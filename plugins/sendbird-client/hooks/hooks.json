@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/welcome.sh"
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/welcome.sh\""
           }
         ]
       }
@@ -17,7 +17,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/telemetry-start.sh"
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/telemetry-start.sh\""
           }
         ]
       },
@@ -26,7 +26,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/credential-guard.sh"
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/credential-guard.sh\""
           }
         ]
       },
@@ -35,7 +35,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/source-claim-guard.sh"
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/source-claim-guard.sh\""
           }
         ]
       }
@@ -46,11 +46,11 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/telemetry-end.sh"
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/telemetry-end.sh\""
           },
           {
             "type": "command",
-            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/unsourced-claim-warn.sh"
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/unsourced-claim-warn.sh\""
           }
         ]
       }
@@ -60,7 +60,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/final-answer-gate.sh"
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/final-answer-gate.sh\""
           }
         ]
       }
