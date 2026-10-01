@@ -1,0 +1,105 @@
+{
+  "schemaVersion": "0.1.5",
+  "knowledge": {
+    "mode": "runtime-fetch",
+    "_modes": [
+      "runtime-fetch",
+      "bundled"
+    ],
+    "_note": "runtime-fetch is the default until legal approval covers redistributing extracted API surface (spec §17 Q0 / §18). bundled commits knowledge/imports/."
+  },
+  "platforms": {
+    "primary": [
+      "ios",
+      "android",
+      "js"
+    ],
+    "roadmap": [
+      "platformx"
+    ]
+  },
+  "products": [
+    "chat",
+    "uikit"
+  ],
+  "hosts": {
+    "ios": [
+      "uikit",
+      "swiftui"
+    ],
+    "android": [
+      "view",
+      "compose"
+    ],
+    "js": [
+      "react",
+      "react-native"
+    ]
+  },
+  "routing": {
+    "code": {
+      "ios": "sendbird-ios-agent",
+      "android": "sendbird-android-agent",
+      "js": "sendbird-js-agent"
+    },
+    "docs": "sendbird-docs-agent",
+    "maxAgentHops": 1
+  },
+  "repos": {
+    "ios": {
+      "chat": "sendbird/sendbird-chat-sdk-ios",
+      "_chatPackaging": "iOS prefers SPM. The v4 chat repo (sendbird-chat-sdk-ios) ships Package.swift; add it via SPM (product SendbirdChatSDK, from 4.0.0). Do NOT use sendbird-chat-ios-spm — that mirror is LEGACY v3 (SendBirdSDK). Use CocoaPods only if the project already has a Podfile; never introduce one.",
+      "auth": "sendbird/sendbird-auth-ios",
+      "uikitUikitHost": "sendbird/sendbird-uikit-ios",
+      "uikitUikitHostSpm": "sendbird/sendbird-uikit-ios-spm",
+      "uikitSwiftuiHost": "sendbird/sendbird-swiftui-ios",
+      "distribution": "sendbird/sendbird-ios-distribution"
+    },
+    "android": {
+      "chat": "sendbird/sendbird-chat-sdk-android",
+      "uikit": "sendbird/sendbird-uikit-android",
+      "uikitComposeSample": "sendbird/sendbird-uikit-sample-android-jetpack-compose"
+    },
+    "js": {
+      "chat": "sendbird/sendbird-chat-sdk-javascript",
+      "uikitReact": "sendbird/sendbird-uikit-react",
+      "uikitReactNative": "sendbird/sendbird-uikit-react-native",
+      "platformSdk": "sendbird/sendbird-platform-sdk-javascript"
+    },
+    "common": {
+      "releaseAutomation": "sendbird/release-automation-action"
+    },
+    "_note": "Public mirror repos only. Private SoT mappings live in the private companion repo's CI config and never appear here.",
+    "knownArchived": []
+  },
+  "docs": {
+    "publicBase": "https://sendbird.com/docs"
+  },
+  "telemetry": {
+    "enabled": false,
+    "mode": "local-opt-in",
+    "logPath": "~/.claude/sendbird-client-telemetry.jsonl",
+    "fields": [
+      "event",
+      "agent",
+      "duration_ms",
+      "outcome"
+    ]
+  },
+  "envVarAllowlist": [
+    "SENDBIRD_APP_ID",
+    "SENDBIRD_API_TOKEN",
+    "SENDBIRD_USER_ID",
+    "SENDBIRD_SDK_LOCAL_PATH",
+    "SENDBIRD_REGION"
+  ],
+  "productScope": {
+    "default": "all",
+    "focus": [
+      "chat",
+      "uikit"
+    ],
+    "_note": "Every product stays supported. `focus` marks where verification depth is highest. A customer narrows scope with SENDBIRD_PRODUCTS or .sendbird-client/profile.json enabledProducts."
+  },
+  "stateDir": ".sendbird-client"
+}

@@ -1,0 +1,22 @@
+name: validate
+# Validate the marketplace and the plugin on every release pull request.
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  plugin:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - name: Install pinned Claude Code CLI
+        run: npm install --global @anthropic-ai/claude-code@2.1.278
+      - name: Validate the marketplace and the plugin
+        run: |
+          set -euo pipefail
+          claude plugin validate .
+          claude plugin validate plugins/sendbird-client

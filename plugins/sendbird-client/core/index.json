@@ -1,0 +1,407 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-09-30T06:03:43Z",
+  "count": 42,
+  "entries": [
+    {
+      "file": "knowledge/curated/android/architecture.md",
+      "platform": "android",
+      "category": "architecture",
+      "status": "populated",
+      "lastVerifiedAgainst": "n/a (conceptual architecture overview)",
+      "verifiedDates": []
+    },
+    {
+      "file": "knowledge/curated/android/cross-cutting/errors.md",
+      "platform": "android",
+      "category": "cross-cutting",
+      "status": "populated",
+      "lastVerifiedAgainst": "sendbird-chat-sdk-android 4.36.5",
+      "verifiedDates": [
+        "2026-09-22",
+        "2026-09-30"
+      ]
+    },
+    {
+      "file": "knowledge/curated/android/cross-cutting/performance.md",
+      "platform": "android",
+      "category": "cross-cutting",
+      "status": "populated",
+      "lastVerifiedAgainst": "sendbird-chat-sdk-android 4.36.5",
+      "verifiedDates": [
+        "2026-06-10"
+      ]
+    },
+    {
+      "file": "knowledge/curated/android/cross-cutting/pitfalls.md",
+      "platform": "android",
+      "category": "cross-cutting",
+      "status": "populated",
+      "lastVerifiedAgainst": "sendbird-chat-sdk-android 4.36.5",
+      "verifiedDates": []
+    },
+    {
+      "file": "knowledge/curated/android/cross-cutting/push.md",
+      "platform": "android",
+      "category": "cross-cutting",
+      "status": "populated",
+      "lastVerifiedAgainst": "sendbird-chat-sdk-android 4.36.5",
+      "verifiedDates": [
+        "2026-09-22",
+        "2026-09-30"
+      ]
+    },
+    {
+      "file": "knowledge/curated/android/cross-cutting/theme.md",
+      "platform": "android",
+      "category": "cross-cutting",
+      "status": "populated",
+      "lastVerifiedAgainst": "sendbird-uikit-android 3.26.3",
+      "verifiedDates": [
+        "2026-09-22"
+      ]
+    },
+    {
+      "file": "knowledge/curated/android/hosts/compose.md",
+      "platform": "android",
+      "category": "hosts",
+      "status": "populated",
+      "lastVerifiedAgainst": "uikit-compose 1.3.6 (UIKit for Jetpack Compose section); other notes are conceptual host guidance",
+      "verifiedDates": []
+    },
+    {
+      "file": "knowledge/curated/android/hosts/view.md",
+      "platform": "android",
+      "category": "hosts",
+      "status": "populated",
+      "lastVerifiedAgainst": "n/a (conceptual host guidance)",
+      "verifiedDates": []
+    },
+    {
+      "file": "knowledge/curated/android/products/auth.md",
+      "platform": "android",
+      "category": "products",
+      "status": "populated",
+      "lastVerifiedAgainst": "sendbird-chat-sdk-android 4.36.5",
+      "verifiedDates": [
+        "2026-09-22",
+        "2026-09-30"
+      ]
+    },
+    {
+      "file": "knowledge/curated/android/products/chat.md",
+      "platform": "android",
+      "category": "products",
+      "status": "populated",
+      "lastVerifiedAgainst": "sendbird-chat-sdk-android 4.36.5",
+      "verifiedDates": [
+        "2026-06-09",
+        "2026-09-29"
+      ]
+    },
+    {
+      "file": "knowledge/curated/android/products/uikit.md",
+      "platform": "android",
+      "category": "products",
+      "status": "populated",
+      "lastVerifiedAgainst": "sendbird-uikit-android 3.26.3",
+      "verifiedDates": [
+        "2026-06-09",
+        "2026-09-29"
+      ]
+    },
+    {
+      "file": "knowledge/curated/android/setup.md",
+      "platform": "android",
+      "category": "setup",
+      "status": "populated",
+      "lastVerifiedAgainst": "sendbird-chat-sdk-android 4.36.5",
+      "verifiedDates": [
+        "2026-09-22"
+      ]
+    },
+    {
+      "file": "knowledge/curated/common/concepts.md",
+      "platform": "common",
+      "category": "concepts",
+      "status": "populated",
+      "lastVerifiedAgainst": "conceptual (no version-specific API)",
+      "verifiedDates": [
+        "2026-09-22"
+      ]
+    },
+    {
+      "file": "knowledge/curated/common/dashboard-flow.md",
+      "platform": "common",
+      "category": "dashboard-flow",
+      "status": "populated",
+      "lastVerifiedAgainst": "n/a (conceptual)",
+      "verifiedDates": []
+    },
+    {
+      "file": "knowledge/curated/common/glossary.md",
+      "platform": "common",
+      "category": "glossary",
+      "status": "populated",
+      "lastVerifiedAgainst": "conceptual",
+      "verifiedDates": [
+        "2026-09-22"
+      ]
+    },
+    {
+      "file": "knowledge/curated/common/pricing-quotas.md",
+      "platform": "common",
+      "category": "pricing-quotas",
+      "status": "populated",
+      "lastVerifiedAgainst": "n/a (conceptual; no figures quoted)",
+      "verifiedDates": [
+        "2026-06-10"
+      ]
+    },
+    {
+      "file": "knowledge/curated/common/product-glossary.md",
+      "platform": "common",
+      "category": "product-glossary",
+      "status": "populated",
+      "lastVerifiedAgainst": "conceptual",
+      "verifiedDates": [
+        "2026-09-22"
+      ]
+    },
+    {
+      "file": "knowledge/curated/common/release-channels.md",
+      "platform": "common",
+      "category": "release-channels",
+      "status": "populated",
+      "lastVerifiedAgainst": "n/a (conceptual)",
+      "verifiedDates": []
+    },
+    {
+      "file": "knowledge/curated/ios/architecture.md",
+      "platform": "ios",
+      "category": "architecture",
+      "status": "populated",
+      "lastVerifiedAgainst": "n/a (conceptual architecture overview)",
+      "verifiedDates": []
+    },
+    {
+      "file": "knowledge/curated/ios/cross-cutting/errors.md",
+      "platform": "ios",
+      "category": "cross-cutting",
+      "status": "populated",
+      "lastVerifiedAgainst": "sendbird-chat-sdk-ios 4.39.11",
+      "verifiedDates": [
+        "2026-09-22",
+        "2026-09-30"
+      ]
+    },
+    {
+      "file": "knowledge/curated/ios/cross-cutting/performance.md",
+      "platform": "ios",
+      "category": "cross-cutting",
+      "status": "populated",
+      "lastVerifiedAgainst": "sendbird-chat-sdk-ios 4.39.10",
+      "verifiedDates": [
+        "2026-06-10"
+      ]
+    },
+    {
+      "file": "knowledge/curated/ios/cross-cutting/pitfalls.md",
+      "platform": "ios",
+      "category": "cross-cutting",
+      "status": "populated",
+      "lastVerifiedAgainst": "sendbird-chat-sdk-ios 4.39.10",
+      "verifiedDates": []
+    },
+    {
+      "file": "knowledge/curated/ios/cross-cutting/push.md",
+      "platform": "ios",
+      "category": "cross-cutting",
+      "status": "populated",
+      "lastVerifiedAgainst": "sendbird-chat-sdk-ios 4.39.11",
+      "verifiedDates": [
+        "2026-09-22",
+        "2026-09-30"
+      ]
+    },
+    {
+      "file": "knowledge/curated/ios/cross-cutting/theme.md",
+      "platform": "ios",
+      "category": "cross-cutting",
+      "status": "populated",
+      "lastVerifiedAgainst": "sendbird-uikit-ios 3.36.1",
+      "verifiedDates": [
+        "2026-09-22"
+      ]
+    },
+    {
+      "file": "knowledge/curated/ios/hosts/swiftui.md",
+      "platform": "ios",
+      "category": "hosts",
+      "status": "populated",
+      "lastVerifiedAgainst": "sendbird-swiftui-ios 1.2.2 / sendbird-calls-ios 1.12.3 / sendbird-live-sdk-ios 1.6.0",
+      "verifiedDates": []
+    },
+    {
+      "file": "knowledge/curated/ios/hosts/uikit.md",
+      "platform": "ios",
+      "category": "hosts",
+      "status": "populated",
+      "lastVerifiedAgainst": "n/a (conceptual host guidance)",
+      "verifiedDates": []
+    },
+    {
+      "file": "knowledge/curated/ios/products/auth.md",
+      "platform": "ios",
+      "category": "products",
+      "status": "populated",
+      "lastVerifiedAgainst": "sendbird-chat-sdk-ios 4.39.11",
+      "verifiedDates": [
+        "2026-09-22"
+      ]
+    },
+    {
+      "file": "knowledge/curated/ios/products/chat.md",
+      "platform": "ios",
+      "category": "products",
+      "status": "populated",
+      "lastVerifiedAgainst": "sendbird-chat-sdk-ios 4.39.11",
+      "verifiedDates": [
+        "2026-09-29"
+      ]
+    },
+    {
+      "file": "knowledge/curated/ios/products/uikit.md",
+      "platform": "ios",
+      "category": "products",
+      "status": "populated",
+      "lastVerifiedAgainst": "sendbird-uikit-ios 3.36.1",
+      "verifiedDates": [
+        "2026-06-09"
+      ]
+    },
+    {
+      "file": "knowledge/curated/ios/setup.md",
+      "platform": "ios",
+      "category": "setup",
+      "status": "populated",
+      "lastVerifiedAgainst": "sendbird-chat-sdk-ios 4.39.11 / sendbird-uikit-ios 3.36.1",
+      "verifiedDates": [
+        "2026-09-22"
+      ]
+    },
+    {
+      "file": "knowledge/curated/js/architecture.md",
+      "platform": "js",
+      "category": "architecture",
+      "status": "populated",
+      "lastVerifiedAgainst": "n/a (conceptual architecture overview)",
+      "verifiedDates": []
+    },
+    {
+      "file": "knowledge/curated/js/cross-cutting/errors.md",
+      "platform": "js",
+      "category": "cross-cutting",
+      "status": "populated",
+      "lastVerifiedAgainst": "@sendbird/chat 4.22.13",
+      "verifiedDates": [
+        "2026-09-22",
+        "2026-09-30"
+      ]
+    },
+    {
+      "file": "knowledge/curated/js/cross-cutting/performance.md",
+      "platform": "js",
+      "category": "cross-cutting",
+      "status": "populated",
+      "lastVerifiedAgainst": "@sendbird/chat 4.22.13",
+      "verifiedDates": [
+        "2026-06-10"
+      ]
+    },
+    {
+      "file": "knowledge/curated/js/cross-cutting/pitfalls.md",
+      "platform": "js",
+      "category": "cross-cutting",
+      "status": "populated",
+      "lastVerifiedAgainst": "@sendbird/chat 4.22.13",
+      "verifiedDates": []
+    },
+    {
+      "file": "knowledge/curated/js/cross-cutting/push.md",
+      "platform": "js",
+      "category": "cross-cutting",
+      "status": "populated",
+      "lastVerifiedAgainst": "@sendbird/chat 4.22.13",
+      "verifiedDates": [
+        "2026-09-22"
+      ]
+    },
+    {
+      "file": "knowledge/curated/js/cross-cutting/theme.md",
+      "platform": "js",
+      "category": "cross-cutting",
+      "status": "populated",
+      "lastVerifiedAgainst": "@sendbird/uikit-react 3.19.1 / @sendbird/uikit-react-native 3.12.9",
+      "verifiedDates": [
+        "2026-09-22"
+      ]
+    },
+    {
+      "file": "knowledge/curated/js/hosts/react-native.md",
+      "platform": "js",
+      "category": "hosts",
+      "status": "populated",
+      "lastVerifiedAgainst": "@sendbird/chat 4.22.13 / @sendbird/uikit-react-native 3.12.9",
+      "verifiedDates": []
+    },
+    {
+      "file": "knowledge/curated/js/hosts/react.md",
+      "platform": "js",
+      "category": "hosts",
+      "status": "populated",
+      "lastVerifiedAgainst": "@sendbird/chat 4.22.13 / @sendbird/uikit-react 3.19.1",
+      "verifiedDates": []
+    },
+    {
+      "file": "knowledge/curated/js/products/auth.md",
+      "platform": "js",
+      "category": "products",
+      "status": "populated",
+      "lastVerifiedAgainst": "@sendbird/chat 4.22.13",
+      "verifiedDates": [
+        "2026-09-22",
+        "2026-09-30"
+      ]
+    },
+    {
+      "file": "knowledge/curated/js/products/chat.md",
+      "platform": "js",
+      "category": "products",
+      "status": "populated",
+      "lastVerifiedAgainst": "@sendbird/chat 4.22.13",
+      "verifiedDates": [
+        "2026-06-09",
+        "2026-09-29"
+      ]
+    },
+    {
+      "file": "knowledge/curated/js/products/uikit.md",
+      "platform": "js",
+      "category": "products",
+      "status": "populated",
+      "lastVerifiedAgainst": "@sendbird/uikit-react 3.19.1 / @sendbird/uikit-react-native 3.12.9",
+      "verifiedDates": [
+        "2026-09-29"
+      ]
+    },
+    {
+      "file": "knowledge/curated/js/setup.md",
+      "platform": "js",
+      "category": "setup",
+      "status": "populated",
+      "lastVerifiedAgainst": "@sendbird/chat 4.22.13",
+      "verifiedDates": []
+    }
+  ]
+}
