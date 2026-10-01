@@ -1,0 +1,36 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/sendbird/sendbird-client-plugin/core/schemas/profile.schema.json",
+  "title": "Persisted profile",
+  "description": "Shape of <project>/.sendbird-client/profile.json — every field detection-result.schema.json produces, plus appId and any field a customer or skill has chosen and stored. Deliberately open (additionalProperties: true): a stored field detect.sh doesn't itself produce must survive re-detection, not be rejected — see tools/detection/detect.sh's merge and core/README.md.",
+  "type": "object",
+  "required": ["platform", "host", "packageManager", "deploymentTarget", "lifecycle", "interop", "existingIntegration", "products", "region"],
+  "additionalProperties": true,
+  "properties": {
+    "platform": { "type": "string", "enum": ["ios", "android", "js", "unknown"] },
+    "host": { "type": "string" },
+    "packageManager": { "type": "string" },
+    "deploymentTarget": { "type": "string" },
+    "lifecycle": { "type": "string" },
+    "interop": { "type": "string" },
+    "existingIntegration": {
+      "type": "object",
+      "required": ["present", "version"],
+      "properties": {
+        "present": { "type": "boolean" },
+        "version": { "type": "string" }
+      }
+    },
+    "products": {
+      "type": "array",
+      "items": { "type": "string", "enum": ["chat", "uikit", "ai-agent", "desk", "calls", "live"] }
+    },
+    "region": { "type": "string" },
+    "schemaVersion": { "type": "integer" },
+    "detectedAt": { "type": "string", "format": "date-time" },
+    "appId": {
+      "type": ["string", "null"],
+      "description": "Not a secret — persisted so the customer is asked for it only once per project. Session/access tokens are never persisted."
+    }
+  }
+}

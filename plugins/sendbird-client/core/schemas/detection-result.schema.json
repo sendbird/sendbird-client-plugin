@@ -1,0 +1,106 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/sendbird/sendbird-client-plugin/core/schemas/detection-result.schema.json",
+  "title": "Detection result",
+  "description": "Output of core/commands/detect.sh — freshly detected project facts only. Never contains stored/chosen fields such as appId or enabledProducts.",
+  "type": "object",
+  "required": [
+    "platform",
+    "host",
+    "packageManager",
+    "deploymentTarget",
+    "lifecycle",
+    "interop",
+    "existingIntegration",
+    "products",
+    "region",
+    "schemaVersion",
+    "detectedAt",
+    "tier2"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "platform": {
+      "type": "string",
+      "enum": [
+        "ios",
+        "android",
+        "js",
+        "unknown"
+      ]
+    },
+    "host": {
+      "type": "string"
+    },
+    "packageManager": {
+      "type": "string"
+    },
+    "deploymentTarget": {
+      "type": "string"
+    },
+    "lifecycle": {
+      "type": "string"
+    },
+    "interop": {
+      "type": "string"
+    },
+    "existingIntegration": {
+      "type": "object",
+      "required": [
+        "present",
+        "version"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "present": {
+          "type": "boolean"
+        },
+        "version": {
+          "type": "string"
+        }
+      }
+    },
+    "products": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "chat",
+          "uikit",
+          "ai-agent",
+          "desk",
+          "calls",
+          "live"
+        ]
+      }
+    },
+    "region": {
+      "type": "string"
+    },
+    "schemaVersion": {
+      "type": "integer",
+      "const": 1
+    },
+    "detectedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "tier2": {
+      "type": "object",
+      "description": "Second-tier facts used for guidance, not routing.",
+      "properties": {
+        "pushProvider": {
+          "type": "string"
+        },
+        "stateManagement": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "pushProvider",
+        "stateManagement"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

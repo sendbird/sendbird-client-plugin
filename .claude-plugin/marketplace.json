@@ -1,0 +1,15 @@
+{
+  "name": "sendbird",
+  "description": "Claude Code plugins for integrating Sendbird client SDKs",
+  "owner": {
+    "name": "Sendbird",
+    "url": "https://sendbird.com"
+  },
+  "plugins": [
+    {
+      "name": "sendbird-client",
+      "source": "./plugins/sendbird-client",
+      "description": "Sendbird integration helper for Chat (incl. auth/session) and UIKit across iOS, Android, and JS"
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "_note": "Tier-3 detectors are lazy/on-demand (spec §4.x). No active scan runs at setup; a skill consults these only when the customer's question touches the area.",
+  "detectors": [
+    { "key": "di", "signals": ["Resolver", "Swinject", "Hilt", "Dagger", "InversifyJS", "tsyringe"] },
+    { "key": "networking", "signals": ["Alamofire", "Moya", "Retrofit", "OkHttp", "axios"] },
+    { "key": "persistence", "signals": ["CoreData", "Realm", "Room", "DataStore", "IndexedDB", "AsyncStorage"] },
+    { "key": "navigation", "signals": ["NavigationStack", "Coordinator", "Jetpack Navigation", "Voyager", "react-router", "@react-navigation"] },
+    { "key": "logging", "signals": ["OSLog", "CocoaLumberjack", "Timber", "SLF4J", "winston", "pino"] },
+    { "key": "i18n", "signals": ["Localizable.strings", "strings.xml", "i18next", "react-intl"] },
+    { "key": "test", "signals": ["XCTest", "Quick", "JUnit", "Espresso", "Jest", "Vitest", "Detox"] },
+    { "key": "ci", "signals": ["Bitrise", "Codemagic", "GitHub Actions", "CircleCI", "Vercel"] },
+    { "key": "build", "signals": ["Fastlane", "Tuist", "XcodeGen", "Vite", "Webpack", "Metro"] },
+    { "key": "linting", "signals": ["SwiftLint", "SwiftFormat", "ktlint", "detekt", "ESLint", "Prettier", "Biome"] },
+    { "key": "background", "signals": ["BGTaskScheduler", "WorkManager", "ServiceWorker"] },
+    { "key": "crash-analytics", "signals": ["Firebase", "Sentry", "Crashlytics", "Bugsnag", "Datadog"] }
+  ]
+}

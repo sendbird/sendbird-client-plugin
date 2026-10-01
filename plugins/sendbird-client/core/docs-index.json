@@ -1,0 +1,5322 @@
+{
+  "schemaVersion": 1,
+  "sources": [
+    "https://sendbird.com/docs/llms.txt",
+    "https://sendbird.com/llms.txt (ai-agent pages only)"
+  ],
+  "count": 664,
+  "entries": [
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/application/authenticating-a-user/authentication",
+      "title": "Authentication",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "application"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/application/overview-application",
+      "title": "Overview",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "application"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/application/understanding-rate-limits/rate-limits",
+      "title": "Rate limits",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "application"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/channel/categorizing-channels/categorize-channels-by-custom-type",
+      "title": "Categorize channels by custom type",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "channel"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/channel/creating-a-channel/create-a-channel",
+      "title": "Create a channel",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "channel"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/channel/inviting-users-to-a-group-channel/accept-or-decline-an-invitation",
+      "title": "Accept or decline an invitation",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "channel"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/channel/inviting-users-to-a-group-channel/invite-users-as-members",
+      "title": "Invite users as members",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "channel"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/channel/joining-and-leaving-a-channel/enter-and-exit-an-open-channel",
+      "title": "Enter and exit an open channel",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "channel"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/channel/joining-and-leaving-a-channel/join-and-leave-a-group-channel",
+      "title": "Join and leave a group channel",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "channel"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/channel/managing-channel-metacounters/manage-channel-metacounters",
+      "title": "Manage channel metacounters",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "channel"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/channel/managing-channel-metadata/manage-channel-metadata",
+      "title": "Manage channel metadata",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "channel"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/channel/managing-channels/delete-a-channel",
+      "title": "Delete a channel",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "channel"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/channel/managing-channels/hide-or-archive-a-group-channel",
+      "title": "Hide or archive a group channel",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "channel"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/channel/managing-channels/refresh-all-data-related-to-a-group-channel",
+      "title": "Refresh all data related to a group channel",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "channel"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/channel/managing-operators/register-and-remove-operators",
+      "title": "Register and remove operators",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "channel"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/channel/moderating-a-channel/freeze-and-unfreeze-a-channel",
+      "title": "Freeze and unfreeze a channel",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "channel"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/channel/overview-channel",
+      "title": "Overview",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "channel"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/channel/retrieving-channels/retrieve-a-channel-by-url",
+      "title": "Retrieve a channel by URL",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "channel"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/channel/retrieving-channels/retrieve-a-list-of-channels",
+      "title": "Retrieve a list of channels",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "channel"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/channel/searching-channels/filter-group-channels-by-user-ids",
+      "title": "Filter group channels by user IDs",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "channel"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/channel/searching-channels/search-group-channels-by-name-url-or-other-filters",
+      "title": "Search group channels by name, URL, or other filters",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "channel"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/channel/searching-channels/search-open-channels-by-name-url-or-custom-types",
+      "title": "Search open channels by name, URL, or custom types",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "channel"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/deprecated",
+      "title": "Deprecated",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "deprecated"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/error-codes",
+      "title": "Error codes",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "error-codes"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/event-handler/managing-channel-event-handlers/add-or-remove-a-channel-event-handler",
+      "title": "Add or remove a channel event handler",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "event-handler"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/event-handler/managing-connection-event-handlers/add-or-remove-a-connection-event-handler",
+      "title": "Add or remove a connection event handler",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "event-handler"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/event-handler/managing-user-event-handlers/add-or-remove-a-user-event-handler",
+      "title": "Add or remove a user event handler",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "event-handler"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/event-handler/overview-event-handler",
+      "title": "Overview",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "event-handler"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/getting-started/collection-migration-guide",
+      "title": "Collection migration guide",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "getting-started"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/getting-started/kotlin-extension",
+      "title": "Kotlin extension (KTX)",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "getting-started"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/getting-started/migration-guide",
+      "title": "Migration guide",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "getting-started"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/getting-started/send-first-message",
+      "title": "Send first message",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "getting-started"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/local-caching/overview-local-caching",
+      "title": "Overview",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "local-caching"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/local-caching/using-group-channel-collection/group-channel-collection",
+      "title": "Group channel collection",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "local-caching"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/local-caching/using-message-collection/message-collection",
+      "title": "Message collection",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "local-caching"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/logger",
+      "title": "Logger",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "logger"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/message/adding-extra-data-to-a-message/add-extra-data-to-a-message",
+      "title": "Add extra data to a message",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/message/categorizing-messages/categorize-messages-by-custom-type",
+      "title": "Categorize messages by custom type",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/message/listing-changelogs/list-changelogs-of-messages",
+      "title": "List changelogs of messages",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/message/managing-a-message/clear-the-chat-history-in-a-group-channel",
+      "title": "Clear the chat history in a group channel",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/message/managing-a-message/copy-a-message",
+      "title": "Copy a message",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/message/managing-a-message/delete-a-message",
+      "title": "Delete a message",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/message/managing-a-message/display-open-graph-tags-in-a-message",
+      "title": "Display Open Graph tags in a message",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/message/managing-a-message/generate-thumbnails-of-a-file-message",
+      "title": "Generate thumbnails of a file message",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/message/managing-a-message/react-to-a-message-in-a-group-channel",
+      "title": "React to a message in a group channel",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/message/managing-a-message/send-typing-indicators-to-other-members",
+      "title": "Send typing indicators to other members",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/message/managing-a-message/update-a-message",
+      "title": "Update a message",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/message/managing-pinned-messages-in-group-channels/list-pinned-messages",
+      "title": "List pinned messages",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/message/managing-pinned-messages-in-group-channels/pin-a-message",
+      "title": "Pin a message",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/message/managing-pinned-messages-in-group-channels/unpin-a-message",
+      "title": "Unpin a message",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/message/managing-polls/add-a-poll-option",
+      "title": "Add a poll option",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/message/managing-polls/cast-or-cancel-a-vote",
+      "title": "Cast or cancel a vote",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/message/managing-polls/close-a-poll",
+      "title": "Close a poll",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/message/managing-polls/create-a-poll",
+      "title": "Create a poll",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/message/managing-polls/delete-a-poll",
+      "title": "Delete a poll",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/message/managing-polls/delete-a-poll-option",
+      "title": "Delete a poll option",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/message/managing-polls/list-changelogs-of-polls",
+      "title": "List changelogs of polls",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/message/managing-polls/retrieve-a-list-of-polls",
+      "title": "Retrieve a list of polls",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/message/managing-polls/retrieve-a-list-of-voters",
+      "title": "Retrieve a list of voters",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/message/managing-polls/retrieve-a-poll",
+      "title": "Retrieve a poll",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/message/managing-polls/retrieve-a-poll-option",
+      "title": "Retrieve a poll option",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/message/managing-polls/update-a-poll",
+      "title": "Update a poll",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/message/managing-polls/update-a-poll-option",
+      "title": "Update a poll option",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/message/managing-read-status-in-a-group-channel/get-read-status",
+      "title": "Get read status of a message",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/message/managing-read-status-in-a-group-channel/mark-messages-as-read",
+      "title": "Mark messages as read",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/message/managing-read-status-in-a-group-channel/mark-messages-as-unread",
+      "title": "Mark messages as unread",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/message/managing-scheduled-messages-in-group-channel/cancel-a-scheduled-message",
+      "title": "Cancel a scheduled message",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/message/managing-scheduled-messages-in-group-channel/create-a-scheduled-message",
+      "title": "Create a scheduled message",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/message/managing-scheduled-messages-in-group-channel/list-all-scheduled-messages",
+      "title": "List all scheduled messages",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/message/managing-scheduled-messages-in-group-channel/retrieve-a-scheduled-message",
+      "title": "Retrieve a scheduled message",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/message/managing-scheduled-messages-in-group-channel/retrieve-the-total-number-of-scheduled-messages",
+      "title": "Retrieve the total number of scheduled messages",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/message/managing-scheduled-messages-in-group-channel/send-a-scheduled-message-immediately",
+      "title": "Send a scheduled message immediately",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/message/managing-scheduled-messages-in-group-channel/update-a-scheduled-message",
+      "title": "Update a scheduled message",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/message/marking-messages-as-delivered-in-a-group-channel/mark-messages-as-delivered",
+      "title": "Mark messages as delivered",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/message/mentioning-other-users-in-a-message/mention-other-users-in-a-message",
+      "title": "Mention other users in a message",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/message/overview-message",
+      "title": "Overview",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/message/receiving-messages-through-event-handler/receive-messages-in-a-group-channel",
+      "title": "Receive messages in a group channel",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/message/receiving-messages-through-event-handler/receive-messages-in-an-open-channel",
+      "title": "Receive messages in an open channel",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/message/retrieving-messages/retrieve-a-list-of-messages",
+      "title": "Retrieve a list of messages",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/message/retrieving-messages/retrieve-a-message",
+      "title": "Retrieve a message",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/message/retrieving-unread-count-in-a-group-channel/members-who-havent-read-a-message",
+      "title": "Members who haven't read a message",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/message/retrieving-unread-count-in-a-group-channel/members-who-havent-received-a-message",
+      "title": "Members who haven't received a message",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/message/retrieving-unread-count-in-a-group-channel/unread-channels",
+      "title": "Unread channels",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/message/retrieving-unread-count-in-a-group-channel/unread-items",
+      "title": "Unread items",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/message/retrieving-unread-count-in-a-group-channel/unread-messages-in-a-channel",
+      "title": "Unread messages in a channel",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/message/retrieving-unread-count-in-a-group-channel/unread-messages-in-all-channels",
+      "title": "Unread messages in all channels",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/message/searching-messages-in-a-group-channel/search-messages-by-a-keyword",
+      "title": "Search messages by a keyword",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/message/sending-a-message/cancel-an-in-progress-file-upload",
+      "title": "Cancel an in-progress file upload",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/message/sending-a-message/send-a-critical-alert-message-to-ios-device-users",
+      "title": "Send a critical alert message to iOS device users",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/message/sending-a-message/send-a-message",
+      "title": "Send a message",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/message/sending-a-message/send-an-admin-message",
+      "title": "Send an admin message",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/message/sending-a-message/share-an-encrypted-file",
+      "title": "Share an encrypted file",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/message/sending-a-message/smart-throttling",
+      "title": "Smart throttling",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/message/sending-a-message/spam-flood-protection",
+      "title": "Spam flood protection",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/message/sending-a-message/track-file-upload-progress-using-a-handler",
+      "title": "Track file upload progress using a handler",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/message/translating-messages/auto-translate-messages",
+      "title": "Auto-translate messages",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/message/translating-messages/translate-messages-on-demand",
+      "title": "Translate messages on-demand",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/message/translating-messages/translation-engine",
+      "title": "Translation engine",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/message/using-message-threading/create-a-message-thread",
+      "title": "Create a message thread",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/message/using-message-threading/list-replies-in-a-message-thread",
+      "title": "List replies in a message thread",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/migrating-to-sendbird",
+      "title": "Migrating to Sendbird",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "migrating-to-sendbird"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/push-notifications/managing-push-notifications/configure-push-notification-preferences",
+      "title": "Configure push notification preferences",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "push-notifications"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/push-notifications/managing-push-notifications/push-notification-content-templates",
+      "title": "Push notification content templates",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "push-notifications"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/push-notifications/managing-push-notifications/push-notification-tester",
+      "title": "Push notification tester",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "push-notifications"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/push-notifications/managing-push-notifications/push-notification-translation",
+      "title": "Push notification translation",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "push-notifications"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/push-notifications/managing-push-notifications/set-up-push-notifications-for-fcm",
+      "title": "Set up push notifications for FCM",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "push-notifications"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/push-notifications/managing-push-notifications/set-up-push-notifications-for-hms",
+      "title": "Set up push notifications for HMS",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "push-notifications"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/push-notifications/marking-push-notifications-as-delivered/mark-push-notifications-as-delivered",
+      "title": "Mark push notifications as delivered",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "push-notifications"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/push-notifications/multi-device-support/set-up-push-notifications-for-fcm",
+      "title": "Set up push notifications for FCM",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "push-notifications"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/push-notifications/multi-device-support/set-up-push-notifications-for-hms",
+      "title": "Set up push notifications for HMS",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "push-notifications"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/push-notifications/overview-push-notifications",
+      "title": "Overview",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "push-notifications"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/report/creating-a-report/report-a-message-user-or-channel",
+      "title": "Report a message, user, or channel",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "report"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/report/overview-report",
+      "title": "Overview",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "report"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/user/managing-user-metadata/manage-user-metadata",
+      "title": "Manage user metadata",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "user"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/user/moderating-a-user/ban-and-unban-a-user",
+      "title": "Ban and unban a user",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "user"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/user/moderating-a-user/block-and-unblock-other-members",
+      "title": "Block and unblock other members",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "user"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/user/moderating-a-user/mute-and-unmute-a-user",
+      "title": "Mute and unmute a user",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "user"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/user/moderating-a-user/retrieve-a-list-of-banned-users",
+      "title": "Retrieve a list of banned users",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "user"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/user/moderating-a-user/retrieve-a-list-of-blocked-users",
+      "title": "Retrieve a list of blocked users",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "user"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/user/moderating-a-user/retrieve-a-list-of-muted-users",
+      "title": "Retrieve a list of muted users",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "user"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/user/overview-user",
+      "title": "Overview",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "user"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/user/retrieving-and-updating-user-information/retrieve-the-latest-information-on-participants",
+      "title": "Retrieve the latest information on participants",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "user"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/user/retrieving-and-updating-user-information/retrieve-the-online-status-of-a-user",
+      "title": "Retrieve the online status of a user",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "user"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/user/retrieving-and-updating-user-information/update-user-profile",
+      "title": "Update user profile",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "user"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/user/retrieving-users/retrieve-a-list-of-members-and-operators-in-a-specific-order",
+      "title": "Retrieve a list of members and operators in a specific order",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "user"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/user/retrieving-users/retrieve-a-list-of-operators",
+      "title": "Retrieve a list of operators",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "user"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/user/retrieving-users/retrieve-a-list-of-users-in-a-channel",
+      "title": "Retrieve a list of users in a channel",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "user"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/user/retrieving-users/retrieve-a-list-of-users-in-an-application",
+      "title": "Retrieve a list of users in an application",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "user"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/android/user/retrieving-users/retrieve-members-who-have-read-a-message",
+      "title": "Retrieve members who have read a message",
+      "product": "chat",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "user"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/apple-privacy-manifest",
+      "title": "Apple Privacy Manifest",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "apple-privacy-manifest"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/application/authenticating-a-user/authentication",
+      "title": "Authentication",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "application"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/application/overview-application",
+      "title": "Overview",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "application"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/application/understanding-rate-limits/rate-limits",
+      "title": "Rate limits",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "application"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/channel/categorizing-channels/categorize-channels-by-custom-type",
+      "title": "Categorize channels by custom type",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "channel"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/channel/creating-a-channel/create-a-channel",
+      "title": "Create a channel",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "channel"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/channel/inviting-users-to-a-group-channel/accept-or-decline-an-invitation",
+      "title": "Accept or decline an invitation",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "channel"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/channel/inviting-users-to-a-group-channel/invite-users-as-members",
+      "title": "Invite users as members",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "channel"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/channel/joining-and-leaving-a-channel/enter-and-exit-an-open-channel",
+      "title": "Enter and exit an open channel",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "channel"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/channel/joining-and-leaving-a-channel/join-and-leave-a-group-channel",
+      "title": "Join and leave a group channel",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "channel"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/channel/managing-channel-metacounters/manage-channel-metacounters",
+      "title": "Manage channel metacounters",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "channel"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/channel/managing-channel-metadata/manage-channel-metadata",
+      "title": "Manage channel metadata",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "channel"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/channel/managing-channels/delete-a-channel",
+      "title": "Delete a channel",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "channel"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/channel/managing-channels/hide-or-archive-a-group-channel",
+      "title": "Hide or archive a group channel",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "channel"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/channel/managing-channels/refresh-all-data-related-to-a-group-channel",
+      "title": "Refresh all data related to a group channel",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "channel"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/channel/managing-operators/register-and-remove-operators",
+      "title": "Register and remove operators",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "channel"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/channel/moderating-a-channel/freeze-and-unfreeze-a-channel",
+      "title": "Freeze and unfreeze a channel",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "channel"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/channel/overview-channel",
+      "title": "Overview",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "channel"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/channel/retrieving-channels/retrieve-a-channel-by-url",
+      "title": "Retrieve a channel by URL",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "channel"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/channel/retrieving-channels/retrieve-a-list-of-channels",
+      "title": "Retrieve a list of channels",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "channel"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/channel/searching-channels/filter-group-channels-by-user-ids",
+      "title": "Filter group channels by user IDs",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "channel"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/channel/searching-channels/search-group-channels-by-name-url-or-other-filters",
+      "title": "Search group channels by name, URL, or other filters",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "channel"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/channel/searching-channels/search-open-channels-by-name-url-or-custom-types",
+      "title": "Search open channels by name, URL, or custom types",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "channel"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/deprecated",
+      "title": "Deprecated",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "deprecated"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/error-codes",
+      "title": "Error codes",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "error-codes"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/event-delegate/managing-channel-delegates/add-or-remove-a-channel-delegate",
+      "title": "Add or remove a channel delegate",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "event-delegate"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/event-delegate/managing-connection-delegates/add-or-remove-a-connection-delegate",
+      "title": "Add or remove a connection delegate",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "event-delegate"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/event-delegate/managing-user-event-delegates/add-or-remove-a-user-event-delegate",
+      "title": "Add or remove a user event delegate",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "event-delegate"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/event-delegate/overview-event-delegate",
+      "title": "Overview",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "event-delegate"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/getting-started/collection-migration-guide",
+      "title": "Collection migration guide",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "getting-started"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/getting-started/migration-guide",
+      "title": "Migration guide",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "getting-started"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/getting-started/send-first-message",
+      "title": "Send first message",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "getting-started"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/local-caching/overview-local-caching",
+      "title": "Overview",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "local-caching"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/local-caching/using-group-channel-collection/group-channel-collection",
+      "title": "Group channel collection",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "local-caching"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/local-caching/using-message-collection/message-collection",
+      "title": "Message collection",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "local-caching"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/logger",
+      "title": "Logger",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "logger"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/message/adding-extra-data-to-a-message/add-extra-data-to-a-message",
+      "title": "Add extra data to a message",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/message/categorizing-messages/categorize-messages-by-custom-type",
+      "title": "Categorize messages by custom type",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/message/listing-changelogs/list-changelogs-of-messages",
+      "title": "List changelogs of messages",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/message/managing-a-message/clear-the-chat-history-in-a-group-channel",
+      "title": "Clear the chat history in a group channel",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/message/managing-a-message/copy-a-message",
+      "title": "Copy a message",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/message/managing-a-message/delete-a-message",
+      "title": "Delete a message",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/message/managing-a-message/display-open-graph-tags-in-a-message",
+      "title": "Display Open Graph tags in a message",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/message/managing-a-message/generate-thumbnails-of-a-file-message",
+      "title": "Generate thumbnails of a file message",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/message/managing-a-message/react-to-a-message-in-a-group-channel",
+      "title": "React to a message in a group channel",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/message/managing-a-message/send-typing-indicators-to-other-members",
+      "title": "Send typing indicators to other members",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/message/managing-a-message/update-a-message",
+      "title": "Update a message",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/message/managing-pinned-messages-in-group-channels/list-pinned-messages",
+      "title": "List pinned messages",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/message/managing-pinned-messages-in-group-channels/pin-a-message",
+      "title": "Pin a message",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/message/managing-pinned-messages-in-group-channels/unpin-a-message",
+      "title": "Unpin a message",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/message/managing-polls/add-a-poll-option",
+      "title": "Add a poll option",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/message/managing-polls/cast-or-cancel-a-vote",
+      "title": "Cast or cancel a vote",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/message/managing-polls/close-a-poll",
+      "title": "Close a poll",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/message/managing-polls/create-a-poll",
+      "title": "Create a poll",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/message/managing-polls/delete-a-poll",
+      "title": "Delete a poll",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/message/managing-polls/delete-a-poll-option",
+      "title": "Delete a poll option",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/message/managing-polls/list-changelogs-of-polls",
+      "title": "List changelogs of polls",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/message/managing-polls/retrieve-a-list-of-polls",
+      "title": "Retrieve a list of polls",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/message/managing-polls/retrieve-a-list-of-voters",
+      "title": "Retrieve a list of voters",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/message/managing-polls/retrieve-a-poll",
+      "title": "Retrieve a poll",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/message/managing-polls/retrieve-a-poll-option",
+      "title": "Retrieve a poll option",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/message/managing-polls/update-a-poll",
+      "title": "Update a poll",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/message/managing-polls/update-a-poll-option",
+      "title": "Update a poll option",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/message/managing-read-status-in-a-group-channel/get-read-status",
+      "title": "Get read status of a message",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/message/managing-read-status-in-a-group-channel/mark-messages-as-read",
+      "title": "Mark messages as read",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/message/managing-read-status-in-a-group-channel/mark-messages-as-unread",
+      "title": "Mark messages as unread",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/message/managing-scheduled-messages-in-group-channel/cancel-a-scheduled-message",
+      "title": "Cancel a scheduled message",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/message/managing-scheduled-messages-in-group-channel/create-a-scheduled-message",
+      "title": "Create a scheduled message",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/message/managing-scheduled-messages-in-group-channel/list-all-scheduled-messages",
+      "title": "List all scheduled messages",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/message/managing-scheduled-messages-in-group-channel/retrieve-a-scheduled-message",
+      "title": "Retrieve a scheduled message",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/message/managing-scheduled-messages-in-group-channel/retrieve-the-total-number-of-scheduled-messages",
+      "title": "Retrieve the total number of scheduled messages",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/message/managing-scheduled-messages-in-group-channel/send-a-scheduled-message-immediately",
+      "title": "Send a scheduled message immediately",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/message/managing-scheduled-messages-in-group-channel/update-a-scheduled-message",
+      "title": "Update a scheduled message",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/message/marking-messages-as-delivered-in-a-group-channel/mark-messages-as-delivered",
+      "title": "Mark messages as delivered",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/message/mentioning-other-users-in-a-message/mention-other-users-in-a-message",
+      "title": "Mention other users in a message",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/message/overview-message",
+      "title": "Overview",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/message/receiving-messages-through-event-delegate/receive-messages-in-a-group-channel",
+      "title": "Receive messages in a group channel",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/message/receiving-messages-through-event-delegate/receive-messages-in-an-open-channel",
+      "title": "Receive messages in an open channel",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/message/retrieving-messages/retrieve-a-list-of-messages",
+      "title": "Retrieve a list of messages",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/message/retrieving-messages/retrieve-a-message",
+      "title": "Retrieve a message",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/message/retrieving-unread-count-in-a-group-channel/members-who-havent-read-a-message",
+      "title": "Members who haven't read a message",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/message/retrieving-unread-count-in-a-group-channel/members-who-havent-received-a-message",
+      "title": "Members who haven't received a message",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/message/retrieving-unread-count-in-a-group-channel/unread-channels",
+      "title": "Unread channels",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/message/retrieving-unread-count-in-a-group-channel/unread-items",
+      "title": "Unread items",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/message/retrieving-unread-count-in-a-group-channel/unread-messages-in-a-channel",
+      "title": "Unread messages in a channel",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/message/retrieving-unread-count-in-a-group-channel/unread-messages-in-all-channels",
+      "title": "Unread messages in all channels",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/message/searching-messages-in-a-group-channel/search-messages-by-a-keyword",
+      "title": "Search messages by a keyword",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/message/sending-a-message/cancel-an-in-progress-file-upload",
+      "title": "Cancel an in-progress file upload",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/message/sending-a-message/send-a-critical-alert-message-to-ios-device-users",
+      "title": "Send a critical alert message to iOS device users",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/message/sending-a-message/send-a-message",
+      "title": "Send a message",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/message/sending-a-message/send-an-admin-message",
+      "title": "Send an admin message",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/message/sending-a-message/share-an-encrypted-file",
+      "title": "Share an encrypted file",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/message/sending-a-message/smart-throttling",
+      "title": "Smart throttling",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/message/sending-a-message/spam-flood-protection",
+      "title": "Spam flood protection",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/message/sending-a-message/track-file-upload-progress-using-a-handler",
+      "title": "Track file upload progress using a handler",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/message/translating-messages/auto-translate-messages",
+      "title": "Auto-translate messages",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/message/translating-messages/translate-messages-on-demand",
+      "title": "Translate messages on-demand",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/message/translating-messages/translation-engine",
+      "title": "Translation engine",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/message/using-message-threading/create-a-message-thread",
+      "title": "Create a message thread",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/message/using-message-threading/list-replies-in-a-message-thread",
+      "title": "List replies in a message thread",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/migrating-to-sendbird",
+      "title": "Migrating to Sendbird",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "migrating-to-sendbird"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/push-notifications/configuring-preferences/push-notification-content-templates",
+      "title": "Push notification content templates",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "push-notifications"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/push-notifications/configuring-preferences/push-notification-preferences",
+      "title": "Push notification preferences",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "push-notifications"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/push-notifications/configuring-preferences/push-notification-tester",
+      "title": "Push notification tester",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "push-notifications"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/push-notifications/configuring-preferences/push-notification-translation",
+      "title": "Push notification translation",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "push-notifications"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/push-notifications/configuring-preferences/register-push-notification-credentials",
+      "title": "Register push notification credentials",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "push-notifications"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/push-notifications/marking-push-notifications-as-delivered/mark-push-notifications-as-delivered",
+      "title": "Mark push notifications as delivered",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "push-notifications"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/push-notifications/overview-push-notifications",
+      "title": "Overview",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "push-notifications"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/report/creating-a-report/report-a-message-user-or-channel",
+      "title": "Report a message, user, or channel",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "report"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/report/overview-report",
+      "title": "Overview",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "report"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/user/managing-user-metadata/manage-user-metadata",
+      "title": "Manage user metadata",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "user"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/user/moderating-a-user/ban-and-unban-a-user",
+      "title": "Ban and unban a user",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "user"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/user/moderating-a-user/block-and-unblock-other-members",
+      "title": "Block and unblock other members",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "user"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/user/moderating-a-user/mute-and-unmute-a-user",
+      "title": "Mute and unmute a user",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "user"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/user/moderating-a-user/retrieve-a-list-of-banned-users",
+      "title": "Retrieve a list of banned users",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "user"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/user/moderating-a-user/retrieve-a-list-of-blocked-users",
+      "title": "Retrieve a list of blocked users",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "user"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/user/moderating-a-user/retrieve-a-list-of-muted-users",
+      "title": "Retrieve a list of muted users",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "user"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/user/overview-user",
+      "title": "Overview",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "user"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/user/retrieving-and-updating-user-information/retrieve-the-latest-information-on-participants",
+      "title": "Retrieve the latest information on participants",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "user"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/user/retrieving-and-updating-user-information/retrieve-the-online-status-of-a-user",
+      "title": "Retrieve the online status of a user",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "user"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/user/retrieving-and-updating-user-information/update-user-profile",
+      "title": "Update user profile",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "user"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/user/retrieving-users/retrieve-a-list-of-members-and-operators-in-a-specific-order",
+      "title": "Retrieve a list of members and operators in a specific order",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "user"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/user/retrieving-users/retrieve-a-list-of-operators",
+      "title": "Retrieve a list of operators",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "user"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/user/retrieving-users/retrieve-a-list-of-users-in-a-channel",
+      "title": "Retrieve a list of users in a channel",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "user"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/user/retrieving-users/retrieve-a-list-of-users-in-an-application",
+      "title": "Retrieve a list of users in an application",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "user"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/ios/user/retrieving-users/retrieve-members-who-have-read-a-message",
+      "title": "Retrieve members who have read a message",
+      "product": "chat",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "user"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/application/authenticating-a-user/authentication",
+      "title": "Authentication",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "application"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/application/overview-application",
+      "title": "Overview",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "application"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/application/understanding-rate-limits/rate-limits",
+      "title": "Rate limits",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "application"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/channel/categorizing-channels/categorize-channels-by-custom-type",
+      "title": "Categorize channels by custom type",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "channel"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/channel/creating-a-channel/create-a-channel",
+      "title": "Create a channel",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "channel"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/channel/inviting-users-to-a-group-channel/accept-or-decline-an-invitation",
+      "title": "Accept or decline an invitation",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "channel"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/channel/inviting-users-to-a-group-channel/invite-users-as-members",
+      "title": "Invite users as members",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "channel"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/channel/joining-and-leaving-a-channel/enter-and-exit-an-open-channel",
+      "title": "Enter and exit an open channel",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "channel"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/channel/joining-and-leaving-a-channel/join-and-leave-a-group-channel",
+      "title": "Join and leave a group channel",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "channel"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/channel/managing-channel-metacounters/manage-channel-metacounters",
+      "title": "Manage channel metacounters",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "channel"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/channel/managing-channel-metadata/manage-channel-metadata",
+      "title": "Manage channel metadata",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "channel"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/channel/managing-channels/delete-a-channel",
+      "title": "Delete a channel",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "channel"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/channel/managing-channels/hide-or-archive-a-group-channel-from-a-list-of-channels",
+      "title": "Hide or archive a group channel from a list of channels",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "channel"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/channel/managing-channels/refresh-all-data-related-to-a-group-channel",
+      "title": "Refresh all data related to a group channel",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "channel"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/channel/managing-operators/register-and-remove-operators",
+      "title": "Register and remove operators",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "channel"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/channel/moderating-a-channel/freeze-and-unfreeze-a-channel",
+      "title": "Freeze and unfreeze a channel",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "channel"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/channel/overview-channel",
+      "title": "Overview",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "channel"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/channel/retrieving-channels/retrieve-a-channel-by-url",
+      "title": "Retrieve a channel by URL",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "channel"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/channel/retrieving-channels/retrieve-a-list-of-channels",
+      "title": "Retrieve a list of channels",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "channel"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/channel/searching-channels/filter-group-channels-by-user-ids",
+      "title": "Filter group channels by user IDs",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "channel"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/channel/searching-channels/search-group-channels-by-name-url-or-other-filters",
+      "title": "Search group channels by name, URL, or other filters",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "channel"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/channel/searching-channels/search-open-channels-by-name-or-url-or-custom-types",
+      "title": "Search open channels by name or URL, or custom types",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "channel"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/deprecated",
+      "title": "Deprecated",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "deprecated"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/error-codes",
+      "title": "Error codes",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "error-codes"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/event-handler/managing-channel-event-handlers/add-or-remove-a-channel-event-handler",
+      "title": "Add or remove a channel event handler",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "event-handler"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/event-handler/managing-connection-event-handlers/add-or-remove-a-connection-event-handler",
+      "title": "Add or remove a connection event handler",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "event-handler"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/event-handler/managing-user-event-handlers/add-or-remove-a-user-event-handler",
+      "title": "Add or remove a user event handler",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "event-handler"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/event-handler/overview-event-handler",
+      "title": "Overview",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "event-handler"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/getting-started/environment-specific-implementation",
+      "title": "Environment-specific implementation",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "getting-started"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/getting-started/send-first-message",
+      "title": "Send first message",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "getting-started"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/local-caching/overview-local-caching",
+      "title": "Overview",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "local-caching"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/local-caching/using-group-channel-collection/group-channel-collection",
+      "title": "Group channel collection",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "local-caching"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/local-caching/using-message-collection/message-collection",
+      "title": "Message collection",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "local-caching"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/logger",
+      "title": "Logger",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "logger"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/message/adding-extra-data-to-a-message/add-extra-data-to-a-message",
+      "title": "Add extra data to a message",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/message/categorizing-messages/categorize-messages-by-custom-type",
+      "title": "Categorize messages by custom type",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/message/listing-changelogs/list-changelogs-of-messages",
+      "title": "List changelogs of messages",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/message/managing-a-message/clear-the-chat-history-in-a-group-channel",
+      "title": "Clear the chat history in a group channel",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/message/managing-a-message/copy-a-message",
+      "title": "Copy a message",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/message/managing-a-message/delete-a-message",
+      "title": "Delete a message",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/message/managing-a-message/display-open-graph-tags-in-a-message",
+      "title": "Display Open Graph tags in a message",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/message/managing-a-message/generate-thumbnails-of-a-file-message",
+      "title": "Generate thumbnails of a file message",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/message/managing-a-message/react-to-a-message-in-a-group-channel",
+      "title": "React to a message in a group channel",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/message/managing-a-message/send-typing-indicators-to-other-members",
+      "title": "Send typing indicators to other members",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/message/managing-a-message/update-a-message",
+      "title": "Update a message",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/message/managing-pinned-messages-in-group-channels/list-pinned-messages",
+      "title": "List pinned messages",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/message/managing-pinned-messages-in-group-channels/pin-a-message",
+      "title": "Pin a message",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/message/managing-pinned-messages-in-group-channels/unpin-a-message",
+      "title": "Unpin a message",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/message/managing-polls/add-a-poll-option",
+      "title": "Add a poll option",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/message/managing-polls/cast-or-cancel-a-vote",
+      "title": "Cast or cancel a vote",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/message/managing-polls/close-a-poll",
+      "title": "Close a poll",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/message/managing-polls/create-a-poll",
+      "title": "Create a poll",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/message/managing-polls/delete-a-poll",
+      "title": "Delete a poll",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/message/managing-polls/delete-a-poll-option",
+      "title": "Delete a poll option",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/message/managing-polls/list-changelogs-of-polls",
+      "title": "List changelogs of polls",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/message/managing-polls/retrieve-a-list-of-polls",
+      "title": "Retrieve a list of polls",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/message/managing-polls/retrieve-a-list-of-voters",
+      "title": "Retrieve a list of voters",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/message/managing-polls/retrieve-a-poll",
+      "title": "Retrieve a poll",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/message/managing-polls/retrieve-a-poll-option",
+      "title": "Retrieve a poll option",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/message/managing-polls/update-a-poll",
+      "title": "Update a poll",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/message/managing-polls/update-a-poll-option",
+      "title": "Update a poll option",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/message/managing-read-status-in-a-group-channel/get-read-status",
+      "title": "Get read status of a message",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/message/managing-read-status-in-a-group-channel/mark-messages-as-read",
+      "title": "Mark messages as read",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/message/managing-read-status-in-a-group-channel/mark-messages-as-unread",
+      "title": "Mark messages as unread",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/message/managing-scheduled-messages-in-group-channel/cancel-a-scheduled-message",
+      "title": "Cancel a scheduled message",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/message/managing-scheduled-messages-in-group-channel/create-a-scheduled-message",
+      "title": "Create a scheduled message",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/message/managing-scheduled-messages-in-group-channel/list-all-scheduled-messages",
+      "title": "List all scheduled messages",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/message/managing-scheduled-messages-in-group-channel/retrieve-a-scheduled-message",
+      "title": "Retrieve a scheduled message",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/message/managing-scheduled-messages-in-group-channel/retrieve-the-total-number-of-scheduled-messages",
+      "title": "Retrieve the total number of scheduled messages",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/message/managing-scheduled-messages-in-group-channel/send-a-scheduled-message-immediately",
+      "title": "Send a scheduled message immediately",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/message/managing-scheduled-messages-in-group-channel/update-a-scheduled-message",
+      "title": "Update a scheduled message",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/message/marking-messages-as-delivered-in-a-group-channel/mark-messages-as-delivered",
+      "title": "Mark messages as delivered",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/message/mentioning-other-users-in-a-message/mention-other-users-in-a-message",
+      "title": "Mention other users in a message",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/message/overview-message",
+      "title": "Overview",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/message/receiving-messages-through-event-handler/receive-messages-in-a-group-channel",
+      "title": "Receive messages in a group channel",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/message/receiving-messages-through-event-handler/receive-messages-in-an-open-channel",
+      "title": "Receive messages in an open channel",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/message/retrieving-messages/retrieve-a-list-of-messages",
+      "title": "Retrieve a list of messages",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/message/retrieving-messages/retrieve-a-message",
+      "title": "Retrieve a message",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/message/retrieving-unread-counts-in-a-group-channel/members-who-havent-read-a-message",
+      "title": "Members who haven't read a message",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/message/retrieving-unread-counts-in-a-group-channel/members-who-havent-received-a-message",
+      "title": "Members who haven't received a message",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/message/retrieving-unread-counts-in-a-group-channel/unread-channels",
+      "title": "Unread channels",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/message/retrieving-unread-counts-in-a-group-channel/unread-items",
+      "title": "Unread items",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/message/retrieving-unread-counts-in-a-group-channel/unread-messages",
+      "title": "Unread messages in a channel",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/message/retrieving-unread-counts-in-a-group-channel/unread-messages-in-all-channels",
+      "title": "Unread messages in all channels",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/message/searching-messages-in-a-group-channel/search-messages-by-a-keyword",
+      "title": "Search messages by a keyword",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/message/sending-a-message/cancel-an-in-progress-file-upload",
+      "title": "Cancel an in-progress file upload",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/message/sending-a-message/send-a-critical-alert-message-to-ios-devices",
+      "title": "Send a critical alert message to iOS devices",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/message/sending-a-message/send-a-message",
+      "title": "Send a message",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/message/sending-a-message/send-an-admin-message",
+      "title": "Send an admin message",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/message/sending-a-message/share-an-encrypted-file",
+      "title": "Share an encrypted file",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/message/sending-a-message/smart-throttling",
+      "title": "Smart throttling",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/message/sending-a-message/spam-flood-protection",
+      "title": "Spam flood protection",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/message/sending-a-message/track-file-upload-progress-using-a-handler",
+      "title": "Track file upload progress using a handler",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/message/translating-messages/auto-translate-messages",
+      "title": "Auto-translate messages",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/message/translating-messages/translate-messages-on-demand",
+      "title": "Translate messages on-demand",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/message/translating-messages/translation-engine",
+      "title": "Translation engine",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/message/using-message-threading/create-a-message-thread",
+      "title": "Create a message thread",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/message/using-message-threading/list-replies-in-a-message-thread",
+      "title": "List replies in a message thread",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "message"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/migrating-to-sendbird",
+      "title": "Migrating to Sendbird",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "migrating-to-sendbird"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/migration-guide/collection-migration-guide",
+      "title": "Collection migration guide",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "migration-guide"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/migration-guide/migration-guide",
+      "title": "Migration guide",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "migration-guide"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/push-notifications/configuring-preferences/push-notification-content-templates",
+      "title": "Push notification content templates",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "push-notifications"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/push-notifications/configuring-preferences/push-notification-preferences",
+      "title": "Push notification preferences",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "push-notifications"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/push-notifications/configuring-preferences/push-notification-translation",
+      "title": "Push notification translation",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "push-notifications"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/push-notifications/configuring-preferences/set-up-push-notifications",
+      "title": "Set up push notifications",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "push-notifications"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/push-notifications/overview-push-notifications",
+      "title": "Overview",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "push-notifications"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/report/creating-a-report/report-a-message-user-or-channel",
+      "title": "Report a message, user, or channel",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "report"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/report/overview-report",
+      "title": "Overview",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "report"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/user/managing-user-metadata/manage-user-metadata",
+      "title": "Manage user metadata",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "user"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/user/moderating-a-user/ban-and-unban-a-user",
+      "title": "Ban and unban a user",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "user"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/user/moderating-a-user/block-and-unblock-other-members",
+      "title": "Block and unblock other members",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "user"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/user/moderating-a-user/mute-and-unmute-a-user",
+      "title": "Mute and unmute a user",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "user"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/user/moderating-a-user/retrieve-a-list-of-banned-users",
+      "title": "Retrieve a list of banned users",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "user"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/user/moderating-a-user/retrieve-a-list-of-blocked-users",
+      "title": "Retrieve a list of blocked users",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "user"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/user/moderating-a-user/retrieve-a-list-of-muted-users",
+      "title": "Retrieve a list of muted users",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "user"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/user/overview-user",
+      "title": "Overview",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "user"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/user/retrieving-and-updating-user-information/retrieve-the-latest-information-on-participants",
+      "title": "Retrieve the latest information on participants",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "user"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/user/retrieving-and-updating-user-information/retrieve-the-online-status-of-a-user",
+      "title": "Retrieve the online status of a user",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "user"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/user/retrieving-and-updating-user-information/update-user-profile",
+      "title": "Update user profile",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "user"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/user/retrieving-users/retrieve-a-list-of-members-and-operators-in-a-specific-order",
+      "title": "Retrieve a list of members and operators in a specific order",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "user"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/user/retrieving-users/retrieve-a-list-of-operators",
+      "title": "Retrieve a list of operators",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "user"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/user/retrieving-users/retrieve-a-list-of-users-in-a-channel",
+      "title": "Retrieve a list of users in a channel",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "user"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/user/retrieving-users/retrieve-a-list-of-users-in-an-application",
+      "title": "Retrieve a list of users in an application",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "user"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/sdk/v4/javascript/user/retrieving-users/retrieve-members-who-have-read-a-message",
+      "title": "Retrieve members who have read a message",
+      "product": "chat",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "user"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/android-view/customizations/channel-list-customization/add-new-channel-type",
+      "title": "Add new channel type",
+      "product": "uikit",
+      "platform": "android",
+      "docsPlatform": "android-view",
+      "section": "customizations"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/android-view/customizations/channel-list-customization/channel-item-ui",
+      "title": "Channel item UI",
+      "product": "uikit",
+      "platform": "android",
+      "docsPlatform": "android-view",
+      "section": "customizations"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/android-view/customizations/channel-list-customization/filter-channel-list",
+      "title": "Filter channel list",
+      "product": "uikit",
+      "platform": "android",
+      "docsPlatform": "android-view",
+      "section": "customizations"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/android-view/customizations/chat-customization/add-custom-data-to-message",
+      "title": "Add custom data to message",
+      "product": "uikit",
+      "platform": "android",
+      "docsPlatform": "android-view",
+      "section": "customizations"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/android-view/customizations/chat-customization/add-new-message-type",
+      "title": "Add new message type",
+      "product": "uikit",
+      "platform": "android",
+      "docsPlatform": "android-view",
+      "section": "customizations"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/android-view/customizations/chat-customization/chat-header",
+      "title": "Chat header",
+      "product": "uikit",
+      "platform": "android",
+      "docsPlatform": "android-view",
+      "section": "customizations"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/android-view/customizations/chat-customization/chat-input-menu",
+      "title": "Chat input menu",
+      "product": "uikit",
+      "platform": "android",
+      "docsPlatform": "android-view",
+      "section": "customizations"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/android-view/customizations/chat-customization/filter-message-list",
+      "title": "Filter message list",
+      "product": "uikit",
+      "platform": "android",
+      "docsPlatform": "android-view",
+      "section": "customizations"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/android-view/customizations/chat-customization/message-click-events",
+      "title": "Message click events",
+      "product": "uikit",
+      "platform": "android",
+      "docsPlatform": "android-view",
+      "section": "customizations"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/android-view/customizations/chat-customization/message-context-menu",
+      "title": "Message context menu",
+      "product": "uikit",
+      "platform": "android",
+      "docsPlatform": "android-view",
+      "section": "customizations"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/android-view/customizations/chat-customization/message-item-ui",
+      "title": "Message item UI",
+      "product": "uikit",
+      "platform": "android",
+      "docsPlatform": "android-view",
+      "section": "customizations"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/android-view/customizations/chat-customization/module-layout",
+      "title": "Module layout",
+      "product": "uikit",
+      "platform": "android",
+      "docsPlatform": "android-view",
+      "section": "customizations"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/android-view/customizations/global-customization/fragments",
+      "title": "Fragments",
+      "product": "uikit",
+      "platform": "android",
+      "docsPlatform": "android-view",
+      "section": "customizations"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/android-view/customizations/global-customization/list-adapters",
+      "title": "List adapters",
+      "product": "uikit",
+      "platform": "android",
+      "docsPlatform": "android-view",
+      "section": "customizations"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/android-view/customizations/global-customization/modules-and-components",
+      "title": "Modules and components",
+      "product": "uikit",
+      "platform": "android",
+      "docsPlatform": "android-view",
+      "section": "customizations"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/android-view/customizations/global-customization/viewmodels",
+      "title": "ViewModels",
+      "product": "uikit",
+      "platform": "android",
+      "docsPlatform": "android-view",
+      "section": "customizations"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/android-view/customizations/overview-customizations",
+      "title": "Overview",
+      "product": "uikit",
+      "platform": "android",
+      "docsPlatform": "android-view",
+      "section": "customizations"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/android-view/customizations/resource-customization/color-resources",
+      "title": "Color resources",
+      "product": "uikit",
+      "platform": "android",
+      "docsPlatform": "android-view",
+      "section": "customizations"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/android-view/customizations/resource-customization/icon-resources",
+      "title": "Icon resources",
+      "product": "uikit",
+      "platform": "android",
+      "docsPlatform": "android-view",
+      "section": "customizations"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/android-view/customizations/resource-customization/string-resources",
+      "title": "String resources",
+      "product": "uikit",
+      "platform": "android",
+      "docsPlatform": "android-view",
+      "section": "customizations"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/android-view/customizations/resource-customization/style-resources",
+      "title": "Style resources",
+      "product": "uikit",
+      "platform": "android",
+      "docsPlatform": "android-view",
+      "section": "customizations"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/android-view/customizations/resource-customization/text-appearance-resources",
+      "title": "Text appearance resources",
+      "product": "uikit",
+      "platform": "android",
+      "docsPlatform": "android-view",
+      "section": "customizations"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/android-view/customizations/resource-customization/theme-resources",
+      "title": "Theme resources",
+      "product": "uikit",
+      "platform": "android",
+      "docsPlatform": "android-view",
+      "section": "customizations"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/android-view/customizations/user-list-customization/filter-user-list",
+      "title": "Filter user list",
+      "product": "uikit",
+      "platform": "android",
+      "docsPlatform": "android-view",
+      "section": "customizations"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/android-view/customizations/user-list-customization/user-data-sources",
+      "title": "User data sources",
+      "product": "uikit",
+      "platform": "android",
+      "docsPlatform": "android-view",
+      "section": "customizations"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/android-view/customizations/user-list-customization/user-item-ui",
+      "title": "User item UI",
+      "product": "uikit",
+      "platform": "android",
+      "docsPlatform": "android-view",
+      "section": "customizations"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/android-view/customizations/user-list-customization/user-selection",
+      "title": "User selection",
+      "product": "uikit",
+      "platform": "android",
+      "docsPlatform": "android-view",
+      "section": "customizations"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/android-view/dashboard-configuration/overview",
+      "title": "Overview",
+      "product": "uikit",
+      "platform": "android",
+      "docsPlatform": "android-view",
+      "section": "dashboard-configuration"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/android-view/dashboard-configuration/uikit-config-in-dashboard",
+      "title": "UIKit config in dashboard",
+      "product": "uikit",
+      "platform": "android",
+      "docsPlatform": "android-view",
+      "section": "dashboard-configuration"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/android-view/essentials/authentication",
+      "title": "Authentication",
+      "product": "uikit",
+      "platform": "android",
+      "docsPlatform": "android-view",
+      "section": "essentials"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/android-view/essentials/installation",
+      "title": "Installation",
+      "product": "uikit",
+      "platform": "android",
+      "docsPlatform": "android-view",
+      "section": "essentials"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/android-view/features/delivery-receipt",
+      "title": "Delivery receipt",
+      "product": "uikit",
+      "platform": "android",
+      "docsPlatform": "android-view",
+      "section": "features"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/android-view/features/file-sharing",
+      "title": "File sharing",
+      "product": "uikit",
+      "platform": "android",
+      "docsPlatform": "android-view",
+      "section": "features"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/android-view/features/logger",
+      "title": "Logger",
+      "product": "uikit",
+      "platform": "android",
+      "docsPlatform": "android-view",
+      "section": "features"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/android-view/features/mention",
+      "title": "Mention",
+      "product": "uikit",
+      "platform": "android",
+      "docsPlatform": "android-view",
+      "section": "features"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/android-view/features/message-search",
+      "title": "Message search",
+      "product": "uikit",
+      "platform": "android",
+      "docsPlatform": "android-view",
+      "section": "features"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/android-view/features/message-threading/quote-reply",
+      "title": "Quote reply",
+      "product": "uikit",
+      "platform": "android",
+      "docsPlatform": "android-view",
+      "section": "features"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/android-view/features/message-threading/threads",
+      "title": "Threads",
+      "product": "uikit",
+      "platform": "android",
+      "docsPlatform": "android-view",
+      "section": "features"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/android-view/features/moderation",
+      "title": "Moderation",
+      "product": "uikit",
+      "platform": "android",
+      "docsPlatform": "android-view",
+      "section": "features"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/android-view/features/overview",
+      "title": "Overview",
+      "product": "uikit",
+      "platform": "android",
+      "docsPlatform": "android-view",
+      "section": "features"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/android-view/features/reactions",
+      "title": "Reactions",
+      "product": "uikit",
+      "platform": "android",
+      "docsPlatform": "android-view",
+      "section": "features"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/android-view/features/read-receipt",
+      "title": "Read receipt",
+      "product": "uikit",
+      "platform": "android",
+      "docsPlatform": "android-view",
+      "section": "features"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/android-view/features/typing-indicator",
+      "title": "Typing indicator",
+      "product": "uikit",
+      "platform": "android",
+      "docsPlatform": "android-view",
+      "section": "features"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/android-view/features/unread-messages",
+      "title": "Unread messages",
+      "product": "uikit",
+      "platform": "android",
+      "docsPlatform": "android-view",
+      "section": "features"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/android-view/features/voice-message",
+      "title": "Voice message",
+      "product": "uikit",
+      "platform": "android",
+      "docsPlatform": "android-view",
+      "section": "features"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/android-view/group-channel-screens/chat-in-a-group-channel",
+      "title": "Chat in channel",
+      "product": "uikit",
+      "platform": "android",
+      "docsPlatform": "android-view",
+      "section": "group-channel-screens"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/android-view/group-channel-screens/configure-group-channel-settings",
+      "title": "Channel settings",
+      "product": "uikit",
+      "platform": "android",
+      "docsPlatform": "android-view",
+      "section": "group-channel-screens"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/android-view/group-channel-screens/create-a-group-channel",
+      "title": "Create a channel",
+      "product": "uikit",
+      "platform": "android",
+      "docsPlatform": "android-view",
+      "section": "group-channel-screens"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/android-view/group-channel-screens/invite-users",
+      "title": "Invite users",
+      "product": "uikit",
+      "platform": "android",
+      "docsPlatform": "android-view",
+      "section": "group-channel-screens"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/android-view/group-channel-screens/list-banned-users-in-group-channel",
+      "title": "List banned users",
+      "product": "uikit",
+      "platform": "android",
+      "docsPlatform": "android-view",
+      "section": "group-channel-screens"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/android-view/group-channel-screens/list-channel-members",
+      "title": "List members",
+      "product": "uikit",
+      "platform": "android",
+      "docsPlatform": "android-view",
+      "section": "group-channel-screens"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/android-view/group-channel-screens/list-channels",
+      "title": "List channels",
+      "product": "uikit",
+      "platform": "android",
+      "docsPlatform": "android-view",
+      "section": "group-channel-screens"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/android-view/group-channel-screens/list-muted-members",
+      "title": "List muted members",
+      "product": "uikit",
+      "platform": "android",
+      "docsPlatform": "android-view",
+      "section": "group-channel-screens"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/android-view/group-channel-screens/list-operators-in-group-channel",
+      "title": "List operators",
+      "product": "uikit",
+      "platform": "android",
+      "docsPlatform": "android-view",
+      "section": "group-channel-screens"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/android-view/group-channel-screens/moderate-group-channels-and-members",
+      "title": "Moderation",
+      "product": "uikit",
+      "platform": "android",
+      "docsPlatform": "android-view",
+      "section": "group-channel-screens"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/android-view/group-channel-screens/overview",
+      "title": "Overview",
+      "product": "uikit",
+      "platform": "android",
+      "docsPlatform": "android-view",
+      "section": "group-channel-screens"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/android-view/group-channel-screens/register-members-as-operators",
+      "title": "Register operators",
+      "product": "uikit",
+      "platform": "android",
+      "docsPlatform": "android-view",
+      "section": "group-channel-screens"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/android-view/group-channel-screens/reply-to-messages",
+      "title": "Reply to messages",
+      "product": "uikit",
+      "platform": "android",
+      "docsPlatform": "android-view",
+      "section": "group-channel-screens"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/android-view/group-channel-screens/search-messages",
+      "title": "Search messages",
+      "product": "uikit",
+      "platform": "android",
+      "docsPlatform": "android-view",
+      "section": "group-channel-screens"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/android-view/miscellaneous/migration-guide",
+      "title": "Migration guide",
+      "product": "uikit",
+      "platform": "android",
+      "docsPlatform": "android-view",
+      "section": "miscellaneous"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/android-view/open-channel-screens/chat-in-an-open-channel",
+      "title": "Chat in a channel",
+      "product": "uikit",
+      "platform": "android",
+      "docsPlatform": "android-view",
+      "section": "open-channel-screens"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/android-view/open-channel-screens/configure-open-channel-settings",
+      "title": "Channel settings",
+      "product": "uikit",
+      "platform": "android",
+      "docsPlatform": "android-view",
+      "section": "open-channel-screens"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/android-view/open-channel-screens/create-an-open-channel",
+      "title": "Create a channel",
+      "product": "uikit",
+      "platform": "android",
+      "docsPlatform": "android-view",
+      "section": "open-channel-screens"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/android-view/open-channel-screens/list-banned-users-in-open-channel",
+      "title": "List banned users",
+      "product": "uikit",
+      "platform": "android",
+      "docsPlatform": "android-view",
+      "section": "open-channel-screens"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/android-view/open-channel-screens/list-channel-participants",
+      "title": "List participants",
+      "product": "uikit",
+      "platform": "android",
+      "docsPlatform": "android-view",
+      "section": "open-channel-screens"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/android-view/open-channel-screens/list-channels",
+      "title": "List channels",
+      "product": "uikit",
+      "platform": "android",
+      "docsPlatform": "android-view",
+      "section": "open-channel-screens"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/android-view/open-channel-screens/list-muted-participants",
+      "title": "List muted participants",
+      "product": "uikit",
+      "platform": "android",
+      "docsPlatform": "android-view",
+      "section": "open-channel-screens"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/android-view/open-channel-screens/list-operators-in-open-channel",
+      "title": "List operators",
+      "product": "uikit",
+      "platform": "android",
+      "docsPlatform": "android-view",
+      "section": "open-channel-screens"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/android-view/open-channel-screens/moderate-open-channels-and-participants",
+      "title": "Moderation",
+      "product": "uikit",
+      "platform": "android",
+      "docsPlatform": "android-view",
+      "section": "open-channel-screens"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/android-view/open-channel-screens/overview",
+      "title": "Overview",
+      "product": "uikit",
+      "platform": "android",
+      "docsPlatform": "android-view",
+      "section": "open-channel-screens"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/android-view/open-channel-screens/register-participants-as-operators",
+      "title": "Register operators",
+      "product": "uikit",
+      "platform": "android",
+      "docsPlatform": "android-view",
+      "section": "open-channel-screens"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/android-view/tutorial/apply-brand-color",
+      "title": "Apply brand color",
+      "product": "uikit",
+      "platform": "android",
+      "docsPlatform": "android-view",
+      "section": "tutorial"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/android-view/tutorial/customize-channel-list",
+      "title": "Customize channel list",
+      "product": "uikit",
+      "platform": "android",
+      "docsPlatform": "android-view",
+      "section": "tutorial"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/android-view/tutorial/customize-channel-settings",
+      "title": "Customize channel settings",
+      "product": "uikit",
+      "platform": "android",
+      "docsPlatform": "android-view",
+      "section": "tutorial"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/android-view/tutorial/customize-message-menu",
+      "title": "Customize message menu",
+      "product": "uikit",
+      "platform": "android",
+      "docsPlatform": "android-view",
+      "section": "tutorial"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/android-view/tutorial/integrating-with-existing-app",
+      "title": "Integrate UIKit to an existing app",
+      "product": "uikit",
+      "platform": "android",
+      "docsPlatform": "android-view",
+      "section": "tutorial"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/ios-uikit/apple-privacy-manifest",
+      "title": "Apple privacy manifest",
+      "product": "uikit",
+      "platform": "ios",
+      "docsPlatform": "ios-uikit",
+      "section": "apple-privacy-manifest"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/ios-uikit/dashboard-configuration/overview",
+      "title": "Overview",
+      "product": "uikit",
+      "platform": "ios",
+      "docsPlatform": "ios-uikit",
+      "section": "dashboard-configuration"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/ios-uikit/dashboard-configuration/uikit-config-in-dashboard",
+      "title": "UIKit config in dashboard",
+      "product": "uikit",
+      "platform": "ios",
+      "docsPlatform": "ios-uikit",
+      "section": "dashboard-configuration"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/ios-uikit/essentials/authentication",
+      "title": "Authentication",
+      "product": "uikit",
+      "platform": "ios",
+      "docsPlatform": "ios-uikit",
+      "section": "essentials"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/ios-uikit/essentials/installation",
+      "title": "Installation",
+      "product": "uikit",
+      "platform": "ios",
+      "docsPlatform": "ios-uikit",
+      "section": "essentials"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/ios-uikit/features/delivery-receipt",
+      "title": "Delivery receipt",
+      "product": "uikit",
+      "platform": "ios",
+      "docsPlatform": "ios-uikit",
+      "section": "features"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/ios-uikit/features/file-sharing",
+      "title": "File sharing",
+      "product": "uikit",
+      "platform": "ios",
+      "docsPlatform": "ios-uikit",
+      "section": "features"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/ios-uikit/features/logger",
+      "title": "Logger",
+      "product": "uikit",
+      "platform": "ios",
+      "docsPlatform": "ios-uikit",
+      "section": "features"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/ios-uikit/features/mention",
+      "title": "Mention",
+      "product": "uikit",
+      "platform": "ios",
+      "docsPlatform": "ios-uikit",
+      "section": "features"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/ios-uikit/features/message-search",
+      "title": "Message search",
+      "product": "uikit",
+      "platform": "ios",
+      "docsPlatform": "ios-uikit",
+      "section": "features"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/ios-uikit/features/message-threading/quote-reply",
+      "title": "Quote reply",
+      "product": "uikit",
+      "platform": "ios",
+      "docsPlatform": "ios-uikit",
+      "section": "features"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/ios-uikit/features/message-threading/threads",
+      "title": "Threads",
+      "product": "uikit",
+      "platform": "ios",
+      "docsPlatform": "ios-uikit",
+      "section": "features"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/ios-uikit/features/moderation",
+      "title": "Moderation",
+      "product": "uikit",
+      "platform": "ios",
+      "docsPlatform": "ios-uikit",
+      "section": "features"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/ios-uikit/features/overview",
+      "title": "Overview",
+      "product": "uikit",
+      "platform": "ios",
+      "docsPlatform": "ios-uikit",
+      "section": "features"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/ios-uikit/features/reactions",
+      "title": "Reactions",
+      "product": "uikit",
+      "platform": "ios",
+      "docsPlatform": "ios-uikit",
+      "section": "features"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/ios-uikit/features/read-receipt",
+      "title": "Read receipt",
+      "product": "uikit",
+      "platform": "ios",
+      "docsPlatform": "ios-uikit",
+      "section": "features"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/ios-uikit/features/typing-indicator",
+      "title": "Typing indicator",
+      "product": "uikit",
+      "platform": "ios",
+      "docsPlatform": "ios-uikit",
+      "section": "features"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/ios-uikit/features/unread-messages",
+      "title": "Unread messages",
+      "product": "uikit",
+      "platform": "ios",
+      "docsPlatform": "ios-uikit",
+      "section": "features"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/ios-uikit/features/voice-message",
+      "title": "Voice message",
+      "product": "uikit",
+      "platform": "ios",
+      "docsPlatform": "ios-uikit",
+      "section": "features"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/ios-uikit/group-channel-views/basics-of-viewcontroller",
+      "title": "Basics of ViewController",
+      "product": "uikit",
+      "platform": "ios",
+      "docsPlatform": "ios-uikit",
+      "section": "group-channel-views"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/ios-uikit/group-channel-views/chat-in-group-channel",
+      "title": "Chat in a channel",
+      "product": "uikit",
+      "platform": "ios",
+      "docsPlatform": "ios-uikit",
+      "section": "group-channel-views"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/ios-uikit/group-channel-views/common-views",
+      "title": "Common views",
+      "product": "uikit",
+      "platform": "ios",
+      "docsPlatform": "ios-uikit",
+      "section": "group-channel-views"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/ios-uikit/group-channel-views/configure-group-channel-settings",
+      "title": "Channel settings",
+      "product": "uikit",
+      "platform": "ios",
+      "docsPlatform": "ios-uikit",
+      "section": "group-channel-views"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/ios-uikit/group-channel-views/create-group-channel",
+      "title": "Create a channel",
+      "product": "uikit",
+      "platform": "ios",
+      "docsPlatform": "ios-uikit",
+      "section": "group-channel-views"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/ios-uikit/group-channel-views/invite-users",
+      "title": "Invite users",
+      "product": "uikit",
+      "platform": "ios",
+      "docsPlatform": "ios-uikit",
+      "section": "group-channel-views"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/ios-uikit/group-channel-views/list-channels",
+      "title": "List channels",
+      "product": "uikit",
+      "platform": "ios",
+      "docsPlatform": "ios-uikit",
+      "section": "group-channel-views"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/ios-uikit/group-channel-views/list-users-in-a-group-channel",
+      "title": "List members",
+      "product": "uikit",
+      "platform": "ios",
+      "docsPlatform": "ios-uikit",
+      "section": "group-channel-views"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/ios-uikit/group-channel-views/moderate-group-channels-and-members",
+      "title": "Moderation",
+      "product": "uikit",
+      "platform": "ios",
+      "docsPlatform": "ios-uikit",
+      "section": "group-channel-views"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/ios-uikit/group-channel-views/overview",
+      "title": "Overview",
+      "product": "uikit",
+      "platform": "ios",
+      "docsPlatform": "ios-uikit",
+      "section": "group-channel-views"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/ios-uikit/group-channel-views/register-members-as-operators",
+      "title": "Register operators",
+      "product": "uikit",
+      "platform": "ios",
+      "docsPlatform": "ios-uikit",
+      "section": "group-channel-views"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/ios-uikit/group-channel-views/reply-to-messages",
+      "title": "Reply to messages",
+      "product": "uikit",
+      "platform": "ios",
+      "docsPlatform": "ios-uikit",
+      "section": "group-channel-views"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/ios-uikit/group-channel-views/search-messages",
+      "title": "Search messages",
+      "product": "uikit",
+      "platform": "ios",
+      "docsPlatform": "ios-uikit",
+      "section": "group-channel-views"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/ios-uikit/miscellaneous/get-attachment-permission",
+      "title": "Get attachment permission",
+      "product": "uikit",
+      "platform": "ios",
+      "docsPlatform": "ios-uikit",
+      "section": "miscellaneous"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/ios-uikit/miscellaneous/global-classes",
+      "title": "Global classes",
+      "product": "uikit",
+      "platform": "ios",
+      "docsPlatform": "ios-uikit",
+      "section": "miscellaneous"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/ios-uikit/miscellaneous/migration-guide/from-version-three-point-five",
+      "title": "From v3.5 to v3.6",
+      "product": "uikit",
+      "platform": "ios",
+      "docsPlatform": "ios-uikit",
+      "section": "miscellaneous"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/ios-uikit/miscellaneous/migration-guide/from-version-two",
+      "title": "From v2 to v3",
+      "product": "uikit",
+      "platform": "ios",
+      "docsPlatform": "ios-uikit",
+      "section": "miscellaneous"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/ios-uikit/modules/basics-of-module",
+      "title": "Basics of Module",
+      "product": "uikit",
+      "platform": "ios",
+      "docsPlatform": "ios-uikit",
+      "section": "modules"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/ios-uikit/modules/overview",
+      "title": "Overview",
+      "product": "uikit",
+      "platform": "ios",
+      "docsPlatform": "ios-uikit",
+      "section": "modules"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/ios-uikit/open-channel-views/basics-of-viewcontroller",
+      "title": "Basics of ViewController",
+      "product": "uikit",
+      "platform": "ios",
+      "docsPlatform": "ios-uikit",
+      "section": "open-channel-views"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/ios-uikit/open-channel-views/chat-in-open-channel",
+      "title": "Chat in a channel",
+      "product": "uikit",
+      "platform": "ios",
+      "docsPlatform": "ios-uikit",
+      "section": "open-channel-views"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/ios-uikit/open-channel-views/common-views",
+      "title": "Common views",
+      "product": "uikit",
+      "platform": "ios",
+      "docsPlatform": "ios-uikit",
+      "section": "open-channel-views"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/ios-uikit/open-channel-views/configure-open-channel-settings",
+      "title": "Channel settings",
+      "product": "uikit",
+      "platform": "ios",
+      "docsPlatform": "ios-uikit",
+      "section": "open-channel-views"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/ios-uikit/open-channel-views/create-open-channel",
+      "title": "Create a channel",
+      "product": "uikit",
+      "platform": "ios",
+      "docsPlatform": "ios-uikit",
+      "section": "open-channel-views"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/ios-uikit/open-channel-views/list-channels",
+      "title": "List channels",
+      "product": "uikit",
+      "platform": "ios",
+      "docsPlatform": "ios-uikit",
+      "section": "open-channel-views"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/ios-uikit/open-channel-views/list-users-in-an-open-channel",
+      "title": "List participants",
+      "product": "uikit",
+      "platform": "ios",
+      "docsPlatform": "ios-uikit",
+      "section": "open-channel-views"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/ios-uikit/open-channel-views/moderate-open-channels-and-participants",
+      "title": "Moderation",
+      "product": "uikit",
+      "platform": "ios",
+      "docsPlatform": "ios-uikit",
+      "section": "open-channel-views"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/ios-uikit/open-channel-views/overview",
+      "title": "Overview",
+      "product": "uikit",
+      "platform": "ios",
+      "docsPlatform": "ios-uikit",
+      "section": "open-channel-views"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/ios-uikit/open-channel-views/register-participants-as-operators",
+      "title": "Register operators",
+      "product": "uikit",
+      "platform": "ios",
+      "docsPlatform": "ios-uikit",
+      "section": "open-channel-views"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/ios-uikit/theme-and-style-resources/color-resources",
+      "title": "Color resources",
+      "product": "uikit",
+      "platform": "ios",
+      "docsPlatform": "ios-uikit",
+      "section": "theme-and-style-resources"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/ios-uikit/theme-and-style-resources/font-resources",
+      "title": "Font resources",
+      "product": "uikit",
+      "platform": "ios",
+      "docsPlatform": "ios-uikit",
+      "section": "theme-and-style-resources"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/ios-uikit/theme-and-style-resources/icon-resources",
+      "title": "Icon resources",
+      "product": "uikit",
+      "platform": "ios",
+      "docsPlatform": "ios-uikit",
+      "section": "theme-and-style-resources"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/ios-uikit/theme-and-style-resources/string-resources",
+      "title": "String resources",
+      "product": "uikit",
+      "platform": "ios",
+      "docsPlatform": "ios-uikit",
+      "section": "theme-and-style-resources"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/ios-uikit/theme-and-style-resources/theme-resources",
+      "title": "Theme resources",
+      "product": "uikit",
+      "platform": "ios",
+      "docsPlatform": "ios-uikit",
+      "section": "theme-and-style-resources"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/ios-uikit/tutorial/apply-brand-color",
+      "title": "Apply brand color",
+      "product": "uikit",
+      "platform": "ios",
+      "docsPlatform": "ios-uikit",
+      "section": "tutorial"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/ios-uikit/tutorial/customize-channel-list",
+      "title": "Customize channel list",
+      "product": "uikit",
+      "platform": "ios",
+      "docsPlatform": "ios-uikit",
+      "section": "tutorial"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/ios-uikit/tutorial/customize-channel-settings",
+      "title": "Customize channel settings",
+      "product": "uikit",
+      "platform": "ios",
+      "docsPlatform": "ios-uikit",
+      "section": "tutorial"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/ios-uikit/tutorial/customize-message-menu",
+      "title": "Customize message menu",
+      "product": "uikit",
+      "platform": "ios",
+      "docsPlatform": "ios-uikit",
+      "section": "tutorial"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/ios-uikit/tutorial/integrating-to-existing-app",
+      "title": "Integrating to existing app",
+      "product": "uikit",
+      "platform": "ios",
+      "docsPlatform": "ios-uikit",
+      "section": "tutorial"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/jetpack-compose/customization",
+      "title": "Customization",
+      "product": "uikit",
+      "platform": "android",
+      "docsPlatform": "jetpack-compose",
+      "section": "customization"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/jetpack-compose/essentials/authentication",
+      "title": "Authentication",
+      "product": "uikit",
+      "platform": "android",
+      "docsPlatform": "jetpack-compose",
+      "section": "essentials"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/jetpack-compose/essentials/installation",
+      "title": "Installation",
+      "product": "uikit",
+      "platform": "android",
+      "docsPlatform": "jetpack-compose",
+      "section": "essentials"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/jetpack-compose/essentials/push-notifications",
+      "title": "Push notifications",
+      "product": "uikit",
+      "platform": "android",
+      "docsPlatform": "jetpack-compose",
+      "section": "essentials"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/jetpack-compose/features/ogtag",
+      "title": "OG Tag",
+      "product": "uikit",
+      "platform": "android",
+      "docsPlatform": "jetpack-compose",
+      "section": "features"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/jetpack-compose/features/reactions",
+      "title": "Reactions",
+      "product": "uikit",
+      "platform": "android",
+      "docsPlatform": "jetpack-compose",
+      "section": "features"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/jetpack-compose/navigation",
+      "title": "Navigation",
+      "product": "uikit",
+      "platform": "android",
+      "docsPlatform": "jetpack-compose",
+      "section": "navigation"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/jetpack-compose/screens/channel-list",
+      "title": "Channel list",
+      "product": "uikit",
+      "platform": "android",
+      "docsPlatform": "jetpack-compose",
+      "section": "screens"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/jetpack-compose/screens/channel-members",
+      "title": "Channel members",
+      "product": "uikit",
+      "platform": "android",
+      "docsPlatform": "jetpack-compose",
+      "section": "screens"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/jetpack-compose/screens/configure-group-channel-settings",
+      "title": "Channel settings",
+      "product": "uikit",
+      "platform": "android",
+      "docsPlatform": "jetpack-compose",
+      "section": "screens"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/jetpack-compose/screens/create-a-group-channel",
+      "title": "Create a channel",
+      "product": "uikit",
+      "platform": "android",
+      "docsPlatform": "jetpack-compose",
+      "section": "screens"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/jetpack-compose/screens/invite-users",
+      "title": "Invite users",
+      "product": "uikit",
+      "platform": "android",
+      "docsPlatform": "jetpack-compose",
+      "section": "screens"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/jetpack-compose/screens/messages-in-a-channel",
+      "title": "Messages",
+      "product": "uikit",
+      "platform": "android",
+      "docsPlatform": "jetpack-compose",
+      "section": "screens"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/jetpack-compose/screens/overview",
+      "title": "Overview",
+      "product": "uikit",
+      "platform": "android",
+      "docsPlatform": "jetpack-compose",
+      "section": "screens"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/jetpack-compose/themes",
+      "title": "Themes",
+      "product": "uikit",
+      "platform": "android",
+      "docsPlatform": "jetpack-compose",
+      "section": "themes"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react-native/core-components/hooks",
+      "title": "Hooks",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react-native",
+      "section": "core-components"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react-native/core-components/provider/platformserviceprovider",
+      "title": "PlatformServiceProvider",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react-native",
+      "section": "core-components"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react-native/core-components/provider/sendbirdchatprovider",
+      "title": "SendbirdChatProvider",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react-native",
+      "section": "core-components"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react-native/core-components/sendbirduikitcontainer",
+      "title": "SendbirdUIKitContainer",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react-native",
+      "section": "core-components"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react-native/customization/fragment-and-module",
+      "title": "Fragment and module",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react-native",
+      "section": "customization"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react-native/customization/sendbirduikitcontainer",
+      "title": "SendbirdUIKitContainer",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react-native",
+      "section": "customization"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react-native/dashboard-configuration/overview",
+      "title": "Overview",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react-native",
+      "section": "dashboard-configuration"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react-native/dashboard-configuration/uikit-config-in-dashboard",
+      "title": "UIKit config in dashboard",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react-native",
+      "section": "dashboard-configuration"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react-native/essentials/authentication",
+      "title": "Authentication",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react-native",
+      "section": "essentials"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react-native/essentials/installation",
+      "title": "Installation",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react-native",
+      "section": "essentials"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react-native/essentials/native-modules",
+      "title": "Native modules",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react-native",
+      "section": "essentials"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react-native/essentials/screen-navigation",
+      "title": "Screen navigation",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react-native",
+      "section": "essentials"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react-native/essentials/send-first-message",
+      "title": "Send your first message",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react-native",
+      "section": "essentials"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react-native/features/delivery-receipt",
+      "title": "Delivery receipt",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react-native",
+      "section": "features"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react-native/features/file-sharing",
+      "title": "File sharing",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react-native",
+      "section": "features"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react-native/features/mention",
+      "title": "Mention",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react-native",
+      "section": "features"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react-native/features/message-search",
+      "title": "Message search",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react-native",
+      "section": "features"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react-native/features/message-threading/quote-reply",
+      "title": "Quote reply",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react-native",
+      "section": "features"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react-native/features/message-threading/threads",
+      "title": "Threads",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react-native",
+      "section": "features"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react-native/features/moderation",
+      "title": "Moderation",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react-native",
+      "section": "features"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react-native/features/overview",
+      "title": "Overview",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react-native",
+      "section": "features"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react-native/features/reactions",
+      "title": "Reactions",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react-native",
+      "section": "features"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react-native/features/read-receipt",
+      "title": "Read receipt",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react-native",
+      "section": "features"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react-native/features/typing-indicator",
+      "title": "Typing indicator",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react-native",
+      "section": "features"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react-native/features/unread-messages",
+      "title": "Unread messages",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react-native",
+      "section": "features"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react-native/features/voice-message",
+      "title": "Voice message",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react-native",
+      "section": "features"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react-native/group-channel-screens/architecture/context",
+      "title": "Context",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react-native",
+      "section": "group-channel-screens"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react-native/group-channel-screens/architecture/fragment",
+      "title": "Fragment",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react-native",
+      "section": "group-channel-screens"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react-native/group-channel-screens/architecture/module",
+      "title": "Module",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react-native",
+      "section": "group-channel-screens"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react-native/group-channel-screens/chat-in-a-group-channel",
+      "title": "Chat in a channel",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react-native",
+      "section": "group-channel-screens"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react-native/group-channel-screens/configure-group-channel-settings",
+      "title": "Configure channel settings",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react-native",
+      "section": "group-channel-screens"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react-native/group-channel-screens/create-a-group-channel",
+      "title": "Create a channel",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react-native",
+      "section": "group-channel-screens"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react-native/group-channel-screens/group-channel-screens-overview",
+      "title": "Overview",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react-native",
+      "section": "group-channel-screens"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react-native/group-channel-screens/invite-users",
+      "title": "Invite users",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react-native",
+      "section": "group-channel-screens"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react-native/group-channel-screens/list-banned-users-in-group-channel",
+      "title": "List banned users",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react-native",
+      "section": "group-channel-screens"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react-native/group-channel-screens/list-channel-members",
+      "title": "List channel members",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react-native",
+      "section": "group-channel-screens"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react-native/group-channel-screens/list-channels",
+      "title": "List channels",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react-native",
+      "section": "group-channel-screens"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react-native/group-channel-screens/list-muted-members",
+      "title": "List muted members",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react-native",
+      "section": "group-channel-screens"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react-native/group-channel-screens/list-operators-in-group-channel",
+      "title": "List operators",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react-native",
+      "section": "group-channel-screens"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react-native/group-channel-screens/moderate-group-channels-and-members",
+      "title": "Moderate channels and members",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react-native",
+      "section": "group-channel-screens"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react-native/group-channel-screens/register-members-as-operators",
+      "title": "Register operators",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react-native",
+      "section": "group-channel-screens"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react-native/group-channel-screens/search-messages",
+      "title": "Search messages",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react-native",
+      "section": "group-channel-screens"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react-native/miscellaneous/migration-guide",
+      "title": "Migration guide",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react-native",
+      "section": "miscellaneous"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react-native/open-channel-screens/architecture/context",
+      "title": "Context",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react-native",
+      "section": "open-channel-screens"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react-native/open-channel-screens/architecture/fragment",
+      "title": "Fragment",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react-native",
+      "section": "open-channel-screens"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react-native/open-channel-screens/architecture/module",
+      "title": "Module",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react-native",
+      "section": "open-channel-screens"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react-native/open-channel-screens/chat-in-an-open-channel",
+      "title": "Chat in a channel",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react-native",
+      "section": "open-channel-screens"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react-native/open-channel-screens/configure-open-channel-settings",
+      "title": "Configure channel settings",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react-native",
+      "section": "open-channel-screens"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react-native/open-channel-screens/create-an-open-channel",
+      "title": "Create a channel",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react-native",
+      "section": "open-channel-screens"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react-native/open-channel-screens/list-banned-users-in-open-channel",
+      "title": "List banned users",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react-native",
+      "section": "open-channel-screens"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react-native/open-channel-screens/list-channel-participants",
+      "title": "List channel participants",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react-native",
+      "section": "open-channel-screens"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react-native/open-channel-screens/list-channels",
+      "title": "List channels",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react-native",
+      "section": "open-channel-screens"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react-native/open-channel-screens/list-muted-participants",
+      "title": "List muted participants",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react-native",
+      "section": "open-channel-screens"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react-native/open-channel-screens/list-operators-in-open-channel",
+      "title": "List operators",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react-native",
+      "section": "open-channel-screens"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react-native/open-channel-screens/moderate-open-channels-and-participants",
+      "title": "Moderate channels and participants",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react-native",
+      "section": "open-channel-screens"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react-native/open-channel-screens/open-channel-screens-overview",
+      "title": "Overview",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react-native",
+      "section": "open-channel-screens"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react-native/open-channel-screens/register-participants-as-operators",
+      "title": "Register operators",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react-native",
+      "section": "open-channel-screens"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react-native/theme-and-style-resources/color-resource",
+      "title": "Color resource",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react-native",
+      "section": "theme-and-style-resources"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react-native/theme-and-style-resources/icon-resource",
+      "title": "Icon resource",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react-native",
+      "section": "theme-and-style-resources"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react-native/theme-and-style-resources/string-resource",
+      "title": "String resource",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react-native",
+      "section": "theme-and-style-resources"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react-native/theme-and-style-resources/theme-resource",
+      "title": "Theme resource",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react-native",
+      "section": "theme-and-style-resources"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react-native/theme-and-style-resources/typography-resource",
+      "title": "Typography resource",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react-native",
+      "section": "theme-and-style-resources"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react/customization",
+      "title": "Customization",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react",
+      "section": "customization"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react/dashboard-configuration/overview",
+      "title": "Overview",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react",
+      "section": "dashboard-configuration"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react/dashboard-configuration/uikit-config-in-dashboard",
+      "title": "UIKit config in dashboard",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react",
+      "section": "dashboard-configuration"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react/essentials/handlers",
+      "title": "Handlers",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react",
+      "section": "essentials"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react/essentials/installation",
+      "title": "Installation",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react",
+      "section": "essentials"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react/essentials/sendbirdprovider",
+      "title": "SendbirdProvider",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react",
+      "section": "essentials"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react/features/delivery-receipt",
+      "title": "Delivery receipt",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react",
+      "section": "features"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react/features/file-sharing",
+      "title": "File sharing",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react",
+      "section": "features"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react/features/logger",
+      "title": "Logger",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react",
+      "section": "features"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react/features/mention",
+      "title": "Mention",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react",
+      "section": "features"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react/features/message-search",
+      "title": "Message search",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react",
+      "section": "features"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react/features/message-threading/quote-reply",
+      "title": "Quote reply",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react",
+      "section": "features"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react/features/message-threading/threads",
+      "title": "Threads",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react",
+      "section": "features"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react/features/moderation",
+      "title": "Moderation",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react",
+      "section": "features"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react/features/overview",
+      "title": "Overview",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react",
+      "section": "features"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react/features/reactions",
+      "title": "Reactions",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react",
+      "section": "features"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react/features/read-receipt",
+      "title": "Read receipt",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react",
+      "section": "features"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react/features/typing-indicator",
+      "title": "Typing indicator",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react",
+      "section": "features"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react/features/unread-messages",
+      "title": "Unread messages",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react",
+      "section": "features"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react/features/voice-message",
+      "title": "Voice message",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react",
+      "section": "features"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react/miscellaneous/group-channel-migration-guide",
+      "title": "Group channel migration guide",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react",
+      "section": "miscellaneous"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react/miscellaneous/mobile-optimization-guide",
+      "title": "Mobile optimization guide",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react",
+      "section": "miscellaneous"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react/miscellaneous/version-migration-guide",
+      "title": "Version migration guide",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react",
+      "section": "miscellaneous"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react/modules/channel-list",
+      "title": "Group Channel list",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react",
+      "section": "modules"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react/modules/create-a-channel",
+      "title": "Create a channel",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react",
+      "section": "modules"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react/modules/edit-user-profile",
+      "title": "Edit user profile",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react",
+      "section": "modules"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react/modules/group-channel",
+      "title": "Group channel",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react",
+      "section": "modules"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react/modules/group-channel-settings",
+      "title": "Group channel settings",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react",
+      "section": "modules"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react/modules/message-search",
+      "title": "Message search",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react",
+      "section": "modules"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react/modules/open-channel",
+      "title": "Open channel",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react",
+      "section": "modules"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react/modules/open-channel-list",
+      "title": "Open Channel list",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react",
+      "section": "modules"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react/modules/open-channel-settings",
+      "title": "Open channel settings",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react",
+      "section": "modules"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react/modules/overview",
+      "title": "Overview",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react",
+      "section": "modules"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react/modules/thread",
+      "title": "Thread",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react",
+      "section": "modules"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react/theme-and-style-resources/color-resources",
+      "title": "Color resources",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react",
+      "section": "theme-and-style-resources"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react/theme-and-style-resources/localization-resources/date",
+      "title": "Date",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react",
+      "section": "theme-and-style-resources"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react/theme-and-style-resources/localization-resources/text",
+      "title": "Text",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react",
+      "section": "theme-and-style-resources"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react/theme-and-style-resources/theme-resources",
+      "title": "Theme resources",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react",
+      "section": "theme-and-style-resources"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react/tutorial/apply-brand-color",
+      "title": "Apply brand color",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react",
+      "section": "tutorial"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react/tutorial/customize-channel-list",
+      "title": "Customize channel list",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react",
+      "section": "tutorial"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react/tutorial/customize-channel-settings",
+      "title": "Customize channel settings",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react",
+      "section": "tutorial"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react/tutorial/customize-message-menu",
+      "title": "Customize message menu",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react",
+      "section": "tutorial"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/react/tutorial/integrate-with-existing-app",
+      "title": "Integrate UIKit to an existing app",
+      "product": "uikit",
+      "platform": "js",
+      "docsPlatform": "react",
+      "section": "tutorial"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/swiftui/apple-privacy-manifest",
+      "title": "Apple privacy manifest",
+      "product": "uikit",
+      "platform": "ios",
+      "docsPlatform": "swiftui",
+      "section": "apple-privacy-manifest"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/swiftui/dashboard-configuration/overview",
+      "title": "Overview",
+      "product": "uikit",
+      "platform": "ios",
+      "docsPlatform": "swiftui",
+      "section": "dashboard-configuration"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/swiftui/dashboard-configuration/ui-config-in-dashboard",
+      "title": "UI config in dashboard",
+      "product": "uikit",
+      "platform": "ios",
+      "docsPlatform": "swiftui",
+      "section": "dashboard-configuration"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/swiftui/essentials/authentication",
+      "title": "Authentication",
+      "product": "uikit",
+      "platform": "ios",
+      "docsPlatform": "swiftui",
+      "section": "essentials"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/swiftui/essentials/global-classes",
+      "title": "Global classes",
+      "product": "uikit",
+      "platform": "ios",
+      "docsPlatform": "swiftui",
+      "section": "essentials"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/swiftui/essentials/installation",
+      "title": "Installation",
+      "product": "uikit",
+      "platform": "ios",
+      "docsPlatform": "swiftui",
+      "section": "essentials"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/swiftui/essentials/push-notifications",
+      "title": "Push notifications",
+      "product": "uikit",
+      "platform": "ios",
+      "docsPlatform": "swiftui",
+      "section": "essentials"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/swiftui/group-channel-views/chat-in-group-channel",
+      "title": "Chat in a channel",
+      "product": "uikit",
+      "platform": "ios",
+      "docsPlatform": "swiftui",
+      "section": "group-channel-views"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/swiftui/group-channel-views/configure-group-channel-settings",
+      "title": "Channel settings",
+      "product": "uikit",
+      "platform": "ios",
+      "docsPlatform": "swiftui",
+      "section": "group-channel-views"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/swiftui/group-channel-views/create-group-channel",
+      "title": "Create a channel",
+      "product": "uikit",
+      "platform": "ios",
+      "docsPlatform": "swiftui",
+      "section": "group-channel-views"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/swiftui/group-channel-views/invite-users",
+      "title": "Invite users",
+      "product": "uikit",
+      "platform": "ios",
+      "docsPlatform": "swiftui",
+      "section": "group-channel-views"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/swiftui/group-channel-views/list-channels",
+      "title": "List channels",
+      "product": "uikit",
+      "platform": "ios",
+      "docsPlatform": "swiftui",
+      "section": "group-channel-views"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/swiftui/group-channel-views/list-members-in-a-group-channel",
+      "title": "List members",
+      "product": "uikit",
+      "platform": "ios",
+      "docsPlatform": "swiftui",
+      "section": "group-channel-views"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/swiftui/group-channel-views/moderate-group-channels-and-members",
+      "title": "Moderation",
+      "product": "uikit",
+      "platform": "ios",
+      "docsPlatform": "swiftui",
+      "section": "group-channel-views"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/swiftui/group-channel-views/overview",
+      "title": "Overview",
+      "product": "uikit",
+      "platform": "ios",
+      "docsPlatform": "swiftui",
+      "section": "group-channel-views"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/swiftui/group-channel-views/register-members-as-operators",
+      "title": "Register operators",
+      "product": "uikit",
+      "platform": "ios",
+      "docsPlatform": "swiftui",
+      "section": "group-channel-views"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/swiftui/group-channel-views/reply-to-messages",
+      "title": "Reply to messages",
+      "product": "uikit",
+      "platform": "ios",
+      "docsPlatform": "swiftui",
+      "section": "group-channel-views"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/swiftui/group-channel-views/search-messages",
+      "title": "Search messages",
+      "product": "uikit",
+      "platform": "ios",
+      "docsPlatform": "swiftui",
+      "section": "group-channel-views"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/swiftui/open-channel-views/chat-in-open-channel",
+      "title": "Chat in a channel",
+      "product": "uikit",
+      "platform": "ios",
+      "docsPlatform": "swiftui",
+      "section": "open-channel-views"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/swiftui/open-channel-views/configure-open-channel-settings",
+      "title": "Channel settings",
+      "product": "uikit",
+      "platform": "ios",
+      "docsPlatform": "swiftui",
+      "section": "open-channel-views"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/swiftui/open-channel-views/create-open-channel",
+      "title": "Create a channel",
+      "product": "uikit",
+      "platform": "ios",
+      "docsPlatform": "swiftui",
+      "section": "open-channel-views"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/swiftui/open-channel-views/list-channels",
+      "title": "List channels",
+      "product": "uikit",
+      "platform": "ios",
+      "docsPlatform": "swiftui",
+      "section": "open-channel-views"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/swiftui/open-channel-views/list-participants-in-an-open-channel",
+      "title": "List participants",
+      "product": "uikit",
+      "platform": "ios",
+      "docsPlatform": "swiftui",
+      "section": "open-channel-views"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/swiftui/open-channel-views/moderate-open-channels-and-participants",
+      "title": "Moderation",
+      "product": "uikit",
+      "platform": "ios",
+      "docsPlatform": "swiftui",
+      "section": "open-channel-views"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/swiftui/open-channel-views/overview",
+      "title": "Overview",
+      "product": "uikit",
+      "platform": "ios",
+      "docsPlatform": "swiftui",
+      "section": "open-channel-views"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/swiftui/open-channel-views/register-participants-as-operators",
+      "title": "Register operators",
+      "product": "uikit",
+      "platform": "ios",
+      "docsPlatform": "swiftui",
+      "section": "open-channel-views"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/swiftui/theme-and-style-resources/color-resources",
+      "title": "Color resources",
+      "product": "uikit",
+      "platform": "ios",
+      "docsPlatform": "swiftui",
+      "section": "theme-and-style-resources"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/swiftui/theme-and-style-resources/font-resources",
+      "title": "Font resources",
+      "product": "uikit",
+      "platform": "ios",
+      "docsPlatform": "swiftui",
+      "section": "theme-and-style-resources"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/swiftui/theme-and-style-resources/icon-resources",
+      "title": "Icon resources",
+      "product": "uikit",
+      "platform": "ios",
+      "docsPlatform": "swiftui",
+      "section": "theme-and-style-resources"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/swiftui/theme-and-style-resources/string-resources",
+      "title": "String resources",
+      "product": "uikit",
+      "platform": "ios",
+      "docsPlatform": "swiftui",
+      "section": "theme-and-style-resources"
+    },
+    {
+      "url": "https://sendbird.com/docs/chat/uikit/v3/swiftui/theme-and-style-resources/theme-resources",
+      "title": "Theme resources",
+      "product": "uikit",
+      "platform": "ios",
+      "docsPlatform": "swiftui",
+      "section": "theme-and-style-resources"
+    }
+  ]
+}

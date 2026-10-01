@@ -1,0 +1,37 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/sendbird/sendbird-client-plugin/core/schemas/docs-index.schema.json",
+  "title": "Docs URL index",
+  "description": "core/docs-index.json — the sendbird.com/docs pages in this plugin's scope, trimmed from Sendbird's published llms.txt by tools/curated/build-docs-index.sh. Agents look a page up here and WebFetch that exact URL instead of constructing one. Entries are sorted by url and unique by url. platform is the plugin platform (ios / android / js, or common for product-level pages); docsPlatform is the platform segment of the docs URL (ios, android, javascript, react-native, ios-uikit, swiftui, android-view, jetpack-compose, react), null when the URL has none; section is the first path segment after docsPlatform, or the page slug when the page sits directly under it.",
+  "type": "object",
+  "required": ["schemaVersion", "sources", "count", "entries"],
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": { "type": "integer", "const": 1 },
+    "sources": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "pattern": "^https://sendbird\\.com/" }
+    },
+    "count": { "type": "integer", "minimum": 0 },
+    "entries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["url", "title", "product", "platform", "docsPlatform", "section"],
+        "additionalProperties": false,
+        "properties": {
+          "url": { "type": "string", "pattern": "^https://sendbird\\.com/docs/(chat/sdk/v4|chat/uikit/v3|calls/sdk/v1|desk/sdk/v1|live/sdk/v1|ai-agent)/[a-z0-9./_-]+$" },
+          "title": { "type": "string", "minLength": 1 },
+          "product": { "type": "string", "enum": ["chat", "uikit", "ai-agent", "desk", "calls", "live"] },
+          "platform": { "type": "string", "enum": ["ios", "android", "js", "common"] },
+          "docsPlatform": {
+            "type": ["string", "null"],
+            "enum": ["ios", "android", "javascript", "react-native", "ios-uikit", "swiftui", "android-view", "jetpack-compose", "react", null]
+          },
+          "section": { "type": "string", "minLength": 1 }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "_note": "Version watch (curated SDK-symbol freshness). source-freshness watches cited github.com docs; this watches PUBLISHED PACKAGE versions for curated docs whose symbols are cited against a binary/package interface (swiftinterface, .d.ts, maven/CHANGELOGS) that source-freshness cannot poll. For each entry: read the `last-verified-against: <stampToken> <version>` from the curated file, fetch the latest published version, flag STALE when latest > stamped. Public sources only (no token needed). Every coordinate below was probe-verified to resolve (2026-06-18). Extend by adding entries.",
+  "_note2": "All 5 products covered on all 3 platforms (15 product docs) + AI Agent's extra react-native/android entries = 21 entries. The Android Desk entry resolves as `com.sendbird.sdk:sendbird-desk-android-sdk` (confirmed via the Android compile harness, 2026-06-18).",
+  "entries": [
+    {
+      "file": "knowledge/curated/ios/products/chat.md",
+      "stampToken": "sendbird-chat-sdk-ios",
+      "type": "github-release",
+      "coord": "sendbird/sendbird-chat-sdk-ios"
+    },
+    {
+      "file": "knowledge/curated/android/products/chat.md",
+      "stampToken": "sendbird-chat-sdk-android",
+      "type": "maven",
+      "coord": "https://repo.sendbird.com/public/maven/com/sendbird/sdk/sendbird-chat/maven-metadata.xml"
+    },
+    {
+      "file": "knowledge/curated/js/products/chat.md",
+      "stampToken": "@sendbird/chat",
+      "type": "npm",
+      "coord": "@sendbird/chat"
+    },
+    {
+      "file": "knowledge/curated/ios/products/uikit.md",
+      "stampToken": "sendbird-uikit-ios",
+      "type": "github-release",
+      "coord": "sendbird/sendbird-uikit-ios-spm"
+    },
+    {
+      "file": "knowledge/curated/android/products/uikit.md",
+      "stampToken": "sendbird-uikit-android",
+      "type": "maven",
+      "coord": "https://repo.sendbird.com/public/maven/com/sendbird/sdk/uikit/maven-metadata.xml"
+    },
+    {
+      "file": "knowledge/curated/js/products/uikit.md",
+      "stampToken": "@sendbird/uikit-react",
+      "type": "npm",
+      "coord": "@sendbird/uikit-react"
+    },
+    {
+      "file": "knowledge/curated/js/products/uikit.md",
+      "stampToken": "@sendbird/uikit-react-native",
+      "type": "npm",
+      "coord": "@sendbird/uikit-react-native"
+    }
+  ]
+}

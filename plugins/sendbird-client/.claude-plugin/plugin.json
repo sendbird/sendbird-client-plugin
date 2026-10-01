@@ -1,0 +1,23 @@
+{
+  "name": "sendbird-client",
+  "displayName": "Sendbird Client",
+  "version": "0.1.5",
+  "description": "Sendbird integration helper for Chat (incl. auth/session) and UIKit across iOS, Android, and JS",
+  "author": {
+    "name": "Sendbird",
+    "url": "https://sendbird.com"
+  },
+  "homepage": "https://sendbird.com/docs",
+  "repository": "https://github.com/sendbird/sendbird-client-plugin",
+  "license": "Apache-2.0",
+  "keywords": [
+    "sendbird",
+    "chat",
+    "uikit",
+    "ios",
+    "android",
+    "javascript",
+    "react",
+    "react-native"
+  ]
+}
