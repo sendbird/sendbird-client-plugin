@@ -41,6 +41,20 @@ jobs:
           [ "$(gh pr view "$PR" --repo "$REPO" --json reviewDecision --jq .reviewDecision)" = APPROVED ] \
             || gh pr review "$PR" --repo "$REPO" --approve --body "Auto-approved: release PR, validate green." \
             || echo "approve failed (already reviewed or no approval rule) — continuing"
+      - name: Wait for every check
+        if: steps.pr.outputs.skip != '1'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR: ${{ steps.pr.outputs.number }}
+        run: |
+          # Organization checks (secret scan, code scan) finish after validate and send no
+          # workflow_run event, so wait for them here.
+          rc=0
+          timeout 15m gh pr checks "$PR" --repo "$REPO" --watch --fail-fast || rc=$?
+          case "$rc" in
+            0) echo "All checks green on PR #$PR." ;;
+            *) echo "Checks not green (rc=$rc) — leaving PR #$PR for a human."; exit 1 ;;
+          esac
       - name: Merge
         if: steps.pr.outputs.skip != '1'
         env:
