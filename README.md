@@ -52,6 +52,31 @@ claude plugin update sendbird-client@sendbird     # install the new version
 
 Then run `/reload-plugins` or restart Claude Code. See the Claude Code docs: [keep plugins updated](https://code.claude.com/docs/en/plugins/install#keep-plugins-updated) and [which marketplaces auto-update](https://code.claude.com/docs/en/plugins/loading#which-marketplaces-and-plugins-auto-update).
 
+## What runs on your machine
+
+This plugin runs inside Claude Code with your user account's permissions. Three kinds of code run locally:
+
+**Hooks** — shell scripts Claude Code runs automatically at the points below.
+
+| When | Script | What it reads | What it can change | Network |
+|---|---|---|---|---|
+| Session start | `hooks/welcome.sh` | plugin files | adds the plugin's rules to the model's context | none |
+| Before a file write or shell command | `hooks/credential-guard.sh` | the content or command about to run | blocks it if it contains a credential | none |
+| Before a file write | `hooks/source-claim-guard.sh` | the content about to be written, local files it cites | blocks Sendbird API code without a verifiable source | fetches the cited page if it is on `sendbird.com/docs` or `github.com/sendbird` |
+| After an agent finishes | `hooks/unsourced-claim-warn.sh` | the agent's reply | adds a warning when an API claim has no source | none |
+| When the answer ends | `hooks/final-answer-gate.sh` | the session transcript file (it checks only the last answer) | asks the model to revise an unsourced answer | same as `source-claim-guard.sh` |
+| Before and after an agent runs | `hooks/telemetry-start.sh`, `hooks/telemetry-end.sh` | agent name, duration, outcome | nothing; writes a local log only if you opted in | none |
+
+The two fetching hooks send a plain request for the cited public page (8-second timeout); nothing from your project or conversation is sent.
+
+**Scripts the agent runs** through Claude Code's Bash tool, under your Claude Code permission settings: project detection (reads manifests such as `package.json`, `Podfile`, `Package.swift`, `build.gradle`) and the installed-SDK reader (reads `node_modules/@sendbird/*`, `Pods/`, `.build/`, this project's Xcode `DerivedData`, and the Gradle cache).
+
+**Instructions** — skills and agents that tell Claude how to work. They change what Claude does in your session.
+
+**Files it writes:** `.sendbird-client/profile.json` and `.sendbird-client/cache/` in your project, and `~/.claude/sendbird-client-telemetry.jsonl` only when telemetry is on.
+
+**Updates replace all of the above.** When the plugin updates — by `claude plugin update` or through auto-update — the new version's hooks, scripts and instructions replace the old ones and run from your next session (or after `/reload-plugins`). With auto-update on, Claude Code installs new versions without asking for each one. Each release is a pull request in the plugin's repository that lists the changed paths; review them before turning auto-update on for `sendbird`.
+
 ## What is in this repository
 
 - `plugins/sendbird-client/` — the plugin (skills, agents, hooks, knowledge, templates)

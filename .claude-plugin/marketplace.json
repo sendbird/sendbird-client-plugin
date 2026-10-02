@@ -9,7 +9,7 @@
     {
       "name": "sendbird-client",
       "source": "./plugins/sendbird-client",
-      "description": "Sendbird integration helper for Chat (incl. auth/session) and UIKit across iOS, Android, and JS"
+      "description": "Sendbird integration helper for Chat (incl. auth/session) and UIKit across iOS, Android, and JS. Includes hooks that run local shell scripts; see README \"What runs on your machine\"."
     }
   ]
 }
