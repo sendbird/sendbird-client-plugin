@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-09-30T06:03:43Z",
+  "generatedAt": "2026-10-05T13:36:30Z",
   "count": 42,
   "entries": [
     {
@@ -390,7 +390,7 @@
       "platform": "js",
       "category": "products",
       "status": "populated",
-      "lastVerifiedAgainst": "@sendbird/uikit-react 3.19.1 / @sendbird/uikit-react-native 3.12.9",
+      "lastVerifiedAgainst": "@sendbird/uikit-react 3.19.1 / @sendbird/uikit-react-native 3.12.10",
       "verifiedDates": [
         "2026-09-29"
       ]
