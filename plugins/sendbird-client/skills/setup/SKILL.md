@@ -1,7 +1,7 @@
 ---
 name: setup
 description: Wizard to integrate Sendbird into the current project. Detects platform, host, package manager, lifecycle, and products; installs the SDK, inserts init + connect, and scaffolds a first screen. Use when starting a Sendbird integration or running first-time setup.
-argument-hint: "[--product chat|uikit]"
+argument-hint: "[--product chat|uikit|calls]"
 allowed-tools: Read, Edit, Write, Bash, Grep, Glob, WebFetch, Agent
 ---
 
@@ -23,8 +23,8 @@ Resolve the active product scope with `bash "${CLAUDE_PLUGIN_ROOT}/tools/detecti
 
 ## Wired knowledge (read these FIRST — populated and cited)
 - Install coordinates + packaging policy: `knowledge/curated/<platform>/setup.md` (iOS is SPM-first).
-- Product init/connect/send: `knowledge/curated/<platform>/products/<product>.md` (chat/uikit — all populated; iOS snippets build-verified, JS type-checked).
-- Verified splice code: `templates/ios/uikit/{chat/InitConnect.swift, uikit/SetupUIKit.swift}` and the matching `templates/android/view/...`, `templates/js/react/...`, `templates/js/react-native/...` files (each `_README.md` documents splice steps).
+- Product init/connect/send: `knowledge/curated/<platform>/products/<product>.md` (chat/uikit/calls — all populated; iOS snippets build-verified, JS type-checked).
+- Verified splice code: `templates/ios/uikit/{chat/InitConnect.swift, uikit/SetupUIKit.swift, calls/SetupCalls.swift}` and the matching `templates/android/view/...`, `templates/js/react/...`, `templates/js/react-native/...` files (each `_README.md` documents splice steps).
 - Non-native hosts (SwiftUI/Compose): the host `_README.md` under templates explains the verified interop path — no host-native SDK API exists; do not invent one.
 
 ## No-Fabrication

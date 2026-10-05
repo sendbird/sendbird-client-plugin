@@ -1,6 +1,6 @@
 # Sendbird Client plugin for Claude Code
 
-`sendbird-client` helps you add Sendbird Chat (including authentication and sessions) and UIKit to iOS (UIKit and SwiftUI), Android (View and Compose), and JavaScript (React and React Native) apps from Claude Code. It writes setup and feature code from verified documentation and templates, reads the Sendbird SDK you have installed, and never invents an API name.
+`sendbird-client` helps you add Sendbird Chat (including authentication and sessions), UIKit, and Calls to iOS (UIKit and SwiftUI), Android (View and Compose), and JavaScript (React and React Native) apps from Claude Code. It writes setup and feature code from verified documentation and templates, reads the Sendbird SDK you have installed, and never invents an API name.
 
 ## Install
 
