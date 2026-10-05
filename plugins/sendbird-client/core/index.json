@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "generatedAt": "2026-10-05T13:36:30Z",
-  "count": 42,
+  "count": 45,
   "entries": [
     {
       "file": "knowledge/curated/android/architecture.md",
@@ -86,6 +86,16 @@
       "verifiedDates": [
         "2026-09-22",
         "2026-09-30"
+      ]
+    },
+    {
+      "file": "knowledge/curated/android/products/calls.md",
+      "platform": "android",
+      "category": "products",
+      "status": "populated",
+      "lastVerifiedAgainst": "sendbird-calls-android 1.12.5",
+      "verifiedDates": [
+        "2026-06-09"
       ]
     },
     {
@@ -261,6 +271,16 @@
       ]
     },
     {
+      "file": "knowledge/curated/ios/products/calls.md",
+      "platform": "ios",
+      "category": "products",
+      "status": "populated",
+      "lastVerifiedAgainst": "sendbird-calls-ios 1.12.2",
+      "verifiedDates": [
+        "2026-06-09"
+      ]
+    },
+    {
       "file": "knowledge/curated/ios/products/chat.md",
       "platform": "ios",
       "category": "products",
@@ -372,6 +392,16 @@
       "verifiedDates": [
         "2026-09-22",
         "2026-09-30"
+      ]
+    },
+    {
+      "file": "knowledge/curated/js/products/calls.md",
+      "platform": "js",
+      "category": "products",
+      "status": "populated",
+      "lastVerifiedAgainst": "sendbird-calls 1.10.21 / @sendbird/calls-react-native 1.2.0",
+      "verifiedDates": [
+        "2026-06-09"
       ]
     },
     {

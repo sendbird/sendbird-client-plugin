@@ -43,6 +43,30 @@
       "stampToken": "@sendbird/uikit-react-native",
       "type": "npm",
       "coord": "@sendbird/uikit-react-native"
+    },
+    {
+      "file": "knowledge/curated/ios/products/calls.md",
+      "stampToken": "sendbird-calls-ios",
+      "type": "github-release",
+      "coord": "sendbird/sendbird-calls-ios"
+    },
+    {
+      "file": "knowledge/curated/android/products/calls.md",
+      "stampToken": "sendbird-calls-android",
+      "type": "maven",
+      "coord": "https://repo.sendbird.com/public/maven/com/sendbird/sdk/sendbird-calls/maven-metadata.xml"
+    },
+    {
+      "file": "knowledge/curated/js/products/calls.md",
+      "stampToken": "sendbird-calls",
+      "type": "npm",
+      "coord": "sendbird-calls"
+    },
+    {
+      "file": "knowledge/curated/js/products/calls.md",
+      "stampToken": "@sendbird/calls-react-native",
+      "type": "npm",
+      "coord": "@sendbird/calls-react-native"
     }
   ]
 }

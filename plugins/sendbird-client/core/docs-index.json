@@ -4,8 +4,392 @@
     "https://sendbird.com/docs/llms.txt",
     "https://sendbird.com/llms.txt (ai-agent pages only)"
   ],
-  "count": 664,
+  "count": 712,
   "entries": [
+    {
+      "url": "https://sendbird.com/docs/calls/sdk/v1/android/features/authentication",
+      "title": "Authentication",
+      "product": "calls",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "features"
+    },
+    {
+      "url": "https://sendbird.com/docs/calls/sdk/v1/android/features/direct-call",
+      "title": "Direct call",
+      "product": "calls",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "features"
+    },
+    {
+      "url": "https://sendbird.com/docs/calls/sdk/v1/android/features/error-codes",
+      "title": "Error codes",
+      "product": "calls",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "features"
+    },
+    {
+      "url": "https://sendbird.com/docs/calls/sdk/v1/android/features/group-call",
+      "title": "Group call",
+      "product": "calls",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "features"
+    },
+    {
+      "url": "https://sendbird.com/docs/calls/sdk/v1/android/features/logger",
+      "title": "Logger",
+      "product": "calls",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "features"
+    },
+    {
+      "url": "https://sendbird.com/docs/calls/sdk/v1/android/features/push-notifications",
+      "title": "Push notifications",
+      "product": "calls",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "features"
+    },
+    {
+      "url": "https://sendbird.com/docs/calls/sdk/v1/android/getting-started/calls-integration-to-chat",
+      "title": "Calls integration to Chat",
+      "product": "calls",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "getting-started"
+    },
+    {
+      "url": "https://sendbird.com/docs/calls/sdk/v1/android/getting-started/make-first-call",
+      "title": "Make first call",
+      "product": "calls",
+      "platform": "android",
+      "docsPlatform": "android",
+      "section": "getting-started"
+    },
+    {
+      "url": "https://sendbird.com/docs/calls/sdk/v1/ios/features/authentication",
+      "title": "Authentication",
+      "product": "calls",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "features"
+    },
+    {
+      "url": "https://sendbird.com/docs/calls/sdk/v1/ios/features/direct-call",
+      "title": "Direct call",
+      "product": "calls",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "features"
+    },
+    {
+      "url": "https://sendbird.com/docs/calls/sdk/v1/ios/features/direct-call-advanced",
+      "title": "Advanced",
+      "product": "calls",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "features"
+    },
+    {
+      "url": "https://sendbird.com/docs/calls/sdk/v1/ios/features/error-codes",
+      "title": "Error codes",
+      "product": "calls",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "features"
+    },
+    {
+      "url": "https://sendbird.com/docs/calls/sdk/v1/ios/features/group-call",
+      "title": "Group call",
+      "product": "calls",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "features"
+    },
+    {
+      "url": "https://sendbird.com/docs/calls/sdk/v1/ios/features/logger",
+      "title": "Logger",
+      "product": "calls",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "features"
+    },
+    {
+      "url": "https://sendbird.com/docs/calls/sdk/v1/ios/features/notifications",
+      "title": "Notifications",
+      "product": "calls",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "features"
+    },
+    {
+      "url": "https://sendbird.com/docs/calls/sdk/v1/ios/features/remote-notifications",
+      "title": "Remote notifications",
+      "product": "calls",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "features"
+    },
+    {
+      "url": "https://sendbird.com/docs/calls/sdk/v1/ios/features/voip-push-notifications",
+      "title": "VoIP notifications",
+      "product": "calls",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "features"
+    },
+    {
+      "url": "https://sendbird.com/docs/calls/sdk/v1/ios/getting-started/calls-integration-to-chat",
+      "title": "Calls integration to Chat",
+      "product": "calls",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "getting-started"
+    },
+    {
+      "url": "https://sendbird.com/docs/calls/sdk/v1/ios/getting-started/make-first-call",
+      "title": "Make first call",
+      "product": "calls",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "getting-started"
+    },
+    {
+      "url": "https://sendbird.com/docs/calls/sdk/v1/ios/privacy-policy/apple-privacy-manifest",
+      "title": "Apple privacy manifest",
+      "product": "calls",
+      "platform": "ios",
+      "docsPlatform": "ios",
+      "section": "privacy-policy"
+    },
+    {
+      "url": "https://sendbird.com/docs/calls/sdk/v1/javascript/features/authentication",
+      "title": "Authentication",
+      "product": "calls",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "features"
+    },
+    {
+      "url": "https://sendbird.com/docs/calls/sdk/v1/javascript/features/direct-call",
+      "title": "Direct call",
+      "product": "calls",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "features"
+    },
+    {
+      "url": "https://sendbird.com/docs/calls/sdk/v1/javascript/features/error-codes",
+      "title": "Error codes",
+      "product": "calls",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "features"
+    },
+    {
+      "url": "https://sendbird.com/docs/calls/sdk/v1/javascript/features/group-call",
+      "title": "Group call",
+      "product": "calls",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "features"
+    },
+    {
+      "url": "https://sendbird.com/docs/calls/sdk/v1/javascript/features/logger",
+      "title": "Logger",
+      "product": "calls",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "features"
+    },
+    {
+      "url": "https://sendbird.com/docs/calls/sdk/v1/javascript/getting-started/calls-integration-to-chat",
+      "title": "Calls integration to Chat",
+      "product": "calls",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "getting-started"
+    },
+    {
+      "url": "https://sendbird.com/docs/calls/sdk/v1/javascript/getting-started/make-first-call",
+      "title": "Make first call",
+      "product": "calls",
+      "platform": "js",
+      "docsPlatform": "javascript",
+      "section": "getting-started"
+    },
+    {
+      "url": "https://sendbird.com/docs/calls/sdk/v1/react-native/direct-call/adding-event-handler/add-an-event-handler",
+      "title": "Add an event handler",
+      "product": "calls",
+      "platform": "js",
+      "docsPlatform": "react-native",
+      "section": "direct-call"
+    },
+    {
+      "url": "https://sendbird.com/docs/calls/sdk/v1/react-native/direct-call/adding-push-notifications/add-push-notifications",
+      "title": "Add push notifications",
+      "product": "calls",
+      "platform": "js",
+      "docsPlatform": "react-native",
+      "section": "direct-call"
+    },
+    {
+      "url": "https://sendbird.com/docs/calls/sdk/v1/react-native/direct-call/ending-a-call/end-a-call",
+      "title": "End a call",
+      "product": "calls",
+      "platform": "js",
+      "docsPlatform": "react-native",
+      "section": "direct-call"
+    },
+    {
+      "url": "https://sendbird.com/docs/calls/sdk/v1/react-native/direct-call/making-a-call/make-a-call",
+      "title": "Make a call",
+      "product": "calls",
+      "platform": "js",
+      "docsPlatform": "react-native",
+      "section": "direct-call"
+    },
+    {
+      "url": "https://sendbird.com/docs/calls/sdk/v1/react-native/direct-call/managing-a-call/manage-a-call",
+      "title": "Manage a call",
+      "product": "calls",
+      "platform": "js",
+      "docsPlatform": "react-native",
+      "section": "direct-call"
+    },
+    {
+      "url": "https://sendbird.com/docs/calls/sdk/v1/react-native/direct-call/managing-a-call/select-video-output",
+      "title": "Select a video output",
+      "product": "calls",
+      "platform": "js",
+      "docsPlatform": "react-native",
+      "section": "direct-call"
+    },
+    {
+      "url": "https://sendbird.com/docs/calls/sdk/v1/react-native/direct-call/overview-direct-call",
+      "title": "Overview",
+      "product": "calls",
+      "platform": "js",
+      "docsPlatform": "react-native",
+      "section": "direct-call"
+    },
+    {
+      "url": "https://sendbird.com/docs/calls/sdk/v1/react-native/direct-call/receiving-a-call/receive-a-call",
+      "title": "Receive a call",
+      "product": "calls",
+      "platform": "js",
+      "docsPlatform": "react-native",
+      "section": "direct-call"
+    },
+    {
+      "url": "https://sendbird.com/docs/calls/sdk/v1/react-native/direct-call/receiving-a-call/receive-a-call-in-the-background",
+      "title": "Receive a call in the background",
+      "product": "calls",
+      "platform": "js",
+      "docsPlatform": "react-native",
+      "section": "direct-call"
+    },
+    {
+      "url": "https://sendbird.com/docs/calls/sdk/v1/react-native/direct-call/retrieving-call-history/retrieve-call-history",
+      "title": "Retrieve call history",
+      "product": "calls",
+      "platform": "js",
+      "docsPlatform": "react-native",
+      "section": "direct-call"
+    },
+    {
+      "url": "https://sendbird.com/docs/calls/sdk/v1/react-native/error-codes",
+      "title": "Error codes",
+      "product": "calls",
+      "platform": "js",
+      "docsPlatform": "react-native",
+      "section": "error-codes"
+    },
+    {
+      "url": "https://sendbird.com/docs/calls/sdk/v1/react-native/getting-started/authentication",
+      "title": "Authentication",
+      "product": "calls",
+      "platform": "js",
+      "docsPlatform": "react-native",
+      "section": "getting-started"
+    },
+    {
+      "url": "https://sendbird.com/docs/calls/sdk/v1/react-native/getting-started/make-first-call",
+      "title": "Make first call",
+      "product": "calls",
+      "platform": "js",
+      "docsPlatform": "react-native",
+      "section": "getting-started"
+    },
+    {
+      "url": "https://sendbird.com/docs/calls/sdk/v1/react-native/group-call/adding-event-handler/add-event-handler",
+      "title": "Add an event handler",
+      "product": "calls",
+      "platform": "js",
+      "docsPlatform": "react-native",
+      "section": "group-call"
+    },
+    {
+      "url": "https://sendbird.com/docs/calls/sdk/v1/react-native/group-call/creating-a-room/create-a-room",
+      "title": "Create a room",
+      "product": "calls",
+      "platform": "js",
+      "docsPlatform": "react-native",
+      "section": "group-call"
+    },
+    {
+      "url": "https://sendbird.com/docs/calls/sdk/v1/react-native/group-call/entering-and-exiting-a-room/enter-and-exit-a-room",
+      "title": "Enter and exit a room",
+      "product": "calls",
+      "platform": "js",
+      "docsPlatform": "react-native",
+      "section": "group-call"
+    },
+    {
+      "url": "https://sendbird.com/docs/calls/sdk/v1/react-native/group-call/managing-participants-actions/manage-participants-actions",
+      "title": "Manage participant's actions",
+      "product": "calls",
+      "platform": "js",
+      "docsPlatform": "react-native",
+      "section": "group-call"
+    },
+    {
+      "url": "https://sendbird.com/docs/calls/sdk/v1/react-native/group-call/overview-group-call",
+      "title": "Overview",
+      "product": "calls",
+      "platform": "js",
+      "docsPlatform": "react-native",
+      "section": "group-call"
+    },
+    {
+      "url": "https://sendbird.com/docs/calls/sdk/v1/react-native/group-call/reconnecting-to-media-stream/reconnect-to-media-stream",
+      "title": "Reconnect to media stream",
+      "product": "calls",
+      "platform": "js",
+      "docsPlatform": "react-native",
+      "section": "group-call"
+    },
+    {
+      "url": "https://sendbird.com/docs/calls/sdk/v1/react-native/group-call/retrieving-rooms/retrieve-a-list-of-rooms",
+      "title": "Retrieve a list of rooms",
+      "product": "calls",
+      "platform": "js",
+      "docsPlatform": "react-native",
+      "section": "group-call"
+    },
+    {
+      "url": "https://sendbird.com/docs/calls/sdk/v1/react-native/logger",
+      "title": "Logger",
+      "product": "calls",
+      "platform": "js",
+      "docsPlatform": "react-native",
+      "section": "logger"
+    },
     {
       "url": "https://sendbird.com/docs/chat/sdk/v4/android/application/authenticating-a-user/authentication",
       "title": "Authentication",

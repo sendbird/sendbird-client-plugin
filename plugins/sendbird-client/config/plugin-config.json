@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "0.1.13",
+  "schemaVersion": "0.1.14",
   "knowledge": {
     "mode": "runtime-fetch",
     "_modes": [
@@ -20,7 +20,8 @@
   },
   "products": [
     "chat",
-    "uikit"
+    "uikit",
+    "calls"
   ],
   "hosts": {
     "ios": [
@@ -53,17 +54,21 @@
       "uikitUikitHost": "sendbird/sendbird-uikit-ios",
       "uikitUikitHostSpm": "sendbird/sendbird-uikit-ios-spm",
       "uikitSwiftuiHost": "sendbird/sendbird-swiftui-ios",
+      "calls": "sendbird/sendbird-calls-ios",
       "distribution": "sendbird/sendbird-ios-distribution"
     },
     "android": {
       "chat": "sendbird/sendbird-chat-sdk-android",
       "uikit": "sendbird/sendbird-uikit-android",
-      "uikitComposeSample": "sendbird/sendbird-uikit-sample-android-jetpack-compose"
+      "uikitComposeSample": "sendbird/sendbird-uikit-sample-android-jetpack-compose",
+      "calls": "sendbird/sendbird-calls-android"
     },
     "js": {
       "chat": "sendbird/sendbird-chat-sdk-javascript",
       "uikitReact": "sendbird/sendbird-uikit-react",
       "uikitReactNative": "sendbird/sendbird-uikit-react-native",
+      "calls": "sendbird/sendbird-calls-javascript",
+      "callsRN": "sendbird/sendbird-calls-sdk-react-native",
       "platformSdk": "sendbird/sendbird-platform-sdk-javascript"
     },
     "common": {
