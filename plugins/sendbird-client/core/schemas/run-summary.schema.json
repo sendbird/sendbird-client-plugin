@@ -1,0 +1,102 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/sendbird/sendbird-client-plugin/core/schemas/run-summary.schema.json",
+  "title": "Run summary",
+  "description": "What a skill reports at the end of a non-interactive run (claude -p) so a caller such as a CLI can show the diff, build, and verify without reading prose. One JSON object per run.",
+  "type": "object",
+  "required": ["schemaVersion", "skill", "status", "changes", "manualSteps"],
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": { "const": "1" },
+    "skill": {
+      "description": "Skill name without namespace, e.g. setup, add-feature, push-setup.",
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*$"
+    },
+    "status": {
+      "description": "completed: work done. needs_input: stopped before changing anything that depends on an answer (see questions). failed: could not finish (see reason). declined: request is outside the plugin's scope or would need an unverifiable API (see reason).",
+      "enum": ["completed", "needs_input", "failed", "declined"]
+    },
+    "project": {
+      "description": "Detection facts the run acted on (core/commands/detect.sh subset).",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "platform": { "enum": ["ios", "android", "js", "unknown"] },
+        "host": { "type": "string" },
+        "products": { "type": "array", "items": { "type": "string" }, "uniqueItems": true }
+      }
+    },
+    "changes": {
+      "description": "Files the run created, modified, or deleted, relative to the project root.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["path", "action"],
+        "additionalProperties": false,
+        "properties": {
+          "path": { "type": "string", "minLength": 1, "not": { "pattern": "^(/|\\.\\./)" } },
+          "action": { "enum": ["created", "modified", "deleted"] },
+          "summary": { "type": "string" }
+        }
+      }
+    },
+    "steps": {
+      "description": "Ordered steps the skill went through.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["description", "status"],
+        "additionalProperties": false,
+        "properties": {
+          "description": { "type": "string", "minLength": 1 },
+          "status": { "enum": ["done", "skipped", "failed"] },
+          "detail": { "type": "string" }
+        }
+      }
+    },
+    "apis": {
+      "description": "Sendbird symbols the emitted code uses, each with the source that verifies it (curated doc path, customer SDK cache path, or public URL).",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["symbol", "source"],
+        "additionalProperties": false,
+        "properties": {
+          "symbol": { "type": "string", "minLength": 1 },
+          "source": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "manualSteps": {
+      "description": "What the customer still has to do by hand, e.g. set SENDBIRD_APP_ID or add a capability in Xcode. Empty when nothing is left.",
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "questions": {
+      "description": "What the caller must supply before re-running, when status is needs_input. Each id is the option a caller passes back.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "question"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+          "question": { "type": "string", "minLength": 1 },
+          "options": { "type": "array", "items": { "type": "string" }, "minItems": 1 }
+        }
+      }
+    },
+    "reason": {
+      "description": "Why the run failed or declined.",
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "allOf": [
+    { "if": { "properties": { "status": { "const": "needs_input" } } },
+      "then": { "required": ["questions"], "properties": { "questions": { "minItems": 1 }, "changes": { "maxItems": 0 } } } },
+    { "if": { "properties": { "status": { "enum": ["failed", "declined"] } } },
+      "then": { "required": ["reason"] } }
+  ]
+}
