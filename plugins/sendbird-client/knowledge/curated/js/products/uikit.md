@@ -1,8 +1,8 @@
-<!-- last-verified-against: @sendbird/uikit-react 3.19.1 / @sendbird/uikit-react-native 3.12.9 -->
+<!-- last-verified-against: @sendbird/uikit-react 3.19.1 / @sendbird/uikit-react-native 3.12.10 -->
 <!-- status: populated -->
 # js uikit
 
-> Verified against the public mirrors `sendbird/sendbird-uikit-react` and `sendbird/sendbird-uikit-react-native`. React and React Native templates type-checked against pinned and latest packages, including 3.19.1 and 3.12.9, on 2026-09-22. The GroupChannelList/GroupChannel prop sections below are verified against the `sendbird-uikit-react` repo's actual TSX source at `main` (verified 2026-09-29) — the package's own shipped `types/index.d.ts` is a stale/legacy export surface and does not match the runtime component tree, so props are cited from source, not from the package's `.d.ts`. Cite each symbol; do not add API from memory.
+> Verified against the public mirrors `sendbird/sendbird-uikit-react` and `sendbird/sendbird-uikit-react-native`. React and React Native templates type-checked against pinned and latest packages, including 3.19.1 and 3.12.9, on 2026-09-22. The `SendbirdUIKitContainer` props cited below (`appId`, `platformServices`) were re-verified against `@sendbird/uikit-react-native` 3.12.10 shipped types on 2026-10-05 (patch bump, no change to the cited surface). The GroupChannelList/GroupChannel prop sections below are verified against the `sendbird-uikit-react` repo's actual TSX source at `main` (verified 2026-09-29) — the package's own shipped `types/index.d.ts` is a stale/legacy export surface and does not match the runtime component tree, so props are cited from source, not from the package's `.d.ts`. Cite each symbol; do not add API from memory.
 > Sources: https://github.com/sendbird/sendbird-uikit-react , https://github.com/sendbird/sendbird-uikit-react-native
 
 ## React (`@sendbird/uikit-react`)
