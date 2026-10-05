@@ -16,7 +16,12 @@ if ! command -v javap >/dev/null || ! command -v jar >/dev/null || ! command -v 
 fi
 tmp="$(mktemp -d)"; trap 'rm -rf "$tmp"' EXIT
 unzip -p "$aar" classes.jar > "$tmp/classes.jar"
-classes="$(jar tf "$tmp/classes.jar" | grep '\.class$' | grep -vE '(^|/)(R|R\$.*|BuildConfig)\.class$|\$|/(internal|impl)/' | sed 's#/#.#g; s#\.class$##' || true)"
+# Nested classes stay (Params$Builder, SendbirdChat$Options, X$Companion); drop only R,
+# BuildConfig, anonymous classes ($1), when-mapping tables, synthetic lambdas ($$), and
+# internal/impl packages.
+classes="$(jar tf "$tmp/classes.jar" | grep '\.class$' \
+  | grep -vE '(^|/)(R|R\$.*|BuildConfig)\.class$|\$[0-9]+(\$|\.class$)|\$WhenMappings\.class$|\$\$|/(internal|impl)/' \
+  | sed 's#/#.#g; s#\.class$##' || true)"
 [ -n "$classes" ] || { render_empty "$title" "no public class candidates in $aar"; exit 0; }
 : > "$tmp/javap.txt"
 while IFS= read -r class_name; do
