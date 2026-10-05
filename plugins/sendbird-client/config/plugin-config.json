@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "0.1.9",
+  "schemaVersion": "0.1.10",
   "knowledge": {
     "mode": "runtime-fetch",
     "_modes": [
@@ -69,7 +69,7 @@
     "common": {
       "releaseAutomation": "sendbird/release-automation-action"
     },
-    "_note": "Public mirror repos only. Private SoT mappings live in the private companion repo's CI config and never appear here.",
+    "_note": "Public mirror repos only. Non-public sources never appear here.",
     "knownArchived": []
   },
   "docs": {
