@@ -18,7 +18,7 @@ For a code task, resolve the platform agent with `bash "${CLAUDE_PLUGIN_ROOT}/to
 
 Resolve the active product scope with `bash "${CLAUDE_PLUGIN_ROOT}/tools/detection/resolve-products.sh" <project-dir>`. If the requested product is not in that list, say it is out of the configured scope and stop instead of writing code for it.
 
-If one unknown value changes the code that would be emitted, ask one focused question. Do not guess. If it does not change the output, state the limitation and continue.
+If one unknown value changes the code that would be emitted, ask one focused question. Do not guess. If it does not change the output, state the limitation and continue. In a non-interactive run, do not ask; follow section 7.
 
 ## 2. Build an evidence ledger
 
@@ -71,3 +71,16 @@ Return:
 3. verification commands and their actual results
 4. symbol-to-source evidence
 5. anything not verified and the exact next action
+
+## 7. Non-interactive runs
+
+When `SENDBIRD_NONINTERACTIVE` is set (for example `SENDBIRD_NONINTERACTIVE=1 claude -p ...` in CI or a script), nobody can answer a question during the run.
+
+- Never ask the user a question, and never end the answer with one.
+- For a value you would otherwise ask for, use the environment (`SENDBIRD_APP_ID`, `SENDBIRD_PRODUCTS`, `SENDBIRD_REGION`) or the project's `profile.json` when they have it.
+- Adding the Sendbird dependency that the request clearly needs is allowed: the request is the consent. List it under `changes`.
+- If a value that changes the emitted code is still unknown, change nothing and stop with `status: "needs_input"` and one `questions` entry per missing value. Examples: the host is `hybrid` or `unknown`; there is no App ID for setup; the request assumes an integration the project does not have, such as theming UIKit screens in an app without UIKit.
+- End the final answer with one fenced `json` block that validates against `core/schemas/run-summary.schema.json`. Paths in `changes` are relative to the project root.
+
+The caller answers by running again with the value in the environment or in the prompt (for example `host: swiftui`).
+

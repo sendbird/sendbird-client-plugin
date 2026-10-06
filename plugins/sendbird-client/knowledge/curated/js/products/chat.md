@@ -158,6 +158,29 @@ sb.addUserEventHandler('unread-badge', new UserEventHandler({
 - (source: `@sendbird/chat` 4.22.13 `lib/__definition.d.ts`: `GroupChannel` 1872 — `unreadMessageCount` 1903; `GroupChannelModule` 6149 — `getTotalUnreadMessageCount(params?)` 6275; `SendbirdChat` 4230 — `addUserEventHandler(key, handler)` 4414; `UserEventHandler` 5239, `UserEventHandlerParams` 5243 — `onTotalUnreadMessageCountChanged` 5249 — verified 2026-10-05)
 - The total counts unread messages in all group channels the user joined; it can be filtered by channel custom type or super-channel type. (source: https://sendbird.com/docs/chat/sdk/v4/javascript/message/retrieving-unread-counts-in-a-group-channel/unread-messages-in-all-channels — reviewed 2026-10-05)
 
+## Moderation (ban, mute, block, freeze)
+```ts
+import { Role } from '@sendbird/chat';
+import { MutedState } from '@sendbird/chat/groupChannel';
+
+// Operators only: check `channel.myRole === Role.OPERATOR` first. `channel` is a GroupChannel.
+await channel.banUserWithUserId('USER_ID', 600, 'Spam');   // removed for 600 s; -1 bans indefinitely
+await channel.unbanUserWithUserId('USER_ID');
+await channel.muteUserWithUserId('USER_ID', 600);          // stays in the channel, cannot send
+await channel.unmuteUserWithUserId('USER_ID');
+await channel.freeze();                                     // while frozen, only operators can send
+await channel.unfreeze();
+const muted = channel.myMutedState === MutedState.MUTED;
+
+// Any user: block another user
+await sb.blockUser('USER_ID');      // accepts a User or a userId
+await sb.unblockUser('USER_ID');
+```
+- Ban, mute, and freeze are operator actions. A banned user is removed from the channel and can rejoin after the set time; a muted user stays in the channel and can read but not send. While a group channel is frozen only operators can send; open channels are frozen only through the Chat API or the dashboard, not the SDK. (source: https://sendbird.com/docs/chat/sdk/v4/javascript/user/moderating-a-user/ban-and-unban-a-user, https://sendbird.com/docs/chat/sdk/v4/javascript/user/moderating-a-user/mute-and-unmute-a-user, https://sendbird.com/docs/chat/sdk/v4/javascript/channel/moderating-a-channel/freeze-and-unfreeze-a-channel — reviewed 2026-10-06)
+- Blocking: in a 1-to-1 group channel the blocker no longer receives the blocked user's messages or notifications; in a 1-to-N channel messages may still show depending on the chat UI, and by default notifications from the blocked user are not delivered (Sendbird can turn them on for individual channels on request). (source: https://sendbird.com/docs/chat/sdk/v4/javascript/user/moderating-a-user/block-and-unblock-other-members — reviewed 2026-10-06)
+- Events: `onUserBanned`, `onUserMuted`, `onChannelFrozen`, `onChannelUnfrozen` on the `GroupChannelHandler` (see "Handle incoming events without a collection"). Lists: `sb.createBlockedUserListQuery()`. `banUser(user, ...)` and `muteUser(user, ...)` take a `User` instead of an id.
+- (source: `@sendbird/chat` 4.22.13 `lib/__definition.d.ts`: `BaseChannel` — `isFrozen` 187, `muteUser` 353, `muteUserWithUserId` 360, `unmuteUserWithUserId` 371, `banUser` 381 (JSDoc: pass -1 to ban indefinitely), `banUserWithUserId` 388, `unbanUserWithUserId` 399; `GroupChannel` — `myRole` 1925, `myMutedState` 1927, `freeze` 2061, `unfreeze` 2062; `MutedState` 3189; `Role` 4127; `SendbirdChat` — `createBlockedUserListQuery` 4450, `blockUser` 4661, `unblockUser` 4672; `BaseChannelHandlerParams` — `onUserMuted` 5395, `onUserBanned` 5399, `onChannelFrozen` 5407, `onChannelUnfrozen` 5409; no `@deprecated` on any of them; `Role` is exported from `@sendbird/chat`, `MutedState` from `@sendbird/chat/groupChannel` — verified 2026-10-06)
+
 ## Handle incoming events without a collection
 For events outside an active collection (e.g. a badge count on another screen), register a channel handler:
 ```ts

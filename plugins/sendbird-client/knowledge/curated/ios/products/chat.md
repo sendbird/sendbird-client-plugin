@@ -174,6 +174,35 @@ SendbirdChat.addUserEventDelegate(observer, identifier: "unread-badge")   // kee
 - (source: `SendbirdChatSDK.swiftinterface` (4.39.11): `GroupChannel` line 2826, `unreadMessageCount` 2870; `SendbirdChat` 6295 — `static getTotalUnreadMessageCount(completionHandler:)` 6494, `getTotalUnreadMessageCountWithFeed(params:completionHandler:)` 6498, deprecated `(params:completionHandler:)` 6496-6497; `CountHandler` 3643, `UnreadMessageCountHandler` 3644; `GroupChannelTotalUnreadMessageCountParams` 3306; unavailable `GroupChannel` overloads 2814-2823; `UserEventDelegate` 7160 — `didUpdateTotalUnreadMessageCount(unreadMessageCount:)` 7168; `SendbirdChat.addUserEventDelegate(_:identifier:)` 6387 (deprecated `add(_:identifier:)` 6385-6386) — verified 2026-10-05)
 - The total counts unread messages in all group channels the user joined; it can be filtered by channel custom type or super-channel type. (source: https://sendbird.com/docs/chat/sdk/v4/ios/message/retrieving-unread-count-in-a-group-channel/unread-messages-in-all-channels — reviewed 2026-10-05)
 
+## Moderation (ban, mute, block, freeze)
+```swift
+// Operators only: check `channel.myRole == .operator` first. `channel` is a GroupChannel.
+channel.banUser(userId: "USER_ID", seconds: 600, description: "Spam") { error in
+    guard error == nil else { return }   // banned: removed from the channel for 600 s
+}
+channel.unbanUser(userId: "USER_ID") { error in }
+channel.muteUser(userId: "USER_ID", seconds: 600, description: nil) { error in }   // stays in the channel, cannot send
+channel.unmuteUser(userId: "USER_ID") { error in }
+channel.freeze { error in }     // while frozen, only operators can send
+channel.unfreeze { error in }
+
+// Any user: block another user
+SendbirdChat.blockUserId("USER_ID") { blockedUser, error in }
+SendbirdChat.unblockUserId("USER_ID") { error in }
+
+// Moderation events (register with SendbirdChat.addChannelDelegate(_:identifier:))
+final class ModerationObserver: NSObject, GroupChannelDelegate {
+    func channel(_ channel: BaseChannel, userWasBanned user: RestrictedUser) {}
+    func channel(_ channel: BaseChannel, userWasMuted user: RestrictedUser) {}
+    func channelWasFrozen(_ channel: BaseChannel) {}
+    func channelWasUnfrozen(_ channel: BaseChannel) {}
+}
+```
+- Ban, mute, and freeze are operator actions. A banned user is removed from the channel and can rejoin after `seconds`; a muted user stays in the channel and can read but not send. While a group channel is frozen only operators can send; open channels are frozen only through the Chat API or the dashboard, not the SDK. (source: https://sendbird.com/docs/chat/sdk/v4/ios/user/moderating-a-user/ban-and-unban-a-user, https://sendbird.com/docs/chat/sdk/v4/ios/user/moderating-a-user/mute-and-unmute-a-user, https://sendbird.com/docs/chat/sdk/v4/ios/channel/moderating-a-channel/freeze-and-unfreeze-a-channel — reviewed 2026-10-06)
+- Blocking: in a 1-to-1 group channel the blocker no longer receives the blocked user's messages or notifications; in a 1-to-N channel messages may still show depending on the chat UI, and by default notifications from the blocked user are not delivered (Sendbird can turn them on for individual channels on request). (source: https://sendbird.com/docs/chat/sdk/v4/ios/user/moderating-a-user/block-and-unblock-other-members — reviewed 2026-10-06)
+- State and lists: `channel.isFrozen`, `channel.myMutedState` (`.muted` / `.unmuted`), `channel.createBannedUserListQuery()` and `channel.createMutedUserListQuery()` (both return an optional), `SendbirdChat.createBlockedUserListQuery()`. The `User`-taking overloads (`banUser(_:seconds:description:completionHandler:)`, `blockUser(_:completionHandler:)`, ...) do the same thing.
+- (source: `SendbirdChatSDK.swiftinterface` (4.39.11): `BaseChannel` extension 482 — `banUser(userId:seconds:description:completionHandler:)` 621, `unbanUser(userId:completionHandler:)` 627, `muteUser(userId:seconds:description:completionHandler:)` 654, `unmuteUser(userId:completionHandler:)` 657, `createBannedUserListQuery()` 699, `createMutedUserListQuery()` 711, `isFrozen` 819; `BaseChannelDelegate` 867 — `userWasMuted` 871, `userWasBanned` 873, `channelWasFrozen`/`channelWasUnfrozen` 875-876; `GroupChannel` extension 2597 — `freeze(completionHandler:)` 2651, `unfreeze(completionHandler:)` 2654, `myRole` 2903, `myMutedState` 2906; `SendbirdChat` 6295 — `createBlockedUserListQuery()` 6361, `addChannelDelegate(_:identifier:)` 6376, `blockUserId(_:completionHandler:)` 6574, `unblockUserId(_:completionHandler:)` 6580; `Role` 7274, `MutedState` 7287; none marked deprecated — verified 2026-10-06)
+
 ## Handle incoming events without a collection
 ```swift
 SendbirdChat.addChannelDelegate(self, identifier: "UNIQUE_HANDLER_ID")
