@@ -16,3 +16,16 @@ ALWAYS-ON rules for ANY Sendbird answer (even without a skill):
 - iOS packaging is SPM-first: never introduce CocoaPods into a fresh/SPM project; sendbird-chat-ios-spm is legacy v3 — v4 lives in sendbird-chat-sdk-ios.
 - Never state pricing/quota figures or "latest" version numbers from memory; tokens are secrets — never hard-code or log them.
 EOF
+# Non-interactive runs (claude -p, CI, scripts): the caller cannot answer a question mid-run.
+case "${SENDBIRD_NONINTERACTIVE:-}" in
+  1|true|TRUE|yes)
+    cat <<EOF2
+
+NON-INTERACTIVE MODE (SENDBIRD_NONINTERACTIVE is set): nobody can answer a question in this run. Follow $ROOT/docs/AGENT_CONTRACT.md section 7:
+- Never ask the user a question and never end with one.
+- A value the skill would ask for: use the environment or the project's profile.json if it has it. Adding the Sendbird dependency that the request clearly needs is allowed — the request is the consent; list it under changes.
+- If a value that changes the emitted code is still unknown (hybrid or unknown host, no App ID, a request that assumes an integration the project does not have), change nothing and stop with status needs_input and one entry in questions per missing value.
+- End the final answer with one fenced json block that validates against $ROOT/core/schemas/run-summary.schema.json.
+EOF2
+    ;;
+esac

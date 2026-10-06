@@ -163,6 +163,35 @@ SendbirdChat.addUserEventHandler("unread-badge", object : UserEventHandler() {
 - (source: `sendbird-chat` 4.36.5 AAR, `javap -public`: `GroupChannel.getUnreadMessageCount()`; `SendbirdChat.getTotalUnreadMessageCount(UnreadMessageCountHandler)` and `(GroupChannelTotalUnreadMessageCountParams, UnreadMessageCountHandler)`; `UnreadMessageCountHandler.onResult(int, int, SendbirdException)`; `CountHandler` overloads carry `Deprecated` ("As of 4.6.0, replaced with … UnreadMessageCountHandler", `javap -v`); `SendbirdChat.addUserEventHandler(String, UserEventHandler)`; abstract `UserEventHandler.onFriendsDiscovered(List<User>)`, `onTotalUnreadMessageCountChanged(UnreadMessageCount)` — verified 2026-10-05; example compiled with Kotlin against `sendbird-chat` 4.36.5 on 2026-10-06)
 - The total counts unread messages in all group channels the user joined; it can be filtered by channel custom type or super-channel type. (source: https://sendbird.com/docs/chat/sdk/v4/android/message/retrieving-unread-count-in-a-group-channel/unread-messages-in-all-channels — reviewed 2026-10-05)
 
+## Moderation (ban, mute, block, freeze)
+```kotlin
+// Operators only: check `groupChannel.myRole == Role.OPERATOR` first.
+// Note the order: description comes BEFORE seconds on Android.
+groupChannel.banUser("USER_ID", "Spam", 600) { e -> if (e != null) return@banUser }  // removed for 600 s
+groupChannel.unbanUser("USER_ID") { e -> }
+groupChannel.muteUser("USER_ID", "Flooding", 600) { e -> }   // stays in the channel, cannot send
+groupChannel.unmuteUser("USER_ID") { e -> }
+groupChannel.freeze { e -> }     // while frozen, only operators can send
+groupChannel.unfreeze { e -> }
+
+// Any user: block another user
+SendbirdChat.blockUser("USER_ID") { blockedUser, e -> }
+SendbirdChat.unblockUser("USER_ID") { e -> }
+
+// Moderation events
+SendbirdChat.addChannelHandler("moderation", object : GroupChannelHandler() {
+    override fun onMessageReceived(channel: BaseChannel, message: BaseMessage) {}   // abstract, required
+    override fun onUserBanned(channel: BaseChannel, restrictedUser: RestrictedUser) {}
+    override fun onUserMuted(channel: BaseChannel, restrictedUser: RestrictedUser) {}
+    override fun onChannelFrozen(channel: BaseChannel) {}
+    override fun onChannelUnfrozen(channel: BaseChannel) {}
+})
+```
+- Ban, mute, and freeze are operator actions. A banned user is removed from the channel and can rejoin after the set time; a muted user stays in the channel and can read but not send. While a group channel is frozen only operators can send; open channels are frozen only through the Chat API or the dashboard, not the SDK. (source: https://sendbird.com/docs/chat/sdk/v4/android/user/moderating-a-user/ban-and-unban-a-user, https://sendbird.com/docs/chat/sdk/v4/android/user/moderating-a-user/mute-and-unmute-a-user, https://sendbird.com/docs/chat/sdk/v4/android/channel/moderating-a-channel/freeze-and-unfreeze-a-channel — reviewed 2026-10-06)
+- Blocking: in a 1-to-1 group channel the blocker no longer receives the blocked user's messages or notifications; in a 1-to-N channel messages may still show depending on the chat UI, and by default notifications from the blocked user are not delivered (Sendbird can turn them on for individual channels on request). (source: https://sendbird.com/docs/chat/sdk/v4/android/user/moderating-a-user/block-and-unblock-other-members — reviewed 2026-10-06)
+- State and lists: `isFrozen`, `myMutedState` (`MutedState.MUTED` / `UNMUTED`), `SendbirdChat.createBlockedUserListQuery(BlockedUserListQueryParams)`. `muteUser(userId, handler)` without a time also exists; every call has a `User`-taking overload.
+- (source: `sendbird-chat` 4.36.5 AAR, `javap -public`: `GroupChannel.banUser(String, String, int, CompletionHandler)`, `unbanUser(String, CompletionHandler)`, `muteUser(String, String, int, CompletionHandler)` and `muteUser(String, CompletionHandler)`, `unmuteUser(String, CompletionHandler)`, `freeze(CompletionHandler)`, `unfreeze(CompletionHandler)`, `getMyRole()`, `getMyMutedState()`; `BaseChannel.isFrozen()`; `SendbirdChat.blockUser(String, UserHandler)`, `unblockUser(String, CompletionHandler)`, `createBlockedUserListQuery(BlockedUserListQueryParams)`; `BaseChannelHandler.onUserBanned`, `onUserMuted`, `onChannelFrozen`, `onChannelUnfrozen`; `Role.OPERATOR`, `MutedState.MUTED`; no `Deprecated` attribute on any of them (`javap -v`) — verified 2026-10-06)
+
 ## Handle incoming events without a collection
 ```kotlin
 SendbirdChat.addChannelHandler("UNIQUE_HANDLER_ID", object : GroupChannelHandler() {
