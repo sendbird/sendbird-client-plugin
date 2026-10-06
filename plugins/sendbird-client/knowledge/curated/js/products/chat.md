@@ -138,6 +138,26 @@ await sb.groupChannel.markAsReadAll();       // every joined group channel
 ```
 `markAsRead()` is on `GroupChannel`; `markAsReadAll()` / `markAsReadWithChannelUrls(urls)` are on the `GroupChannelModule` (`sb.groupChannel`). (source: `@sendbird/chat@4.22.13` lib/__definition.d.ts:2129 `markAsRead`, :6332 `markAsReadAll`, :6337 `markAsReadWithChannelUrls`)
 
+## Unread counts
+```ts
+import { UserEventHandler } from '@sendbird/chat';
+
+// one channel
+const unread: number = channel.unreadMessageCount;
+
+// every group channel the user joined
+const total = await sb.groupChannel.getTotalUnreadMessageCount();
+
+// live updates: register once after connect
+sb.addUserEventHandler('unread-badge', new UserEventHandler({
+  onTotalUnreadMessageCountChanged: (counts) => { /* refresh badge */ },
+}));
+```
+- Filters: `getTotalUnreadMessageCount(params?: TotalUnreadMessageCountParams)` (custom types, super-channel type). `channel.markAsRead()` (see Read status) resets a channel's count.
+- The per-custom-type counts in this event (`countByCustomTypes`) are turned off by default; the app owner must contact Sendbird to enable them. (source: https://sendbird.com/docs/chat/sdk/v4/javascript/event-handler/managing-user-event-handlers/add-or-remove-a-user-event-handler — reviewed 2026-10-06)
+- (source: `@sendbird/chat` 4.22.13 `lib/__definition.d.ts`: `GroupChannel` 1872 — `unreadMessageCount` 1903; `GroupChannelModule` 6149 — `getTotalUnreadMessageCount(params?)` 6275; `SendbirdChat` 4230 — `addUserEventHandler(key, handler)` 4414; `UserEventHandler` 5239, `UserEventHandlerParams` 5243 — `onTotalUnreadMessageCountChanged` 5249 — verified 2026-10-05)
+- The total counts unread messages in all group channels the user joined; it can be filtered by channel custom type or super-channel type. (source: https://sendbird.com/docs/chat/sdk/v4/javascript/message/retrieving-unread-counts-in-a-group-channel/unread-messages-in-all-channels — reviewed 2026-10-05)
+
 ## Handle incoming events without a collection
 For events outside an active collection (e.g. a badge count on another screen), register a channel handler:
 ```ts
