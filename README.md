@@ -15,6 +15,16 @@ Then, in your project:
 /sendbird-client:setup --product chat
 ```
 
+To use it for one run without installing (for example from a script or another CLI), download
+`sendbird-client-<version>.zip` from [Releases](https://github.com/sendbird/sendbird-client-plugin/releases)
+and pass it to Claude Code; nothing is installed and the next session does not load it:
+
+```bash
+claude -p --plugin-dir sendbird-client-<version>.zip "/sendbird-client:setup --product chat"
+```
+
+Each release lists the zip's sha256.
+
 ## Keeping it up to date
 
 An installed plugin is a snapshot: Claude Code replaces it only when the plugin version changes, and every change that ships to users bumps the patch version. Third-party marketplaces such as `sendbird` do not auto-update by default. Turn it on in any one of these places:
