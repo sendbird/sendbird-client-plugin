@@ -151,6 +151,29 @@ SendbirdChat.markAsReadAll(completionHandler: nil)          // every joined grou
 ```
 `markAsRead(completionHandler:)` is on `GroupChannel`; `SendbirdChat.markAsReadAll(completionHandler:)` / `SendbirdChat.markAsRead(channelURLs:completionHandler:)` are static. (source: `SendbirdChatSDK.swiftinterface` (4.39.10) line 2699 `GroupChannel.markAsRead`, line 6506 `markAsReadAll`, line 6509 `markAsRead(channelURLs:)`)
 
+## Unread counts
+```swift
+// one channel
+let unread: UInt = channel.unreadMessageCount
+
+// every group channel the user joined
+SendbirdChat.getTotalUnreadMessageCount { count, error in
+    guard error == nil else { return }
+    // show `count` on the app badge or tab
+}
+
+// live updates: register once after connect
+final class UnreadObserver: NSObject, UserEventDelegate {
+    func didUpdateTotalUnreadMessageCount(unreadMessageCount: UnreadMessageCount) { /* refresh badge */ }
+}
+SendbirdChat.addUserEventDelegate(observer, identifier: "unread-badge")   // keep `observer` alive
+```
+- Filters: `SendbirdChat.getTotalUnreadMessageCountWithFeed(params:completionHandler:)` with `GroupChannelTotalUnreadMessageCountParams` (`channelCustomTypesFilter`, `superChannelFilter`); its handler gets group and feed channel counts. `markAsRead(completionHandler:)` (see Read status) resets a channel's count.
+- Do not use `GroupChannel.getTotalUnreadMessageCount(...)` (marked `@available(*, unavailable)` on the line above each declaration; does not compile), `SendbirdChat.getTotalUnreadMessageCount(params:completionHandler:)` (deprecated in 4.6.0), or `SendbirdChat.add(_:identifier:)` (deprecated in 4.0.12).
+- The per-custom-type counts in this event (`totalCountByCustomType` in the docs) are turned off by default; the app owner must contact Sendbird to enable them. (source: https://sendbird.com/docs/chat/sdk/v4/ios/event-delegate/managing-user-event-delegates/add-or-remove-a-user-event-delegate — reviewed 2026-10-06)
+- (source: `SendbirdChatSDK.swiftinterface` (4.39.11): `GroupChannel` line 2826, `unreadMessageCount` 2870; `SendbirdChat` 6295 — `static getTotalUnreadMessageCount(completionHandler:)` 6494, `getTotalUnreadMessageCountWithFeed(params:completionHandler:)` 6498, deprecated `(params:completionHandler:)` 6496-6497; `CountHandler` 3643, `UnreadMessageCountHandler` 3644; `GroupChannelTotalUnreadMessageCountParams` 3306; unavailable `GroupChannel` overloads 2814-2823; `UserEventDelegate` 7160 — `didUpdateTotalUnreadMessageCount(unreadMessageCount:)` 7168; `SendbirdChat.addUserEventDelegate(_:identifier:)` 6387 (deprecated `add(_:identifier:)` 6385-6386) — verified 2026-10-05)
+- The total counts unread messages in all group channels the user joined; it can be filtered by channel custom type or super-channel type. (source: https://sendbird.com/docs/chat/sdk/v4/ios/message/retrieving-unread-count-in-a-group-channel/unread-messages-in-all-channels — reviewed 2026-10-05)
+
 ## Handle incoming events without a collection
 ```swift
 SendbirdChat.addChannelDelegate(self, identifier: "UNIQUE_HANDLER_ID")
