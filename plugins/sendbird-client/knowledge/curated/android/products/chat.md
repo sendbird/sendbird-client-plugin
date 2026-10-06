@@ -147,20 +147,20 @@ SendbirdChat.markAsReadAll { e -> }                // every joined group channel
 val unread: Int = channel.unreadMessageCount
 
 // every group channel the user joined
-SendbirdChat.getTotalUnreadMessageCount(UnreadMessageCountHandler { groupChannelCount, feedChannelCount, e ->
+SendbirdChat.getTotalUnreadMessageCount(handler = UnreadMessageCountHandler { groupChannelCount, feedChannelCount, e ->
     if (e != null) return@UnreadMessageCountHandler
     // show `groupChannelCount` on the app badge or tab
 })
 
 // live updates: register once after connect
 SendbirdChat.addUserEventHandler("unread-badge", object : UserEventHandler() {
-    override fun onFriendsDiscovered(friends: List<User>) {}
+    override fun onFriendsDiscovered(users: List<User>) {}
     override fun onTotalUnreadMessageCountChanged(unreadMessageCount: UnreadMessageCount) { /* refresh badge */ }
 })
 ```
-- `UserEventHandler` is abstract: `onFriendsDiscovered` must be implemented. Filters: the `getTotalUnreadMessageCount(GroupChannelTotalUnreadMessageCountParams, UnreadMessageCountHandler)` overload. The `CountHandler` overloads and `onTotalUnreadMessageCountChanged(Int, Map)` are deprecated since 4.6.0. `markAsRead(handler)` (see Read status) resets a channel's count.
+- `getTotalUnreadMessageCount` takes `params` first (with a default), so pass the handler by name: `handler = ...`. A positional handler does not compile. `UserEventHandler` is abstract: `onFriendsDiscovered` must be implemented. Filters: the `getTotalUnreadMessageCount(GroupChannelTotalUnreadMessageCountParams, UnreadMessageCountHandler)` overload. The `CountHandler` overloads and `onTotalUnreadMessageCountChanged(Int, Map)` are deprecated since 4.6.0. `markAsRead(handler)` (see Read status) resets a channel's count.
 - `onTotalUnreadMessageCountChanged()` is turned off by default; the app owner must contact Sendbird to enable it. Until then, do not rely on it for the badge: refresh with `getTotalUnreadMessageCount` instead (for example after `markAsRead` or when the screen resumes). (source: https://sendbird.com/docs/chat/sdk/v4/android/event-handler/managing-user-event-handlers/add-or-remove-a-user-event-handler — reviewed 2026-10-06)
-- (source: `sendbird-chat` 4.36.5 AAR, `javap -public`: `GroupChannel.getUnreadMessageCount()`; `SendbirdChat.getTotalUnreadMessageCount(UnreadMessageCountHandler)` and `(GroupChannelTotalUnreadMessageCountParams, UnreadMessageCountHandler)`; `UnreadMessageCountHandler.onResult(int, int, SendbirdException)`; `CountHandler` overloads carry `Deprecated` ("As of 4.6.0, replaced with … UnreadMessageCountHandler", `javap -v`); `SendbirdChat.addUserEventHandler(String, UserEventHandler)`; abstract `UserEventHandler.onFriendsDiscovered(List<User>)`, `onTotalUnreadMessageCountChanged(UnreadMessageCount)` — verified 2026-10-05)
+- (source: `sendbird-chat` 4.36.5 AAR, `javap -public`: `GroupChannel.getUnreadMessageCount()`; `SendbirdChat.getTotalUnreadMessageCount(UnreadMessageCountHandler)` and `(GroupChannelTotalUnreadMessageCountParams, UnreadMessageCountHandler)`; `UnreadMessageCountHandler.onResult(int, int, SendbirdException)`; `CountHandler` overloads carry `Deprecated` ("As of 4.6.0, replaced with … UnreadMessageCountHandler", `javap -v`); `SendbirdChat.addUserEventHandler(String, UserEventHandler)`; abstract `UserEventHandler.onFriendsDiscovered(List<User>)`, `onTotalUnreadMessageCountChanged(UnreadMessageCount)` — verified 2026-10-05; example compiled with Kotlin against `sendbird-chat` 4.36.5 on 2026-10-06)
 - The total counts unread messages in all group channels the user joined; it can be filtered by channel custom type or super-channel type. (source: https://sendbird.com/docs/chat/sdk/v4/android/message/retrieving-unread-count-in-a-group-channel/unread-messages-in-all-channels — reviewed 2026-10-05)
 
 ## Handle incoming events without a collection
