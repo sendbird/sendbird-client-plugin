@@ -78,6 +78,18 @@ channel.sendFileMessage({ file, fileName: file.name, mimeType: file.type })
 ```
 `FileMessageCreateParams` accepts `file` (or `fileUrl` for a pre-uploaded file), `fileName`, `fileSize`, `mimeType`, `thumbnailSizes`, `message`. (source: `@sendbird/chat@4.22.13` lib/__definition.d.ts:1790 `FileMessageCreateParams`, `BaseChannel.sendFileMessage` :472)
 
+## Update and delete a message
+```ts
+const updated = await channel.updateUserMessage(message.messageId, { message: 'Edited text' });
+// replace the old message in your list with `updated`
+
+await channel.deleteMessage(message);
+```
+- File messages: `channel.updateFileMessage(messageId, params)` with `FileMessageUpdateParams`.
+- Other members are told through the channel handler: `onMessageUpdated(channel, message)` and `onMessageDeleted(channel, messageId)`.
+- (source: `@sendbird/chat` 4.22.13 `lib/__definition.d.ts`: `BaseChannel` line 169 — `updateUserMessage(messageId, params): Promise<UserMessage>` 454, `updateFileMessage` 510, `deleteMessage(message): Promise<void>` 545; `UserMessageUpdateParams.message` 5306-5308; `BaseMessage.messageId` 853; `BaseChannelHandlerParams` 5393 — `onMessageUpdated` 5428, `onMessageDeleted` 5430 — verified 2026-10-05)
+- A user can update or delete messages they sent; channel operators can update or delete any message in the channel. (source: https://sendbird.com/docs/chat/sdk/v4/javascript/message/managing-a-message/update-a-message, https://sendbird.com/docs/chat/sdk/v4/javascript/message/managing-a-message/delete-a-message — reviewed 2026-10-05)
+
 ## List and receive messages
 For a message list screen, use a message collection (handles both the initial page and live updates):
 ```ts

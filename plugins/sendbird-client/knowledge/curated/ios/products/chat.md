@@ -85,6 +85,23 @@ channel.sendFileMessage(params: FileMessageCreateParams(file: fileData)) { messa
 ```
 `FileMessageCreateParams` also takes `fileURL` (pre-uploaded), `fileName`, `thumbnailSizes`, `mimeType`. (source: `SendbirdChatSDK.swiftinterface` (4.39.10) line 2418 `FileMessageCreateParams`, `BaseChannel.sendFileMessage(params:completionHandler:)` line 513)
 
+## Update and delete a message
+```swift
+let params = UserMessageUpdateParams(message: "Edited text")
+channel.updateUserMessage(messageId: message.messageId, params: params) { updated, error in
+    guard let updated = updated, error == nil else { return }
+    // replace the old message in your list with `updated`
+}
+
+channel.deleteMessage(message) { error in
+    guard error == nil else { return }
+}
+```
+- File messages: `updateFileMessage(messageId:params:completionHandler:)` with `FileMessageUpdateParams`. Deleting by id: `deleteMessage(messageId:completionHandler:)`.
+- Other members are told through `BaseChannelDelegate`: `channel(_:didUpdate:)` and `channel(_:messageWasDeleted:)` (the deleted message's id).
+- (source: `SendbirdChatSDK.swiftinterface` (4.39.11) `extension BaseChannel` line 482: `updateUserMessage(messageId:params:completionHandler:)` 506, `updateFileMessage` 524, `deleteMessage(_:completionHandler:)` 542, `deleteMessage(messageId:completionHandler:)` 545; `UserMessageUpdateParams.init(message:)` 7219; `BaseMessage.messageId` 989; `BaseChannelDelegate` 867, `channel(_:didUpdate:)` 869, `channel(_:messageWasDeleted:)` 879 — verified 2026-10-05)
+- A user can update or delete messages they sent; channel operators can update or delete any message in the channel. (source: https://sendbird.com/docs/chat/sdk/v4/ios/message/managing-a-message/update-a-message, https://sendbird.com/docs/chat/sdk/v4/ios/message/managing-a-message/delete-a-message — reviewed 2026-10-05)
+
 ## List and receive messages
 For a message list screen, use a `MessageCollection`:
 ```swift

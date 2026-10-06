@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-10-05T13:36:30Z",
+  "generatedAt": "2026-10-05T15:19:33Z",
   "count": 45,
   "entries": [
     {
@@ -106,7 +106,8 @@
       "lastVerifiedAgainst": "sendbird-chat-sdk-android 4.36.5",
       "verifiedDates": [
         "2026-06-09",
-        "2026-09-29"
+        "2026-09-29",
+        "2026-10-05"
       ]
     },
     {
@@ -287,7 +288,8 @@
       "status": "populated",
       "lastVerifiedAgainst": "sendbird-chat-sdk-ios 4.39.11",
       "verifiedDates": [
-        "2026-09-29"
+        "2026-09-29",
+        "2026-10-05"
       ]
     },
     {
@@ -412,7 +414,8 @@
       "lastVerifiedAgainst": "@sendbird/chat 4.22.13",
       "verifiedDates": [
         "2026-06-09",
-        "2026-09-29"
+        "2026-09-29",
+        "2026-10-05"
       ]
     },
     {
