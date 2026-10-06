@@ -77,6 +77,22 @@ channel.sendFileMessage(FileMessageCreateParams(file)) { message, e -> }
 ```
 `FileMessageCreateParams` also has constructors taking a file URL `String` or a `FileMessage` (for resend). (source: `sendbird-chat-sdk-android` 4.36.5 AAR, `javap` on `com.sendbird.android.params.FileMessageCreateParams`, `BaseChannel.sendFileMessage`)
 
+## Update and delete a message
+```kotlin
+channel.updateUserMessage(message.messageId, UserMessageUpdateParams("Edited text")) { updated, e ->
+    if (e != null) { /* handle error */ return@updateUserMessage }
+    // replace the old message in your list with `updated`
+}
+
+channel.deleteMessage(message) { e ->
+    if (e != null) { /* handle error */ }
+}
+```
+- File messages: `updateFileMessage(messageId, FileMessageUpdateParams, FileMessageHandler)`. Deleting by id: `deleteMessage(messageId, CompletionHandler)`.
+- Other members are told through the channel handler: `onMessageUpdated(channel, message)` and `onMessageDeleted(channel, messageId)`.
+- (source: `sendbird-chat` 4.36.5 AAR, `javap -public`: `com.sendbird.android.channel.BaseChannel` `updateUserMessage(long, UserMessageUpdateParams, UserMessageHandler)`, `updateFileMessage(long, FileMessageUpdateParams, FileMessageHandler)`, `deleteMessage(BaseMessage, CompletionHandler)`, `deleteMessage(long, CompletionHandler)`; `UserMessageUpdateParams(String)`; `BaseMessage.getMessageId()`; `BaseChannelHandler.onMessageUpdated(BaseChannel, BaseMessage)`, `onMessageDeleted(BaseChannel, long)` — verified 2026-10-05)
+- A user can update or delete messages they sent; channel operators can update or delete any message in the channel. (source: https://sendbird.com/docs/chat/sdk/v4/android/message/managing-a-message/update-a-message, https://sendbird.com/docs/chat/sdk/v4/android/message/managing-a-message/delete-a-message — reviewed 2026-10-05)
+
 ## List and receive messages
 For a message list screen, use a `MessageCollection`:
 ```kotlin
