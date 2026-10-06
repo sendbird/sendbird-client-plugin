@@ -1,0 +1,39 @@
+name: release-zip
+# When main gets a new plugin version, publish GitHub release v<version> with the plugin as
+# a .zip (plugin root at the zip root) and its sha256. A caller can then load the plugin for
+# one run without a marketplace install: claude -p --plugin-dir sendbird-client-<version>.zip
+# Re-runs for an existing version do nothing; a release is never replaced.
+on:
+  push:
+    branches: [main]
+    paths:
+      - plugins/sendbird-client/**
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  release:
+    if: github.repository == 'sendbird/sendbird-client-plugin'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Zip the plugin and publish the release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          v="$(jq -r .version plugins/sendbird-client/.claude-plugin/plugin.json)"
+          case "$v" in ''|null) echo "no version in plugin.json" >&2; exit 1 ;; esac
+          tag="v$v"
+          if gh release view "$tag" >/dev/null 2>&1; then echo "release $tag already exists — nothing to do"; exit 0; fi
+          zip_name="sendbird-client-$v.zip"
+          ( cd plugins/sendbird-client && zip -qrX "$RUNNER_TEMP/$zip_name" . )
+          ( cd "$RUNNER_TEMP" && sha256sum "$zip_name" > "$zip_name.sha256" )
+          unzip -l "$RUNNER_TEMP/$zip_name" | grep -q ' \.claude-plugin/plugin\.json$' \
+            || { echo "zip has no .claude-plugin/plugin.json at its root" >&2; exit 1; }
+          notes="$(printf 'sendbird-client %s\n\nLoad for one run without installing:\n\n    claude -p --plugin-dir %s "..."\n\nsha256: %s\n' \
+            "$v" "$zip_name" "$(cut -d' ' -f1 "$RUNNER_TEMP/$zip_name.sha256")")"
+          gh release create "$tag" "$RUNNER_TEMP/$zip_name" "$RUNNER_TEMP/$zip_name.sha256" \
+            --title "sendbird-client $v" --notes "$notes" --target "$GITHUB_SHA"
