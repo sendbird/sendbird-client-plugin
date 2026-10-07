@@ -18,8 +18,20 @@
 - React UIKit needs the CSS import (`@sendbird/uikit-react/dist/index.css`).
 - React Native needs native modules / platform services per the quickstart (mmkv, safe-area, etc.).
 
+## App ID
+Read the App ID the way the project already reads config. Detection writes the mechanism to `tier2.appIdSource` in the project profile (`tools/detection/tier2/detect-app-id-source.sh`). Never tell the customer to install a bundler or env loader just to read the App ID. App IDs are not secret; access and session tokens are, and never go into any of these.
+
+| `appIdSource` | Variable in `.env` | Read in code | Source |
+|---|---|---|---|
+| `next` | `NEXT_PUBLIC_SENDBIRD_APP_ID` | `process.env.NEXT_PUBLIC_SENDBIRD_APP_ID` | https://nextjs.org/docs/app/guides/environment-variables |
+| `expo` | `EXPO_PUBLIC_SENDBIRD_APP_ID` | `process.env.EXPO_PUBLIC_SENDBIRD_APP_ID` (dot notation only; `process.env[key]` is not inlined) | https://docs.expo.dev/guides/environment-variables/ |
+| `vite` | `VITE_SENDBIRD_APP_ID` | `import.meta.env.VITE_SENDBIRD_APP_ID` | https://vite.dev/guide/env-and-mode |
+| `cra` | `REACT_APP_SENDBIRD_APP_ID` | `process.env.REACT_APP_SENDBIRD_APP_ID` | https://create-react-app.dev/docs/adding-custom-environment-variables/ |
+| `config` | none | export the value from a config module, e.g. `src/sendbird/config.ts` | no env loader was detected |
+
+All four loaders inline the value at build time, so a changed `.env` needs a rebuild (sources above). The templates show `process.env.NEXT_PUBLIC_SENDBIRD_APP_ID` or `process.env.SENDBIRD_APP_ID`; replace that line with the row for the detected `appIdSource`.
+
 ## Pitfalls
-- App ID from env (e.g. `NEXT_PUBLIC_SENDBIRD_APP_ID`); tokens are secrets.
 - React Native peers must be installed + linked; don't skip `platformServices`/`nativeModules`.
 
 ## Related

@@ -12,7 +12,7 @@ public sample + docs-validation (verified 2026-06-09). `SendbirdUIKitContainer`,
 ## How to splice
 1. Install the package + its peers/native modules per the quickstart (foundation, chat, RN modules).
 2. Build `platformServices` from the SDK's `createNative*Service` factories — follow the quickstart, do not guess.
-3. App ID from env — never hard-code; tokens are secrets.
+3. App ID read per the profile `tier2.appIdSource` (knowledge/curated/js/setup.md "App ID") — never ask the customer to add a bundler; tokens are secrets.
 
 ## Variations (see knowledge/curated/js/products/uikit.md, all cited)
 - Add UIKit fragments (e.g. group channel list) inside the container with navigation.

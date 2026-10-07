@@ -69,7 +69,7 @@
       }
     },
     "manualSteps": {
-      "description": "What the customer still has to do by hand, e.g. set SENDBIRD_APP_ID or add a capability in Xcode. Empty when nothing is left.",
+      "description": "Steps the customer still has to do because they need something the project does not contain (a token server, a dashboard setting, a signing key, a device run, a value nobody supplied). Each says what is missing. Work the plugin could do inside the project never goes here. Empty when nothing is left.",
       "type": "array",
       "items": { "type": "string", "minLength": 1 }
     },

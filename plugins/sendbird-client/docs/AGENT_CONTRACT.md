@@ -45,6 +45,15 @@ The source must contain the symbol or exact signature. A related page is not evi
 - Preserve the template's `source:` comment when code is copied so the write-boundary guard can validate it.
 - Limit edits to the requested product and the lifecycle code required to support it.
 
+### Finish what the project allows
+
+Do every step that can be done inside the customer project before reporting. A step goes to the customer only when it needs something outside the project.
+
+- Read the App ID through the mechanism the project already has. On JS, follow `tier2.appIdSource` and `knowledge/curated/js/setup.md` "App ID"; when it is `config`, write a config module. Never require a new bundler or env loader.
+- If the app already has a sign-out or logout function, disconnect there and clean up the handlers you added. Add a standalone helper only when no such function exists, and name the helper in the hand-off.
+- When the project already gets a Sendbird token from its own backend, register the session handler with that call. Without such a call, leave it out; do not add a placeholder endpoint.
+- A hand-off step is allowed only for work that needs something the project does not contain: a token-issuing server, a dashboard setting, a signing key or certificate, a device or simulator run, or a value nobody supplied. Each step says what is missing and why the plugin could not do it.
+
 ## 4. Verify the result
 
 Verification must exercise the edited path, not only inspect text:
@@ -70,7 +79,7 @@ Return:
 2. changed files and why each changed
 3. verification commands and their actual results
 4. symbol-to-source evidence
-5. anything not verified and the exact next action
+5. anything not verified and the exact next action; only steps that "Finish what the project allows" (section 3) could not complete
 
 ## 7. Non-interactive runs
 
