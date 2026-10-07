@@ -44,6 +44,7 @@ GroupChannel.createChannel(params: params) { channel, error in
 `GroupChannel.createChannel(params:completionHandler:)` is a class method; the completion is `GroupChannelHandler = (GroupChannel?, SBError?) -> Void`. (source: `SendbirdChatSDK.swiftinterface` (4.39.10) line 2602 `createChannel(params:completionHandler:)`, line 3624 `GroupChannelHandler` typealias)
 
 For a live-updating channel list, use a `GroupChannelCollection`:
+<!-- compile: receiver SnippetChannelListHost -->
 ```swift
 let query = GroupChannel.createMyGroupChannelListQuery { params in
     params.includeEmptyChannel = true
@@ -104,6 +105,7 @@ channel.deleteMessage(message) { error in
 
 ## List and receive messages
 For a message list screen, use a `MessageCollection`:
+<!-- compile: receiver SnippetMessageListHost -->
 ```swift
 let params = MessageListParams()
 let collection = SendbirdChat.createMessageCollection(channel: channel, startingPoint: Int64(Date().timeIntervalSince1970 * 1000), params: params)

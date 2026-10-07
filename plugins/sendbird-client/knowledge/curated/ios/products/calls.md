@@ -26,6 +26,7 @@ SendBirdCall.authenticate(with: params) { user, error in
 Register a VoIP push token with `SendBirdCall.registerVoIPPush(token:unique:)` for background/terminated incoming calls (needs an APNs cert on the dashboard). (source: sendbird-calls-ios README §authenticate; configure + authenticate build-verified)
 
 ## Handle incoming calls
+<!-- compile: receiver SnippetCallsDelegate -->
 ```swift
 SendBirdCall.addDelegate(self, identifier: UNIQUE_HANDLER_ID)   // SendBirdCallDelegate; didStartRinging(_:)
 ```
