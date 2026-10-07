@@ -36,16 +36,16 @@ To also react to connectivity, the docs combine this with `@react-native-communi
 
 ```tsx
 import { SendbirdUIKitContainer } from '@sendbird/uikit-react-native';
-import { MMKV } from 'react-native-mmkv';
+import { createMMKV } from 'react-native-mmkv';
 
-const mmkv = new MMKV(); // react-native-mmkv v2/v3 API, as in the docs
+const mmkv = createMMKV(); // react-native-mmkv v4; on v2/v3 (the docs' example) use `new MMKV()`
 
 <SendbirdUIKitContainer appId={APP_ID} chatOptions={{ localCacheStorage: mmkv }} platformServices={platformServices}>
   {/* app */}
 </SendbirdUIKitContainer>
 ```
 
-(source: https://sendbird.com/docs/chat/uikit/v3/react-native/essentials/send-first-message ; @sendbird/uikit-react-native@3.12.9 src/containers/SendbirdUIKitContainer.tsx:90,154-158 ; https://sendbird.com/docs/chat/sdk/v4/javascript/getting-started/environment-specific-implementation)
+(source: https://sendbird.com/docs/chat/uikit/v3/react-native/essentials/send-first-message ; @sendbird/uikit-react-native@3.12.9 src/containers/SendbirdUIKitContainer.tsx:90,154-158 ; https://sendbird.com/docs/chat/sdk/v4/javascript/getting-started/environment-specific-implementation ; react-native-mmkv@4.3.2 lib/index.d.ts:1,3 — `MMKV` is a type only in v4, `createMMKV()` makes the instance)
 
 ## Version compatibility checklist
 

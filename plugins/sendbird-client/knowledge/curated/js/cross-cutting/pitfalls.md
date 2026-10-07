@@ -33,6 +33,9 @@
 Keep a reference to the instance you connected and `await sb.disconnect()` on **that** instance before calling `SendbirdChat.init()` with another app ID. Don't look it up again through `SendbirdChat.instance` at cleanup time, because that getter returns whichever instance is currently active. Use 4.22.10 or later: earlier versions could return the instance still bound to the previous app when `init()` was called with a different `appId`. From 4.22.10, `init()` releases the previous app's instance itself.
 
 ```ts
+import SendbirdChat from '@sendbird/chat';
+import { GroupChannelModule, type SendbirdGroupChat } from '@sendbird/chat/groupChannel';
+
 let sb = SendbirdChat.init({ appId: APP_ID_A, modules: [new GroupChannelModule()] }) as SendbirdGroupChat;
 await sb.connect(USER_ID);
 

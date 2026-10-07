@@ -93,6 +93,8 @@ await channel.deleteMessage(message);
 ## List and receive messages
 For a message list screen, use a message collection (handles both the initial page and live updates):
 ```ts
+import { MessageFilter, MessageCollectionInitPolicy } from '@sendbird/chat/groupChannel';
+
 const collection = channel.createMessageCollection({
   filter: new MessageFilter(),
   startingPoint: Date.now(),

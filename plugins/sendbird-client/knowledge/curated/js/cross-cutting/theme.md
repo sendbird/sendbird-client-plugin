@@ -8,6 +8,8 @@
 
 ## Light / dark (React)
 ```tsx
+import App from '@sendbird/uikit-react/App';
+
 <App userId={userId} appId={appId} theme="dark" />   // "light" | "dark"
 ```
 The same `theme` prop works on `SendBirdProvider`. (source: sendbird.com/docs UIKit v3 react theme-and-style-resources)
