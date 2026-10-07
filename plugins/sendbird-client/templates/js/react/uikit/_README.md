@@ -11,7 +11,7 @@ Sendbird UIKit on React (`@sendbird/uikit-react`). From the public README (verif
 ## How to splice
 1. `npm i @sendbird/uikit-react @sendbird/chat`
 2. Render `<ChatApp />`; import `@sendbird/uikit-react/dist/index.css` (required, else unstyled).
-3. App ID/user from env — never hard-code; tokens are secrets.
+3. App ID/user read per the profile `tier2.appIdSource` (knowledge/curated/js/setup.md "App ID") — never ask the customer to add a bundler; tokens are secrets.
 
 ## Variations (see knowledge/curated/js/products/uikit.md, all cited)
 - Granular UI: `SendBirdProvider` + `ChannelList` + `Channel`.

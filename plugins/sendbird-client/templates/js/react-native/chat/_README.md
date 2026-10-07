@@ -11,7 +11,7 @@ From sendbird.com/docs (chat v4 javascript getting-started, verified 2026-06-09)
 ## How to splice
 1. `npm install @sendbird/chat`
 2. Import `sb` / call `connectUser(...)` after login.
-3. App ID from env — never hard-code; access/session tokens are secrets.
+3. App ID read per the profile `tier2.appIdSource` (knowledge/curated/js/setup.md "App ID") — never ask the customer to add a bundler; access/session tokens are secrets.
 
 ## Variations (see knowledge/curated/js/products/chat.md, all cited)
 - Open channels: add `OpenChannelModule` from `@sendbird/chat/openChannel`.

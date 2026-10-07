@@ -23,7 +23,7 @@ and the shipped `@sendbird/chat@4.22.13` type declarations (verified 2026-09-29)
 4. For a message list screen: `createMessageListCollection(channel)` then
    `initializeMessageList(collection, { onCache, onApi, onAdded, onUpdated, onDeleted })`
    (`GroupChannelMessages.tsx`). Call `dispose()` on unmount.
-5. App ID from env (e.g. `NEXT_PUBLIC_SENDBIRD_APP_ID`) — never hard-code; tokens are secrets.
+5. App ID read per the profile `tier2.appIdSource` (knowledge/curated/js/setup.md "App ID") — never ask the customer to add a bundler; tokens are secrets.
 
 ## Variations (see knowledge/curated/js/products/chat.md, all cited)
 - Open channels: `OpenChannelModule` from `@sendbird/chat/openChannel`.

@@ -40,6 +40,7 @@ products="$(bash "$DETECT/common/detect-products.sh" "$dir")"
 region="$(bash "$DETECT/common/detect-region.sh" "$dir")"
 push_provider="$(bash "$DETECT/tier2/detect-push-provider.sh" "$dir")"
 state_management="$(bash "$DETECT/tier2/detect-state-management.sh" "$dir")"
+app_id_source="$(bash "$DETECT/tier2/detect-app-id-source.sh" "$dir")"
 if [ "$products" = "unknown" ] || [ -z "$products" ]; then prod_json='[]';
 else prod_json="$(printf '%s' "$products" | jq -R 'split(",")')"; fi
 
@@ -47,13 +48,13 @@ jq -n \
   --arg platform "$platform" --arg host "$host" --arg pm "$pm" \
   --arg dep "$dep" --arg life "$life" --arg interop "$interop" \
   --arg present "$present" --arg ever "$ever" --arg region "$region" \
-  --arg pushProvider "$push_provider" --arg stateManagement "$state_management" \
+  --arg pushProvider "$push_provider" --arg stateManagement "$state_management" --arg appIdSource "$app_id_source" \
   --argjson products "$prod_json" \
   '{
      platform: $platform, host: $host, packageManager: $pm,
      deploymentTarget: $dep, lifecycle: $life, interop: $interop,
      existingIntegration: { present: ($present=="true"), version: $ever },
      products: $products, region: $region,
-     tier2: { pushProvider: $pushProvider, stateManagement: $stateManagement },
+     tier2: { pushProvider: $pushProvider, stateManagement: $stateManagement, appIdSource: $appIdSource },
      schemaVersion: 1, detectedAt: (now | todateiso8601)
    }'

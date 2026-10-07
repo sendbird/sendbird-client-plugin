@@ -94,11 +94,23 @@
         },
         "stateManagement": {
           "type": "string"
+        },
+        "appIdSource": {
+          "description": "JS only: how the App ID is read at runtime. See knowledge/curated/js/setup.md \"App ID\".",
+          "enum": [
+            "next",
+            "expo",
+            "vite",
+            "cra",
+            "config",
+            "n/a"
+          ]
         }
       },
       "required": [
         "pushProvider",
-        "stateManagement"
+        "stateManagement",
+        "appIdSource"
       ],
       "additionalProperties": false
     }
