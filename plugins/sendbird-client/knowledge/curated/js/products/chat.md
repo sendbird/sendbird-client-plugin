@@ -183,6 +183,69 @@ await sb.unblockUser('USER_ID');
 - Events: `onUserBanned`, `onUserMuted`, `onChannelFrozen`, `onChannelUnfrozen` on the `GroupChannelHandler` (see "Handle incoming events without a collection"). Lists: `sb.createBlockedUserListQuery()`. `banUser(user, ...)` and `muteUser(user, ...)` take a `User` instead of an id.
 - (source: `@sendbird/chat` 4.22.13 `lib/__definition.d.ts`: `BaseChannel` — `isFrozen` 187, `muteUser` 353, `muteUserWithUserId` 360, `unmuteUserWithUserId` 371, `banUser` 381 (JSDoc: pass -1 to ban indefinitely), `banUserWithUserId` 388, `unbanUserWithUserId` 399; `GroupChannel` — `myRole` 1925, `myMutedState` 1927, `freeze` 2061, `unfreeze` 2062; `MutedState` 3189; `Role` 4127; `SendbirdChat` — `createBlockedUserListQuery` 4450, `blockUser` 4661, `unblockUser` 4672; `BaseChannelHandlerParams` — `onUserMuted` 5395, `onUserBanned` 5399, `onChannelFrozen` 5407, `onChannelUnfrozen` 5409; no `@deprecated` on any of them; `Role` is exported from `@sendbird/chat`, `MutedState` from `@sendbird/chat/groupChannel` — verified 2026-10-06)
 
+## Invite members and manage operators
+```ts
+// `channel` is a GroupChannel
+await channel.inviteWithUserIds(['USER_ID']);
+await channel.addOperators(['USER_ID']);      // operators can mute, ban, and freeze
+await channel.removeOperators(['USER_ID']);   // stays a member
+```
+- A private group channel can be joined only by invitation from a member. Whether a new member sees messages sent before the invite is an app setting, on by default. (source: https://sendbird.com/docs/chat/sdk/v4/javascript/channel/inviting-users-to-a-group-channel/invite-users-as-members, https://sendbird.com/docs/chat/sdk/v4/javascript/channel/managing-operators/register-and-remove-operators — reviewed 2026-10-07)
+- (source: `@sendbird/chat` 4.22.13 `lib/__definition.d.ts`: `GroupChannel.inviteWithUserIds` 2065; `BaseChannel.addOperators` 246, `removeOperators` 251 — verified 2026-10-07)
+
+## Pinned messages
+```ts
+await channel.pinMessage(message.messageId);
+await channel.unpinMessage(message.messageId);
+const pinnedIds: number[] = channel.pinnedMessageIds;
+
+const pinnedQuery = channel.createPinnedMessageListQuery({ limit: 20 });
+const pinned = await pinnedQuery.next();                 // PinnedMessage[]
+const messages = pinned.map((p) => p.message);           // BaseMessage | null
+```
+- Up to 10 messages can be pinned per channel by default. Group channels support pinning except ephemeral channels; Supergroup channels do not. (source: https://sendbird.com/docs/chat/sdk/v4/javascript/message/managing-pinned-messages-in-group-channels/pin-a-message — reviewed 2026-10-07)
+- (source: `@sendbird/chat` 4.22.13 `lib/__definition.d.ts`: `BaseChannel.pinnedMessageIds` 160, `createPinnedMessageListQuery` 241, `pinMessage` 680, `unpinMessage` 685; `PinnedMessage.message` 3489; `PinnedMessageListQuery.next` 3523 — verified 2026-10-07)
+
+## Search messages
+```ts
+const searchQuery = sb.createMessageSearchQuery({
+  keyword: 'refund',
+  channelUrl: channel.url,   // omit to search every joined group channel
+  limit: 20,
+});
+const found = await searchQuery.next();   // call again while searchQuery.hasNext
+```
+- Searches group channel messages. Punctuation and special characters are ignored when indexing; `AND` and `OR` (uppercase) combine terms; a term shorter than two characters matches exactly only. (source: https://sendbird.com/docs/chat/sdk/v4/javascript/message/searching-messages-in-a-group-channel/search-messages-by-a-keyword — reviewed 2026-10-07)
+- (source: `@sendbird/chat` 4.22.13 `lib/__definition.d.ts`: `SendbirdChat.createMessageSearchQuery` 4447; `MessageSearchQueryParams.keyword` 3000, `channelUrl` 3012; `MessageSearchQuery.next` 2993 — verified 2026-10-07)
+
+## Filter the channel list by name
+```ts
+const listQuery = sb.groupChannel.createMyGroupChannelListQuery({ channelNameContainsFilter: 'support' });
+const channels = await listQuery.next();
+```
+- (source: https://sendbird.com/docs/chat/sdk/v4/javascript/channel/searching-channels/search-group-channels-by-name-url-or-other-filters — reviewed 2026-10-07; `@sendbird/chat` 4.22.13 `lib/__definition.d.ts`: `GroupChannelModule.createMyGroupChannelListQuery` 6147, `GroupChannelFilterParams.channelNameContainsFilter` 5797, `GroupChannelListQuery.next` 6129 — verified 2026-10-07)
+
+## Read receipts for a message
+```ts
+const unreadCount = channel.getUnreadMemberCount(message);   // 0 = every member has read it
+const readers = channel.getReadMembers(message);             // pass true to include the current user
+```
+- Re-render when `onUnreadMemberStatusUpdated` fires on the `GroupChannelHandler` (see "Handle incoming events without a collection"). (source: https://sendbird.com/docs/chat/sdk/v4/javascript/message/managing-read-status-in-a-group-channel/get-read-status — reviewed 2026-10-07; `@sendbird/chat` 4.22.13 `lib/__definition.d.ts`: `GroupChannel.getUnreadMemberCount` 1997, `getReadMembers` 2012, `getReadStatus` 2025; `GroupChannelHandlerParams.onUnreadMemberStatusUpdated` 5875 — verified 2026-10-07)
+
+## Connection state and reconnection
+```ts
+import { ConnectionHandler } from '@sendbird/chat';
+
+sb.addConnectionHandler('connection-banner', new ConnectionHandler({
+  onReconnectStarted: () => { /* show "Reconnecting..." */ },
+  onReconnectSucceeded: () => { /* hide the banner and refresh */ },
+  onReconnectFailed: () => { /* offer a manual retry */ },
+}));
+// sb.removeConnectionHandler('connection-banner') on cleanup
+```
+- The SDK reconnects by itself after a network drop; these callbacks only report it. `onConnected` and `onDisconnected` are also available. (source: https://sendbird.com/docs/chat/sdk/v4/javascript/event-handler/managing-connection-event-handlers/add-or-remove-a-connection-event-handler — reviewed 2026-10-07)
+- (source: `@sendbird/chat` 4.22.13 `lib/__definition.d.ts`: `SendbirdChat.addConnectionHandler` 4414, `removeConnectionHandler` 4419; `ConnectionHandler` 1305 — `onReconnectStarted` 1313, `onReconnectSucceeded` 1315, `onReconnectFailed` 1317 — verified 2026-10-07)
+
 ## Handle incoming events without a collection
 For events outside an active collection (e.g. a badge count on another screen), register a channel handler:
 ```ts

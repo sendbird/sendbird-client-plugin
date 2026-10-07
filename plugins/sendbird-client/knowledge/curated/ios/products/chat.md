@@ -205,6 +205,72 @@ final class ModerationObserver: NSObject, GroupChannelDelegate {
 - State and lists: `channel.isFrozen`, `channel.myMutedState` (`.muted` / `.unmuted`), `channel.createBannedUserListQuery()` and `channel.createMutedUserListQuery()` (both return an optional), `SendbirdChat.createBlockedUserListQuery()`. The `User`-taking overloads (`banUser(_:seconds:description:completionHandler:)`, `blockUser(_:completionHandler:)`, ...) do the same thing.
 - (source: `SendbirdChatSDK.swiftinterface` (4.39.11): `BaseChannel` extension 482 — `banUser(userId:seconds:description:completionHandler:)` 621, `unbanUser(userId:completionHandler:)` 627, `muteUser(userId:seconds:description:completionHandler:)` 654, `unmuteUser(userId:completionHandler:)` 657, `createBannedUserListQuery()` 699, `createMutedUserListQuery()` 711, `isFrozen` 819; `BaseChannelDelegate` 867 — `userWasMuted` 871, `userWasBanned` 873, `channelWasFrozen`/`channelWasUnfrozen` 875-876; `GroupChannel` extension 2597 — `freeze(completionHandler:)` 2651, `unfreeze(completionHandler:)` 2654, `myRole` 2903, `myMutedState` 2906; `SendbirdChat` 6295 — `createBlockedUserListQuery()` 6361, `addChannelDelegate(_:identifier:)` 6376, `blockUserId(_:completionHandler:)` 6574, `unblockUserId(_:completionHandler:)` 6580; `Role` 7274, `MutedState` 7287; none marked deprecated — verified 2026-10-06)
 
+## Invite members and manage operators
+```swift
+// `channel` is a GroupChannel
+channel.inviteUserIds(["USER_ID"]) { error in }
+channel.addOperators(userIds: ["USER_ID"]) { error in }     // operators can mute, ban, and freeze
+channel.removeOperators(userIds: ["USER_ID"]) { error in }  // stays a member
+```
+- A private group channel can be joined only by invitation from a member. Whether a new member sees messages sent before the invite is an app setting, on by default. (source: https://sendbird.com/docs/chat/sdk/v4/ios/channel/inviting-users-to-a-group-channel/invite-users-as-members, https://sendbird.com/docs/chat/sdk/v4/ios/channel/managing-operators/register-and-remove-operators — reviewed 2026-10-07)
+- (source: `SendbirdChatSDK.swiftinterface` (4.39.11): `GroupChannel.inviteUserIds(_:completionHandler:)` 2666; `BaseChannel.addOperators(userIds:completionHandler:)` 663, `removeOperators(userIds:completionHandler:)` 666 — verified 2026-10-07)
+
+## Pinned messages
+```swift
+channel.pinMessage(messageId: message.messageId) { error in }
+channel.unpinMessage(messageId: message.messageId) { error in }
+let pinnedIds = channel.pinnedMessageIds          // [Int64]?
+
+let pinnedQuery = channel.createPinnedMessageListQuery { params in params.limit = 20 }
+pinnedQuery?.loadNextPage { pinned, error in
+    let messages = pinned?.compactMap { $0.message } ?? []   // PinnedMessage.message
+}
+```
+- Up to 10 messages can be pinned per channel by default. Group channels support pinning except ephemeral channels; Supergroup channels do not. (source: https://sendbird.com/docs/chat/sdk/v4/ios/message/managing-pinned-messages-in-group-channels/pin-a-message — reviewed 2026-10-07)
+- (source: `SendbirdChatSDK.swiftinterface` (4.39.11): `BaseChannel.pinMessage(messageId:completionHandler:)` 551, `unpinMessage(messageId:completionHandler:)` 554, `createPinnedMessageListQuery(paramsBuilder:)` 755, `pinnedMessageIds` 825; `PinnedMessage.message` 5180; `PinnedMessageListQuery.loadNextPage(completionHandler:)` 5219; `PinnedMessageListQueryParams.limit` 5226 — verified 2026-10-07)
+
+## Search messages
+```swift
+let searchQuery = SendbirdChat.createMessageSearchQuery { params in
+    params.keyword = "refund"
+    params.channelURL = channel.channelURL   // omit to search every joined group channel
+    params.limit = 20
+}
+searchQuery.loadNextPage { messages, error in }  // call again while searchQuery.hasNext
+```
+- Searches group channel messages. Punctuation and special characters are ignored when indexing; `AND` and `OR` (uppercase) combine terms; a term shorter than two characters matches exactly only. (source: https://sendbird.com/docs/chat/sdk/v4/ios/message/searching-messages-in-a-group-channel/search-messages-by-a-keyword — reviewed 2026-10-07)
+- (source: `SendbirdChatSDK.swiftinterface` (4.39.11): `SendbirdChat.createMessageSearchQuery(builder:)` 6364; `MessageSearchQueryParams.keyword` 4384, `channelURL` 4391, `limit` 4398; `MessageSearchQuery.loadNextPage(completionHandler:)` 4326 — verified 2026-10-07)
+
+## Filter the channel list by name
+```swift
+let listQuery = GroupChannel.createMyGroupChannelListQuery { params in
+    params.channelNameContainsFilter = "support"
+}
+listQuery.loadNextPage { channels, error in }
+```
+- (source: https://sendbird.com/docs/chat/sdk/v4/ios/channel/searching-channels/search-group-channels-by-name-url-or-other-filters — reviewed 2026-10-07; `SendbirdChatSDK.swiftinterface` (4.39.11): `GroupChannel.createMyGroupChannelListQuery(paramsBuilder:)` 2730, `GroupChannelListQueryParams.channelNameContainsFilter` 3194 — verified 2026-10-07)
+
+## Read receipts for a message
+```swift
+let unreadCount = channel.getUnreadMemberCount(message)        // 0 = every member has read it
+let readers = channel.getReadMembers(message: message, includeAllMembers: false)
+let statuses = channel.getReadStatus(with: false)              // [userId: ReadStatus], excludes the current user
+```
+- (source: https://sendbird.com/docs/chat/sdk/v4/ios/message/managing-read-status-in-a-group-channel/get-read-status — reviewed 2026-10-07; `SendbirdChatSDK.swiftinterface` (4.39.11): `GroupChannel.getUnreadMemberCount(_:)` 2707, `getReadMembers(message:includeAllMembers:)` 2708, `getReadStatus(with:)` 2712 — verified 2026-10-07)
+
+## Connection state and reconnection
+```swift
+final class ConnectionObserver: NSObject, ConnectionDelegate {
+    func didStartReconnection() { /* show "Reconnecting..." */ }
+    func didSucceedReconnection() { /* hide the banner and refresh */ }
+    func didFailReconnection() { /* offer a manual retry */ }
+}
+let observer = ConnectionObserver()   // keep a strong reference
+SendbirdChat.addConnectionDelegate(observer, identifier: "connection-banner")
+```
+- The SDK reconnects by itself after a network drop; these callbacks only report it. `didConnect(userId:)` and `didDisconnect(userId:)` are also available. (source: https://sendbird.com/docs/chat/sdk/v4/ios/event-delegate/managing-connection-delegates/add-or-remove-a-connection-delegate — reviewed 2026-10-07)
+- (source: `SendbirdChatSDK.swiftinterface` (4.39.11): `ConnectionDelegate` 1694 — `didStartReconnection` 1695, `didSucceedReconnection` 1696, `didFailReconnection` 1697; `SendbirdChat.addConnectionDelegate(_:identifier:)` 6368 — verified 2026-10-07)
+
 ## Handle incoming events without a collection
 ```swift
 SendbirdChat.addChannelDelegate(self, identifier: "UNIQUE_HANDLER_ID")
