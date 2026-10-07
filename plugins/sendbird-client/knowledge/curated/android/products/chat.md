@@ -192,6 +192,71 @@ SendbirdChat.addChannelHandler("moderation", object : GroupChannelHandler() {
 - State and lists: `isFrozen`, `myMutedState` (`MutedState.MUTED` / `UNMUTED`), `SendbirdChat.createBlockedUserListQuery(BlockedUserListQueryParams)`. `muteUser(userId, handler)` without a time also exists; every call has a `User`-taking overload.
 - (source: `sendbird-chat` 4.36.5 AAR, `javap -public`: `GroupChannel.banUser(String, String, int, CompletionHandler)`, `unbanUser(String, CompletionHandler)`, `muteUser(String, String, int, CompletionHandler)` and `muteUser(String, CompletionHandler)`, `unmuteUser(String, CompletionHandler)`, `freeze(CompletionHandler)`, `unfreeze(CompletionHandler)`, `getMyRole()`, `getMyMutedState()`; `BaseChannel.isFrozen()`; `SendbirdChat.blockUser(String, UserHandler)`, `unblockUser(String, CompletionHandler)`, `createBlockedUserListQuery(BlockedUserListQueryParams)`; `BaseChannelHandler.onUserBanned`, `onUserMuted`, `onChannelFrozen`, `onChannelUnfrozen`; `Role.OPERATOR`, `MutedState.MUTED`; no `Deprecated` attribute on any of them (`javap -v`) — verified 2026-10-06)
 
+## Invite members and manage operators
+```kotlin
+// `groupChannel` is a GroupChannel
+groupChannel.invite(listOf("USER_ID")) { e -> }
+groupChannel.addOperators(listOf("USER_ID")) { e -> }      // operators can mute, ban, and freeze
+groupChannel.removeOperators(listOf("USER_ID")) { e -> }   // stays a member
+```
+- A private group channel can be joined only by invitation from a member. Whether a new member sees messages sent before the invite is an app setting, on by default. (source: https://sendbird.com/docs/chat/sdk/v4/android/channel/inviting-users-to-a-group-channel/invite-users-as-members, https://sendbird.com/docs/chat/sdk/v4/android/channel/managing-operators/register-and-remove-operators — reviewed 2026-10-07)
+- (source: `sendbird-chat` 4.36.5 AAR, `javap -public`: `GroupChannel.invite(List<String>, CompletionHandler)`, `BaseChannel.addOperators(Collection<String>, CompletionHandler)`, `removeOperators(Collection<String>, CompletionHandler)` — verified 2026-10-07)
+
+## Pinned messages
+```kotlin
+groupChannel.pinMessage(message.messageId) { e -> }
+groupChannel.unpinMessage(message.messageId) { e -> }
+val pinnedIds: List<Long> = groupChannel.pinnedMessageIds
+
+val pinnedQuery = SendbirdChat.createPinnedMessageListQuery(
+    PinnedMessageListQueryParams(ChannelType.GROUP, groupChannel.url)
+)
+pinnedQuery.next { pinned, e ->
+    val messages = pinned?.map { it.message } ?: emptyList()   // PinnedMessage.message
+}
+```
+- Up to 10 messages can be pinned per channel by default. Group channels support pinning except ephemeral channels; Supergroup channels do not. (source: https://sendbird.com/docs/chat/sdk/v4/android/message/managing-pinned-messages-in-group-channels/pin-a-message — reviewed 2026-10-07)
+- (source: `sendbird-chat` 4.36.5 AAR, `javap -public`: `BaseChannel.pinMessage(long, CompletionHandler)`, `unpinMessage(long, CompletionHandler)`, `getPinnedMessageIds()`; `SendbirdChat.createPinnedMessageListQuery(PinnedMessageListQueryParams)`; `PinnedMessageListQueryParams(ChannelType, String)`; `PinnedMessageListQuery.next(PinnedMessagesHandler)`; `PinnedMessage.getMessage()` — verified 2026-10-07)
+
+## Search messages
+```kotlin
+val searchQuery = SendbirdChat.createMessageSearchQuery(
+    MessageSearchQueryParams(keyword = "refund", channelUrl = groupChannel.url, limit = 20)  // drop channelUrl to search every joined channel
+)
+searchQuery.next { messages, e -> }   // call again while searchQuery.hasNext
+```
+- Searches group channel messages. Punctuation and special characters are ignored when indexing; `AND` and `OR` (uppercase) combine terms; a term shorter than two characters matches exactly only. (source: https://sendbird.com/docs/chat/sdk/v4/android/message/searching-messages-in-a-group-channel/search-messages-by-a-keyword — reviewed 2026-10-07)
+- `keyword` and `channelUrl` are constructor parameters (no setters). (source: `sendbird-chat` 4.36.5 AAR, `javap -public`: `SendbirdChat.createMessageSearchQuery(MessageSearchQueryParams)`; `MessageSearchQueryParams` constructor, `getKeyword()`, `getChannelUrl()`, `setLimit(int)`; `MessageSearchQuery.next(BaseMessagesHandler)`, `getHasNext()` — verified 2026-10-07)
+
+## Filter the channel list by name
+```kotlin
+val listQuery = GroupChannel.createMyGroupChannelListQuery(
+    GroupChannelListQueryParams().apply { channelNameContainsFilter = "support" }
+)
+listQuery.next { channels, e -> }
+```
+- (source: https://sendbird.com/docs/chat/sdk/v4/android/channel/searching-channels/search-group-channels-by-name-url-or-other-filters — reviewed 2026-10-07; `sendbird-chat` 4.36.5 AAR, `javap -public`: `GroupChannel.createMyGroupChannelListQuery(GroupChannelListQueryParams)`, `GroupChannelListQueryParams.setChannelNameContainsFilter(String)` — verified 2026-10-07)
+
+## Read receipts for a message
+```kotlin
+val unreadCount = groupChannel.getUnreadMemberCount(message)           // 0 = every member has read it
+val readers = groupChannel.getReadMembers(message, false)              // false = exclude the current user
+```
+- (source: https://sendbird.com/docs/chat/sdk/v4/android/message/managing-read-status-in-a-group-channel/get-read-status — reviewed 2026-10-07; `sendbird-chat` 4.36.5 AAR, `javap -public`: `GroupChannel.getUnreadMemberCount(BaseMessage)`, `getReadMembers(BaseMessage, boolean)`, `getUnreadMembers(BaseMessage, boolean)` — verified 2026-10-07)
+
+## Connection state and reconnection
+```kotlin
+SendbirdChat.addConnectionHandler("connection-banner", object : ConnectionHandler {
+    override fun onConnected(userId: String) {}
+    override fun onDisconnected(userId: String) {}
+    override fun onReconnectStarted() { /* show "Reconnecting..." */ }
+    override fun onReconnectSucceeded() { /* hide the banner and refresh */ }
+    override fun onReconnectFailed() { /* offer a manual retry */ }
+})
+```
+- The SDK reconnects by itself after a network drop; these callbacks only report it. All five methods are abstract and must be implemented. (source: https://sendbird.com/docs/chat/sdk/v4/android/event-handler/managing-connection-event-handlers/add-or-remove-a-connection-event-handler — reviewed 2026-10-07)
+- (source: `sendbird-chat` 4.36.5 AAR, `javap -public`: `SendbirdChat.addConnectionHandler(String, ConnectionHandler)`; `ConnectionHandler` — `onConnected(String)`, `onDisconnected(String)`, `onReconnectStarted()`, `onReconnectSucceeded()`, `onReconnectFailed()` — verified 2026-10-07)
+
 ## Handle incoming events without a collection
 ```kotlin
 SendbirdChat.addChannelHandler("UNIQUE_HANDLER_ID", object : GroupChannelHandler() {
