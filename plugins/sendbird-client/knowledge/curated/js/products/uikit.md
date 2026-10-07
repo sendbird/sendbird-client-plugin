@@ -20,6 +20,7 @@ import '@sendbird/uikit-react/dist/index.css';
 ### Compose your own UI: channel list + conversation
 For a custom layout (e.g. a two-pane screen instead of the drop-in `App`), use `GroupChannelList` and `GroupChannel` directly instead of `App`:
 ```tsx
+import { useState } from 'react';
 import { SendbirdProvider } from '@sendbird/uikit-react/SendbirdProvider';
 import { GroupChannelList } from '@sendbird/uikit-react/GroupChannelList';
 import { GroupChannel } from '@sendbird/uikit-react/GroupChannel';
@@ -54,9 +55,13 @@ Read SDK connection/store state for advanced cases with `useSendbirdStateContext
 Install the package + its required peers (foundation, chat, and native modules — see the quickstart). Wrap the app in the container:
 ```tsx
 import { SendbirdUIKitContainer } from '@sendbird/uikit-react-native';
+import { createMMKV } from 'react-native-mmkv';
+
+const mmkv = createMMKV(); // react-native-mmkv v4; v2/v3 use `new MMKV()`
 
 <SendbirdUIKitContainer
   appId={APP_ID}
+  chatOptions={{ localCacheStorage: mmkv }}   // required: the container throws without it (see hosts/react-native.md)
   platformServices={platformServices}   // built from the SDK's createNative*Service factories — see docs/sample
 >
   {/* fragments / navigation */}
