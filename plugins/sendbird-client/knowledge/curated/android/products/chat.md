@@ -101,15 +101,15 @@ val messageHandler = object : MessageCollectionHandler {
     override fun onMessagesUpdated(context: MessageContext, channel: GroupChannel, messages: List<BaseMessage>) { }
     override fun onMessagesDeleted(context: MessageContext, channel: GroupChannel, messages: List<BaseMessage>) { }
     override fun onChannelUpdated(context: GroupChannelContext, channel: GroupChannel) { }
-    override fun onChannelDeleted(context: GroupChannelContext, deletedChannelUrl: String) { }
+    override fun onChannelDeleted(context: GroupChannelContext, channelUrl: String) { }
     override fun onHugeGapDetected() { }
 }
 val collectionParams = MessageCollectionCreateParams(channel, MessageListParams(), System.currentTimeMillis(), messageHandler)
 val collection = SendbirdChat.createMessageCollection(collectionParams)
 
 collection.initialize(MessageCollectionInitPolicy.CACHE_AND_REPLACE_BY_API, object : MessageCollectionInitHandler {
-    override fun onCacheResult(messages: List<BaseMessage>?, e: SendbirdException?) { /* render cached messages immediately */ }
-    override fun onApiResult(messages: List<BaseMessage>?, e: SendbirdException?) { /* replace with the server's authoritative page */ }
+    override fun onCacheResult(cachedList: List<BaseMessage>?, e: SendbirdException?) { /* render cached messages immediately */ }
+    override fun onApiResult(apiResultList: List<BaseMessage>?, e: SendbirdException?) { /* replace with the server's authoritative page */ }
 })
 
 if (collection.hasPrevious) {
