@@ -36,6 +36,25 @@ await SendbirdCalls.authenticate({ userId: USER_ID, accessToken: ACCESS_TOKEN })
 ```
 (source: sendbird-calls-sdk-react-native README §authenticate)
 
+## Sign out
+"When users log out of their call client apps, they must be deauthenticated with `SendBirdCall.deauthenticate()` method." (source: sendbird-calls 1.10.21 README.md:656)
+
+```ts
+import SendBirdCall from 'sendbird-calls';
+
+SendBirdCall.deauthenticate();
+```
+
+On the web it returns `void` (source: sendbird-calls 1.10.21 `SendBirdCall.min.d.ts:7`). In React Native it returns a promise:
+
+```ts
+import { SendbirdCalls } from '@sendbird/calls-react-native';
+
+await SendbirdCalls.deauthenticate();
+```
+
+(source: @sendbird/calls-react-native 1.2.0 `lib/typescript/libs/SendbirdCallsModule.d.ts:146`)
+
 ## Pitfalls
 - Web: call `connectWebSocket()` after `authenticate`, or events won't arrive.
 - App ID from env; access token is a secret — never hard-code. RN background calls need push tokens.

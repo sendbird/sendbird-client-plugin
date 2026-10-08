@@ -41,6 +41,17 @@ let directCall = SendBirdCall.dial(with: dialParams) { directCall, error in
 ```
 (source: sendbird-calls-ios README §"make a call"; build-verified)
 
+## Sign out
+On logout, deauthenticate the user so this device stops receiving their calls:
+
+```swift
+SendBirdCall.deauthenticate { error in
+    // signed out of Calls
+}
+```
+
+`SendBirdCall.deauthenticate(completionHandler:)` is a static method; the handler is optional. (source: SendBirdCalls 1.12.3 `SendBirdCalls.swiftinterface:878`) If you registered a VoIP push token, `SendBirdCall.unregisterVoIPPush(token:completionHandler:)` removes it. (source: SendBirdCalls 1.12.3 `SendBirdCalls.swiftinterface:885`)
+
 ## Pitfalls
 - SPM-only; the WebRTC dependency is required.
 - Add the delegate before expecting `didStartRinging`; delegates are cleared on app termination.

@@ -30,6 +30,9 @@ dependencies {
 
 (source: https://repo.sendbird.com/public/maven/com/sendbird/sdk/uikit/3.26.3/uikit-3.26.3.pom; https://docs.gradle.org/current/userguide/graph_resolution.html)
 
+## App ID in Gradle
+The App ID is not a secret, so a fresh clone and CI should build without extra setup. Put it in `gradle.properties` (`SENDBIRD_APP_ID=...`), let `-PSENDBIRD_APP_ID=...` or an environment variable override it, and pass it on with `buildConfigField`. Do not throw from the build script when it is missing: an exception there fails every build, including CI and a teammate's first checkout. Check for an empty value at init time instead.
+
 ## Init
 - Initialize once in `Application.onCreate` (Chat: `SendbirdChat.init`; UIKit: `SendbirdUIKit.init(adapter, context)`; AI Agent: `AIAgentMessenger.initialize(...)`).
 - Register your `Application` in `AndroidManifest.xml`.
