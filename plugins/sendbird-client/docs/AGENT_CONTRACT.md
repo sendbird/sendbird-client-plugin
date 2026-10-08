@@ -44,6 +44,9 @@ The source must contain the symbol or exact signature. A related page is not evi
 - Keep secrets out of source, commands, logs, and generated files. Application IDs are not secrets.
 - Preserve the template's `source:` comment when code is copied so the write-boundary guard can validate it.
 - Limit edits to the requested product and the lifecycle code required to support it.
+- Install dependencies so the project's next clean install works. Never pass `--legacy-peer-deps` or `--force` to npm (or `--ignore-engines` to yarn): they hide a version conflict that breaks the next `npm install`. When a package's peer range rejects the project's versions, install the newest version whose `peerDependencies` accept them; check with `npm view <package>@<range> peerDependencies`.
+- Do not install tools or write files outside the project for your own checks (for example `npm i playwright` in `/tmp`). Use what the project and the machine already have, and report a check you could not run as not run.
+- Keep the signatures of existing functions, classes, and constructors you edit. Callers you cannot see would break. Get what the SDK needs (an Android `Context`, the SDK instance) from the `Application` class or a holder instead of a new parameter.
 
 ### Finish what the project allows
 
@@ -52,6 +55,8 @@ Do every step that can be done inside the customer project before reporting. A s
 - Read the App ID through the mechanism the project already has. On JS, follow `tier2.appIdSource` and `knowledge/curated/js/setup.md` "App ID"; when it is `config`, write a config module. Never require a new bundler or env loader.
 - If the app already has a sign-out or logout function, disconnect there and clean up the handlers you added. Add a standalone helper only when no such function exists, and name the helper in the hand-off.
 - When the project already gets a Sendbird token from its own backend, register the session handler with that call. Without such a call, leave it out; do not add a placeholder endpoint.
+- Find the build toolchain before saying a build cannot run. On Android, `tools/local-sdk/android-toolchain.sh` looks for a JDK and an Android SDK in the standard install locations; an unset `ANDROID_HOME` or `JAVA_HOME` alone is not a reason to skip the build.
+- Files your own verification created (build outputs such as `.gradle/`, `build/`, `node_modules/`, a generated `.xcodeproj`) are not hand-off steps. Leave them out of `changes` and `manualSteps`; at most mention them once in the answer.
 - A hand-off step is allowed only for work that needs something the project does not contain: a token-issuing server, a dashboard setting, a signing key or certificate, a device or simulator run, or a value nobody supplied. Each step says what is missing and why the plugin could not do it.
 
 ## 4. Verify the result
@@ -88,6 +93,11 @@ When `SENDBIRD_NONINTERACTIVE` is set (for example `SENDBIRD_NONINTERACTIVE=1 cl
 - Never ask the user a question, and never end the answer with one.
 - For a value you would otherwise ask for, use the environment (`SENDBIRD_APP_ID`, `SENDBIRD_PRODUCTS`, `SENDBIRD_REGION`) or the project's `profile.json` when they have it.
 - Adding the Sendbird dependency that the request clearly needs is allowed: the request is the consent. List it under `changes`.
+- A request to add a product's screen or feature includes installing and initializing that product. Do not stop to ask for a choice that has a safe default; use the default and say so in the answer:
+  - the user ID: the one the app's existing sign-in code already has
+  - authentication: connect with the user ID only, and list the token server under `manualSteps`
+  - navigation: the project's existing navigation; without one, switch screens with state
+  - push: leave it out, and list it under `manualSteps`
 - If a value that changes the emitted code is still unknown, change nothing and stop with `status: "needs_input"` and one `questions` entry per missing value. Examples: the host is `hybrid` or `unknown`; there is no App ID for setup; the request assumes an integration the project does not have, such as theming UIKit screens in an app without UIKit.
 - End the final answer with one fenced `json` block that validates against `core/schemas/run-summary.schema.json`. Paths in `changes` are relative to the project root.
 
