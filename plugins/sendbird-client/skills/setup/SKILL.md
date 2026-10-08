@@ -1,8 +1,8 @@
 ---
 name: setup
 description: Wizard to integrate Sendbird into the current project. Detects platform, host, package manager, lifecycle, and products; installs the SDK, inserts init + connect, and scaffolds a first screen. Use when starting a Sendbird integration or running first-time setup.
-argument-hint: "[--product chat|uikit|calls]"
-allowed-tools: Read, Edit, Write, Bash, Grep, Glob, WebFetch, Agent
+argument-hint: "[new-app] [--product chat|uikit|calls]"
+allowed-tools: Read, Edit, Write, Bash, Grep, Glob, WebFetch, Agent, AskUserQuestion
 ---
 
 # /sendbird-client:setup
@@ -20,6 +20,17 @@ Resolve the active product scope with `bash "${CLAUDE_PLUGIN_ROOT}/tools/detecti
 4. The agent installs the SDK dependency, inserts initialize + connect in the correct lifecycle entry, and (optionally) scaffolds a first screen from `templates/<platform>/<host>/<product>/`.
    - iOS: install via Swift Package Manager. Use CocoaPods only if the project already has a `Podfile`; never create one or run `pod install` on a fresh/SPM project.
 5. Output the edit diff + a product-specific next-step checklist; suggest `/sendbird-client:verify-integration`.
+
+## New app (empty folder)
+Use this when the request is to create a new app, or the project folder is empty (detection finds no platform).
+
+1. Read the questions from `${CLAUDE_PLUGIN_ROOT}/core/catalog.json`. Drop options whose `product` is outside the active scope (`resolve-products.sh`), and drop a question with no options left. Skip a question whose `when` does not match the answers so far.
+2. Get the answers:
+   - Interactive: ask with AskUserQuestion, using the catalog's question text and option labels as written (translated into the customer's language if needed). Use `multiSelect` for `multi` questions. Ask `platform` first, then the rest together (at most 4 questions per call). Do not add, drop, or reword options.
+   - Non-interactive (`SENDBIRD_NONINTERACTIVE`): read answers from the request, written as `answers: platform=react; chat=channel-list,conversation; calls=voice-call; notes=...`. An answer that is not a catalog option id is an error. If the request has no answers yet, change nothing and stop with `status: "needs_input"`, returning every catalog question in scope at once, in catalog order, each with its `id`, `question`, `type`, option ids as `options`, and `when` when it has one, so the caller can ask them all and run again once (with `--resume` it continues this session). If answers are given but a `required` question that applies is missing, return only the missing ones the same way.
+3. Copy the starter named by `starters` in the catalog (`platform`, or `platform/<ios-ui|android-ui>`) from `${CLAUDE_PLUGIN_ROOT}/` into the project folder, then initialize git if the folder is not a repository.
+4. Continue with Steps 2–5 above: App ID, then the platform agent implements sign-in and connect in the starter's `onLoginSucceeded` and `onLogout`, then every chosen feature, and shows each on screen. Install packages and build or type-check as the agent contract requires.
+5. Write the run summary (`core/schemas/run-summary.schema.json`, with `skill: "setup"`) to the path in `SENDBIRD_RUN_SUMMARY_FILE` when it is set, in both modes, so the caller can read the result after the session ends. List the answers used under `steps`.
 
 ## Wired knowledge (read these FIRST — populated and cited)
 - Install coordinates + packaging policy: `knowledge/curated/<platform>/setup.md` (iOS is SPM-first).

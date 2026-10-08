@@ -1,0 +1,17 @@
+name: FixtureUIKit
+options: { deploymentTarget: { iOS: "15.0" }, bundleIdPrefix: com.example.fixture }
+targets:
+  FixtureUIKit:
+    type: application
+    platform: iOS
+    sources: [Sources]
+    info:
+      path: Sources/Info.plist
+      properties:
+        UILaunchScreen: {}
+        UIApplicationSceneManifest:
+          UIApplicationSupportsMultipleScenes: false
+          UISceneConfigurations:
+            UIWindowSceneSessionRoleApplication:
+              - UISceneConfigurationName: Default Configuration
+                UISceneDelegateClassName: $(PRODUCT_MODULE_NAME).SceneDelegate

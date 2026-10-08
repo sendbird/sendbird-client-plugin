@@ -1,0 +1,6 @@
+# Code that runs on customers' machines, and the CI and release setup, needs a code owner's
+# review (pre-release security review C11). A repository ruleset makes this review required.
+/.github/                        @tezpark
+/plugins/sendbird-client/hooks/  @tezpark
+/plugins/sendbird-client/core/   @tezpark
+/plugins/sendbird-client/tools/  @tezpark

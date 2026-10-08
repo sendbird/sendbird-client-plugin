@@ -1,0 +1,7 @@
+{
+  "compilerOptions": {
+    "target": "ESNext", "module": "ESNext", "moduleResolution": "Bundler",
+    "jsx": "react-native", "strict": true, "skipLibCheck": true, "noEmit": true
+  },
+  "include": ["App.tsx", "index.ts", "src"]
+}

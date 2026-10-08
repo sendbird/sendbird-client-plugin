@@ -1,0 +1,61 @@
+{
+  "version": 1,
+  "about": "Questions a caller shows before the plugin builds a new app. The setup skill asks them in this order (interactive), or reads the answers from the request (non-interactive). Each question has at most 4 options, the limit of Claude Code's question tool. Options with a product only appear when that product is in the plugin's scope.",
+  "questions": [
+    {
+      "id": "platform", "type": "single", "required": true,
+      "question": "Which platform should the app run on?",
+      "options": [
+        { "id": "react", "label": "React (web)" },
+        { "id": "react-native", "label": "React Native" },
+        { "id": "ios", "label": "iOS" },
+        { "id": "android", "label": "Android" }
+      ]
+    },
+    {
+      "id": "ios-ui", "type": "single", "required": true, "when": { "platform": ["ios"] },
+      "question": "Which iOS UI framework?",
+      "options": [
+        { "id": "uikit", "label": "UIKit" },
+        { "id": "swiftui", "label": "SwiftUI" }
+      ]
+    },
+    {
+      "id": "android-ui", "type": "single", "required": true, "when": { "platform": ["android"] },
+      "question": "Which Android UI toolkit?",
+      "options": [
+        { "id": "view", "label": "Views (XML)" },
+        { "id": "compose", "label": "Jetpack Compose" }
+      ]
+    },
+    {
+      "id": "chat", "type": "multi", "required": false,
+      "question": "Which chat features should the app have? Sign-in and connect are always included.",
+      "options": [
+        { "id": "channel-list", "label": "Channel list", "product": "chat" },
+        { "id": "conversation", "label": "Conversation (send and receive messages)", "product": "chat" },
+        { "id": "invite", "label": "Invite members", "product": "chat" }
+      ]
+    },
+    {
+      "id": "calls", "type": "multi", "required": false,
+      "question": "Add calls?",
+      "options": [
+        { "id": "voice-call", "label": "1:1 voice call", "product": "calls" },
+        { "id": "video-call", "label": "1:1 video call", "product": "calls" }
+      ]
+    },
+    {
+      "id": "notes", "type": "text", "required": false,
+      "question": "Anything else the app should do? (optional)"
+    }
+  ],
+  "starters": {
+    "react": "templates/starters/react",
+    "react-native": "templates/starters/react-native",
+    "ios/uikit": "templates/starters/ios-uikit",
+    "ios/swiftui": "templates/starters/ios-swiftui",
+    "android/view": "templates/starters/android-view",
+    "android/compose": "templates/starters/android-compose"
+  }
+}
