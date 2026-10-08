@@ -8,7 +8,12 @@
   "plugins": [
     {
       "name": "sendbird-client",
-      "source": "./plugins/sendbird-client",
+      "source": {
+        "source": "git-subdir",
+        "url": "https://github.com/sendbird/sendbird-client-plugin.git",
+        "path": "plugins/sendbird-client",
+        "ref": "v0.1.27"
+      },
       "description": "Sendbird integration helper for Chat (incl. auth/session), UIKit, and Calls across iOS, Android, and JS. Includes hooks that run local shell scripts; see README \"What runs on your machine\"."
     }
   ]
