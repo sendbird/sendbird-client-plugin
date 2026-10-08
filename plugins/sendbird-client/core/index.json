@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-10-07T17:04:34Z",
-  "count": 45,
+  "generatedAt": "2026-10-08T02:23:56Z",
+  "count": 48,
   "entries": [
     {
       "file": "knowledge/curated/android/architecture.md",
@@ -60,6 +60,14 @@
       "verifiedDates": [
         "2026-09-22"
       ]
+    },
+    {
+      "file": "knowledge/curated/android/cross-cutting/troubleshooting.md",
+      "platform": "android",
+      "category": "cross-cutting",
+      "status": "populated",
+      "lastVerifiedAgainst": "sendbird-chat-sdk-android 4.36.5 / sendbird-uikit-android 3.26.3 / sendbird-calls-android 1.12.5",
+      "verifiedDates": []
     },
     {
       "file": "knowledge/curated/android/hosts/compose.md",
@@ -248,6 +256,14 @@
       ]
     },
     {
+      "file": "knowledge/curated/ios/cross-cutting/troubleshooting.md",
+      "platform": "ios",
+      "category": "cross-cutting",
+      "status": "populated",
+      "lastVerifiedAgainst": "sendbird-chat-sdk-ios 4.39.11 / sendbird-uikit-ios 3.36.2 / sendbird-calls-ios 1.12.3",
+      "verifiedDates": []
+    },
+    {
       "file": "knowledge/curated/ios/hosts/swiftui.md",
       "platform": "ios",
       "category": "hosts",
@@ -372,6 +388,14 @@
       "verifiedDates": [
         "2026-09-22"
       ]
+    },
+    {
+      "file": "knowledge/curated/js/cross-cutting/troubleshooting.md",
+      "platform": "js",
+      "category": "cross-cutting",
+      "status": "populated",
+      "lastVerifiedAgainst": "@sendbird/chat 4.22.13 / @sendbird/uikit-react 3.19.1 / @sendbird/uikit-react-native 3.12.9 / sendbird-calls 1.10.21",
+      "verifiedDates": []
     },
     {
       "file": "knowledge/curated/js/hosts/react-native.md",

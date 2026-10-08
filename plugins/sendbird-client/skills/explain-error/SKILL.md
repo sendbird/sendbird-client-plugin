@@ -16,8 +16,9 @@ Map an error to meaning + fix (Intent A — lookup).
 
 ## Steps
 1. Look up the code in the verified table `knowledge/curated/<platform>/cross-cutting/errors.md`. Interpret it only with the detected platform and resolved SDK version because the same number can map to a different symbol or description on another platform.
-2. If the code isn't in the curated table: check `${CLAUDE_PLUGIN_ROOT}/knowledge/imports/<platform>/<product>/error-codes.md` when present, else read the customer-local SDK error enum via `bash "${CLAUDE_PLUGIN_ROOT}/tools/local-sdk/read-surface.sh" <project> <product> [resolved-version]`, else search version-matched official docs.
-3. Report: code, platform symbol (e.g. 400302 = iOS `accessTokenNotValid` / JS `SESSION_TOKEN_EXPIRED`), meaning, common triggers, fix (codegen handed to the platform agent for in-scope products), related docs link — all cited. Session-expiry codes route to `products/auth.md` refresh patterns.
+2. For triggers and fixes, and for a symptom with no code ("push never arrives", "channel missing from the list"), check `knowledge/curated/<platform>/cross-cutting/troubleshooting.md`: symptom, cause, and fix from solved public cases, each fix re-checked against the pinned SDK. Entries marked community were resolved by users, not Sendbird staff; say so when you use one.
+3. If the code isn't in the curated table: check `${CLAUDE_PLUGIN_ROOT}/knowledge/imports/<platform>/<product>/error-codes.md` when present, else read the customer-local SDK error enum via `bash "${CLAUDE_PLUGIN_ROOT}/tools/local-sdk/read-surface.sh" <project> <product> [resolved-version]`, else search version-matched official docs.
+4. Report: code, platform symbol (e.g. 400302 = iOS `accessTokenNotValid` / JS `SESSION_TOKEN_EXPIRED`), meaning, common triggers, fix (codegen handed to the platform agent for in-scope products), related docs link — all cited. Session-expiry codes route to `products/auth.md` refresh patterns.
 
 ## No-Fabrication
 Only report error codes/meanings present in a verified source. If the code isn't found, say "not found in <searched sources>" and suggest the docs — never invent a meaning.

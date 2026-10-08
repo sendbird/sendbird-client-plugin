@@ -14,7 +14,7 @@ Delegate to `sendbird-docs-agent` to answer the user's query.
 
 Steps:
 1. Read `config/plugin-config.json` for `docs.publicBase` and the public repo matrix.
-2. Consult sources in priority order: `knowledge/curated/` (all 45 docs populated — concepts in `common/`, per-platform products/cross-cutting/hosts) → `knowledge/imports/` when present (bundled mode) → a sendbird.com/docs page found in `${CLAUDE_PLUGIN_ROOT}/core/docs-index.json` (`jq` by `product` + `platform`, or `grep -i <topic>`; WebFetch that exact `url`, never construct one) → public discussions.
+2. Consult sources in priority order: `knowledge/curated/` (all 57 docs populated — concepts in `common/`, per-platform products/cross-cutting/hosts) → `knowledge/imports/` when present (bundled mode) → a sendbird.com/docs page found in `${CLAUDE_PLUGIN_ROOT}/core/docs-index.json` (`jq` by `product` + `platform`, or `grep -i <topic>`; WebFetch that exact `url`, never construct one) → public discussions.
 3. Pricing/quota/version questions: `common/pricing-quotas.md` and `common/release-channels.md` say to NEVER quote figures or "latest" versions from memory — point to sendbird.com/pricing / the registry.
 4. Return: answer + primary source citation + up to three related links (docs links only from `core/docs-index.json`).
 

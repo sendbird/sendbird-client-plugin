@@ -71,7 +71,7 @@ Sendbird delivers Android push as FCM data messages, and the `sendbird` payload 
 
 ## Pitfalls
 - Register the handler after `SendbirdChat.init`.
-- Declare the messaging service in `AndroidManifest.xml`.
+- You do not declare a messaging service yourself: the Chat SDK's own manifest already declares `com.sendbird.android.push.SendbirdFirebaseMessagingService` and merges into the app, and `SendbirdPushHandler` is not a `Service`. (source: sendbird-chat 4.36.5 AAR `AndroidManifest.xml`)
 - Credentials are secrets — never hard-code or commit `google-services.json` secrets.
 
 ## Related
