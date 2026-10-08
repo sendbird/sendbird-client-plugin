@@ -6,10 +6,7 @@ HERE="$(cd "$(dirname "$0")" && pwd)"
 # shellcheck source=lib/render.sh
 source "$HERE/lib/render.sh"
 [ -f "$aar" ] || { render_empty "$title" "AAR not found: $aar"; exit 0; }
-if [ -z "${JAVA_HOME:-}" ] && [ -d /opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home ]; then
-  export JAVA_HOME=/opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home
-  export PATH="$JAVA_HOME/bin:$PATH"
-fi
+eval "$(bash "$HERE/android-toolchain.sh")"
 if ! command -v javap >/dev/null || ! command -v jar >/dev/null || ! command -v unzip >/dev/null; then
   render_empty "$title" "javap, jar, and unzip are required to inspect an AAR"
   exit 0

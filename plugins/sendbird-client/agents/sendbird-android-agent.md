@@ -31,6 +31,9 @@ Splice from `templates/android/{view|compose}/{product}/` matching the detected 
 - Confirm the `Application`, `Activity`, `Fragment`, or Compose owner responsible for initialization and cleanup.
 - Treat View-based UIKit surfaces as interop inside Compose unless a verified Compose API exists.
 - Compile the affected module. When both a pinned regression set and latest compatibility set are relevant, report them separately.
+  - Find the JDK and Android SDK first: `eval "$(bash "${CLAUDE_PLUGIN_ROOT}/tools/local-sdk/android-toolchain.sh" <project-dir>)"`, then run the project's own `./gradlew` (for example `./gradlew :app:assembleDebug`) in the same shell. An unset `ANDROID_HOME` or `JAVA_HOME` is not a reason to skip the build.
+  - Never write the found paths into the project (`local.properties`, `gradle.properties`); they are only for this build.
+  - Hand the build off only when the script prints a `# missing:` line, and quote that line so the customer knows what to install.
 
 ## No-Fabrication Policy (non-negotiable)
 - Never invent an API name, signature, parameter, error code, enum case, or docs URL. Every emitted symbol must be verifiable in the sources listed under Source priority above.

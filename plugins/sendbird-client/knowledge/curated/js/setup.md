@@ -29,6 +29,8 @@ Read the App ID the way the project already reads config. Detection writes the m
 | `cra` | `REACT_APP_SENDBIRD_APP_ID` | `process.env.REACT_APP_SENDBIRD_APP_ID` | https://create-react-app.dev/docs/adding-custom-environment-variables/ |
 | `config` | none | export the value from a config module, e.g. `src/sendbird/config.ts` | no env loader was detected |
 
+A request to read the App ID "from configuration" or "not as a literal" is met by the config module when `appIdSource` is `config`; do not switch to an env loader the project does not have.
+
 All four loaders inline the value at build time, so a changed `.env` needs a rebuild (sources above). The templates show `process.env.NEXT_PUBLIC_SENDBIRD_APP_ID` or `process.env.SENDBIRD_APP_ID`; replace that line with the row for the detected `appIdSource`.
 
 ## Pitfalls

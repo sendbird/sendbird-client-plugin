@@ -43,6 +43,23 @@ DirectCall call = SendBirdCall.dial(params, (directCall, e) -> {
 ```
 (source: sendbird-calls-android README §"make a call")
 
+## Sign out
+On logout, deauthenticate the user so this device stops receiving their calls:
+
+```kotlin
+import com.sendbird.calls.SendBirdCall
+import com.sendbird.calls.SendBirdException
+import com.sendbird.calls.handler.CompletionHandler
+
+SendBirdCall.deauthenticate(object : CompletionHandler {
+    override fun onResult(e: SendBirdException?) {
+        // signed out of Calls
+    }
+})
+```
+
+`SendBirdCall.deauthenticate(CompletionHandler)` is static; `CompletionHandler.onResult(SendBirdException)` reports the result. (source: sendbird-calls 1.12.5 `javap -public com.sendbird.calls.SendBirdCall` and `com.sendbird.calls.handler.CompletionHandler`)
+
 ## Pitfalls
 - Add the listener before expecting `onRinging`.
 - App ID from BuildConfig/secret; access token is a secret — never hard-code. Background calls need a push token (FCM) registered.

@@ -24,8 +24,18 @@ case "$plat" in
       *) pkg="@sendbird/$product";;
     esac
     pkg_dir="$dir/node_modules/$pkg"
+    # Companion packages whose exports apps import directly: React Native UIKit themes and
+    # components come from -foundation (DarkUIKitTheme), hooks from uikit-chat-hooks.
+    extra=()
+    [ "$product" = "uikit" ] && [ "$host" = "react-native" ] && extra=("@sendbird/uikit-react-native-foundation" "@sendbird/uikit-chat-hooks")
     # The whole package (every import path in "exports"), not one entry file.
-    if [ -f "$pkg_dir/package.json" ]; then bash "$HERE/read-dts.sh" "$pkg_dir" "$pkg" "$dir" > "$out"
+    if [ -f "$pkg_dir/package.json" ]; then
+      {
+        bash "$HERE/read-dts.sh" "$pkg_dir" "$pkg" "$dir"
+        for e in ${extra[@]+"${extra[@]}"}; do
+          [ -f "$dir/node_modules/$e/package.json" ] && bash "$HERE/read-dts.sh" "$dir/node_modules/$e" "$e" "$dir"
+        done
+      } > "$out"
     else render_empty "$product" "$pkg not in node_modules" > "$out"; fi
     ;;
   ios)
