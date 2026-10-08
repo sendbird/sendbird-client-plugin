@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://github.com/sendbird/sendbird-client-plugin/core/schemas/run-summary.schema.json",
   "title": "Run summary",
-  "description": "What a skill reports at the end of a non-interactive run (claude -p) so a caller such as a CLI can show the diff, build, and verify without reading prose. One JSON object per run.",
+  "description": "What a skill reports at the end of a non-interactive run (claude -p) so a caller such as a CLI can show the diff, build, and verify without reading prose. One JSON object per run. It never carries a credential (access or session token, API token, private key).",
   "type": "object",
   "required": ["schemaVersion", "skill", "status", "changes", "manualSteps"],
   "additionalProperties": false,
@@ -83,7 +83,9 @@
         "properties": {
           "id": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
           "question": { "type": "string", "minLength": 1 },
-          "options": { "type": "array", "items": { "type": "string" }, "minItems": 1 }
+          "options": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+          "type": { "description": "single (pick one option), multi (pick any), or text (free text). Omitted means single when options exist, text otherwise.", "enum": ["single", "multi", "text"] },
+          "when": { "description": "Ask only when every named earlier answer is one of the listed option ids, e.g. {\"platform\": [\"ios\"]}.", "type": "object", "additionalProperties": { "type": "array", "items": { "type": "string" } } }
         }
       }
     },

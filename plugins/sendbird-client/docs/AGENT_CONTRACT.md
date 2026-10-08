@@ -42,6 +42,7 @@ The source must contain the symbol or exact signature. A related page is not evi
 - Preserve the project's package manager, architecture, naming, state management, and navigation choices.
 - Do not introduce a second SDK instance, initialization path, listener owner, or token store.
 - Keep secrets out of source, commands, logs, and generated files. Application IDs are not secrets.
+- Never put a credential (access or session token, API token, private key) in the run summary, `profile.json`, or any other file the plugin writes for itself. A caller such as a CLI passes only the App ID and region; the customer's own app code reads tokens at runtime from its environment or backend.
 - Preserve the template's `source:` comment when code is copied so the write-boundary guard can validate it.
 - Limit edits to the requested product and the lifecycle code required to support it.
 - Install dependencies so the project's next clean install works. Never pass `--legacy-peer-deps` or `--force` to npm (or `--ignore-engines` to yarn): they hide a version conflict that breaks the next `npm install`. When a package's peer range rejects the project's versions, install the newest version whose `peerDependencies` accept them; check with `npm view <package>@<range> peerDependencies`.

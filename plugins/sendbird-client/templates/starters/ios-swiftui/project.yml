@@ -1,0 +1,11 @@
+name: FixtureSwiftUI
+options: { deploymentTarget: { iOS: "15.0" }, bundleIdPrefix: com.example.fixture }
+targets:
+  FixtureSwiftUI:
+    type: application
+    platform: iOS
+    sources: [Sources]
+    info:
+      path: Sources/Info.plist
+      properties:
+        UILaunchScreen: {}
