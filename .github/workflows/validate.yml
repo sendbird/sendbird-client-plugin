@@ -20,3 +20,6 @@ jobs:
           set -euo pipefail
           claude plugin validate .
           claude plugin validate plugins/sendbird-client
+          want="v$(jq -r .version plugins/sendbird-client/.claude-plugin/plugin.json)"
+          got="$(jq -r '.plugins[] | select(.name == "sendbird-client") | .source.ref' .claude-plugin/marketplace.json)"
+          [ "$got" = "$want" ] || { echo "marketplace ref $got does not match the plugin version tag $want" >&2; exit 1; }

@@ -72,6 +72,7 @@ This plugin runs inside Claude Code with your user account's permissions. Three 
 |---|---|---|---|---|
 | Session start | `hooks/welcome.sh` | plugin files | adds the plugin's rules to the model's context | none |
 | Before a file write or shell command | `hooks/credential-guard.sh` | the content or command about to run | blocks it if it contains a credential | none |
+| Before a shell command | `hooks/destructive-command-guard.sh` | the command about to run | asks you to approve a Sendbird CLI `delete`, `revoke`, or `deactivate` run with `--yes`; in a `-p` run it is denied | none |
 | Before a file write | `hooks/source-claim-guard.sh` | the content about to be written, local files it cites | blocks Sendbird API code without a verifiable source | fetches the cited page if it is on `sendbird.com/docs` or `github.com/sendbird` |
 | After an agent finishes | `hooks/unsourced-claim-warn.sh` | the agent's reply | adds a warning when an API claim has no source | none |
 | When the answer ends | `hooks/final-answer-gate.sh` | the session transcript file (it checks only the last answer) | asks the model to revise an unsourced answer | same as `source-claim-guard.sh` |
