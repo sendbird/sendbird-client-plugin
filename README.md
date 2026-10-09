@@ -20,10 +20,10 @@ To use it for one run without installing (for example from a script or another C
 and pass it to Claude Code; nothing is installed and the next session does not load it:
 
 ```bash
-claude -p --plugin-dir sendbird-client-<version>.zip "/sendbird-client:setup --product chat"
+claude -p --model claude-sonnet-5-5 --plugin-dir sendbird-client-<version>.zip "/sendbird-client:setup --product chat"
 ```
 
-Each release lists the zip's sha256.
+Each release lists the zip's sha256. `--model` is optional; `claude-sonnet-5-5` is the model the release checks run on.
 
 ## Keeping it up to date
 
