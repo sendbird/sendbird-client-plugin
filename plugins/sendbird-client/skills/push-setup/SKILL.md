@@ -17,6 +17,7 @@ Push end-to-end for the detected platform.
 1. Detect platform + push provider (Tier-2 detector) + products. Ask once if unknown.
 2. Walk the provider path (APNS cert vs .p8 / FCM / Web Push / RN), cite the dashboard-config docs (do NOT invent dashboard click-paths), then hand off to the platform agent for token-registration + payload + deeplink code from the wired sources below.
 3. Cover foreground/background, Android 13+ POST_NOTIFICATIONS, VoIP push when Calls is present.
+   On logout, unregister the token before disconnecting, inside the app's existing sign-out or logout function; use the unregister call in `knowledge/curated/<platform>/cross-cutting/push.md`. A token left registered keeps sending the previous user's notifications to this device.
 4. End with a test-message checklist.
 
 ## Wired knowledge (populated and cited)
