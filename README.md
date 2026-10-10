@@ -20,10 +20,10 @@ To use it for one run without installing (for example from a script or another C
 and pass it to Claude Code; nothing is installed and the next session does not load it:
 
 ```bash
-claude -p --plugin-dir sendbird-client-<version>.zip "/sendbird-client:setup --product chat"
+claude -p --model claude-sonnet-5-5 --plugin-dir sendbird-client-<version>.zip "/sendbird-client:setup --product chat"
 ```
 
-Each release lists the zip's sha256.
+Each release lists the zip's sha256. `--model` is optional; `claude-sonnet-5-5` is the model the release checks run on.
 
 ## Keeping it up to date
 
@@ -75,7 +75,8 @@ This plugin runs inside Claude Code with your user account's permissions. Three 
 | Before a shell command | `hooks/destructive-command-guard.sh` | the command about to run | asks you to approve a Sendbird CLI `delete`, `revoke`, or `deactivate` run with `--yes`; in a `-p` run it is denied | none |
 | Before a file write | `hooks/source-claim-guard.sh` | the content about to be written, local files it cites | blocks Sendbird API code without a verifiable source | fetches the cited page if it is on `sendbird.com/docs` or `github.com/sendbird` |
 | After an agent finishes | `hooks/unsourced-claim-warn.sh` | the agent's reply | adds a warning when an API claim has no source | none |
-| When the answer ends | `hooks/final-answer-gate.sh` | the session transcript file (it checks only the last answer) | asks the model to revise an unsourced answer | same as `source-claim-guard.sh` |
+| When the answer ends | `hooks/final-answer-gate.sh` | the final answer (passed by Claude Code; older versions: the session transcript after your last prompt) | asks the model to revise an unsourced answer | same as `source-claim-guard.sh` |
+| When the answer ends, only when `SENDBIRD_NONINTERACTIVE` is set | `hooks/run-summary-gate.sh` | the final answer and the plugin's run summary schema | asks the model to fix a run summary that does not match the schema | none |
 | Before and after an agent runs | `hooks/telemetry-start.sh`, `hooks/telemetry-end.sh` | agent name, duration, outcome | nothing; writes a local log only if you opted in | none |
 
 The two fetching hooks send a plain request for the cited public page (8-second timeout); nothing from your project or conversation is sent.
