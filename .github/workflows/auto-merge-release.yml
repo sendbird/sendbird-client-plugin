@@ -1,7 +1,9 @@
 name: auto-merge-release
 # Release pull requests (release/* opened by the publishing bot) merge on their own once
 # `validate` passes: a second bot account approves (a PR author cannot approve its own PR),
-# then the publishing bot merges. Anything else waits for a human.
+# then the publishing bot merges. When the release also needs a code owner's approval, the
+# bot turns on GitHub auto-merge, so that approval alone completes the release. Anything
+# else waits for a human.
 on:
   workflow_run:
     workflows: [validate]
@@ -56,18 +58,24 @@ jobs:
             0) echo "All checks green on PR #$PR." ;;
             *) echo "Checks not green (rc=$rc) — leaving PR #$PR for a human."; exit 1 ;;
           esac
-      - name: Merge
+      - name: Merge now, or when the code owner approves
         if: steps.pr.outputs.skip != '1'
         env:
           GH_TOKEN: ${{ secrets.GH_API_TOKEN }}
           PR: ${{ steps.pr.outputs.number }}
         run: |
+          # A release that changes hooks, core, tools, or CI needs a code owner's approval
+          # (repository ruleset), which arrives after this run. Waiting here would time out, so
+          # turn on GitHub auto-merge instead: GitHub merges the moment every requirement is met,
+          # and the merge starts release-zip as usual. Mergeable already: merge now.
           for i in 1 2 3 4 5 6; do
             state=$(gh pr view "$PR" --repo "$REPO" --json mergeStateStatus --jq .mergeStateStatus)
             echo "attempt $i: $state"
             case "$state" in
               CLEAN) gh pr merge "$PR" --repo "$REPO" --squash --delete-branch && exit 0 ;;
-              BLOCKED|UNSTABLE|UNKNOWN) sleep 10 ;;
+              BLOCKED) gh pr merge "$PR" --repo "$REPO" --squash --delete-branch --auto \
+                         && { echo "Auto-merge on: PR #$PR merges when the code owner approves."; exit 0; } ;;
+              UNSTABLE|UNKNOWN) sleep 10 ;;
               *) echo "State=$state — leaving for a human."; exit 0 ;;
             esac
           done
