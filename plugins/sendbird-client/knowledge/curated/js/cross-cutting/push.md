@@ -4,7 +4,7 @@
 <!-- status: populated -->
 # js — push
 
-> Push token APIs read from `@sendbird/chat`'s shipped types (`lib/__definition.d.ts`); the React Native tap-handling pattern follows Sendbird's public RN UIKit sample. Verified 2026-09-30. Used by `/sendbird-client:push-setup`. Do not invent API.
+> Push token APIs read from `@sendbird/chat`'s shipped types (`lib/__definition.d.ts`); the React Native tap-handling pattern follows Sendbird's public RN UIKit sample. Verified 2026-09-30; the logout section was added on 2026-10-11. Used by `/sendbird-client:push-setup`. Do not invent API.
 
 ## Overview
 
@@ -24,7 +24,19 @@ await sb.unregisterAPNSPushTokenForCurrentUser(apnsToken);
 await sb.unregisterAPNSPushTokenAllForCurrentUser();
 ```
 
-All return `PushTokenRegistrationState`; an optional `PushTokenRegistrationDetails` second arg tracks device info. (source: @sendbird/chat lib/__definition.d.ts — `registerFCMPushTokenForCurrentUser`, `registerAPNSPushTokenForCurrentUser`, and their unregister variants)
+Register and single-token unregister return `PushTokenRegistrationState`; the `...AllForCurrentUser()` variants return nothing (`Promise<void>`). The register methods take an optional `PushTokenRegistrationDetails` second arg that tracks device info. (source: @sendbird/chat lib/__definition.d.ts — `registerFCMPushTokenForCurrentUser`, `registerAPNSPushTokenForCurrentUser`, and their unregister variants; 4.22.13 lines 4499-4532)
+
+## Logout: unregister this device before disconnecting
+
+A push token identifies one app install, so keep it registered only for the user who is signed in on that device. `sb.disconnect()` does not stop push: a disconnected user still receives push notifications for their group channels. On logout, unregister this device's token first and disconnect after it resolves; otherwise the next user on the device can receive the previous user's notifications.
+
+```ts
+// Android (FCM) token; use unregisterAPNSPushTokenForCurrentUser(apnsToken) for an iOS token.
+await sb.unregisterFCMPushTokenForCurrentUser(fcmToken);
+await sb.disconnect();
+```
+
+(source: https://sendbird.com/docs/chat/sdk/v4/javascript/application/authenticating-a-user/authentication — Disconnect from the Sendbird server, reviewed 2026-10-11; `@sendbird/chat` 4.22.13 `lib/__definition.d.ts`: `SendbirdChat.disconnect()` 4388, `unregisterFCMPushTokenForCurrentUser(token)` 4508, `unregisterAPNSPushTokenForCurrentUser(token)` 4528 — verified 2026-10-11; also source: https://sendbird.com/docs/chat/sdk/v4/javascript/ref/classes/_sendbird_chat.default.html)
 
 ## Setup checklist
 
@@ -54,6 +66,7 @@ function channelUrlFromPushData(data?: { [key: string]: string | object }) {
 ## Pitfalls
 
 - Register after the user connects; tokens are per-user.
+- On logout, unregister this device's token before `sb.disconnect()`; a disconnected user still receives push.
 - Use the FCM methods for Android tokens and the APNS methods for iOS tokens — don't mix.
 - Browser web push (service worker) is a separate setup, not these token methods.
 

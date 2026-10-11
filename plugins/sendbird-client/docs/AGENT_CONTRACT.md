@@ -69,6 +69,7 @@ Verification must exercise the edited path, not only inspect text:
 - initialization occurs once at the detected lifecycle entry
 - session and token refresh handlers are registered before connection
 - listeners, delegates, and handlers have matching cleanup
+- the logout path: when the project has a sign-out or logout function (for example `onLogout`), it now disconnects, removes the handlers you added, and, when you set up push, unregisters the push token (`knowledge/curated/<platform>/cross-cutting/push.md`). Do this in the project; it is never a `manualSteps` entry
 - host-specific requirements are present
 
 Report each check as pass, fail, or not run. Never describe a skipped check as passed.
