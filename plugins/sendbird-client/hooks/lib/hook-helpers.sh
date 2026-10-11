@@ -10,6 +10,30 @@ read_stdin_json() {
 # jget <jq-path> : echo a string field from $HOOK_JSON ('' if absent)
 jget() { printf '%s' "$HOOK_JSON" | jq -r "$1 // empty" 2>/dev/null; }
 
+# final_answer_text : the text of the answer this Stop event ends. The runtime passes it as
+# last_assistant_message; older runtimes do not, so fall back to the transcript and read only
+# what follows the latest user prompt (the final message may not be flushed yet, and the
+# previous turn's answer must not stand in for it). Prints nothing when neither yields text.
+final_answer_text() {
+  local text tp
+  text="$(jget '.last_assistant_message')"
+  if [ -z "$text" ]; then
+    tp="$(jget '.transcript_path')"
+    [ -n "$tp" ] && [ -r "$tp" ] || return 0
+    text="$(jq -rs '
+      [.[] | select(.type=="user" or .type=="assistant")] as $m
+      | ([$m[] | .type=="user" and ((.message.content|type)=="string"
+            or ((.message.content|type)=="array" and any(.message.content[]; .type!="tool_result")))]
+         | indices(true) | last) as $u
+      | if $u == null then empty else
+          [$m[($u+1):][] | select(.type=="assistant") | (.message.content // [])
+           | if type=="array" then map(select(.type=="text") | .text) | join("\n") else empty end
+           | select(length>0)] | join("\n")
+        end' "$tp" 2>/dev/null)"
+  fi
+  printf '%s' "$text"
+}
+
 # emit_warning <text> : warn-only output (exit 0 in caller). Never blocks.
 emit_warning() { jq -n --arg m "$1" '{systemMessage: $m}'; }
 

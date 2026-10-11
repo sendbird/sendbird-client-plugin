@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "about": "Questions a caller shows before the plugin builds a new app. The setup skill asks them in this order (interactive), or reads the answers from the request (non-interactive). Each question has at most 4 options, the limit of Claude Code's question tool. Options with a product only appear when that product is in the plugin's scope.",
+  "about": "Questions a caller shows before the plugin builds a new app. The setup skill asks them in this order (interactive), or reads the answers from the request (non-interactive). Each question has at most 4 options, the limit of Claude Code's question tool. Options with a product only appear when that product is in the plugin's scope. A question with \"offered\": false is a feature not offered in new-app setup for now: it is left out of the questions (set it to true or remove it to offer it again). A request that names that feature still gets it built.",
   "questions": [
     {
       "id": "platform", "type": "single", "required": true,
@@ -38,7 +38,8 @@
       ]
     },
     {
-      "id": "calls", "type": "multi", "required": false,
+      "id": "calls",
+      "offered": false, "type": "multi", "required": false,
       "question": "Add calls?",
       "options": [
         { "id": "voice-call", "label": "1:1 voice call", "product": "calls" },

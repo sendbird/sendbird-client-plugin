@@ -1,28 +1,143 @@
-<!-- last-verified-against: @sendbird/uikit-react 3.19.1 / @sendbird/uikit-react-native 3.12.9 -->
-<!-- verified-at: 2026-09-22 -->
+<!-- last-verified-against: @sendbird/uikit-react 3.19.1 / @sendbird/uikit-react-native 3.12.10 -->
+<!-- verified-at: 2026-10-11 -->
 <!-- verification-method: compile-check-js -->
 <!-- status: populated -->
 # js — theme (UIKit)
 
-> Verified against official UIKit theme resources and pinned/latest React and React Native template type-checks on 2026-09-22. Used by `/sendbird-client:ui-customize`. Do not invent API.
+> Verified against the shipped types of `@sendbird/uikit-react` 3.19.1 and `@sendbird/uikit-react-native` / `-foundation` 3.12.10, the public source at tags `v3.19.1` and `v3.12.10`, and the UIKit v3 theme and localization pages on sendbird.com. Every example type-checks against the pinned and latest packages. Used by `/sendbird-client:ui-customize`. Do not invent API.
 
-## Light / dark (React)
+## React (`@sendbird/uikit-react`)
+
+### Light / dark
 ```tsx
 import App from '@sendbird/uikit-react/App';
 
 <App userId={userId} appId={appId} theme="dark" />   // "light" | "dark"
 ```
-The same `theme` prop works on `SendBirdProvider`. (source: sendbird.com/docs UIKit v3 react theme-and-style-resources)
+The same `theme` prop works on `SendbirdProvider`. It is not read once: when the prop changes, the provider updates its theme and swaps the `sendbird-theme--light` / `sendbird-theme--dark` class on `<body>`. To follow the system setting, drive the prop from `prefers-color-scheme` (example below). (source: https://sendbird.com/docs/chat/uikit/v3/react/theme-and-style-resources/theme-resources ; github.com/sendbird/sendbird-uikit-react v3.19.1 src/lib/Sendbird/context/SendbirdProvider.tsx:133-136,145-166 ; @sendbird/uikit-react@3.19.1 types/lib/Sendbird/types.d.ts:144)
 
-## Custom colors
-UIKit React exposes CSS custom properties (`--sendbird-*`) and a color set; override them in your stylesheet or via the provider's color configuration. See the React color-resources guide. (source: sendbird.com/docs UIKit v3 react color-resources)
+### Brand colors (`colorSet`) and strings (`stringSet`)
+- `colorSet` is a `Record<string, string>` of UIKit CSS variable names to values, such as `--sendbird-light-primary-500` or `--sendbird-dark-primary-300`. Each color family (`primary`, `secondary`, `error`, `information`, `background`, …) exists in a light and a dark variant, so set both if you support both themes. The descriptive suffixes `extra-light`, `light`, `main`, `dark`, and `extra-dark` are accepted as aliases for `100` to `500`.
+- The provider applies `colorSet` in a layout effect that runs again whenever the object identity changes. Define it outside the component, or memoize it, so it isn't re-applied on every render.
+- `stringSet` is a `Partial<StringSet>`; UIKit merges it over the English defaults, so you only list the keys you change. Key names (for example `MESSAGE_INPUT__PLACE_HOLDER`) are in `types/ui/Label/stringSet.d.ts` of the installed package.
+- `dateLocale` takes a `date-fns` `Locale` for dates in the UI.
 
-## React Native
-`@sendbird/uikit-react-native` themes via `@sendbird/uikit-react-native-foundation` (`LightUIKitTheme` / `DarkUIKitTheme`) passed to the container's styles. (source: sendbird-uikit-react-native sample App.tsx imports `LightUIKitTheme`/`DarkUIKitTheme` from `@sendbird/uikit-react-native-foundation`)
+```tsx
+import { useEffect, useState } from 'react';
+import { SendbirdProvider } from '@sendbird/uikit-react/SendbirdProvider';
+import { GroupChannel } from '@sendbird/uikit-react/GroupChannel';
+import '@sendbird/uikit-react/dist/index.css';
+
+const colorSet = {
+  '--sendbird-light-primary-500': '#00487c',
+  '--sendbird-light-primary-400': '#4bb3fd',
+  '--sendbird-light-primary-300': '#3e6680',
+  '--sendbird-light-primary-200': '#0496ff',
+  '--sendbird-light-primary-100': '#027bce',
+};
+
+const stringSet = {
+  MESSAGE_INPUT__PLACE_HOLDER: 'Saisissez un message.',
+  MESSAGE_INPUT__PLACE_HOLDER__DISABLED: 'Le chat est indisponible dans ce canal.',
+};
+
+function useSystemTheme(): 'light' | 'dark' {
+  const query = '(prefers-color-scheme: dark)';
+  const [dark, setDark] = useState(() => window.matchMedia(query).matches);
+  useEffect(() => {
+    const mql = window.matchMedia(query);
+    const onChange = (event: MediaQueryListEvent) => setDark(event.matches);
+    mql.addEventListener('change', onChange);
+    return () => mql.removeEventListener('change', onChange);
+  }, []);
+  return dark ? 'dark' : 'light';
+}
+
+function ChatRoot() {
+  const theme = useSystemTheme();
+  return (
+    <SendbirdProvider appId={APP_ID} userId={USER_ID} theme={theme} colorSet={colorSet} stringSet={stringSet}>
+      <GroupChannel channelUrl={CHANNEL_URL} />
+    </SendbirdProvider>
+  );
+}
+```
+
+(source: https://sendbird.com/docs/chat/uikit/v3/react/theme-and-style-resources/localization-resources/text ; https://sendbird.com/docs/chat/uikit/v3/react/theme-and-style-resources/color-resources ; github.com/sendbird/sendbird-uikit-react v3.19.1 src/lib/hooks/useTheme.ts:116-126 — `colorSet` merged over the defaults and applied with `css-vars-ponyfill` when the object changes ; src/lib/utils/colorMapper.ts:7-26 (descriptive aliases) ; src/lib/Sendbird/context/SendbirdProvider.tsx:96,413-420 (`stringSet` merged over `getStringSet('en')`) ; @sendbird/uikit-react@3.19.1 types/lib/Sendbird/types.d.ts:147-149 `colorSet`, `stringSet`, `dateLocale` ; types/ui/Label/stringSet.d.ts:8,132-133)
+
+## React Native (`@sendbird/uikit-react-native`)
+
+### Light / dark and custom colors
+Pass a `UIKitTheme` to `SendbirdUIKitContainer` as `styles.theme`; without it the container uses `LightUIKitTheme`. `LightUIKitTheme`, `DarkUIKitTheme`, `createTheme`, and `Palette` come from `@sendbird/uikit-react-native-foundation`. To follow the device setting, choose the theme from `useColorScheme()`.
+
+`createTheme({ colorScheme, palette?, colors, typography? })` builds a theme. `colors` is a function of the palette that returns the full `UIKitColors` object, including per-component colors under `colors.ui`. Spreading `LightUIKitTheme.colors` (or `DarkUIKitTheme.colors`) copies those per-component values as they are, so they don't follow a new palette; override the `ui` entries you need as well.
+
+```tsx
+import { useColorScheme } from 'react-native';
+import { SendbirdUIKitContainer } from '@sendbird/uikit-react-native';
+import { DarkUIKitTheme, LightUIKitTheme, Palette, createTheme } from '@sendbird/uikit-react-native-foundation';
+import { createMMKV } from 'react-native-mmkv';
+
+const mmkv = createMMKV();
+
+const BrandLightTheme = createTheme({
+  colorScheme: 'light',
+  palette: { ...Palette, primary300: '#00487c' },
+  colors: (palette) => ({ ...LightUIKitTheme.colors, primary: palette.primary300 }),
+});
+
+function App() {
+  const scheme = useColorScheme();
+  return (
+    <SendbirdUIKitContainer
+      appId={APP_ID}
+      chatOptions={{ localCacheStorage: mmkv }}
+      platformServices={platformServices}
+      styles={{ theme: scheme === 'dark' ? DarkUIKitTheme : BrandLightTheme }}
+    >
+      {/* fragments / navigation */}
+    </SendbirdUIKitContainer>
+  );
+}
+```
+
+(source: https://sendbird.com/docs/chat/uikit/v3/react-native/theme-and-style-resources/theme-resource ; github.com/sendbird/sendbird-uikit-react-native v3.12.10 packages/uikit-react-native/src/containers/SendbirdUIKitContainer.tsx:107-113 `styles`, 250 (default `LightUIKitTheme`) ; @sendbird/uikit-react-native-foundation@3.12.10 src/index.ts:57-60 ; src/theme/createTheme.ts:6-18 ; src/theme/LightUIKitTheme.ts:3-7 ; src/types.ts:23-31 `UIKitTheme`, 165-204 `UIKitColors`, 219-224 `UIKitPalette`)
+
+### Strings and localization
+`localization.stringSet` on the container takes a complete `StringSet`, not a partial one. Build it with `createBaseStringSet({ dateLocale, overrides })`, which fills every key you don't override, or start from the exported English set `StringSetEn`. `dateLocale` is a `date-fns` locale; `date-fns` is a peer dependency of `@sendbird/uikit-react-native`. Some entries are functions (for example `LABELS.TYPING_INDICATOR_TYPINGS(users)`), while `GROUP_CHANNEL_LIST.HEADER_TITLE` and `LABELS.CHANNEL_INPUT_PLACEHOLDER_ACTIVE` are plain strings.
+
+```tsx
+import { ko } from 'date-fns/locale';
+import { SendbirdUIKitContainer, createBaseStringSet } from '@sendbird/uikit-react-native';
+import { createMMKV } from 'react-native-mmkv';
+
+const mmkv = createMMKV();
+
+const StringSetKo = createBaseStringSet({
+  dateLocale: ko,
+  overrides: {
+    GROUP_CHANNEL_LIST: { HEADER_TITLE: '채팅' },
+    LABELS: { CHANNEL_INPUT_PLACEHOLDER_ACTIVE: '메시지를 입력하세요' },
+  },
+});
+
+<SendbirdUIKitContainer
+  appId={APP_ID}
+  chatOptions={{ localCacheStorage: mmkv }}
+  platformServices={platformServices}
+  localization={{ stringSet: StringSetKo }}
+>
+  {/* fragments / navigation */}
+</SendbirdUIKitContainer>
+```
+
+(source: https://sendbird.com/docs/chat/uikit/v3/react-native/theme-and-style-resources/string-resource ; github.com/sendbird/sendbird-uikit-react-native v3.12.10 packages/uikit-react-native/src/localization/createBaseStringSet.ts:22-34 ; src/localization/StringSet.type.ts:218-220,264-299 ; src/containers/SendbirdUIKitContainer.tsx:104-106,162 (falls back to `StringSetEn`) ; src/index.ts:70-71 ; @sendbird/uikit-react-native@3.12.10 package.json peerDependencies `date-fns`)
 
 ## Pitfalls
 - React: import the UIKit CSS (`@sendbird/uikit-react/dist/index.css`) or theming has nothing to style.
-- Drive `theme` from your app state to follow system/dark mode.
+- React: a `colorSet` object created inside the render function is re-applied on every render.
+- React Native: `localization.stringSet` must be a full `StringSet`; passing only the keys you change fails type-checking.
+- Drive `theme` (React) or `styles.theme` (React Native) from your app state to follow system dark mode.
 
 ## Related
 - UIKit: knowledge/curated/js/products/uikit.md
