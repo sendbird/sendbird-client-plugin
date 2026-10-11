@@ -15,18 +15,15 @@ read_stdin_json
 # Documented loop guard: if we already blocked once this stop, let it pass.
 [ "$(jget '.stop_hook_active')" = "true" ] && exit 0
 
-# transcript_path is provided by the runtime but not a documented Stop field —
-# treat as optional and fail open when absent/unreadable.
-tp="$(jget '.transcript_path')"
-[ -n "$tp" ] && [ -r "$tp" ] || exit 0
-
-text="$(jq -rs '[.[] | select(.type=="assistant") | (.message.content // []) |
-  if type=="array" then map(select(.type=="text") | .text) | join("\n") else empty end |
-  select(length>0)] | last // empty' "$tp" 2>/dev/null)"
+text="$(final_answer_text)"
 [ -n "$text" ] || exit 0
 
+# A six-digit number counts as an error code only next to an error word on the same
+# line; otherwise PR numbers, dates and IDs would gate unrelated answers.
+code_ctx='(error|Error|ERROR|code|Code|에러|오류|코드)[^0-9]{0,24}[0-9]{6}([^0-9]|$)'
+
 # Only gate Sendbird-flavored answers that include code-shaped content.
-printf '%s' "$text" | grep -Eq 'SendbirdChat|SendBirdCall|SendbirdCalls|AIAgentMessenger|SendbirdUIKit|SendbirdLive|SendbirdDesk|SendBirdDesk|MessengerLauncher|GroupChannel|BaseMessage|@sendbird/|\bSBU[A-Z]|\bSBA[A-Z]|\bSBDSK|\b[0-9]{6}\b' || exit 0
+printf '%s' "$text" | grep -Eq "SendbirdChat|SendBirdCall|SendbirdCalls|AIAgentMessenger|SendbirdUIKit|SendbirdLive|SendbirdDesk|SendBirdDesk|MessengerLauncher|GroupChannel|BaseMessage|@sendbird/|\bSBU[A-Z]|\bSBA[A-Z]|\bSBDSK|$code_ctx" || exit 0
 printf '%s' "$text" | grep -Eq '```|[A-Za-z]\([A-Za-z]*:' || exit 0
 
 # Pass only when a concrete source marker resolves to a shipped local file or an
@@ -34,7 +31,10 @@ printf '%s' "$text" | grep -Eq '```|[A-Za-z]\([A-Za-z]*:' || exit 0
 sources="$(printf '%s' "$text" | grep -Eo '(source:|출처:[[:space:]])[[:space:]]*[^)`[:space:]]+' | sed -E 's/^(source:|출처:)[[:space:]]*//' || true)"
 symbols="$(printf '%s' "$text" | grep -Eo '(SendbirdChat|SendBirdCall|SendbirdCalls|AIAgentMessenger|SendbirdUIKit|SendbirdLive|SendbirdDesk|SendBirdDesk|MessengerLauncher|GroupChannel|BaseMessage|SBU[A-Z][A-Za-z0-9_]*|SBA[A-Z][A-Za-z0-9_]*|SBDSK[A-Za-z0-9_]*)(\.[A-Za-z_][A-Za-z0-9_]*)?' | sort -u || true)"
 instance_methods="$(printf '%s' "$text" | grep -Eo '(sb|channel|messengerLauncher)\.[A-Za-z_][A-Za-z0-9_]*' | sed 's/.*\.//' | sort -u || true)"
-symbols="$(printf '%s\n%s\n' "$symbols" "$instance_methods" | sed '/^$/d' | sort -u)"
+error_codes="$(printf '%s' "$text" | grep -Eo "$code_ctx" | grep -Eo '[0-9]{6}' | sort -u || true)"
+symbols="$(printf '%s\n%s\n%s\n' "$symbols" "$instance_methods" "$error_codes" | sed '/^$/d' | sort -u)"
+# Nothing checkable (for example a bare package name in prose): let it pass.
+[ -n "$symbols" ] || exit 0
 source_supports_symbol() {
   local file="$1" symbol="$2" method
   [ -s "$file" ] || return 1

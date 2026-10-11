@@ -4,7 +4,7 @@
 <!-- status: populated -->
 # ios — push
 
-> Push APIs read from the SDK's own `SendbirdChatSDK.swiftinterface`, verified 2026-09-30. register/unregister, logout order, and the Notification Service Extension snippet build-verified (xcodebuild). Used by `/sendbird-client:push-setup`. Do not invent API.
+> Push APIs read from the SDK's own `SendbirdChatSDK.swiftinterface`, verified 2026-09-30. register/unregister, logout order, and the Notification Service Extension snippet build-verified (xcodebuild). The pending-token and payload sections were added on 2026-10-11 from the 4.39.11 interface and the iOS push registration page. Used by `/sendbird-client:push-setup`. Do not invent API.
 
 ## Overview
 iOS push uses APNs. Register the device's APNs token with Sendbird after the user connects; register a PushKit (VoIP) token for Calls. Upload your APNs auth key / certificate on the Sendbird dashboard.
@@ -49,6 +49,50 @@ func logOutUIKit() {
 ```
 
 (source: SendbirdChatSDK.swiftinterface (4.39.10) lines 6392, 6395, 6402, 6409; SendbirdUIKit.swiftinterface (3.36.0) lines 16569–16570; https://sendbird.com/docs/chat/sdk/v4/ios/push-notifications/configuring-preferences/register-push-notification-credentials; https://sendbird.com/docs/chat/sdk/v4/ios/application/authenticating-a-user/authentication; https://sendbird.com/docs/chat/uikit/v3/swiftui/essentials/authentication)
+
+## Token registered before connect (pending)
+
+If the device token arrives before the user is connected, registration returns `PushTokenRegistrationStatus.pending`. Register it again from the `connect` completion with `SendbirdChat.getPendingPushToken()`.
+
+```swift
+import SendbirdChatSDK
+
+func connectAndRegisterPendingToken() {
+    SendbirdChat.connect(userId: USER_ID) { user, error in
+        guard error == nil, let token = SendbirdChat.getPendingPushToken() else { return }
+        SendbirdChat.registerDevicePushTokenForMultiDevicePush(token) { status, error in }
+    }
+}
+```
+
+(source: SendbirdChatSDK.swiftinterface (4.39.11) lines 6393 `getPendingPushToken()`, 6396 `registerDevicePushTokenForMultiDevicePush(_:completionHandler:)`, 5744 `PushTokenRegistrationStatus.pending`, 6318 `connect(userId:completionHandler:)`; source: https://sendbird.com/docs/chat/sdk/v4/ios/push-notifications/configuring-preferences/register-push-notification-credentials — reviewed 2026-10-11)
+
+## Handle a notification payload (background and tap)
+
+Sendbird sends APNs an alert (`{sender's nickname}: {text message}`), the default sound, and a badge with the user's total unread message count (the badge can be turned off in the dashboard). The push also carries a JSON object under the `sendbird` key: `type` (`MESG`, `FILE`, or `ADMM` for an admin message), `message`, `channel.channel_url`, `sender`, `unread_message_count`, and more. The docs handle it in `application(_:didReceiveRemoteNotification:fetchCompletionHandler:)`, which receives notifications while the app is inactive, in the foreground, or in the background.
+
+```swift
+import UIKit
+
+final class PushPayloadAppDelegate: UIResponder, UIApplicationDelegate {
+    func application(_ application: UIApplication,
+                     didReceiveRemoteNotification userInfo: [AnyHashable: Any],
+                     fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
+        let sendbird = userInfo["sendbird"] as? [String: Any]
+        let channelURL = (sendbird?["channel"] as? [String: Any])?["channel_url"] as? String
+        if application.applicationState == .inactive {
+            // Received while the app is inactive (the docs handle this state apart from
+            // foreground and background). Before opening `channelURL`, initialize and connect.
+        }
+        _ = channelURL
+        completionHandler(.newData)
+    }
+}
+```
+
+An app opened this way usually needs data before `connect` finishes. Start Chat calls from the `connect` completion; see "Call APIs only after connect completes" in knowledge/curated/ios/products/chat.md.
+
+(source: https://sendbird.com/docs/chat/sdk/v4/ios/push-notifications/configuring-preferences/register-push-notification-credentials — Step 5 and the full `sendbird` payload format, reviewed 2026-10-11)
 
 ## Delivery receipts for offline members (Notification Service Extension)
 

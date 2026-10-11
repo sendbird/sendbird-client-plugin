@@ -53,7 +53,7 @@
 
 ### Replying to a reply fails with an invalid parent message error
 - **Cause:** Sendbird threads are one level deep, so a reply cannot be the parent of another reply.
-- **Fix:** Always use the thread's root message as the parent. When the user replies to a reply, read that message's `BaseMessage.parentMessageId` and set it as `parentMessageId` on the create params (source: SendbirdChatSDK 4.39.11 SendbirdChatSDK.swiftinterface:1036, :1226; also source: https://sendbird.com/docs/chat/sdk/v4/ios/message/using-message-threading/create-a-message-thread).
+- **Fix:** Always use the thread's root message as the parent. When the user replies to a reply, read that message's `BaseMessage.parentMessageId` and set it as `parentMessageId` on the create params (source: SendbirdChatSDK 4.39.11 SendbirdChatSDK.swiftinterface:1036, :1226; also source: https://sendbird.com/docs/chat/sdk/v4/ios/message/using-message-threading/create-a-message-thread). A build-checked reply and list-replies example is in "Message threads" in knowledge/curated/ios/products/chat.md.
 - **Cases:** https://community.sendbird.com/t/error-reply-message/4219
 
 ### Thread replies also show up in the main message list

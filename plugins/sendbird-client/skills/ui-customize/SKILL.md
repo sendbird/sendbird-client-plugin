@@ -21,6 +21,9 @@ Theme / override Sendbird UI for the detected platform + host + product.
 
 ## Wired knowledge (populated and cited)
 - UIKit theming: `knowledge/curated/<platform>/cross-cutting/theme.md` — iOS `SBUTheme.set(colorScheme:)` + per-component themes; Android `SendbirdUIKit.setDefaultThemeMode(...)`; JS `<App theme="light|dark">` + `--sendbird-*` CSS vars; RN foundation themes.
+- iOS UIKit components: `knowledge/curated/ios/products/uikit.md` — custom message cells (including file messages), input bar buttons and attachment options, disabling input, channel list item and loading indicator, header, thumbnails, video playback. iOS theme at runtime, fonts, strings: `knowledge/curated/ios/cross-cutting/theme.md`.
+- iOS SwiftUI (SendbirdSwiftUI): `knowledge/curated/ios/hosts/swiftui.md` — `headerItem`/`listItem`/`inputItem` builders for message views, reply thumbnails, input buttons, channel-list search and loading, header, theme.
+- UIKit component customization (JS): `knowledge/curated/js/products/uikit.md` — React render props and React Native fragment modules for message rendering (including file messages), the message input, the channel list (custom row, filter, loading state), and the channel header.
 
 ## No-Fabrication
 Theme/override symbols must be verified for the host (no invented theme APIs). Uncited -> fetch the verified source or decline. Cite each symbol.
