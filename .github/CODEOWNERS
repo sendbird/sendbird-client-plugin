@@ -1,6 +1,8 @@
 # Code that runs on customers' machines, and the CI and release setup, needs a code owner's
 # review (pre-release security review C11). A repository ruleset makes this review required.
-/.github/                        @tezpark
-/plugins/sendbird-client/hooks/  @tezpark
-/plugins/sendbird-client/core/   @tezpark
-/plugins/sendbird-client/tools/  @tezpark
+# This repository only receives release PRs built from the reviewed source, so the release
+# approval account is a code owner too and releases merge without a manual step.
+/.github/                        @tezpark @sendbird-sdk-deployment-2
+/plugins/sendbird-client/hooks/  @tezpark @sendbird-sdk-deployment-2
+/plugins/sendbird-client/core/   @tezpark @sendbird-sdk-deployment-2
+/plugins/sendbird-client/tools/  @tezpark @sendbird-sdk-deployment-2
