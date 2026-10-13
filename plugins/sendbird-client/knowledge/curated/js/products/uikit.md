@@ -203,7 +203,7 @@ function ChannelSidebar({ onSelect }: { onSelect: (url: string | null) => void }
 }
 ```
 
-`channelNameContainsFilter` matches the channel name, which is often empty for 1:1 channels; use `nicknameContainsFilter` to match member nicknames instead. To keep the default row and only add to it, render `GroupChannelListItem` (named export of `@sendbird/uikit-react/GroupChannelList/components/GroupChannelListItem`) with the props you received.
+`channelNameContainsFilter` matches the channel name; `nicknameContainsFilter` matches member nicknames. To keep the default row and only add to it, render `GroupChannelListItem` (named export of `@sendbird/uikit-react/GroupChannelList/components/GroupChannelListItem`) with the props you received.
 
 (source: https://github.com/sendbird/sendbird-uikit-react/blob/v3.19.1/src/modules/GroupChannelList/components/GroupChannelListItem/utils.ts ; src/modules/GroupChannelList/components/GroupChannelListUI/index.tsx:45-77 — the wrapper `div` with `onClick` ; src/modules/GroupChannelList/components/GroupChannelListUI/GroupChannelListUIView.tsx:60-79 ; src/modules/GroupChannelList/context/GroupChannelListProvider.tsx:148-158,288-293 ; CHANGELOG.md v3.14.14 ; @sendbird/uikit-react@3.19.1 types/modules/GroupChannelList/components/GroupChannelListUI/index.d.ts:6-12 ; types/modules/GroupChannelList/components/GroupChannelListItem/GroupChannelListItemView.d.ts:5-13 ; types/modules/GroupChannelList/components/GroupChannelListItem/index.d.ts:3-5 ; types/modules/GroupChannelList/context/GroupChannelListProvider.d.ts:15,25 `ChannelListQueryParamsType` ; @sendbird/chat@4.22.13 lib/__definition.d.ts:5384 `limit`, 5794 `nicknameContainsFilter`, 5812 `channelNameContainsFilter` ; https://sendbird.com/docs/chat/uikit/v3/react/modules/channel-list)
 
@@ -364,12 +364,11 @@ The example leaves `placeholder` unset while locked, so the localized disabled t
 ### Channel list: custom item, filter, loading state
 - `renderGroupChannelPreview({ channel, onPress, onLongPress })` replaces each row. `onPress` calls your `onPressChannel`, and `onLongPress` opens the row menu. The default row component is not exported from the package root, so a custom preview draws the whole row.
 - `channelListQueryParams` takes the same Chat SDK filter fields as on the web (`includeEmpty`, `customTypesFilter`, `nicknameContainsFilter`, `channelNameContainsFilter`, …) plus `limit` and `order`.
-- The list creates its collection once per SDK instance and user, so changing `channelListQueryParams` on a mounted fragment does not reload it. To apply a new search, remount the fragment with a `key`, as below.
+- The list creates its collection once per SDK instance and user, so changing `channelListQueryParams` on a mounted fragment does not reload it.
 - Pass `StatusLoading` and `StatusEmpty` modules to `createGroupChannelListFragment` to replace the loading and empty states.
 
 ```tsx
-import { useState } from 'react';
-import { Pressable, Text, TextInput, View } from 'react-native';
+import { Pressable, Text } from 'react-native';
 import { createGroupChannelListFragment } from '@sendbird/uikit-react-native';
 
 const GroupChannelListFragment = createGroupChannelListFragment({
@@ -378,23 +377,17 @@ const GroupChannelListFragment = createGroupChannelListFragment({
 });
 
 function ChannelListScreen({ onOpen, onCreate }: { onOpen: (url: string) => void; onCreate: () => void }) {
-  const [draft, setDraft] = useState('');
-  const [query, setQuery] = useState('');
   return (
-    <View style={{ flex: 1 }}>
-      <TextInput value={draft} onChangeText={setDraft} onSubmitEditing={() => setQuery(draft)} placeholder="Search by member name" />
-      <GroupChannelListFragment
-        key={query}
-        onPressChannel={(channel) => onOpen(channel.url)}
-        onPressCreateChannel={onCreate}
-        channelListQueryParams={{ includeEmpty: false, nicknameContainsFilter: query || undefined }}
-        renderGroupChannelPreview={({ channel, onPress, onLongPress }) => (
-          <Pressable onPress={onPress} onLongPress={onLongPress}>
-            <Text>{channel.name}</Text>
-          </Pressable>
-        )}
-      />
-    </View>
+    <GroupChannelListFragment
+      onPressChannel={(channel) => onOpen(channel.url)}
+      onPressCreateChannel={onCreate}
+      channelListQueryParams={{ includeEmpty: false, customTypesFilter: ['support'] }}
+      renderGroupChannelPreview={({ channel, onPress, onLongPress }) => (
+        <Pressable onPress={onPress} onLongPress={onLongPress}>
+          <Text>{channel.name}</Text>
+        </Pressable>
+      )}
+    />
   );
 }
 ```
@@ -436,7 +429,7 @@ To change every UIKit header at once (for example to hand them to React Navigati
 - React: the package's shipped root `types/index.d.ts` lags the actual v3 component tree (it still lists `ChannelList` / `withSendBird`, a v2-era surface). Verify prop names against the subpath's real TSX source, not that file, before citing them.
 - React: `renderFileUploadIcon` replaces the attach button and its file picker, not only the icon (see "Message input" above).
 - React Native: `platformServices` is required; follow the quickstart's factory setup exactly.
-- React Native: changing `channelListQueryParams` on a mounted channel list fragment does not reload the list; remount it with a `key` (see "Channel list" above).
+- React Native: changing `channelListQueryParams` on a mounted channel list fragment does not reload the list (see "Channel list" above).
 - App ID from env; access/session tokens are secrets — never hard-code.
 
 ## Related

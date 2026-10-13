@@ -1,10 +1,10 @@
 <!-- last-verified-against: sendbird-uikit-ios 3.36.1 -->
-<!-- verified-at: 2026-10-11 -->
+<!-- verified-at: 2026-10-12 -->
 <!-- verification-method: compile-check-ios -->
 <!-- status: populated -->
 # ios — theme (UIKit)
 
-> Verified against the public UIKit README, the public SendbirdUIKit `.swiftinterface`, and pinned/latest iOS template xcodebuild on 2026-09-22. The runtime switch, fonts and colors, and strings sections were read from the public source at tag `3.36.1` and build with `tools/curated/compile-snippets-ios.sh` (verified 2026-10-11). Used by `/sendbird-client:ui-customize`. Do not invent API.
+> Verified against the public UIKit README, the public SendbirdUIKit `.swiftinterface`, and pinned/latest iOS template xcodebuild on 2026-09-22. The runtime switch, fonts and colors, and strings sections were read from the public source at tag `3.36.1` and build with `tools/curated/compile-snippets-ios.sh` (verified 2026-10-11). The message input colors and date format sections were read from the same tag and build the same way (verified 2026-10-12). Used by `/sendbird-client:ui-customize`. Do not invent API.
 
 ## Overview
 Sendbird UIKit for iOS themes through three singletons: `SBUTheme` (themes), `SBUColorSet` (colors), `SBUFontSet` (fonts). Switch light/dark globally, or override per-component theme objects.
@@ -68,6 +68,34 @@ SBUStringSet.Channel_Typing = { (members: [User]) in
 }
 ```
 The docs page lists every key. Where the docs text and the source differ, the source is what ships; for example, the default `MessageInput_Text_Placeholder` in 3.36.1 is "Enter message". SendbirdSwiftUI exposes the same `SBUStringSet` (see knowledge/curated/ios/hosts/swiftui.md). (source: https://github.com/sendbird/sendbird-uikit-ios/blob/3.36.1/Sources/Constant/SBUStringSet.swift#L17-L201 (`ChannelList_Header_Title` at line 74, `Channel_Typing` at line 87, `MessageInput_Text_Placeholder` at line 201); source: https://sendbird.com/docs/chat/uikit/v3/ios-uikit/theme-and-style-resources/string-resources)
+
+## Message input colors
+`SBUMessageInputView` reads its colors from `SBUTheme.messageInputTheme` in `setupStyles()`. Since 3.34.0 the background, text field background, and text field border colors are Liquid Glass-adaptive: `backgroundColorAdaptive`, `textFieldBackgroundColorAdaptive`, and `textFieldBorderColorAdaptive` hold one value for the classic look and one for Liquid Glass. The old names (`backgroundColor`, `textFieldBackgroundColor`, `textFieldBorderColor`) are deprecated. An adaptive property is read-only; change it through its `$` wrapper with `updateValues(base:liquidGlass:)`, where a `nil` argument keeps that value. `buttonTintColor` is still a plain property.
+
+```swift
+import UIKit
+import SendbirdUIKit
+
+SBUTheme.set(colorScheme: .light)   // first: it replaces the theme objects
+let inputTheme = SBUTheme.messageInputTheme
+inputTheme.$backgroundColorAdaptive.updateValues(base: .secondarySystemBackground)
+inputTheme.$textFieldBackgroundColorAdaptive.updateValues(base: .systemBackground)
+inputTheme.$textFieldBorderColorAdaptive.updateValues(base: .systemBlue, liquidGlass: .systemBlue)
+inputTheme.buttonTintColor = .systemBlue
+```
+For one screen type only, override `setupStyles()` in an input view subclass instead (knowledge/curated/ios/products/uikit.md, "Restyle the input bar on open channels only"). (source: https://github.com/sendbird/sendbird-uikit-ios/blob/3.36.1/Sources/Theme/SBUTheme.swift#L1397-L1456 (deprecated setters, adaptive properties at lines 1452–1456, `buttonTintColor` at line 1443); source: https://github.com/sendbird/sendbird-uikit-ios/blob/3.36.1/Sources/Util/SBUPropertyWrapper.swift#L176-L235 (`SBUAdaptive`: read-only `wrappedValue`, `updateValues(base:liquidGlass:)`); source: https://github.com/sendbird/sendbird-uikit-ios/blob/3.36.1/Sources/View/Channel/MessageInput/SBUMessageInputView.swift#L902-L953; community context: https://github.com/sendbird/sendbird-uikit-ios/discussions/125)
+
+## Date and time formats
+`SBUDateFormatSet` holds the format strings UIKit uses for dates, for example `SBUDateFormatSet.Message.sentTimeFormat` (the time under a message in group channels and threads, default `"hh:mm"`) and `SBUDateFormatSet.Message.sentTimeFormatInOpenChannel`. UIKit passes them to `DateFormatter.setLocalizedDateFormatFromTemplate(_:)`, so each string is a template: the device locale decides the order and separators.
+
+```swift
+import SendbirdUIKit
+
+// Once at launch, before the first channel screen:
+SBUDateFormatSet.Message.sentTimeFormat = "HH:mm"
+SBUDateFormatSet.Message.sentTimeFormatInOpenChannel = "HH:mm"
+```
+(source: https://github.com/sendbird/sendbird-uikit-ios/blob/3.36.1/Sources/Constant/SBUDateFormatSet.swift#L50-L66; source: https://github.com/sendbird/sendbird-uikit-ios/blob/3.36.1/Sources/Extension/Date+SBUIKit.swift#L30-L38 (`sbu_toString(dateFormat:localizedFormat:)`, template by default); source: https://github.com/sendbird/sendbird-uikit-ios/blob/3.36.1/Sources/View/Channel/CellView/SBUMessageStateView.swift#L170 (group channel time); source: https://github.com/sendbird/sendbird-uikit-ios/blob/3.36.1/Sources/View/Channel/MessageCell/OpenChannel/SBUOpenChannelContentBaseMessageCell.swift#L222 (open channel time); source: https://developer.apple.com/documentation/foundation/dateformatter/setlocalizeddateformatfromtemplate(_:); community context: https://github.com/sendbird/sendbird-uikit-ios/discussions/74)
 
 ## Pitfalls
 - Set theme/color/font overrides before presenting the UIKit view controller.

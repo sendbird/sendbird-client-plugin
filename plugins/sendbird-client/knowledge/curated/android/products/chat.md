@@ -34,11 +34,11 @@ SendbirdChat.connect(userId) { user, e ->
 Callback receives `(User?, SendbirdException?)`. Authenticated apps pass a session/access token — see `knowledge/curated/android/products/auth.md`. (source: sendbird.com/docs chat v4 android getting-started)
 
 ## Call APIs only after connect completes
-An app opened from a push notification often asks for data (the total unread count, a channel) before `connect` has finished. Start those calls from the `connect` callback, or check the connection state first and wait for the connection handler.
+Apart from initializing, the SDK must be connected before almost every call. Start calls that need the server from the `connect` callback, or check the connection state first and wait for the connection handler.
 ```kotlin
 // App launch or push open: init, connect, then call APIs that need the server.
 SendbirdChat.connect(USER_ID) { user, e ->
-    if (user == null) return@connect          // not connected: retry later
+    if (user == null) return@connect          // not connected
     if (e != null) return@connect             // local caching: offline with cached data, wait for onReconnectSucceeded()
     SendbirdChat.getTotalUnreadMessageCount(handler = UnreadMessageCountHandler { groupChannelCount, _, err -> /* badge */ })
 }
@@ -53,7 +53,6 @@ if (SendbirdChat.connectionState == ConnectionState.OPEN) {
 - Get the `InitResultHandler` callback before connecting. Apart from initializing, connect before calling almost every Chat SDK method; a call made without a connection returns `ERR_CONNECTION_REQUIRED` (800101). (source: https://sendbird.com/docs/chat/sdk/v4/android/application/authenticating-a-user/authentication — reviewed 2026-10-11)
 - With local caching, `connect` can return the user together with an error: the app is offline and can draw the channel list and chat view from cached data, and the SDK connects later and calls `ConnectionHandler.onReconnectSucceeded()`. Server calls made in that state do not have a connection yet. The exception is 400300, 400301, 400302, or 400310: the SDK clears the cached user data. (source: same authentication page)
 - `onConnected()` fires when the SDK first connects to the server; `onReconnectSucceeded()` fires after an automatic reconnection. (source: https://sendbird.com/docs/chat/sdk/v4/android/event-handler/managing-connection-event-handlers/add-or-remove-a-connection-event-handler — reviewed 2026-10-11)
-- `ERR_NETWORK` (800120) is an unstable network or an error in the SDK's network library, not a server rejection; if a call made right after launch fails with it, wait for the connection and retry. Error table: knowledge/curated/android/cross-cutting/errors.md.
 - (source: `sendbird-chat` 4.36.5 AAR, `javap -public`: `SendbirdChat.connect(String, ConnectHandler)`, `getConnectionState()`, `getTotalUnreadMessageCount(GroupChannelTotalUnreadMessageCountParams, UnreadMessageCountHandler)`, `addConnectionHandler(String, ConnectionHandler)`; `com.sendbird.android.ConnectionState` — `CONNECTING`, `OPEN`, `CLOSED` — verified 2026-10-11; also source: https://sendbird.com/docs/chat/sdk/v4/android/ref/-sendbird-chat/com.sendbird.android/-sendbird-chat/index.html)
 
 ## Create and list group channels
@@ -160,16 +159,16 @@ SendbirdChat.init(initParams, initResultHandler)
 fun showMessages(collection: MessageCollection) {
     val shown = collection.succeededMessages   // everything initialize(), loadPrevious(), loadNext(), and events added
     val sending = collection.pendingMessages   // still being sent; with local caching, resent when the connection returns
-    val failed = collection.failedMessages     // not resent automatically: offer a retry
+    val failed = collection.failedMessages     // not resent automatically
     collection.loadPrevious { olderPage, e ->
         // olderPage is also in collection.succeededMessages now
     }
 }
 ```
 - Local caching is off unless `useCaching` is `true`. `LocalCacheConfig.maxSize` defaults to 256 MB (values under 64 MB become 64 MB). The SDK checks the cache size on the first `connect` after initialization and, past the limit, clears cached messages in `clearOrder`. `SendbirdChat.clearCachedData(context, handler)` erases everything, `clearCachedMessages(channelUrl, handler)` one channel's messages, and `getCachedDataSize(context)` reports the size. (source: https://sendbird.com/docs/chat/sdk/v4/android/local-caching/overview-local-caching, https://sendbird.com/docs/chat/sdk/v4/android/application/authenticating-a-user/authentication — reviewed 2026-10-11)
-- The collection keeps the messages loaded by `initialize()`, `loadPrevious()`, `loadNext()`, and message events in `succeededMessages`, the most up-to-date list, so use it as the RecyclerView data source. `pendingMessages` are being sent; when sending ends they move to `succeededMessages` or `failedMessages`. The docs list `onMessagesAdded`, `onMessagesUpdated`, and `onMessagesDeleted` for real-time events, changelog sync, and send-status changes; pagination is not among them. (source: https://sendbird.com/docs/chat/sdk/v4/android/local-caching/using-message-collection/message-collection — reviewed 2026-10-11)
+- The collection keeps the messages loaded by `initialize()`, `loadPrevious()`, `loadNext()`, and message events in `succeededMessages`, the most up-to-date list, so use it as the RecyclerView data source. `pendingMessages` are being sent; when sending ends they move to `succeededMessages` or `failedMessages`. (source: https://sendbird.com/docs/chat/sdk/v4/android/local-caching/using-message-collection/message-collection — reviewed 2026-10-11)
 - Reconnecting after a long time offline: the SDK fills small gaps through changelog sync. When more than 300 messages are missing from the cache, it calls `onHugeGapDetected()`; dispose the collection and create a new one instead of paging through the gap. Contact Sendbird support to change the 300 threshold. (source: same message collection page)
-- Messages sent while offline, with local caching: a user message that could not go out because the WebSocket connection was lost is kept as **pending** and resent automatically when the connection comes back (auto resend). A file message waits the same way when the network is down. When the resend succeeds, `onMessagesUpdated()` reports it with `context.messagesSendingStatus == SendingStatus.SUCCEEDED`. A send that fails for another reason, such as `SendbirdError.ERR_NETWORK` or `SendbirdError.ERR_ACK_TIMEOUT`, is reported as **failed** and is not resent automatically. A pending message older than three days is marked failed when the connection returns. The docs describe auto resend only for local caching. Pending to sent/failed handling and resend: knowledge/curated/android/cross-cutting/pitfalls.md. (source: https://sendbird.com/docs/chat/sdk/v4/android/local-caching/overview-local-caching — reviewed 2026-10-11)
+- Messages sent while offline, with local caching: a user message that could not go out because the WebSocket connection was lost is kept as **pending** and resent automatically when the connection comes back (auto resend). A file message waits the same way when the network is down. When the resend succeeds, `onMessagesUpdated()` reports it with `context.messagesSendingStatus == SendingStatus.SUCCEEDED`. A send that fails for another reason, such as `SendbirdError.ERR_NETWORK` or `SendbirdError.ERR_ACK_TIMEOUT`, is reported as **failed** and is not resent automatically. A pending message older than three days is marked failed when the connection returns. Pending to sent/failed handling and resend: knowledge/curated/android/cross-cutting/pitfalls.md. (source: https://sendbird.com/docs/chat/sdk/v4/android/local-caching/overview-local-caching — reviewed 2026-10-11)
 - `SendbirdChat.disconnect` is a logout and clears cached data; `disconnectWebSocket` keeps it (see knowledge/curated/android/products/auth.md).
 - (source: `sendbird-chat` 4.36.5 AAR, `javap -public`: `InitParams(String, Context, boolean, ...)`, `InitParams.setLocalCacheConfig(LocalCacheConfig)`; `com.sendbird.android.caching.LocalCacheConfig` — `setMaxSize(long)`, `setClearOrder(CachedDataClearOrder)`; `CachedDataClearOrder`; `BaseMessageCollection` — `getSucceededMessages()`, `getPendingMessages()`, `getFailedMessages()`, `loadPrevious(BaseMessagesHandler)`; `BaseMessageCollectionHandler.onHugeGapDetected()`; `MessageContext.getMessagesSendingStatus()`; `SendbirdChat.clearCachedData(Context, CompletionHandler)`, `clearCachedMessages(String, CompletionHandler)`, `getCachedDataSize(Context)` — verified 2026-10-11; also source: https://sendbird.com/docs/chat/sdk/v4/android/ref/-sendbird-chat/com.sendbird.android.collection/-base-message-collection/index.html)
 
@@ -207,12 +206,12 @@ A client SDK does not send admin messages: the docs list Sendbird Dashboard and 
 SendbirdChat.addChannelHandler("admin-notices", object : GroupChannelHandler() {
     override fun onMessageReceived(channel: BaseChannel, message: BaseMessage) {
         if (message is AdminMessage) {
-            // A system notice: it has no sender, so render it as a notice row, not a chat bubble.
+            // An admin message: a system message sent without a sender.
         }
     }
 })
 ```
-- An admin message is a system message sent without a sender, and in a group channel the sender does not need to be a member. Delivery receipts, message search, and message threading do not apply to admin messages; read receipts are empty for them too (see "`getUnreadMemberCount` is always 0 and `getReadMembers` is always empty" in knowledge/curated/android/cross-cutting/troubleshooting.md). (source: https://sendbird.com/docs/chat/sdk/v4/ios/message/overview-message — the Chat v4 message type table, https://sendbird.com/docs/chat/sdk/v4/android/message/sending-a-message/send-an-admin-message — reviewed 2026-10-11)
+- An admin message is a system message sent without a sender, and in a group channel the sender does not need to be a member. Delivery receipts, read receipts, message search, and message threading do not apply to admin messages (see also "`getUnreadMemberCount` is always 0 and `getReadMembers` is always empty" in knowledge/curated/android/cross-cutting/troubleshooting.md). (source: https://sendbird.com/docs/chat/sdk/v4/android/message/overview-message — the message type table, https://sendbird.com/docs/chat/sdk/v4/android/message/sending-a-message/send-an-admin-message — reviewed 2026-10-11)
 - (source: `sendbird-chat` 4.36.5 AAR, `javap -public`: `com.sendbird.android.message.AdminMessage extends BaseMessage`; `BaseChannelHandler.onMessageReceived(BaseChannel, BaseMessage)` — verified 2026-10-11; also source: https://sendbird.com/docs/chat/sdk/v4/android/ref/-sendbird-chat/com.sendbird.android.message/-admin-message/index.html)
 
 ## Custom type, data, and channel metadata
@@ -305,7 +304,6 @@ val archivedQuery = GroupChannel.createMyGroupChannelListQuery(
 )
 ```
 - `allowAutoUnhide = true` hides the channel until a new message arrives; `false` archives it until `unhide()` is called. `hidePreviousMessages = true` stops showing the messages sent before hiding (default `false`). (source: https://sendbird.com/docs/chat/sdk/v4/android/channel/managing-channels/hide-or-archive-a-group-channel — reviewed 2026-10-11)
-- Unread counts: the hide/archive page and the unread-count pages do not say whether a hidden or archived channel's messages count toward `getTotalUnreadMessageCount`. Do not promise either behavior from these docs; check it against your app before you build a badge on it.
 - (source: `sendbird-chat` 4.36.5 AAR, `javap -public`: `GroupChannel` — `hide(boolean, boolean, CompletionHandler)`, `unhide(CompletionHandler)`, `getHiddenState()`; `com.sendbird.android.channel.HiddenState` — `UNHIDDEN`, `HIDDEN_ALLOW_AUTO_UNHIDE`, `HIDDEN_PREVENT_AUTO_UNHIDE`; `com.sendbird.android.channel.query.HiddenChannelFilter`; `GroupChannelListQueryParams.setHiddenChannelFilter(HiddenChannelFilter)` — verified 2026-10-11; also source: https://sendbird.com/docs/chat/sdk/v4/android/ref/-sendbird-chat/com.sendbird.android.channel/-group-channel/index.html)
 
 ## Moderation (ban, mute, block, freeze)

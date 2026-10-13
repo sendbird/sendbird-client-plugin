@@ -22,6 +22,20 @@ SendbirdChat.initialize(params: params,
 ```
 (source: sendbird.com/docs chat v4 ios getting-started; build-verified)
 
+The docs describe what these options do:
+- `needsSynchronous` is `false` by default, so the local cache migration runs asynchronously and initialization takes less time. When you use local caching, set it to `true` to finish the migration before the app is fully launched.
+- If initialization fails with `isLocalCachingEnabled` set to `true`, the SDK keeps working and sets it to `false`. To use local caching again, clear the database with `SendbirdChat.clearCachedData(completionHandler:)` and initialize again with caching on.
+- When another class or method calls Chat SDK functions while initialization may still be running, use `SendbirdChat.executeOrWaitForInitialization(executeHandler:)`. It runs the handler immediately if the SDK is initialized, and otherwise waits for initialization to complete.
+
+```swift
+import SendbirdChatSDK
+
+SendbirdChat.executeOrWaitForInitialization {
+    // Runs once initialization has completed.
+}
+```
+(source: https://sendbird.com/docs/chat/sdk/v4/ios/getting-started/send-first-message (sections "Local caching", "Synchronous initialization", and "Initialization dependency management"); `SendbirdChat.executeOrWaitForInitialization(executeHandler:)` line 6316, `clearCachedData(completionHandler:)` line 6596, `InitParams.needsSynchronous` line 3691 in the SendbirdChatSDK 4.39.11 `.swiftinterface`; also source: https://sendbird.com/docs/chat/sdk/v4/ios/ref/Classes/SendbirdChat.html; community context: https://github.com/sendbird/sendbird-chat-sdk-ios/discussions/34)
+
 ## Connect a user (auth)
 ```swift
 SendbirdChat.connect(userId: USER_ID) { user, error in
@@ -32,11 +46,11 @@ SendbirdChat.connect(userId: USER_ID) { user, error in
 For authenticated apps pass a session token / access token — see `knowledge/curated/ios/products/auth.md`. (source: sendbird.com/docs chat v4 ios getting-started; build-verified)
 
 ## Call APIs only after connect completes
-An app opened from a push notification often asks for data (the total unread count, a channel) before `connect` has finished. Start those calls from the `connect` completion, or check the connection state first and wait for the connection delegate.
+Apart from initializing, the SDK must be connected before almost every call. Start calls that need the server from the `connect` completion, or check the connection state first and wait for the connection delegate.
 ```swift
 // App launch or push open: initialize, connect, then call APIs that need the server.
 SendbirdChat.connect(userId: USER_ID) { user, error in
-    guard user != nil, error == nil else { return }   // not connected: retry later, do not call server APIs yet
+    guard user != nil, error == nil else { return }   // not connected: do not call server APIs yet
     SendbirdChat.getTotalUnreadMessageCount { count, error in /* badge */ }
 }
 
@@ -49,8 +63,7 @@ if SendbirdChat.getConnectState() == .open {
 ```
 - Apart from initializing, connect before calling almost every Chat SDK method; a call made without a connection returns `.connectionRequired` (800101). (source: https://sendbird.com/docs/chat/sdk/v4/ios/application/authenticating-a-user/authentication — reviewed 2026-10-11)
 - `didConnect(userId:)` fires when the SDK has connected with the given user ID; `didSucceedReconnection()` fires after an automatic reconnection. (source: https://sendbird.com/docs/chat/sdk/v4/ios/event-delegate/managing-connection-delegates/add-or-remove-a-connection-delegate — reviewed 2026-10-11)
-- `networkError` (800120) is an unstable network or an error in the SDK's network library, not a server rejection; if a call made right after launch fails with it, wait for the connection and retry. Error table: knowledge/curated/ios/cross-cutting/errors.md.
-- (source: `SendbirdChatSDK.swiftinterface` (4.39.11, sha256-verified release xcframework): `SendbirdChat.connect(userId:completionHandler:)` 6318, `getConnectState()` 6357, `getTotalUnreadMessageCount(completionHandler:)` 6494, `addConnectionDelegate(_:identifier:)` 6368; `WebSocketConnectionState` 7344 (`.open` 7346); `ConnectionDelegate` 1694 — `didSucceedReconnection()` 1696, `didConnect(userId:)` 1698; `ChatError.connectionRequired` 1540, `networkError` 1562 — verified 2026-10-11; also source: https://sendbird.com/docs/chat/sdk/v4/ios/ref/Classes/SendbirdChat.html)
+- (source: `SendbirdChatSDK.swiftinterface` (4.39.11, sha256-verified release xcframework): `SendbirdChat.connect(userId:completionHandler:)` 6318, `getConnectState()` 6357, `getTotalUnreadMessageCount(completionHandler:)` 6494, `addConnectionDelegate(_:identifier:)` 6368; `WebSocketConnectionState` 7344 (`.open` 7346); `ConnectionDelegate` 1694 — `didSucceedReconnection()` 1696, `didConnect(userId:)` 1698; `ChatError.connectionRequired` 1540 — verified 2026-10-11; also source: https://sendbird.com/docs/chat/sdk/v4/ios/ref/Classes/SendbirdChat.html)
 
 ## Create and list group channels
 ```swift
@@ -106,6 +119,32 @@ channel.sendFileMessage(params: FileMessageCreateParams(file: fileData)) { messa
 }
 ```
 `FileMessageCreateParams` also takes `fileURL` (pre-uploaded), `fileName`, `thumbnailSizes`, `mimeType`. (source: `SendbirdChatSDK.swiftinterface` (4.39.10) line 2418 `FileMessageCreateParams`, `BaseChannel.sendFileMessage(params:completionHandler:)` line 513)
+
+### Send a file from an app extension (Share Extension)
+The API reference says that an app extension that uploads a file message must call `SendbirdChat.setSharedContainerIdentifier(_:)`, which sets the `sharedContainerIdentifier` of the `URLSessionConfiguration` the SDK uses for its background session. Apple's `sharedContainerIdentifier` documentation says the value must identify a container shared between the app extension and its containing app.
+
+```swift
+import Foundation
+import SendbirdChatSDK
+
+func sendSharedImage(_ imageData: Data, toChannelURL channelURL: String, completion: @escaping (SBError?) -> Void) {
+    SendbirdChat.initialize(params: InitParams(applicationId: APP_ID), migrationStartHandler: nil) { error in
+        if let error { return completion(error) }
+        SendbirdChat.setSharedContainerIdentifier("group.com.example.myapp")   // your App Group
+        SendbirdChat.connect(userId: USER_ID, authToken: AUTH_TOKEN) { user, error in
+            guard user != nil else { return completion(error) }
+            GroupChannel.getChannel(url: channelURL) { channel, error in
+                guard let channel else { return completion(error) }
+                let params = FileMessageCreateParams(file: imageData)
+                params.fileName = "shared.png"
+                params.mimeType = "image/png"
+                channel.sendFileMessage(params: params) { _, error in completion(error) }
+            }
+        }
+    }
+}
+```
+(source: https://sendbird.com/docs/chat/sdk/v4/ios/ref/Classes/SendbirdChat.html (`setSharedContainerIdentifier(_:)`, marked Important for app extensions that upload file messages); `SendbirdChat.setSharedContainerIdentifier(_:)` line 6545, `initialize(params:migrationStartHandler:completionHandler:)` line 6309, `connect(userId:authToken:completionHandler:)` line 6321, `GroupChannel.getChannel(url:completionHandler:)` line 2616, `FileMessageCreateParams.fileName` and `mimeType` lines 2428 and 2434 in the SendbirdChatSDK 4.39.11 `.swiftinterface`; source: https://developer.apple.com/documentation/foundation/urlsessionconfiguration/sharedcontaineridentifier; community context: https://github.com/sendbird/sendbird-chat-sdk-ios/discussions/62)
 
 ## Update and delete a message
 ```swift
@@ -166,7 +205,7 @@ final class ChatScreenEvents: NSObject, MessageCollectionDelegate {
     func messageCollection(_ collection: MessageCollection, context: MessageContext, channel: GroupChannel, updatedMessages: [BaseMessage]) {
         switch context.sendingStatus {
         case .succeeded: break   // a pending message reached the server (also after an auto resend)
-        case .failed: break      // not resent automatically: offer a retry
+        case .failed: break      // not resent automatically
         default: break
         }
     }
@@ -181,8 +220,8 @@ func outbox(_ collection: MessageCollection) -> (waiting: [BaseMessage], failed:
 ```
 - Default: `isLocalCachingEnabled` is `false`. With caching, `LocalCacheConfig.maxSize` defaults to 256 MB (values under 64 MB become 64 MB). The SDK checks the cache size on the first `connect` after initialization and, past the limit, clears cached messages in `clearOrder`. `SendbirdChat.clearCachedData(completionHandler:)` erases everything, `clearCachedMessages(channelURL:completionHandler:)` one channel's messages, and `getCachedDataSize()` reports the size. (source: https://sendbird.com/docs/chat/sdk/v4/ios/local-caching/overview-local-caching, https://sendbird.com/docs/chat/sdk/v4/ios/application/authenticating-a-user/authentication — reviewed 2026-10-11)
 - Reconnecting after a long time offline: the SDK fills small gaps through changelog sync. When more than 300 messages are missing from the cache, it calls `didDetectHugeGap(_:)`; dispose the collection and create a new one instead of paging through the gap. Contact Sendbird support to change the 300 threshold. (source: https://sendbird.com/docs/chat/sdk/v4/ios/local-caching/using-message-collection/message-collection — reviewed 2026-10-11)
-- `loadPrevious(completionHandler:)` returns the older page in its completion handler, so add that page to your list there. The docs list the add, update, and delete delegate methods for real-time events, changelog sync, and send-status changes; pagination is not among them. Gate `loadPrevious` on `hasPrevious`, as the docs do. (source: https://sendbird.com/docs/chat/sdk/v4/ios/local-caching/using-message-collection/message-collection — reviewed 2026-10-11)
-- Messages sent while offline, with local caching: a user message that could not go out because the WebSocket connection was lost is kept as **pending** and resent automatically when the connection comes back (auto resend). A file message waits the same way when the network is down. When the resend succeeds, `messageCollection(_:context:channel:updatedMessages:)` reports it with `context.sendingStatus == .succeeded`. A send that fails for another reason, such as `ChatError.networkError` or `ChatError.ackTimeout`, is reported as **failed** and is not resent automatically. A pending message older than three days is marked failed when the connection returns. The docs describe auto resend only for local caching. (source: https://sendbird.com/docs/chat/sdk/v4/ios/local-caching/overview-local-caching — reviewed 2026-10-11)
+- `loadPrevious(completionHandler:)` loads the previous page and passes its messages to the completion handler; the docs call it only when `hasPrevious` is true. (source: https://sendbird.com/docs/chat/sdk/v4/ios/local-caching/using-message-collection/message-collection — reviewed 2026-10-11)
+- Messages sent while offline, with local caching: a user message that could not go out because the WebSocket connection was lost is kept as **pending** and resent automatically when the connection comes back (auto resend). A file message waits the same way when the network is down. When the resend succeeds, `messageCollection(_:context:channel:updatedMessages:)` reports it with `context.sendingStatus == .succeeded`. A send that fails for another reason, such as `ChatError.networkError` or `ChatError.ackTimeout`, is reported as **failed** and is not resent automatically. A pending message older than three days is marked failed when the connection returns. (source: https://sendbird.com/docs/chat/sdk/v4/ios/local-caching/overview-local-caching — reviewed 2026-10-11)
 - `SendbirdChat.disconnect` also clears the local cache; `disconnectWebSocket` keeps it (see knowledge/curated/ios/products/auth.md).
 - (source: `SendbirdChatSDK.swiftinterface` (4.39.11): `InitParams.init(applicationId:isLocalCachingEnabled:localCacheConfig:logLevel:appVersion:)` 3693; `LocalCacheConfig` 3734 — `maxSize` 3735, `clearOrder` 3739, `init(isEncryptionEnabled:enableAutoResend:)` 3748; `CachedDataClearOrder.messageCollectionAccessedAt` 1363; `MessageCollection` 4015 — `succeededMessages` 4031, `pendingMessages` 4034, `failedMessages` 4037, `loadPrevious(completionHandler:)` 4045; `MessageCollectionDelegate` 4059 — `updatedMessages` 4061, `didDetectHugeGap(_:)` 4065; `MessageContext.sendingStatus` 4087; `MessageSendingStatus` 4524; `SendbirdChat.clearCachedData(completionHandler:)` 6596, `clearCachedMessages(channelURL:completionHandler:)` 6599, `getCachedDataSize()` 6601 — verified 2026-10-11; also source: https://sendbird.com/docs/chat/sdk/v4/ios/ref/Classes/MessageCollection.html)
 
@@ -221,7 +260,7 @@ A client SDK does not send admin messages: the docs list Sendbird Dashboard and 
 final class NoticeObserver: NSObject, GroupChannelDelegate {
     func channel(_ channel: BaseChannel, didReceive message: BaseMessage) {
         if message is AdminMessage {
-            // A system notice: it has no sender, so render it as a notice row, not a chat bubble.
+            // An admin message: a system message sent without a sender.
         }
     }
 }
@@ -318,7 +357,6 @@ let archivedQuery = GroupChannel.createMyGroupChannelListQuery { params in
 }
 ```
 - `allowAutoUnhide: true` hides the channel until a new message arrives; `false` archives it until `unhide` is called. `hidePreviousMessages: true` stops showing the messages sent before hiding (default `false`). (source: https://sendbird.com/docs/chat/sdk/v4/ios/channel/managing-channels/hide-or-archive-a-group-channel — reviewed 2026-10-11)
-- Unread counts: the hide/archive page and the unread-count pages do not say whether a hidden or archived channel's messages count toward `getTotalUnreadMessageCount`. Do not promise either behavior from these docs; check it against your app before you build a badge on it.
 - (source: `SendbirdChatSDK.swiftinterface` (4.39.11): `extension GroupChannel` 2597 — `hide(hidePreviousMessages:allowAutoUnhide:completionHandler:)` 2693, `unhide(completionHandler:)` 2696; `GroupChannel.hiddenState` 2897; `GroupChannelHiddenState` 3440; `ChannelHiddenStateFilter` 3454; `GroupChannelListQueryParams.channelHiddenStateFilter` 3200 — verified 2026-10-11; also source: https://sendbird.com/docs/chat/sdk/v4/ios/ref/Classes/GroupChannel.html)
 
 ## Moderation (ban, mute, block, freeze)

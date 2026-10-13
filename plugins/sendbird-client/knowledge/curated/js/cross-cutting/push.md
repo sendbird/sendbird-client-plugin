@@ -28,7 +28,7 @@ Register and single-token unregister return `PushTokenRegistrationState`; the `.
 
 ## Logout: unregister this device before disconnecting
 
-A push token identifies one app install, so keep it registered only for the user who is signed in on that device. `sb.disconnect()` does not stop push: a disconnected user still receives push notifications for their group channels. On logout, unregister this device's token first and disconnect after it resolves; otherwise the next user on the device can receive the previous user's notifications.
+`sb.disconnect()` does not stop push: a disconnected user still receives push notifications for their group channels. On logout, unregister this device's token first and disconnect after it resolves.
 
 ```ts
 // Android (FCM) token; use unregisterAPNSPushTokenForCurrentUser(apnsToken) for an iOS token.

@@ -32,7 +32,7 @@ const user = await sb.connect(USER_ID);            // or sb.connect(USER_ID, ACC
 Pass an access/session token as the second arg for authenticated apps — see `knowledge/curated/js/products/auth.md`. (source: sendbird.com/docs chat v4 javascript getting-started)
 
 ## Call APIs only after connect completes
-An app opened from a push notification often asks for data (the total unread count, a channel) before `connect` has finished. Await `connect` first, check the connection state, and wait for the connection handler when it is not open yet.
+Apart from initializing, the SDK must be connected before almost every call. Await `connect` first, check the connection state, and wait for the connection handler when it is not open yet.
 ```ts
 import { ConnectionHandler, ConnectionState } from '@sendbird/chat';
 
@@ -51,7 +51,6 @@ if (sb.connectionState === ConnectionState.OPEN) {
 ```
 - Apart from initializing, connect before calling almost every Chat SDK method; a call made without a connection returns `CONNECTION_REQUIRED` (800101). With local caching, the app can draw the channel list and chat view offline from cached data: the SDK hands back the user from a previous successful connection and tries to reconnect later. After 400300, 400301, 400302, or 400310, clear the cached user data and reconnect instead. (source: https://sendbird.com/docs/chat/sdk/v4/javascript/application/authenticating-a-user/authentication — reviewed 2026-10-11)
 - `onConnected` fires when the SDK connects successfully; `onReconnectSucceeded` fires after an automatic reconnection. (source: https://sendbird.com/docs/chat/sdk/v4/javascript/event-handler/managing-connection-event-handlers/add-or-remove-a-connection-event-handler — reviewed 2026-10-11)
-- `NETWORK_ERROR` (800120) is an unstable network or an error in the SDK's network layer, not a server rejection; if a call made right after launch fails with it, wait for the connection and retry. Error table: knowledge/curated/js/cross-cutting/errors.md.
 - (source: `@sendbird/chat` 4.22.13 `lib/__definition.d.ts`: `SendbirdChat` 4230 — `currentUser` 4288, `connectionState` 4292, `connect(userId, authToken?)` 4372, `addConnectionHandler` 4429, `removeConnectionHandler` 4434; `ConnectionState` 1340 (`OPEN` 1342); `ConnectionHandlerParams` 1320 — `onConnected` 1322, `onReconnectSucceeded` 1326; `GroupChannelModule.getTotalUnreadMessageCount(params?)` 6275; `ConnectionHandler` and `ConnectionState` are exported from `@sendbird/chat` — verified 2026-10-11; also source: https://sendbird.com/docs/chat/sdk/v4/javascript/ref/classes/_sendbird_chat.default.html)
 
 ## Create and list group channels
@@ -82,7 +81,7 @@ collection.setGroupChannelCollectionHandler({
 const channels = await collection.loadMore();   // first page; call again to paginate
 // collection.dispose() when the screen unmounts
 ```
-`createGroupChannelCollection(params?: GroupChannelCollectionParams)` is on `GroupChannelModule`; `setGroupChannelCollectionHandler(handler)` and `loadMore(): Promise<GroupChannel[]>` are on the returned `BaseChannelCollection`, along with `hasMore` and event fields `onChannelsAdded` / `onChannelsUpdated` / `onChannelsDeleted`. `dispose()` is declared on `GroupChannelCollection` itself. A one-shot alternative exists as `sb.groupChannel.createMyGroupChannelListQuery(params)` (returns a `GroupChannelListQuery`), and `createPublicGroupChannelListQuery(params)` lists channels the current user hasn't joined yet. (source: `@sendbird/chat@4.22.13` lib/__definition.d.ts:6156 `createGroupChannelCollection`, :6161 `createMyGroupChannelListQuery`, :6175 `createPublicGroupChannelListQuery`, :5338-5357 `BaseChannelCollection` incl. `setGroupChannelCollectionHandler`/`loadMore`/`hasMore`, :5502-5506 `GroupChannelCollection.dispose`, :5374-5378 `onChannelsAdded/Updated/Deleted`, :5918 `GroupChannelListOrder`)
+`createGroupChannelCollection(params?: GroupChannelCollectionParams)` is on `GroupChannelModule`; `setGroupChannelCollectionHandler(handler)` and `loadMore(): Promise<GroupChannel[]>` are on the returned `BaseChannelCollection`, along with `hasMore` and event fields `onChannelsAdded` / `onChannelsUpdated` / `onChannelsDeleted`. `dispose()` is declared on `GroupChannelCollection` itself. A one-shot alternative exists as `sb.groupChannel.createMyGroupChannelListQuery(params)` (returns a `GroupChannelListQuery`), and `createPublicGroupChannelListQuery(params)` lists channels the current user hasn't joined yet. (source: `@sendbird/chat@4.22.13` lib/__definition.d.ts:6156 `createGroupChannelCollection`, :6162 `createMyGroupChannelListQuery`, :6175 `createPublicGroupChannelListQuery`, :5338-5357 `BaseChannelCollection` incl. `setGroupChannelCollectionHandler`/`loadMore`/`hasMore`, :5502-5506 `GroupChannelCollection.dispose`, :5374-5378 `onChannelsAdded/Updated/Deleted`, :5918 `GroupChannelListOrder`)
 
 ## Send a message
 ```ts
@@ -160,15 +159,15 @@ const sb = SendbirdChat.init({
 ```
 ```ts
 // With a MessageCollection (see "List and receive messages"):
-const olderPage = await collection.loadPrevious();   // add this page to your list yourself
+const olderPage = await collection.loadPrevious();   // the previous page
 const sending = collection.pendingMessages;           // with local caching, resent when the connection returns
-const failed = collection.failedMessages;             // not resent automatically: offer a retry
+const failed = collection.failedMessages;             // not resent automatically
 ```
 - Browsers keep the cache in IndexedDB; when IndexedDB is not available the SDK falls back to memory and logs a warning. React Native has no IndexedDB: pass an MMKV instance from `react-native-mmkv` as `useMMKVStorageStore` (do not clear or edit that MMKV data yourself). `useAsyncStorageStore` is deprecated. With several browser tabs on one app, set `supportMultipleTabs: true` (only with `localCacheEnabled`). (source: https://sendbird.com/docs/chat/sdk/v4/javascript/application/authenticating-a-user/authentication, https://sendbird.com/docs/chat/sdk/v4/javascript/getting-started/environment-specific-implementation, https://sendbird.com/docs/chat/sdk/v4/javascript/local-caching/overview-local-caching — reviewed 2026-10-11)
 - `LocalCacheConfig.maxSize` defaults to 256 MB (values under 64 MB become 64 MB). The SDK checks the cache size on the first `connect` after initialization and, past the limit, clears cached messages in `clearOrder`. `sb.clearCachedData()` erases everything, `sb.clearCachedMessages(channelUrls)` the given channels' messages, and `sb.getCacheDataSize()` reports the size (the docs spell it `getCachedDataSize()`; the shipped type is `getCacheDataSize`). (source: same overview page)
 - Reconnecting after a long time offline: the SDK fills small gaps through changelog sync. When more than 300 messages are missing from the cache, it calls `onHugeGapDetected`; dispose the collection and create a new one instead of paging through the gap. Contact Sendbird support to change the 300 threshold. (source: https://sendbird.com/docs/chat/sdk/v4/javascript/local-caching/using-message-collection/message-collection — reviewed 2026-10-11)
-- `loadPrevious()` resolves with the older page. The docs list `onMessagesAdded`, `onMessagesUpdated`, and `onMessagesDeleted` for real-time events, changelog sync, and send-status changes; pagination is not among them. Gate `loadPrevious()` on `hasPrevious` and do not call it again while a call is in flight (see Pitfalls). (source: same message collection page)
-- Messages sent while offline, with local caching: a user message that could not go out because the WebSocket connection was lost is kept as **pending** and resent automatically when the connection comes back (auto resend). A file message waits the same way when the network is down. When the resend succeeds, `onMessagesUpdated` reports it and `message.sendingStatus` reads `SendingStatus.SUCCEEDED`. A send that fails for another reason, such as a network error or an ack timeout, is reported as **failed** and is not resent automatically. A pending message older than three days is marked failed when the connection returns. The docs describe auto resend only for local caching. Resend and final-state handling: knowledge/curated/js/cross-cutting/pitfalls.md. (source: https://sendbird.com/docs/chat/sdk/v4/javascript/local-caching/overview-local-caching — reviewed 2026-10-11)
+- `loadPrevious()` resolves with the previous page; the docs call it only when `hasPrevious` is true. (source: same message collection page)
+- Messages sent while offline, with local caching: a user message that could not go out because the WebSocket connection was lost is kept as **pending** and resent automatically when the connection comes back (auto resend). A file message waits the same way when the network is down. When the resend succeeds, `onMessagesUpdated` reports it and `message.sendingStatus` reads `SendingStatus.SUCCEEDED`. A send that fails for another reason, such as a network error or an ack timeout, is reported as **failed** and is not resent automatically. A pending message older than three days is marked failed when the connection returns. Resend and final-state handling: knowledge/curated/js/cross-cutting/pitfalls.md. (source: https://sendbird.com/docs/chat/sdk/v4/javascript/local-caching/overview-local-caching — reviewed 2026-10-11)
 - `sb.disconnect()` clears the local cache; `sb.disconnectWebSocket()` keeps it (see knowledge/curated/js/products/auth.md).
 - (source: `@sendbird/chat` 4.22.13 `lib/__definition.d.ts`: `SendbirdChatParams` 4805 — `localCacheEnabled` 4815, `localCacheConfig` 4816, `supportMultipleTabs` 4818, deprecated `useAsyncStorageStore` 4819-4820, `useMMKVStorageStore` 4821; `LocalCacheConfig` 2353, `LocalCacheConfigParams` 2368 — `maxSize` 2369, `clearOrder` 2370; `SendbirdChat` — `getCacheDataSize()` 4343, `clearCachedData()` 4347, `clearCachedMessages(channelUrls)` 4352; `BaseMessageCollection` 948 — `failedMessages` 960, `pendingMessages` 962, `loadPrevious()` 977; `onHugeGapDetected` 1054; `LocalCacheConfig` and `CachedDataClearOrder` are exported from `@sendbird/chat` — verified 2026-10-11; also source: https://sendbird.com/docs/chat/sdk/v4/javascript/ref/classes/_sendbird_chat.LocalCacheConfig.html)
 
@@ -197,7 +196,7 @@ sb.groupChannel.addGroupChannelHandler('threads', new GroupChannelHandler({
   },
 }));
 ```
-- Only user and file messages can be threaded: a reply to a reply is rejected, and admin messages can't be replies or have replies. A message that is not a reply has `parentMessageId` 0. When a reply is created or deleted, `onThreadInfoUpdated` fires with the latest thread information. `isReplyToChannel` on the create params also sends the reply to the channel (default `false`). (source: https://sendbird.com/docs/chat/sdk/v4/javascript/message/using-message-threading/create-a-message-thread, https://sendbird.com/docs/chat/sdk/v4/javascript/message/using-message-threading/list-replies-in-a-message-thread — reviewed 2026-10-11)
+- Only user and file messages can be threaded: a reply to a reply is rejected, and admin messages can't be replies or have replies. A message that is not a reply has `parentMessageId` 0. When a reply is created or deleted, `onThreadInfoUpdated` fires with the latest thread information. `isReplyToChannel` on the create params also sends the reply to the channel (default `false`, per its doc comment at `lib/__definition.d.ts` line 1087). (source: https://sendbird.com/docs/chat/sdk/v4/javascript/message/using-message-threading/create-a-message-thread, https://sendbird.com/docs/chat/sdk/v4/javascript/message/using-message-threading/list-replies-in-a-message-thread — reviewed 2026-10-11)
 - `getThreadedMessagesByTimestamp` is declared on `UserMessage`, `FileMessage`, and `AdminMessage` (and the multiple-files message), not on `BaseMessage`, so narrow the type first (for example with `message.isUserMessage()`). `message.threadInfo` has `replyCount`, `mostRepliedUsers`, and `lastRepliedAt`. `MessageFilter.replyType` takes `ReplyType.NONE`, `ALL`, or `ONLY_REPLY_TO_CHANNEL`.
 - (source: `@sendbird/chat` 4.22.13 `lib/__definition.d.ts`: `BaseMessageCreateParams` 1071 — `parentMessageId` 1085, `isReplyToChannel` 1087; `BaseMessage` 851 — `messageId` 853, `parentMessageId` 855, `threadInfo` 863, `applyThreadInfoUpdateEvent` 891; `MessagePrototype.createdAt` 2823; `getThreadedMessagesByTimestamp(ts, params)` on `AdminMessage` 16, `FileMessage` 1778, `MultipleFilesMessage` 3123, `UserMessage` 5282; `ThreadedMessageListParams` 4984 — `prevResultSize` 4986, `nextResultSize` 4988, `includeParentMessageInfo` 5004; `ThreadInfo` 5024; `ThreadInfoUpdateEvent.targetMessageId` 5051; `BaseChannelHandlerParams.onThreadInfoUpdated` 5436; `MessageFilter.replyType` 2625; `ReplyType` 4077 — verified 2026-10-11; also source: https://sendbird.com/docs/chat/sdk/v4/javascript/ref/classes/_sendbird_chat_message.UserMessage.html)
 
@@ -209,12 +208,12 @@ import { GroupChannelHandler } from '@sendbird/chat/groupChannel';
 sb.groupChannel.addGroupChannelHandler('admin-notices', new GroupChannelHandler({
   onMessageReceived: (channel, message) => {
     if (message.isAdminMessage()) {
-      // A system notice: it has no sender, so render it as a notice row, not a chat bubble.
+      // An admin message: a system message sent without a sender.
     }
   },
 }));
 ```
-- An admin message is a system message sent without a sender, and in a group channel the sender does not need to be a member. Delivery receipts, message search, and message threading do not apply to admin messages. (source: https://sendbird.com/docs/chat/sdk/v4/ios/message/overview-message — the Chat v4 message type table, https://sendbird.com/docs/chat/sdk/v4/javascript/message/sending-a-message/send-an-admin-message — reviewed 2026-10-11)
+- An admin message is a system message sent without a sender, and in a group channel the sender does not need to be a member. Delivery receipts, message search, and message threading do not apply to admin messages. (source: https://sendbird.com/docs/chat/sdk/v4/javascript/message/overview-message — the message type table, https://sendbird.com/docs/chat/sdk/v4/javascript/message/sending-a-message/send-an-admin-message — reviewed 2026-10-11)
 - (source: `@sendbird/chat` 4.22.13 `lib/__definition.d.ts`: `AdminMessage extends BaseMessage` 6; `MessagePrototype.isAdminMessage()` 2857; `BaseChannelHandlerParams.onMessageReceived` 5426 — verified 2026-10-11; also source: https://sendbird.com/docs/chat/sdk/v4/javascript/ref/classes/_sendbird_chat_message.AdminMessage.html)
 
 ## Custom type, data, and channel metadata
@@ -298,7 +297,6 @@ const archivedQuery = sb.groupChannel.createMyGroupChannelListQuery({
 });
 ```
 - `allowAutoUnhide: true` (the default) hides the channel until a new message arrives; `false` archives it until `unhide()` is called. `hidePreviousMessages: true` stops showing the messages sent before hiding (default `false`). (source: https://sendbird.com/docs/chat/sdk/v4/javascript/channel/managing-channels/hide-or-archive-a-group-channel-from-a-list-of-channels — reviewed 2026-10-11)
-- Unread counts: the hide/archive page and the unread-count pages do not say whether a hidden or archived channel's messages count toward `getTotalUnreadMessageCount()`. Do not promise either behavior from these docs; check it against your app before you build a badge on it.
 - (source: `@sendbird/chat` 4.22.13 `lib/__definition.d.ts`: `GroupChannel` 1872 — `hiddenState` 1915, `hide(params)` 2115, `unhide()` 2120; `GroupChannelHideParams` 2273; `HiddenState` 2331; `HiddenChannelFilter` 6361; `hiddenChannelFilter` on the group channel list params 5981; both enums are exported from `@sendbird/chat/groupChannel` — verified 2026-10-11; also source: https://sendbird.com/docs/chat/sdk/v4/javascript/ref/classes/_sendbird_chat_groupChannel.GroupChannel.html)
 
 ## Moderation (ban, mute, block, freeze)
@@ -332,7 +330,7 @@ await channel.addOperators(['USER_ID']);      // operators can mute, ban, and fr
 await channel.removeOperators(['USER_ID']);   // stays a member
 ```
 - A private group channel can be joined only by invitation from a member. Whether a new member sees messages sent before the invite is an app setting, on by default. (source: https://sendbird.com/docs/chat/sdk/v4/javascript/channel/inviting-users-to-a-group-channel/invite-users-as-members, https://sendbird.com/docs/chat/sdk/v4/javascript/channel/managing-operators/register-and-remove-operators — reviewed 2026-10-07)
-- (source: `@sendbird/chat` 4.22.13 `lib/__definition.d.ts`: `GroupChannel.inviteWithUserIds` 2065; `BaseChannel.addOperators` 246, `removeOperators` 251 — verified 2026-10-07)
+- (source: `@sendbird/chat` 4.22.13 `lib/__definition.d.ts`: `GroupChannel.inviteWithUserIds` 2080; `BaseChannel.addOperators` 257, `removeOperators` 262 — verified 2026-10-07)
 
 ## Pinned messages
 ```ts
@@ -345,7 +343,7 @@ const pinned = await pinnedQuery.next();                 // PinnedMessage[]
 const messages = pinned.map((p) => p.message);           // BaseMessage | null
 ```
 - Up to 10 messages can be pinned per channel by default. Group channels support pinning except ephemeral channels; Supergroup channels do not. (source: https://sendbird.com/docs/chat/sdk/v4/javascript/message/managing-pinned-messages-in-group-channels/pin-a-message — reviewed 2026-10-07)
-- (source: `@sendbird/chat` 4.22.13 `lib/__definition.d.ts`: `BaseChannel.pinnedMessageIds` 160, `createPinnedMessageListQuery` 241, `pinMessage` 680, `unpinMessage` 685; `PinnedMessage.message` 3489; `PinnedMessageListQuery.next` 3523 — verified 2026-10-07)
+- (source: `@sendbird/chat` 4.22.13 `lib/__definition.d.ts`: `BaseChannel.pinnedMessageIds` 171, `createPinnedMessageListQuery` 252, `pinMessage` 691, `unpinMessage` 696; `PinnedMessage.message` 3504; `PinnedMessageListQuery.next` 3538 — verified 2026-10-07)
 
 ## Search messages
 ```ts
@@ -357,21 +355,21 @@ const searchQuery = sb.createMessageSearchQuery({
 const found = await searchQuery.next();   // call again while searchQuery.hasNext
 ```
 - Searches group channel messages. Punctuation and special characters are ignored when indexing; `AND` and `OR` (uppercase) combine terms; a term shorter than two characters matches exactly only. (source: https://sendbird.com/docs/chat/sdk/v4/javascript/message/searching-messages-in-a-group-channel/search-messages-by-a-keyword — reviewed 2026-10-07)
-- (source: `@sendbird/chat` 4.22.13 `lib/__definition.d.ts`: `SendbirdChat.createMessageSearchQuery` 4447; `MessageSearchQueryParams.keyword` 3000, `channelUrl` 3012; `MessageSearchQuery.next` 2993 — verified 2026-10-07)
+- (source: `@sendbird/chat` 4.22.13 `lib/__definition.d.ts`: `SendbirdChat.createMessageSearchQuery` 4462; `MessageSearchQueryParams.keyword` 3015, `channelUrl` 3027; `MessageSearchQuery.next` 3008 — verified 2026-10-07)
 
 ## Filter the channel list by name
 ```ts
 const listQuery = sb.groupChannel.createMyGroupChannelListQuery({ channelNameContainsFilter: 'support' });
 const channels = await listQuery.next();
 ```
-- (source: https://sendbird.com/docs/chat/sdk/v4/javascript/channel/searching-channels/search-group-channels-by-name-url-or-other-filters — reviewed 2026-10-07; `@sendbird/chat` 4.22.13 `lib/__definition.d.ts`: `GroupChannelModule.createMyGroupChannelListQuery` 6147, `GroupChannelFilterParams.channelNameContainsFilter` 5797, `GroupChannelListQuery.next` 6129 — verified 2026-10-07)
+- (source: https://sendbird.com/docs/chat/sdk/v4/javascript/channel/searching-channels/search-group-channels-by-name-url-or-other-filters — reviewed 2026-10-07; `@sendbird/chat` 4.22.13 `lib/__definition.d.ts`: `GroupChannelModule.createMyGroupChannelListQuery` 6162, `GroupChannelFilterParams.channelNameContainsFilter` 5812, `GroupChannelListQuery.next` 6144 — verified 2026-10-07)
 
 ## Read receipts for a message
 ```ts
 const unreadCount = channel.getUnreadMemberCount(message);   // 0 = every member has read it
 const readers = channel.getReadMembers(message);             // pass true to include the current user
 ```
-- Re-render when `onUnreadMemberStatusUpdated` fires on the `GroupChannelHandler` (see "Handle incoming events without a collection"). (source: https://sendbird.com/docs/chat/sdk/v4/javascript/message/managing-read-status-in-a-group-channel/get-read-status — reviewed 2026-10-07; `@sendbird/chat` 4.22.13 `lib/__definition.d.ts`: `GroupChannel.getUnreadMemberCount` 1997, `getReadMembers` 2012, `getReadStatus` 2025; `GroupChannelHandlerParams.onUnreadMemberStatusUpdated` 5875 — verified 2026-10-07)
+- Re-render when `onUnreadMemberStatusUpdated` fires on the `GroupChannelHandler` (see "Handle incoming events without a collection"). (source: https://sendbird.com/docs/chat/sdk/v4/javascript/message/managing-read-status-in-a-group-channel/get-read-status — reviewed 2026-10-07; `@sendbird/chat` 4.22.13 `lib/__definition.d.ts`: `GroupChannel.getUnreadMemberCount` 2012, `getReadMembers` 2027, `getReadStatus` 2040; `GroupChannelHandlerParams.onUnreadMemberStatusUpdated` 5890 — verified 2026-10-07)
 
 ## Connection state and reconnection
 ```ts
@@ -409,7 +407,7 @@ sb.groupChannel.addGroupChannelHandler('UNIQUE_HANDLER_ID', new GroupChannelHand
 - App ID read from env (e.g. `process.env.NEXT_PUBLIC_SENDBIRD_APP_ID`); access/session tokens are secrets — never hard-code or log.
 - Every collection (`GroupChannelCollection`, `MessageCollection`) and every `addGroupChannelHandler` call must be paired with `dispose()` / `removeGroupChannelHandler()` when the owning screen unmounts, or the SDK keeps delivering events to a dead view.
 - In strict TypeScript, `onChannelsAdded`/`onChannelsUpdated` type their `channels` param as `BaseChannel[]`, not `GroupChannel[]`, even inside a `GroupChannelCollection` — cast (it is always safe here) rather than fighting the type.
-- `collection.loadMore()` / `loadPrevious()` / `loadNext()` reject if called again while a previous call for the same direction is still in flight — gate pagination on your own loading flag.
+- A message collection's `loadPrevious()` and `loadNext()` do not reject when a load in the same direction is still running: in 4.22.13 the second call logs "Messages are already fetching." and resolves with an empty array. So an empty result does not by itself mean there are no more messages; `hasPrevious` and `hasNext` say whether more data is left in each direction. (source: https://unpkg.com/@sendbird/chat@4.22.13/lib/__bundle-a81b3a5d.js — `loadPrevious` and `loadNext` check `_isLoadingPrevious` / `_isLoadingNext`) (source: `@sendbird/chat@4.22.13` lib/__definition.d.ts:964-966 `hasPrevious`, `hasNext`; :977 `loadPrevious`, :982 `loadNext`)
 
 ## Related
 - Getting started: https://sendbird.com/docs/chat/sdk/v4/javascript/getting-started/send-first-message

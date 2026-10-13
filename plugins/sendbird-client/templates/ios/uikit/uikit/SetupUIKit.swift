@@ -1,4 +1,6 @@
 // source: https://github.com/sendbird/sendbird-uikit-ios (README quickstart, verified 2026-06-09)
+// source: https://github.com/sendbird/sendbird-uikit-ios/blob/3.36.1/Sources/SBUGlobals.swift#L22-L26 (accessToken, currentUser)
+// source: https://github.com/sendbird/sendbird-uikit-ios/blob/3.36.1/Sources/Theme/SBUTheme.swift#L252 (channelTheme)
 // Build-verified: SendbirdUI.initialize / SBUGlobals.currentUser / SBUUser /
 // SBUGroupChannelListViewController compile + link against SendbirdUIKit (xcodebuild
 // BUILD SUCCEEDED, 2026-06-09). SPM: sendbird-uikit-ios-spm, product SendbirdUIKit.
