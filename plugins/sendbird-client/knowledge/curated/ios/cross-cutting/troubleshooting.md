@@ -14,7 +14,7 @@
 
 ### UIKit shows every message on the left, or UIKit features such as reactions are missing
 - **Cause:** UIKit does not know who the current user is. This happens when the app connects through the Chat SDK directly and never sets the UIKit user, so UIKit cannot tell which messages are the user's own.
-- **Fix:** Set `SBUGlobals.currentUser` to an `SBUUser(userId:nickname:profileURL:)` before presenting any UIKit screen, and connect with `SendbirdUI.connect(completionHandler:)` instead of the Chat SDK's connect (source: SendbirdUIKit 3.36.2 SendbirdUIKit.swiftinterface:5798, :15355, :16533; also source: knowledge/curated/ios/products/uikit.md).
+- **Fix:** Set `SBUGlobals.currentUser` to an `SBUUser(userId:nickname:profileURL:)` before presenting any UIKit screen, and connect with `SendbirdUI.connect(completionHandler:)` instead of the Chat SDK's connect (source: SendbirdUIKit 3.36.2 SendbirdUIKit.swiftinterface:5798, :15355, :16533; also source: knowledge/curated/ios/products/uikit.md). In the UIKit source, a message goes on the right only when its sender's user ID equals `SBUGlobals.currentUser`'s, and the emoji list that reactions need is loaded inside `SendbirdUI.connect` (source: https://github.com/sendbird/sendbird-uikit-ios/blob/3.36.1/Sources/View/Channel/MessageCell/MessageCellParams/SBUUserMessageCellParams.swift#L55-L59; source: https://github.com/sendbird/sendbird-uikit-ios/blob/3.36.1/Sources/SendbirdUI.swift#L251-L254).
 - **Cases:** https://community.sendbird.com/t/sendbird-uikit-position-chat-messages/2493 — community, https://community.sendbird.com/t/reaction-issues-with-sbuchannelviewcontroller/1802 — community
 
 ### The device keeps receiving push notifications after the user logs out
@@ -25,12 +25,12 @@
 ## Channels
 
 ### A channel created on the server or in the dashboard does not appear in the UIKit channel list
-- **Cause:** The default UIKit channel list query leaves out channels that have no messages yet, so a channel created by your backend stays hidden until someone sends a message. A private channel created in the dashboard also has to include the user as a member.
+- **Cause:** The default UIKit channel list query leaves out channels that have no messages yet, so a channel created by your backend stays hidden until someone sends a message.
 - **Fix:** Build a query with `GroupChannel.createMyGroupChannelListQuery(paramsBuilder:)` and set `includeEmptyChannel = true` on its params (source: SendbirdChatSDK 4.39.11 SendbirdChatSDK.swiftinterface:2730, :3169; also source: knowledge/curated/ios/products/chat.md). Pass it to `SBUGroupChannelListViewController(channelListQuery:)`, or override `createViewModel(channelListQuery:)` in a subclass (source: SendbirdUIKit 3.36.2 SendbirdUIKit.swiftinterface:6176, :6185; also source: https://github.com/sendbird/sendbird-uikit-ios/discussions/45).
 - **Cases:** https://community.sendbird.com/t/channels-created-from-api-not-showing-in-the-app/8925, https://github.com/sendbird/sendbird-uikit-ios/discussions/45, https://community.sendbird.com/t/sendbird-uikit-not-showing-private-chat/354
 
 ### UIKit creates a new 1:1 channel every time with the same user
-- **Cause:** Channels created from the UIKit create-channel screen are not distinct by default, so each creation makes a new channel instead of returning the existing one.
+- **Cause:** Channels created from the UIKit create-channel screen are not distinct by default, so each creation makes a new channel instead of returning the existing one. UIKit sets `isDistinct = false` before it applies your create builder (source: https://github.com/sendbird/sendbird-uikit-ios/blob/3.36.1/Sources/ViewModel/SelectUser/CreateChannel/SBUCreateChannelViewModel.swift#L222-L239).
 - **Fix:** Set `isDistinct = true` on the channel create params (source: SendbirdChatSDK 4.39.11 SendbirdChatSDK.swiftinterface:3247; also source: knowledge/curated/ios/products/chat.md). In UIKit, apply it to every channel UIKit creates through `SBUGlobalCustomParams.groupChannelParamsCreateBuilder` (source: SendbirdUIKit 3.36.2 SendbirdUIKit.swiftinterface:5725; also source: https://github.com/sendbird/sendbird-uikit-ios/blob/3.36.2/Sources/SBUGlobalCustomParams.swift).
 - **Cases:** https://community.sendbird.com/t/sendbird-uikit-duplicate-channels/1012, https://community.sendbird.com/t/multiple-channels-with-same-user-being-created-from-new-channel-screen/7366
 
@@ -40,7 +40,7 @@
 - **Cases:** https://community.sendbird.com/t/group-channel-is-automatically-deleted-when-the-number-of-users-reaches-0/10161, https://community.sendbird.com/t/channel-with-0-member/8138, https://community.sendbird.com/t/all-channels-deleted/7299
 
 ### Creating a channel from the app fails with 400108
-- **Cause:** The application is set to block channel creation from clients, so `GroupChannel.createChannel(params:completionHandler:)` is rejected (source: knowledge/curated/ios/products/chat.md). 400108 is `nonAuthorized` (source: knowledge/curated/ios/cross-cutting/errors.md).
+- **Cause:** The application is set to block channel creation from clients, so `GroupChannel.createChannel(params:completionHandler:)` is rejected; the error text in the first case reads "Group channel creation is not allowed from clients." (source: SendbirdChatSDK 4.39.11 SendbirdChatSDK.swiftinterface:2602; also source: https://sendbird.com/docs/chat/sdk/v4/ios/ref/Classes/GroupChannel.html). 400108 is `nonAuthorized` (source: knowledge/curated/ios/cross-cutting/errors.md).
 - **Fix:** Create channels from your server with the Platform API, or ask Sendbird support to allow client-side creation for the application.
 - **Cases:** https://community.sendbird.com/t/topic/5679, https://community.sendbird.com/t/is-it-possible-to-forbid-all-users-from-creating-a-channel/5047
 
@@ -48,7 +48,7 @@
 
 ### Messages look sent but are gone after leaving and reopening the channel
 - **Cause:** The channel was created as ephemeral, and an ephemeral channel does not keep its messages.
-- **Fix:** Create the channel with `isEphemeral` left at `false` on the channel create params (source: SendbirdChatSDK 4.39.11 SendbirdChatSDK.swiftinterface:3248). Existing ephemeral channels stay ephemeral, so create a new one.
+- **Fix:** Create the channel with `isEphemeral` left at `false` on the channel create params (source: SendbirdChatSDK 4.39.11 SendbirdChatSDK.swiftinterface:3248).
 - **Cases:** https://community.sendbird.com/t/message-appears-to-get-deleted-right-after-sending-it/1902
 
 ### Replying to a reply fails with an invalid parent message error
@@ -74,9 +74,9 @@
 - **Cases:** https://github.com/sendbird/sendbird-uikit-ios/discussions/113, https://community.sendbird.com/t/uikit-textfield-goes-up-to-the-top-when-user-taps-the-textfield/2193
 
 ### Sendbird SwiftUI screens show two navigation bars
-- **Cause:** The Sendbird SwiftUI views host UIKit view controllers that bring their own navigation bar, so a SwiftUI navigation bar on the host adds a second one.
-- **Fix:** Hide the SwiftUI navigation bar on the view that hosts the Sendbird screen.
-- **Cases:** https://github.com/sendbird/sendbird-swiftui-ios/discussions/7, https://community.sendbird.com/t/swiftui-sdk-integration/10082
+- **Cause:** The Sendbird SwiftUI views host UIKit view controllers that bring their own navigation bar. In SendbirdSwiftUI 1.0.0-beta.1, a SwiftUI navigation bar on the host added a second one.
+- **Fix:** Update SendbirdSwiftUI. The release notes list fixes for this in 1.0.0-beta.2 ("Fixed multiple navigationBars appearing issue"), 1.0.1 (an unwanted navigation bar with the `.groupChannelView { }` builder inside a `TabView`), 1.1.3 (a missing navigation bar in a `TabView`), and 1.2.2 (an empty navigation bar above the header when the SDK pushes a channel view created by the `groupChannelView` builder). The `.navigationBarHidden(true)` workaround in the discussion was for 1.0.0-beta.1, and the discussion itself is marked out of date. (source: https://github.com/sendbird/sendbird-swiftui-ios/releases)
+- **Cases:** https://github.com/sendbird/sendbird-swiftui-ios/discussions/7, https://community.sendbird.com/t/swiftui-sdk-integration/10082 (fixed in 1.0.0-beta.2 per the staff reply)
 
 ### UIKit chrome does not follow the system light or dark appearance on iOS 26
 - **Cause:** Liquid Glass chrome follows `SBUTheme.colorScheme` by default, so it keeps the old scheme when the system appearance changes unless the app updates the theme.
@@ -86,17 +86,17 @@
 ## Push
 
 ### Every push notification arrives twice
-- **Cause:** Sendbird sends one push per registered APNs credential, so two certificates for the same bundle ID produce two notifications. An app that also posts its own local notification from a background handler shows a second copy as well.
-- **Fix:** Keep one APNs credential per bundle ID in the dashboard. Do not post a local notification for a push the system already displays.
-- **Cases:** https://community.sendbird.com/t/chat-push-notification-is-coming-twice-in-ios/1913, https://community.sendbird.com/t/duplicate-push-notifications/4696, https://community.sendbird.com/t/push-notifications-are-received-twice-by-all-ios-users/8158 — community
+- **Cause:** Sendbird sends one push per registered APNs credential, so two certificates for the same bundle ID produce two notifications.
+- **Fix:** Keep one APNs credential per bundle ID in the dashboard.
+- **Cases:** https://community.sendbird.com/t/chat-push-notification-is-coming-twice-in-ios/1913, https://community.sendbird.com/t/duplicate-push-notifications/4696
 
 ### Push notifications never arrive, for Chat messages or Calls
 - **Cause:** The APNs credential in the dashboard does not match the app. The usual reasons are a certificate for another bundle ID, a .p8 key set to Production while the build uses a development token (APNs answers `BadDeviceToken`), or push not being turned on for the application at all.
-- **Fix:** Upload a credential for the app's bundle ID and pick the environment that matches the build (Development for debug builds, Production for release builds). Then sign out and back in so the app registers its token again, as the Calls case does. Setup steps: knowledge/curated/ios/cross-cutting/push.md.
+- **Fix:** Upload a credential for the app's bundle ID and pick the environment that matches the build (Development for debug builds, Production for release builds). Setup steps: knowledge/curated/ios/cross-cutting/push.md.
 - **Cases:** https://community.sendbird.com/t/not-receiving-push-notifications-in-ios-after-registering-tokem/4593, https://community.sendbird.com/t/apns-errors-when-using-p8-token/7967, https://github.com/sendbird/sendbird-calls-ios/discussions/27
 
 ### Only the most recently used device gets push notifications
-- **Cause:** The token was registered with `unique: true`, which removes the user's other tokens.
+- **Cause:** The token was registered with `unique: true`, which removes the user's other tokens (source: https://sendbird.com/docs/chat/sdk/v4/ios/ref/Classes/SendbirdChat.html — `registerDevicePushToken(_:unique:completionHandler:)`: "register device token after removing exsiting all device tokens of the current user").
 - **Fix:** Register with `unique: false` in `SendbirdChat.registerDevicePushToken(_:unique:completionHandler:)` (source: SendbirdChatSDK 4.39.11 SendbirdChatSDK.swiftinterface:6399; also source: knowledge/curated/ios/cross-cutting/push.md). For Calls, use `unique: false` in `SendBirdCall.registerVoIPPush(token:unique:completionHandler:)` (source: SendBirdCalls 1.12.3 SendBirdCalls.swiftinterface:884; also source: knowledge/curated/ios/products/calls.md). The Chat case also says to turn on multi-device push in the dashboard.
 - **Cases:** https://community.sendbird.com/t/multi-device-ios-push-notification-support/3024, https://community.sendbird.com/t/notifications-for-multiple-devices/1536
 

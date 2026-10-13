@@ -60,7 +60,7 @@ SendbirdChat.registerPushToken(token) { status, e ->
 
 ## Logout: unregister this device before disconnecting
 
-An FCM token identifies one app install, so keep it registered only for the user who is signed in on that device. Disconnecting is a logout, but unless the push token is unregistered the user still receives push notifications for their group channels. On logout, unregister first and call `SendbirdChat.disconnect` from the completion; otherwise the next user on the device can receive the previous user's notifications.
+Disconnecting is a logout, but unless the push token is unregistered the user still receives push notifications for their group channels. On logout, unregister first and call `SendbirdChat.disconnect` from the completion.
 
 ```kotlin
 // Handler path: false removes only this device's token; true removes all of the user's tokens.

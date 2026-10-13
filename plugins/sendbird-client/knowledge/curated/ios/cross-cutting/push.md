@@ -90,7 +90,7 @@ final class PushPayloadAppDelegate: UIResponder, UIApplicationDelegate {
 }
 ```
 
-An app opened this way usually needs data before `connect` finishes. Start Chat calls from the `connect` completion; see "Call APIs only after connect completes" in knowledge/curated/ios/products/chat.md.
+Chat calls made from this handler need a connection first; see "Call APIs only after connect completes" in knowledge/curated/ios/products/chat.md.
 
 (source: https://sendbird.com/docs/chat/sdk/v4/ios/push-notifications/configuring-preferences/register-push-notification-credentials — Step 5 and the full `sendbird` payload format, reviewed 2026-10-11)
 

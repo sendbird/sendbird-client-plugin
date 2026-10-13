@@ -124,7 +124,7 @@ fun GalleryAndDocumentOnly(navController: NavController, channelUrl: String) {
 }
 ```
 
-- The public `ChannelMessageInput(modifier, state, viewModelContract)` and `MessageInput(...)` signatures in 1.3.6 have no parameter for the menu button's visibility. With an empty `menus` list, `ChannelScreen` still composes the bottom-sheet slot when `isBottomSheetVisible` turns true (it builds a `DefaultMessageInputBottomSheetContract` and calls the slot), and the sheet has no items to show. (source: uikit-compose-1.3.6.aar javap com.sendbird.uikit.compose.channels.group.detail.MessageInputKt, com.sendbird.uikit.compose.component.defaults.SendbirdDialogDefaults, com.sendbird.uikit.compose.channels.group.detail.ChannelScreenKt)
+- The public `ChannelMessageInput(modifier, state, viewModelContract)` and `MessageInput(...)` signatures in 1.3.6 have no parameter for the menu button's visibility. (source: uikit-compose-1.3.6.aar javap com.sendbird.uikit.compose.channels.group.detail.MessageInputKt, com.sendbird.uikit.compose.component.defaults.SendbirdDialogDefaults, com.sendbird.uikit.compose.channels.group.detail.ChannelScreenKt)
 - To turn the input off at runtime, replace the `messageInput` slot: keep `ChannelMessageInput` while sending is allowed and show `MessageInput(enabled = false)` otherwise. `ChannelMessageInput` needs the screen's view model, so create it the way `ChannelScreen` does by default — `viewModel(factory = ChannelViewModel.factory(ChannelViewModelParams(channelUrl)))` — and pass the same object as `viewModelContract`:
 
 ```kotlin
@@ -245,7 +245,7 @@ class UniqueTokenMessagingService : SendbirdPushHandler() {
     override fun onMessageReceived(context: Context, remoteMessage: RemoteMessage) { }
 }
 ```
-The docs pages checked (the Compose push page and the Chat SDK FCM pages) do not say what the server does with `unique = true`, so this note does not describe it. (source: https://sendbird.com/docs/chat/uikit/v3/jetpack-compose/essentials/push-notifications) (source: sendbird-chat-4.36.4.aar javap -c com.sendbird.android.push.SendbirdPushHandler — `onTokenUpdated` calls `isUniquePushToken()` and passes it to `SendbirdPushHelper.registerPushToken`) (source: knowledge/curated/android/cross-cutting/push.md)
+(source: https://sendbird.com/docs/chat/uikit/v3/jetpack-compose/essentials/push-notifications) (source: sendbird-chat-4.36.4.aar javap -c com.sendbird.android.push.SendbirdPushHandler — `onTokenUpdated` calls `isUniquePushToken()` and passes it to `SendbirdPushHelper.registerPushToken`) (source: knowledge/curated/android/cross-cutting/push.md)
 
 ## Related
 - View host: knowledge/curated/android/hosts/view.md

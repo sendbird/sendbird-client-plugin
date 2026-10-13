@@ -11,9 +11,9 @@
 
 ### "This session token is invalid", or a user who used to connect without a token now can't
 
-- **Cause:** Once an access token or session token has been issued for a user, that user must always connect with a token, even if the application lets token-less users read and write. The same message also shows up when the token was issued for a different application, or when the client holds a token the server has since replaced.
-- **Fix:** Pass the token as the second argument, `sb.connect(userId, authToken)`, and make sure your server issued it for this user in this application ID. When the token expires, hand the SDK a fresh one from your server through the `SessionHandler` (see knowledge/curated/js/products/auth.md). (source: @sendbird/chat 4.22.13 lib/__definition.d.ts:4372 ; source: knowledge/curated/js/products/auth.md)
-- **Cases:** https://community.sendbird.com/t/issue-connecting-without-access-token-despite-read-write-permission-enabled/11125, https://community.sendbird.com/t/channelllist-infinite-loading/8932, https://community.sendbird.com/t/im-getting-this-session-token-is-invalid-even-so-im-using-access-token/8623 — community
+- **Cause:** Once an access token or session token has been issued for a user, that user must always connect with a token, even if the application lets token-less users read and write.
+- **Fix:** Pass the token as the second argument, `sb.connect(userId, authToken)`. When the token expires, hand the SDK a fresh one from your server through the `SessionHandler` (see knowledge/curated/js/products/auth.md). (source: @sendbird/chat 4.22.13 lib/__definition.d.ts:4372 ; source: knowledge/curated/js/products/auth.md)
+- **Cases:** https://community.sendbird.com/t/issue-connecting-without-access-token-despite-read-write-permission-enabled/11125, https://community.sendbird.com/t/channelllist-infinite-loading/8932
 
 ### React Native: after the app reloads, every channel call fails with "connection is required" (800101)
 
@@ -23,7 +23,7 @@
 
 ### React Native: channel handlers stop firing while the app is in the background or the screen is locked
 
-- **Cause:** The JS thread does not run in the background, so the SDK cannot deliver events to handlers there. This is expected; use push notifications for background alerts.
+- **Cause:** The JS thread does not run in the background, so the SDK cannot deliver events to handlers there.
 - **Fix:** Call `sb.setBackgroundState()` when the app goes to the background and `sb.setForegroundState()` when it comes back (see knowledge/curated/js/hosts/react-native.md). Use `GroupChannelCollection` and `MessageCollection` for your screens so they catch up on missed changes after the app returns to the foreground. (source: @sendbird/chat 4.22.13 lib/__definition.d.ts:4398, 4403 ; source: knowledge/curated/js/hosts/react-native.md)
 - **Cases:** https://community.sendbird.com/t/onchannelchanged-onmessagereceived-do-not-trigger-when-app-in-background-or-lockscreen/7471
 
@@ -40,11 +40,9 @@
 ### Errors that come from two copies of a Sendbird package
 
 - **Symptom — React Native:** After an upgrade, UIKit hooks report a missing BottomSheet or ActionMenu context.
-- **Symptom — Web:** A call such as `addReaction` on a channel you fetched yourself fails with "Invalid parameters" inside UIKit.
-- **Cause:** The app installed its own copy of a package that UIKit already depends on, at a different version. The bundle then holds two copies, and objects or React contexts from one copy do not match the other.
+- **Cause:** The app installed its own copy of a package that UIKit already depends on, at a different version. The bundle then holds two copies, and React contexts from one copy do not match the other.
 - **Fix — React Native:** Do not add `@sendbird/uikit-react-native-foundation` or `@sendbird/uikit-chat-hooks` at a different version. `@sendbird/uikit-react-native` 3.12.9 pins both to exactly 3.12.9, so remove your own entry or match it exactly. (source: @sendbird/uikit-react-native 3.12.9 package.json `dependencies`)
-- **Fix — Web:** `@sendbird/uikit-react` 3.19.1 depends on `@sendbird/chat` `^4.22.12`. If you also install `@sendbird/chat`, keep it in that range so the package manager installs a single copy (check with `npm ls @sendbird/chat`). Inside UIKit, act on the channel object that UIKit gives you rather than one fetched through a separate SDK instance. (source: @sendbird/uikit-react 3.19.1 package.json `dependencies`)
-- **Cases:** https://community.sendbird.com/t/error-uikit-hooks-after-upgrading-to-react-native-0-72/8050, https://community.sendbird.com/t/message-addreaction-web-v4-sdk-invalid-parameters/9674 — community
+- **Cases:** https://community.sendbird.com/t/error-uikit-hooks-after-upgrading-to-react-native-0-72/8050
 
 ### React Native: `SendbirdUIKitContainer` throws "Cannot read property 'options' of undefined", or asks for media packages you don't use
 
@@ -71,7 +69,7 @@
 
 ### Web UIKit: with a custom channel list query, the list keeps reloading, or selecting a channel always opens the first one
 
-- **Cause:** By default the channel list auto-selects a channel whenever it loads or changes, and that fights with your own selection logic.
+- **Cause:** By default the channel list selects the first channel whenever no channel is selected, and that fights with your own selection logic (source: https://github.com/sendbird/sendbird-uikit-react/blob/v3.19.1/src/modules/GroupChannelList/context/GroupChannelListProvider.tsx#L141-L146).
 - **Fix — Web:** Set `disableAutoSelect` on the list (`GroupChannelList`, or the legacy `ChannelList` if you still use `queries`). Then drive selection yourself with `onChannelSelect` and `selectedChannelUrl`. (source: @sendbird/uikit-react 3.19.1 types/modules/GroupChannelList/context/GroupChannelListProvider.d.ts:17, 20, 22 ; types/modules/ChannelList/context/ChannelListProvider.d.ts:51, 54)
 - **Cases:** https://community.sendbird.com/t/why-when-i-pass-on-props-queries-channellistquery-includeempty-true-app-is-stuck-and-make-endless-requests/6816, https://community.sendbird.com/t/how-to-use-queries-channellistquery-in-the-right-way/7167
 
@@ -117,11 +115,11 @@
 - **Fix:** Chain `.onPending(...)`, `.onFailed(...)` and `.onSucceeded(...)` on the returned handler, and read the sent message in `onSucceeded`. (source: @sendbird/chat 4.22.13 lib/__definition.d.ts:472, 2875-2897 ; source: knowledge/curated/js/products/chat.md)
 - **Cases:** https://community.sendbird.com/t/chat-sdk-v4-send-message-onsucceeded-handler-not-called/4921
 
-### A file message shows up as a generic file, or the stored file has no extension
+### A file message shows up as a generic file
 
-- **Cause:** The server decides how to handle a file from its MIME type and name. A bare type such as `"image"`, or a nameless `Blob`, does not give it enough to go on.
-- **Fix:** Send a full MIME type such as `image/jpeg` in `mimeType`, and give the file a name, either by sending a `File` or by setting `fileName`. (source: @sendbird/chat 4.22.13 lib/__definition.d.ts:1790-1800)
-- **Cases:** https://community.sendbird.com/t/onsendfilemessage-not-working-when-type-is-set-to-image/5819, https://community.sendbird.com/t/uploading-files-audio-clips-issue-with-missing-file-extension-of-saved-file-if-audio-is-encoded-with-audio-webm/3972 — community
+- **Cause:** The file type must be a full MIME type; a bare type such as `"image"` is not one.
+- **Fix:** Send a full MIME type such as `image/jpeg` in `mimeType`. (source: @sendbird/chat 4.22.13 lib/__definition.d.ts:1790-1800)
+- **Cases:** https://community.sendbird.com/t/onsendfilemessage-not-working-when-type-is-set-to-image/5819
 
 ### There's no upload progress for file messages
 

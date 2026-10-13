@@ -20,31 +20,27 @@ Sendbird ships SwiftUI views for Chat in a separate package: add `https://github
 
 (source: sendbird/sendbird-swiftui-ios Package.swift (1.2.2); SendbirdSwiftUI.swiftinterface (1.2.2) line 897; https://sendbird.com/docs/chat/uikit/v3/swiftui/essentials/installation)
 
-## Switching users and keeping custom views
+## Keeping custom views after a screen disappears
 
-When the signed-in user changes, bind the Sendbird root view's identity to the user ID with SwiftUI's `.id(_:)`; a new identity makes SwiftUI rebuild the view and reset its state, so the next user starts from a fresh `GroupChannelListView`. SendbirdSwiftUI resets customized view adaptors whenever a SendbirdSwiftUI view's `onDisappear` is called; to keep them, set `GlobalOptions.enableViewAdaptorAutoReset = false` before that view appears (for app-wide behavior, before `SendbirdUI.initialize`).
+SendbirdSwiftUI resets customized view adaptors whenever a SendbirdSwiftUI view's `onDisappear` is called. `GlobalOptions.enableViewAdaptorAutoReset` (since 1.0.3, default `true`) controls this; set it to `false` before the SendbirdSwiftUI view appears to keep its customized views. In 1.2.2 each view's `onDisappear` checks the flag before it resets that view's adaptors.
 
 ```swift
 import SwiftUI
 import SendbirdSwiftUI
 
-// Call once at launch (e.g. from application(_:didFinishLaunchingWithOptions:)),
-// before any SendbirdSwiftUI view appears.
-func configureSendbird() {
+// Call once at launch, before any SendbirdSwiftUI view appears.
+func keepCustomViews() {
     GlobalOptions.enableViewAdaptorAutoReset = false
-    SendbirdUI.initialize(applicationId: "APP_ID") { error in }
 }
 
 struct ChatRoot: View {
-    let userId: String
     var body: some View {
         GroupChannelListView()
-            .id(userId)   // new user ID -> new view identity -> fresh state
     }
 }
 ```
 
-(source: SendbirdSwiftUI.swiftinterface (1.2.2) lines 673–674, 897–898, 21358; sendbird/sendbird-swiftui-ios@1.2.2 Sources/SwiftUI/Common/GlobalOptions.swift lines 13–17; https://developer.apple.com/documentation/swiftui/view/id(_:))
+(source: https://github.com/sendbird/sendbird-swiftui-ios/blob/1.2.2/Sources/SwiftUI/Common/GlobalOptions.swift#L13-L17; source: https://github.com/sendbird/sendbird-swiftui-ios/blob/1.2.2/Sources/SwiftUI/KeyFunctions/GroupChannelList/GroupChannelListView.swift#L59-L62; SendbirdSwiftUI.swiftinterface (1.2.2) lines 673–674)
 
 ## Customizing SendbirdSwiftUI views
 
@@ -132,7 +128,7 @@ struct BrandedChannelScreen: View {
     }
 }
 ```
-Loading `config.message.url` (the original file) instead of a server thumbnail is one way to avoid soft-looking images. The UIKit section on thumbnails explains why they can look soft (knowledge/curated/ios/products/uikit.md, "Media: thumbnails and video"). (source: SendbirdSwiftUI.swiftinterface (1.2.2) lines 1596–1600 (builders), 1800–1832 (`UserMessage`, `FileMessage`, and `QuotedFileMessage` view configs), 9588 (`SBUMessageFileType`); source: https://github.com/sendbird/sendbird-uikit-ios/blob/3.36.1/Sources/Enums/SBUEnums.swift#L228-L235 (the same `SBUMessageFileType` cases in the UIKit core); source: https://github.com/sendbird/sendbird-swiftui-ios/blob/1.2.2/Sample/QuickStartSwiftUI/CustomSample/CustomViews/GroupChannel/ViewConverter/List/CustomGroupChannel.ViewConverter.List.fileMessageView.swift#L28-L53; source: https://github.com/sendbird/sendbird-swiftui-ios/blob/1.2.2/Sample/QuickStartSwiftUI/CustomSample/CustomViews/GroupChannel/ViewConverter/List/CustomGroupChannel.ViewConverter.List.quotedFileMessageView.swift#L28-L57)
+(source: SendbirdSwiftUI.swiftinterface (1.2.2) lines 1596–1600 (builders), 1800–1832 (`UserMessage`, `FileMessage`, and `QuotedFileMessage` view configs), 9588 (`SBUMessageFileType`); source: https://github.com/sendbird/sendbird-uikit-ios/blob/3.36.1/Sources/Enums/SBUEnums.swift#L228-L235 (the same `SBUMessageFileType` cases in the UIKit core); source: https://github.com/sendbird/sendbird-swiftui-ios/blob/1.2.2/Sample/QuickStartSwiftUI/CustomSample/CustomViews/GroupChannel/ViewConverter/List/CustomGroupChannel.ViewConverter.List.fileMessageView.swift#L28-L53; source: https://github.com/sendbird/sendbird-swiftui-ios/blob/1.2.2/Sample/QuickStartSwiftUI/CustomSample/CustomViews/GroupChannel/ViewConverter/List/CustomGroupChannel.ViewConverter.List.quotedFileMessageView.swift#L28-L57)
 
 ### Message input: custom buttons and attachment options
 
@@ -185,31 +181,14 @@ struct ChannelWithStickerButton: View {
 ```
 `GroupChannelViewProvider` also exposes `showResourcePicker()`, `showCamera()`, `showPhotosLibrary()`, and `showDocumentsPicker()`, so a replaced left area can still offer only the attachment types you want. The attachment options in the default "+" sheet use the same settings as UIKit: `SendbirdUI.config.groupChannel.channel.input` (`camera`, `gallery`, `isDocumentEnabled`). Set them at launch, before the views appear. (source: SendbirdSwiftUI.swiftinterface (1.2.2) lines 1607–1617 (input builders), 1698–1712 (`LeftView` and `RightView` view configs), 1158–1161 (provider picker methods), 8140–8147 (`SBUConfig.BaseInput`), 21356 (`SendbirdUI.config`); source: https://github.com/sendbird/sendbird-uikit-ios/blob/3.36.1/Sources/Configuration/SBUConfig.Base.swift#L13-L74 (the same input settings in the UIKit core); source: https://github.com/sendbird/sendbird-swiftui-ios/blob/1.2.2/Sample/QuickStartSwiftUI/CustomSample/CustomViews/GroupChannel/ViewConverter/Input/CustomGroupChannel.ViewConverter.Input.addButton.swift#L28-L30; source: https://github.com/sendbird/sendbird-swiftui-ios/blob/1.2.2/Sample/QuickStartSwiftUI/CustomSample/CustomViews/GroupChannel/ViewConverter/Input/CustomGroupChannel.ViewConverter.Input.leftView.swift#L27-L30)
 
-### Channel list: search field, loading indicator, list item
+### Channel list: custom query, loading indicator, list item
 
-`GroupChannelListView` has no search item of its own. Its header builders are `leftView`, `rightView`, and `titleView`. To search, put your own text field next to the list and rebuild the list with a channel-name filter when the user submits. `GroupChannelListViewProvider` is an `ObservableObject` with a published `isLoading`, so an overlay can show your own spinner while the list loads.
+`GroupChannelListView` has no search item of its own. Its header builders are `leftView`, `rightView`, and `titleView`. `GroupChannelListViewProvider(channelListQuery:)` takes your own channel list query, for example one with a channel-name filter. The provider is an `ObservableObject` with a published `isLoading`, so an overlay can show your own spinner while the list loads.
 
 ```swift
 import SwiftUI
 import SendbirdSwiftUI
 import SendbirdChatSDK
-
-struct SearchableChannelList: View {
-    @State private var draft = ""
-    @State private var keyword = ""
-
-    var body: some View {
-        VStack(spacing: 0) {
-            TextField("Search channels", text: $draft)
-                .textFieldStyle(.roundedBorder)
-                .submitLabel(.search)
-                .onSubmit { keyword = draft }
-                .padding(.horizontal)
-            FilteredChannelList(keyword: keyword)
-                .id(keyword)   // new keyword -> new view identity -> new provider and query
-        }
-    }
-}
 
 struct FilteredChannelList: View {
     @StateObject private var provider: GroupChannelListViewProvider
@@ -239,7 +218,7 @@ struct FilteredChannelList: View {
     }
 }
 ```
-`.id(_:)` gives the list a new identity for each keyword, so SwiftUI creates a new `FilteredChannelList` with a fresh provider. This is SwiftUI behavior, not an SDK API (see "Switching users and keeping custom views" above). The channel-name filter is the Chat SDK's `GroupChannelListQueryParams.channelNameContainsFilter` (SendbirdChatSDK 4.39.11 `.swiftinterface`). (source: SendbirdSwiftUI.swiftinterface (1.2.2) lines 877–890 (channel list builders), 973–977 (`ChannelName` view config), 997–1027 (`GroupChannelListViewProvider`: `channels`, `isLoading`, `init(channelListQuery:)`), 21650 (`ObservableObject`); source: https://github.com/sendbird/sendbird-swiftui-ios/blob/1.2.2/Sample/QuickStartSwiftUI/CustomSample/CustomViews/GroupChannelList/ViewProvider/CustomGroupChannelList.SwiftUI.View.ViewProvider.swift#L15-L34; source: https://github.com/sendbird/sendbird-uikit-ios/blob/3.36.1/Sources/ViewModel/ChannelList/SBUGroupChannelListViewModel.swift#L125 (`GroupChannel.createMyGroupChannelListQuery(params:)`); source: https://sendbird.com/docs/chat/uikit/v3/swiftui/group-channel-views/list-channels)
+The channel-name filter is the Chat SDK's `GroupChannelListQueryParams.channelNameContainsFilter` (SendbirdChatSDK 4.39.11 `.swiftinterface`, line 3194). (source: SendbirdSwiftUI.swiftinterface (1.2.2) lines 877–890 (channel list builders), 973–977 (`ChannelName` view config), 997–1027 (`GroupChannelListViewProvider`: `channels`, `isLoading`, `init(channelListQuery:)`), 21650 (`ObservableObject`); source: https://github.com/sendbird/sendbird-swiftui-ios/blob/1.2.2/Sample/QuickStartSwiftUI/CustomSample/CustomViews/GroupChannelList/ViewProvider/CustomGroupChannelList.SwiftUI.View.ViewProvider.swift#L15-L34; source: https://github.com/sendbird/sendbird-uikit-ios/blob/3.36.1/Sources/ViewModel/ChannelList/SBUGroupChannelListViewModel.swift#L125 (`GroupChannel.createMyGroupChannelListQuery(params:)`); source: https://sendbird.com/docs/chat/uikit/v3/swiftui/group-channel-views/list-channels)
 
 ### Header
 
@@ -278,7 +257,7 @@ struct ChannelWithCustomHeader: View {
 
 ### Theme, dark mode, strings
 
-SendbirdSwiftUI is built on Sendbird UIKit, so it uses the same `SBUTheme`, `SBUColorSet`, `SBUFontSet`, and `SBUStringSet`. Their properties take `UIColor` and `UIFont`. The package adds `asUIColor()` on `Color` and `asUIFont()` on `Font` to convert. The docs say to set the theme before SendbirdSwiftUI is initialized, and to call `SBUTheme.set(theme:)` again when you change it at runtime. To restyle a screen that is already showing, set the theme first and then give the root view a new identity.
+SendbirdSwiftUI is built on Sendbird UIKit and uses the same `SBUTheme` and `SBUStringSet`. Colors and fonts have their own SwiftUI classes, `ColorSet` and `FontSet`, whose properties are SwiftUI `Color` and `Font`. In 1.2.2 the UIKit names `SBUColorSet` and `SBUFontSet` are deprecated and renamed to `ColorSet` and `FontSet`, so use the new names in SwiftUI code. Theme properties still take `UIColor` and `UIFont`; the package adds `asUIColor()` on `Color` and `asUIFont()` on `Font` to convert. The docs say to set the theme, `ColorSet`, and `FontSet` before SendbirdSwiftUI is initialized, and to call `SBUTheme.set(theme:)` after you change them at runtime so the generated theme picks them up.
 
 ```swift
 import SwiftUI
@@ -289,24 +268,8 @@ func applyBrandTheme(isDark: Bool) {
     SBUTheme.groupChannelCellTheme.titleFont = Font.headline.asUIFont()
     SBUTheme.groupChannelCellTheme.backgroundColor = Color(.systemBackground).asUIColor()
 }
-
-struct ThemedChatRoot: View {
-    @Environment(\.colorScheme) private var colorScheme
-    @State private var themeVersion = 0
-
-    var body: some View {
-        GroupChannelListView()
-            .id(themeVersion)
-            .onChange(of: colorScheme) { newValue in
-                applyBrandTheme(isDark: newValue == .dark)
-                themeVersion += 1   // rebuild only after the new theme is set
-            }
-    }
-}
 ```
-Call `applyBrandTheme(isDark:)` once at launch as well. For strings, fonts, and colors, the rules in knowledge/curated/ios/cross-cutting/theme.md apply unchanged. (source: SendbirdSwiftUI.swiftinterface (1.2.2) lines 18900–18903 (`SBUTheme.set(theme:)`, `set(colorScheme:)`), 102 (`asUIColor()`), 21462 (`asUIFont()`), 7890 (`SBUColorSet`), 10123 (`SBUFontSet`), 18454 (`SBUStringSet`); source: https://github.com/sendbird/sendbird-uikit-ios/blob/3.36.1/Sources/Theme/SBUColorSet.swift#L14; source: https://github.com/sendbird/sendbird-uikit-ios/blob/3.36.1/Sources/Theme/SBUFontSet.swift#L15; source: https://github.com/sendbird/sendbird-uikit-ios/blob/3.36.1/Sources/Constant/SBUStringSet.swift#L17; source: https://github.com/sendbird/sendbird-swiftui-ios/blob/1.2.2/Sample/QuickStartSwiftUI/CustomSample/CustomViews/Theme/Theme/Custom/CustomTheme.Theme.Custom.Main.swift#L25-L29; source: https://sendbird.com/docs/chat/uikit/v3/swiftui/theme-and-style-resources/theme-resources)
-
-Not covered here: a SwiftUI-level way to disable the message input from app logic. `SBUMessageInputView.setInputState(_:placeholder:)` exists in the package, but no `inputItem` builder or provider property hands you that input view. (source: SendbirdSwiftUI.swiftinterface (1.2.2) line 13999; source: https://github.com/sendbird/sendbird-uikit-ios/blob/3.36.1/Sources/View/Channel/MessageInput/SBUMessageInputView.swift#L1162)
+Call `applyBrandTheme(isDark:)` at launch, before SendbirdSwiftUI is initialized. For strings, the rules in knowledge/curated/ios/cross-cutting/theme.md apply unchanged. (source: SendbirdSwiftUI.swiftinterface (1.2.2) lines 18900–18903 (`SBUTheme.set(theme:)`, `set(colorScheme:)`), 102 (`asUIColor()`), 21462 (`asUIFont()`), 107 (`ColorSet`), 595 (`FontSet`), 7889–7890 and 10122–10123 (`SBUColorSet` and `SBUFontSet` deprecated, renamed to `ColorSet` and `FontSet`), 18454 (`SBUStringSet`); source: https://sendbird.com/docs/chat/uikit/v3/swiftui/theme-and-style-resources/color-resources; source: https://sendbird.com/docs/chat/uikit/v3/swiftui/theme-and-style-resources/font-resources; source: https://github.com/sendbird/sendbird-uikit-ios/blob/3.36.1/Sources/Constant/SBUStringSet.swift#L17; source: https://github.com/sendbird/sendbird-swiftui-ios/blob/1.2.2/Sample/QuickStartSwiftUI/CustomSample/CustomViews/Theme/Theme/Custom/CustomTheme.Theme.Custom.Main.swift#L25-L29; source: https://sendbird.com/docs/chat/uikit/v3/swiftui/theme-and-style-resources/theme-resources)
 
 ## Related
 - UIKit host: knowledge/curated/ios/hosts/uikit.md

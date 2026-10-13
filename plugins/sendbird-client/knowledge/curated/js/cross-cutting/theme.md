@@ -1,5 +1,5 @@
 <!-- last-verified-against: @sendbird/uikit-react 3.19.1 / @sendbird/uikit-react-native 3.12.10 -->
-<!-- verified-at: 2026-10-11 -->
+<!-- verified-at: 2026-10-12 -->
 <!-- verification-method: compile-check-js -->
 <!-- status: populated -->
 # js — theme (UIKit)
@@ -132,6 +132,10 @@ const StringSetKo = createBaseStringSet({
 ```
 
 (source: https://sendbird.com/docs/chat/uikit/v3/react-native/theme-and-style-resources/string-resource ; github.com/sendbird/sendbird-uikit-react-native v3.12.10 packages/uikit-react-native/src/localization/createBaseStringSet.ts:22-34 ; src/localization/StringSet.type.ts:218-220,264-299 ; src/containers/SendbirdUIKitContainer.tsx:104-106,162 (falls back to `StringSetEn`) ; src/index.ts:70-71 ; @sendbird/uikit-react-native@3.12.10 package.json peerDependencies `date-fns`)
+
+`dateLocale` is what localizes UIKit's dates. In the set that `createBaseStringSet` builds, the date separator (`GROUP_CHANNEL.LIST_DATE_SEPARATOR`), the message time (`GROUP_CHANNEL.MESSAGE_BUBBLE_TIME`), the channel list time (`GROUP_CHANNEL_LIST.CHANNEL_PREVIEW_TITLE_CAPTION`), and the matching open channel and thread entries format with `locale ?? dateLocale`. UIKit calls them without a `locale` argument, so they use your `dateLocale`. `StringSetEn` is `createBaseStringSet({ dateLocale: enUS })`, so the default set formats dates with the `enUS` locale.
+
+(source: https://github.com/sendbird/sendbird-uikit-react-native/blob/v3.12.10/packages/uikit-react-native/src/localization/createBaseStringSet.ts#L34-L43 lines 119, 130, 225 ; https://github.com/sendbird/sendbird-uikit-react-native/blob/v3.12.10/packages/uikit-react-native/src/localization/StringSet.en.ts#L5 ; packages/uikit-react-native/src/components/GroupChannelMessageRenderer/GroupChannelMessageDateSeparator.tsx:27 ; src/components/GroupChannelMessageRenderer/index.tsx:179 ; src/containers/GroupChannelPreviewContainer.tsx:100) (community context: https://github.com/sendbird/sendbird-uikit-react-native/issues/22 — a 2022 report in which a maintainer proposed this fallback)
 
 ## Pitfalls
 - React: import the UIKit CSS (`@sendbird/uikit-react/dist/index.css`) or theming has nothing to style.
