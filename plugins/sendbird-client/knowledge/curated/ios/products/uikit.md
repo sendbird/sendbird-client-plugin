@@ -966,6 +966,40 @@ SendbirdUI.connectIfNeeded { user, error in
 ```
 (source: https://github.com/sendbird/sendbird-uikit-ios/blob/3.36.1/Sources/Manager/SBUEmojiManager.swift#L56-L75 (`loadAllEmojis(completionHandler:)` at line 149); source: https://github.com/sendbird/sendbird-uikit-ios/blob/3.36.1/Sources/SendbirdUI.swift#L250-L254 (the load starts in a `defer` after connect); community context: https://github.com/sendbird/sendbird-uikit-ios/discussions/50)
 
+## Start a 1:1 chat from a button (no channel list)
+For a "Chat with seller" button: create the channel with `isDistinct = true`, which returns the existing 1:1 channel when one already has the same members, and then open the channel screen by its URL. Push `SBUGroupChannelViewController(channelURL:)` on your own navigation controller, so the back button returns to your screen.
+
+```swift
+import UIKit
+import SendbirdChatSDK
+import SendbirdUIKit
+
+final class SellerProfileViewController: UIViewController {
+    var sellerUserId = ""
+
+    @objc func chatWithSellerTapped() {
+        let params = GroupChannelCreateParams()
+        params.userIds = [sellerUserId]
+        params.isDistinct = true   // same members -> the existing channel comes back
+        GroupChannel.createChannel(params: params) { [weak self] channel, error in
+            guard let self, let channel, error == nil else { return }
+            let channelVC = SBUGroupChannelViewController(channelURL: channel.channelURL)
+            self.navigationController?.pushViewController(channelVC, animated: true)
+        }
+    }
+
+    // From a notification tap, where no navigation controller of yours is at hand.
+    // Payload format: knowledge/curated/ios/cross-cutting/push.md ("Handle a notification payload").
+    func openChannel(fromPush userInfo: [AnyHashable: Any]) {
+        let sendbird = userInfo["sendbird"] as? [String: Any]
+        guard let channelURL = (sendbird?["channel"] as? [String: Any])?["channel_url"] as? String else { return }
+        SendbirdUI.moveToChannel(channelURL: channelURL, basedOnChannelList: false)
+    }
+}
+```
+
+`SendbirdUI.moveToChannel(channelURL:basedOnChannelList:messageListParams:channelType:rootViewController:)` returns without doing anything when `SBUGlobals.currentUser` is not set. It starts from the window's root view controller (or the selected tab), reuses a channel list or channel screen it finds there, and otherwise presents `SBUViewControllerSet.GroupChannelViewController` in a new `UINavigationController`. With `basedOnChannelList: true` (the default) it presents a channel list first and opens the channel from it. UIKit's own `startChatWithAIBot` uses the same create-then-`moveToChannel(..., basedOnChannelList: false)` sequence. (source: https://github.com/sendbird/sendbird-uikit-ios/blob/3.36.1/Sources/SendbirdUI.swift#L750-L872 — `moveToChannel` and `showChannelViewController`) (source: https://github.com/sendbird/sendbird-uikit-ios/blob/3.36.1/Sources/SendbirdUI.swift#L1096-L1116 — create with `isDistinct`, then move) (SendbirdUIKit.swiftinterface 3.36.2: `moveToChannel` 16572, `SBUGroupChannelViewController.init(channelURL:startingPoint:messageListParams:)` 7363) (source: knowledge/curated/ios/products/chat.md — Create and list group channels)
+
 ## Attachment permissions (Info.plist)
 UIKit lets users attach photos, videos, and documents, and save media. The docs list four `Info.plist` usage descriptions for these features: `NSPhotoLibraryUsageDescription` (pick from the library), `NSCameraUsageDescription` (take a photo or video), `NSMicrophoneUsageDescription` (record sound with a video), and `NSPhotoLibraryAddUsageDescription` (save media to the library). When camera capture from the message input fails while picking from the library works, check the camera and microphone keys first. Documents from iCloud also need the iCloud capability with iCloud Documents checked under Signing & Capabilities.
 

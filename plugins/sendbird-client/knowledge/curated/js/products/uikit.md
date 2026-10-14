@@ -288,6 +288,42 @@ import { GroupChannelHeader } from '@sendbird/uikit-react/GroupChannel/component
 
 Use `onChatHeaderActionClick` on `GroupChannel` if you only need to react to the default info button. (source: https://github.com/sendbird/sendbird-uikit-react/blob/v3.19.1/src/modules/GroupChannel/components/GroupChannelHeader/GroupChannelHeaderView.tsx ; @sendbird/uikit-react@3.19.1 types/modules/GroupChannel/components/GroupChannelUI/GroupChannelUIView.d.ts:25 ; types/modules/GroupChannel/components/GroupChannelHeader/index.d.ts:3-6 ; types/ui/Header/index.d.ts:6-10 `HeaderCustomProps` ; types/modules/GroupChannelList/components/GroupChannelListHeader/index.d.ts:4-11 ; types/modules/GroupChannel/context/types.d.ts:74)
 
+### Start a 1:1 chat from a button (no channel list)
+Inside `SendbirdProvider`, get the create function with `sendbirdSelectors.getCreateGroupChannel(useSendbirdStateContext())`, create the channel with `isDistinct: true` (the existing 1:1 channel comes back when one has the same members), and show only `GroupChannel` for its URL. Sendbird's public router sample does the navigation part with react-router: the route `channels/:channelUrl` renders `GroupChannel channelUrl={channelUrl}`, and `onBackClick` navigates back.
+
+```tsx
+import { GroupChannel } from '@sendbird/uikit-react/GroupChannel';
+import useSendbirdStateContext from '@sendbird/uikit-react/useSendbirdStateContext';
+import sendbirdSelectors from '@sendbird/uikit-react/sendbirdSelectors';
+
+// Render inside <SendbirdProvider>. onOpen navigates to your conversation route or sets state.
+export function ChatWithSellerButton({ sellerUserId, onOpen }: { sellerUserId: string; onOpen: (channelUrl: string) => void }) {
+  const createChannel = sendbirdSelectors.getCreateGroupChannel(useSendbirdStateContext());
+  return (
+    <button
+      onClick={async () => {
+        const created = await createChannel({ invitedUserIds: [sellerUserId], isDistinct: true });
+        onOpen(created.url);
+      }}
+    >
+      Chat with seller
+    </button>
+  );
+}
+
+// The conversation alone, without a channel list.
+export function SellerChatPage({ channelUrl, onBack }: { channelUrl: string; onBack: () => void }) {
+  return (
+    <div style={{ height: '100vh' }}>
+      <GroupChannel channelUrl={channelUrl} onBackClick={onBack} />
+    </div>
+  );
+}
+```
+(source: https://github.com/sendbird/sendbird-uikit-react/blob/v3.19.1/samples/router/src/MobileLayout/Router.tsx#L9-L27 — `channels/:channelUrl` route) (source: https://github.com/sendbird/sendbird-uikit-react/blob/v3.19.1/samples/router/src/MobileLayout/Channel.tsx#L6-L31 — `GroupChannel` for the route's channel URL) (source: @sendbird/uikit-react 3.19.1 types/lib/selectors.d.ts:76, 226-248 — `getCreateGroupChannel` and the default export ; types/lib/Sendbird/context/hooks/useSendbirdStateContext.d.ts:2-3 ; package.json `exports` `./sendbirdSelectors`, `./useSendbirdStateContext`) (source: knowledge/curated/js/products/chat.md — Create and list group channels)
+
+Opening a channel from a browser notification tap is not covered here: these docs have no verified web push guide for `@sendbird/chat` (see knowledge/curated/js/cross-cutting/push.md).
+
 ### Threads
 Set `replyType="THREAD"` on `GroupChannel` (or `uikitOptions.groupChannel.replyType: 'thread'` on the provider) to show "Reply in thread" in the message menu. The thread screen is a separate module, `Thread`, that you render yourself: `onReplyInThreadClick({ message })` on `GroupChannel` gives you the parent message, and `Thread` takes `channelUrl` and `message`. `onMoveToParentMessage` on `Thread` receives the parent message and its channel. `threadReplySelectType` decides whether tapping a reply in the channel opens the thread or scrolls to the parent message. Threads are one level deep, in group and supergroup channels only.
 
@@ -565,6 +601,48 @@ const GroupChannelFragment = createGroupChannelFragment({
 To change every UIKit header at once (for example to hand them to React Navigation), pass `styles.HeaderComponent` to `SendbirdUIKitContainer` instead; the default headers render through it.
 
 (source: https://github.com/sendbird/sendbird-uikit-react-native/blob/v3.12.10/packages/uikit-react-native/src/domain/groupChannel/component/GroupChannelHeader.tsx lines 11-51 ; src/domain/groupChannel/types.ts:70-74,143-151 ; src/domain/groupChannel/index.ts:8 ; src/containers/SendbirdUIKitContainer.tsx:107-113,252 ; @sendbird/uikit-react-native-foundation@3.12.10 src/ui/Header/index.tsx:12-25 `HeaderProps` ; src/index.ts:7,33 `Icon`, `Header` ; https://sendbird.com/docs/chat/uikit/v3/react-native/customization/sendbirduikitcontainer)
+
+### Start a 1:1 chat from a button (no channel list)
+Get the SDK instance with `useSendbirdChat()`, create the channel with `isDistinct: true`, and navigate to a screen that loads the channel by URL with `useGroupChannel(sdk, channelUrl)` from `@sendbird/uikit-chat-hooks` and renders the group channel fragment. This is how Sendbird's public sample builds its `GroupChannel` route: React Navigation passes `{ channelUrl }` as the route params. For a push tap, read the channel URL with `parseSendbirdNotification` (knowledge/curated/js/cross-cutting/push.md, "React Native: opening a channel from a push tap") and navigate to the same route.
+
+```tsx
+import React from 'react';
+import { Button } from 'react-native';
+import { createGroupChannelFragment, useSendbirdChat } from '@sendbird/uikit-react-native';
+import { useGroupChannel } from '@sendbird/uikit-chat-hooks';
+
+// onOpen: for example (url) => navigation.navigate('GroupChannel', { channelUrl: url })
+export function ChatWithSellerButton({ sellerUserId, onOpen }: { sellerUserId: string; onOpen: (channelUrl: string) => void }) {
+  const { sdk } = useSendbirdChat();
+  return (
+    <Button
+      title="Chat with seller"
+      onPress={async () => {
+        const created = await sdk.groupChannel.createChannel({ invitedUserIds: [sellerUserId], isDistinct: true });
+        onOpen(created.url);
+      }}
+    />
+  );
+}
+
+const GroupChannelFragment = createGroupChannelFragment();
+
+// The screen behind the 'GroupChannel' route.
+export function GroupChannelScreen({ channelUrl, onBack }: { channelUrl: string; onBack: () => void }) {
+  const { sdk } = useSendbirdChat();
+  const { channel } = useGroupChannel(sdk, channelUrl);
+  if (!channel) return null;
+  return (
+    <GroupChannelFragment
+      channel={channel}
+      onChannelDeleted={onBack}
+      onPressHeaderLeft={onBack}
+      onPressHeaderRight={() => {}}
+    />
+  );
+}
+```
+(source: https://github.com/sendbird/sendbird-uikit-react-native/blob/v3.12.9/sample/src/screens/uikit/groupChannel/GroupChannelScreen.tsx#L68-L98 — `useGroupChannel(sdk, params.channelUrl)` and the fragment's handlers) (source: https://github.com/sendbird/sendbird-uikit-react-native/blob/v3.12.9/sample/src/libs/navigation.ts#L102-L108 — the `GroupChannel` route takes `channelUrl`) (source: @sendbird/uikit-react-native 3.12.9 lib/typescript/src/hooks/useContext.d.ts:4 ; lib/typescript/src/domain/groupChannel/types.d.ts:11-16 — required `channel`, `onChannelDeleted`, `onPressHeaderLeft`, `onPressHeaderRight` ; @sendbird/uikit-chat-hooks 3.12.9 lib/typescript/src/channel/useGroupChannel.d.ts:7) (source: knowledge/curated/js/products/chat.md — Create and list group channels)
 
 ### Threads
 Turn threads on with `uikitOptions={{ groupChannel: { replyType: 'thread', threadReplySelectType: 'thread' } }}` on `SendbirdUIKitContainer`; `threadReplySelectType` (`'thread'` or `'parent'`) decides what a tap on a reply in the channel opens. The thread screen is its own fragment: create it with `createGroupChannelThreadFragment()` and put it on a screen of your navigator. The channel fragment's `onPressReplyMessageInThread(parentMessage, startingPoint)` is where you navigate to that screen. The thread fragment needs `channel`, `parentMessage`, `onParentMessageDeleted`, `onChannelDeleted`, and `onPressHeaderLeft`. Threads are one level deep, in group and supergroup channels only.
