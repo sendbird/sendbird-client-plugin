@@ -10,12 +10,25 @@ import Foundation
 import Combine
 import SendbirdChatSDK
 
-private let swiftUIAppId = ProcessInfo.processInfo.environment["SENDBIRD_APP_ID"] ?? "YOUR_SENDBIRD_APP_ID"
+// App ID: the SENDBIRD_APP_ID Info.plist key (set it to $(SENDBIRD_APP_ID) and define that build setting)
+// works however the app is launched. The environment variable exists only when Xcode or a test runner
+// launches the app, so it is a fallback for development.
+private let swiftUIAppId: String = {
+    if let value = Bundle.main.object(forInfoDictionaryKey: "SENDBIRD_APP_ID") as? String,
+       !value.isEmpty, !value.hasPrefix("$(") {
+        return value
+    }
+    return ProcessInfo.processInfo.environment["SENDBIRD_APP_ID"] ?? "YOUR_SENDBIRD_APP_ID"
+}()
 
 /// Observable Chat session for SwiftUI. Inject as a `@StateObject` at the app root and read
 /// `currentUser` / `isConnected` from any view.
 @MainActor
 final class ChatSession: ObservableObject {
+    /// The one session the app uses. Start it from the app's own sign-in code and show it from any view,
+    /// so sign-in never depends on which view or object happened to receive a reference.
+    static let shared = ChatSession()
+
     @Published private(set) var currentUser: User?
     @Published private(set) var isConnected = false
     @Published private(set) var lastError: String?

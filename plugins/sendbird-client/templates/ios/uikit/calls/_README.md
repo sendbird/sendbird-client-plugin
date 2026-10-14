@@ -13,7 +13,7 @@ limit in this Xcode).
 1. SPM only: package `https://github.com/sendbird/sendbird-calls-ios`, product `SendBirdCalls` (iOS 14+; pulls WebRTC).
 2. `SendbirdCallsBootstrap.configure()` at launch, then `authenticate(...)`.
 3. Add a `SendBirdCallDelegate` to receive incoming calls; register a VoIP push token for background calls.
-4. App ID from env — never hard-code; access token is a secret.
+4. App ID from the `SENDBIRD_APP_ID` Info.plist key, filled by the `SENDBIRD_APP_ID` build setting (see `knowledge/curated/ios/setup.md` "App ID") — never hard-code; access token is a secret.
 
 ## Variations (see knowledge/curated/ios/products/calls.md, all cited)
 - Video call: `dial(calleeId:video: true)`.

@@ -7,7 +7,16 @@
 import Foundation
 import SendbirdChatSDK
 
-private let appId = ProcessInfo.processInfo.environment["SENDBIRD_APP_ID"] ?? "YOUR_SENDBIRD_APP_ID"
+// App ID: the SENDBIRD_APP_ID Info.plist key (set it to $(SENDBIRD_APP_ID) and define that build setting)
+// works however the app is launched. The environment variable exists only when Xcode or a test runner
+// launches the app, so it is a fallback for development.
+private let appId: String = {
+    if let value = Bundle.main.object(forInfoDictionaryKey: "SENDBIRD_APP_ID") as? String,
+       !value.isEmpty, !value.hasPrefix("$(") {
+        return value
+    }
+    return ProcessInfo.processInfo.environment["SENDBIRD_APP_ID"] ?? "YOUR_SENDBIRD_APP_ID"
+}()
 
 enum SendbirdChatBootstrap {
     // Call once at launch (e.g. application(_:didFinishLaunchingWithOptions:)).

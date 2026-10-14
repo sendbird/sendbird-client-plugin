@@ -16,13 +16,26 @@ import Combine
 import SwiftUI
 import SendbirdSwiftUI
 
-private let swiftUIKitAppId = ProcessInfo.processInfo.environment["SENDBIRD_APP_ID"] ?? "YOUR_SENDBIRD_APP_ID"
+// App ID: the SENDBIRD_APP_ID Info.plist key (set it to $(SENDBIRD_APP_ID) and define that build setting)
+// works however the app is launched. The environment variable exists only when Xcode or a test runner
+// launches the app, so it is a fallback for development.
+private let swiftUIKitAppId: String = {
+    if let value = Bundle.main.object(forInfoDictionaryKey: "SENDBIRD_APP_ID") as? String,
+       !value.isEmpty, !value.hasPrefix("$(") {
+        return value
+    }
+    return ProcessInfo.processInfo.environment["SENDBIRD_APP_ID"] ?? "YOUR_SENDBIRD_APP_ID"
+}()
 
 /// Drives SendbirdSwiftUI init + connect and exposes the phase so the root view can show a
 /// loading indicator until the SDK is ready (the README recommends showing one between
 /// `startHandler` and `completionHandler`).
 @MainActor
 final class SendbirdChatUISession: ObservableObject {
+    /// The one session the app uses. Start it from the app's own sign-in code and show it from any view,
+    /// so sign-in never depends on which view or object happened to receive a reference.
+    static let shared = SendbirdChatUISession()
+
     enum Phase { case idle, initializing, connected, failed(String) }
 
     @Published private(set) var phase: Phase = .idle

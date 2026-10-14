@@ -22,7 +22,7 @@ generic/platform=iOS device arch; the binary's simulator slice has an arch limit
    initializer or `.task`), so the incoming-call delegate is registered early; then `authenticate(...)`.
 4. Drive the UI from `state`: on `.ringing` show accept/decline buttons that call `accept()` / `end()`;
    for video calls place `CallVideoView(call: call, source: .remote)` and `.local` in your layout.
-5. App ID from env — never hard-code; access token is a secret. Add camera and microphone usage strings.
+5. App ID from the `SENDBIRD_APP_ID` Info.plist key, filled by the `SENDBIRD_APP_ID` build setting (see `knowledge/curated/ios/setup.md` "App ID") — never hard-code; access token is a secret. Add camera and microphone usage strings.
 
 ## Notes (see knowledge/curated/ios/products/calls.md, all cited)
 - Delegate callbacks are `nonisolated` and hop to the main actor: the README says `didStartRinging` runs on
