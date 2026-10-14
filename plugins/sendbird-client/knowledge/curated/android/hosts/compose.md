@@ -247,6 +247,35 @@ class UniqueTokenMessagingService : SendbirdPushHandler() {
 ```
 (source: https://sendbird.com/docs/chat/uikit/v3/jetpack-compose/essentials/push-notifications) (source: sendbird-chat-4.36.4.aar javap -c com.sendbird.android.push.SendbirdPushHandler — `onTokenUpdated` calls `isUniquePushToken()` and passes it to `SendbirdPushHelper.registerPushToken`) (source: knowledge/curated/android/cross-cutting/push.md)
 
+## Start a 1:1 chat from a button (Compose UIKit)
+Create the channel with the Chat SDK and `isDistinct = true` (knowledge/curated/android/products/chat.md, "Create and list group channels"), then call `navController.navigateToChannel(url)` on the `NavController` whose `NavHost` contains `sendbirdGroupChannelNavGraph(navController)`. The same call opens a channel from a push tap once you have its channel URL (the payload is in knowledge/curated/android/cross-cutting/push.md). The template `templates/android/compose/uikit/UikitComposeApp.kt` builds that `NavHost`.
+
+```kotlin
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.navigation.NavController
+import com.sendbird.android.channel.GroupChannel
+import com.sendbird.android.params.GroupChannelCreateParams
+import com.sendbird.uikit.compose.navigation.navigateToChannel
+
+@Composable
+fun ChatWithSellerButton(navController: NavController, sellerUserId: String) {
+    Button(onClick = {
+        val params = GroupChannelCreateParams().apply {
+            userIds = listOf(sellerUserId)
+            isDistinct = true   // same members -> the existing channel comes back
+        }
+        GroupChannel.createChannel(params) { channel, e ->
+            if (e == null && channel != null) navController.navigateToChannel(channel.url)
+        }
+    }) {
+        Text("Chat with seller")
+    }
+}
+```
+(source: https://sendbird.com/docs/chat/uikit/v3/jetpack-compose/navigation) (source: knowledge/curated/android/products/chat.md — Create and list group channels) (uikit-compose 1.3.6 AAR `javap` on `com.sendbird.uikit.compose.navigation.NavigationKt`: `navigateToChannel(NavController, String)`, `sendbirdGroupChannelNavGraph`; also templates/android/compose/uikit/UikitComposeApp.kt, compile-checked)
+
 ## Related
 - View host: knowledge/curated/android/hosts/view.md
 - AI Agent: knowledge/curated/android/products/ai-agent.md

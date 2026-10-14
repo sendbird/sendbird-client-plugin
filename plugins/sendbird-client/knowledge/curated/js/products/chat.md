@@ -65,22 +65,26 @@ const channel = await sb.groupChannel.createChannel({
 
 For a live-updating channel list (the common case for a channel-list screen), use a collection instead of a one-shot query:
 ```ts
-import { GroupChannelFilter, GroupChannelListOrder } from '@sendbird/chat/groupChannel';
+import type { BaseChannel } from '@sendbird/chat';
+import { GroupChannelFilter, GroupChannelListOrder, type GroupChannel } from '@sendbird/chat/groupChannel';
 
 const collection = sb.groupChannel.createGroupChannelCollection({
   filter: new GroupChannelFilter(),   // e.g. filter.includeEmpty = true
   order: GroupChannelListOrder.LATEST_LAST_MESSAGE,
 });
 
+// The handlers receive BaseChannel[]; narrow them before they go into GroupChannel[] state.
+const asGroup = (list: BaseChannel[]) => list.filter((c): c is GroupChannel => c.isGroupChannel());
 collection.setGroupChannelCollectionHandler({
-  onChannelsAdded: (context, channels) => { /* prepend/merge into UI state */ },
-  onChannelsUpdated: (context, channels) => { /* re-render changed rows */ },
+  onChannelsAdded: (context, channels) => { /* add asGroup(channels) to UI state */ },
+  onChannelsUpdated: (context, channels) => { /* replace rows by url with asGroup(channels) */ },
   onChannelsDeleted: (context, channelUrls) => { /* remove rows */ },
 });
 
-const channels = await collection.loadMore();   // first page; call again to paginate
+const channels = await collection.loadMore();   // GroupChannel[]; first page, call again to paginate
 // collection.dispose() when the screen unmounts
 ```
+The handler arguments are typed `BaseChannel[]`, so passing them straight into `GroupChannel[]` state (for example `setChannels((prev) => [...channels, ...prev])` in React) fails to type-check. Narrow them with the `isGroupChannel()` type guard, as above; `loadMore()` and the `channels` getter already return `GroupChannel[]`. (source: `@sendbird/chat@4.22.13` lib/__definition.d.ts:196 `isGroupChannel(): this is GroupChannel` on `BaseChannel` :169, :5347 `get channels(): GroupChannel[]`, :5374 `onChannelsAdded?: (context, channels: BaseChannel[])`, :5376 `onChannelsUpdated?: (context, channels: BaseChannel[])`)
 `createGroupChannelCollection(params?: GroupChannelCollectionParams)` is on `GroupChannelModule`; `setGroupChannelCollectionHandler(handler)` and `loadMore(): Promise<GroupChannel[]>` are on the returned `BaseChannelCollection`, along with `hasMore` and event fields `onChannelsAdded` / `onChannelsUpdated` / `onChannelsDeleted`. `dispose()` is declared on `GroupChannelCollection` itself. A one-shot alternative exists as `sb.groupChannel.createMyGroupChannelListQuery(params)` (returns a `GroupChannelListQuery`), and `createPublicGroupChannelListQuery(params)` lists channels the current user hasn't joined yet. (source: `@sendbird/chat@4.22.13` lib/__definition.d.ts:6156 `createGroupChannelCollection`, :6162 `createMyGroupChannelListQuery`, :6175 `createPublicGroupChannelListQuery`, :5338-5357 `BaseChannelCollection` incl. `setGroupChannelCollectionHandler`/`loadMore`/`hasMore`, :5502-5506 `GroupChannelCollection.dispose`, :5374-5378 `onChannelsAdded/Updated/Deleted`, :5918 `GroupChannelListOrder`)
 
 ## Send a message

@@ -318,6 +318,42 @@ func applyBrandTheme(isDark: Bool) {
 ```
 Call `applyBrandTheme(isDark:)` at launch, before SendbirdSwiftUI is initialized. For strings, the rules in knowledge/curated/ios/cross-cutting/theme.md apply unchanged. (source: SendbirdSwiftUI.swiftinterface (1.2.2) lines 18900–18903 (`SBUTheme.set(theme:)`, `set(colorScheme:)`), 102 (`asUIColor()`), 21462 (`asUIFont()`), 107 (`ColorSet`), 595 (`FontSet`), 7889–7890 and 10122–10123 (`SBUColorSet` and `SBUFontSet` deprecated, renamed to `ColorSet` and `FontSet`), 18454 (`SBUStringSet`); source: https://sendbird.com/docs/chat/uikit/v3/swiftui/theme-and-style-resources/color-resources; source: https://sendbird.com/docs/chat/uikit/v3/swiftui/theme-and-style-resources/font-resources; source: https://github.com/sendbird/sendbird-uikit-ios/blob/3.36.1/Sources/Constant/SBUStringSet.swift#L17; source: https://github.com/sendbird/sendbird-swiftui-ios/blob/1.2.2/Sample/QuickStartSwiftUI/CustomSample/CustomViews/Theme/Theme/Custom/CustomTheme.Theme.Custom.Main.swift#L25-L29; source: https://sendbird.com/docs/chat/uikit/v3/swiftui/theme-and-style-resources/theme-resources)
 
+## Start a 1:1 chat from a button (SendbirdSwiftUI)
+Create the channel with `isDistinct = true` (knowledge/curated/ios/products/chat.md, "Create and list group channels"), keep its URL in state, and push `GroupChannelView(provider: GroupChannelViewProvider(channelURL:))`. The public sample pushes `GroupChannelView` from its own navigation link the same way. `navigationDestination(isPresented:)` is SwiftUI's iOS 16 API; on iOS 15, use the `NavigationLink` the sample uses.
+
+```swift
+import SwiftUI
+import SendbirdChatSDK
+import SendbirdSwiftUI
+
+@available(iOS 16.0, *)
+struct ChatWithSellerButton: View {
+    let sellerUserId: String
+    @State private var channelURL: String?
+
+    var body: some View {
+        Button("Chat with seller") {
+            let params = GroupChannelCreateParams()
+            params.userIds = [sellerUserId]
+            params.isDistinct = true   // same members -> the existing channel comes back
+            GroupChannel.createChannel(params: params) { channel, error in
+                guard let channel, error == nil else { return }
+                channelURL = channel.channelURL
+            }
+        }
+        .navigationDestination(isPresented: Binding(
+            get: { channelURL != nil },
+            set: { if !$0 { channelURL = nil } }
+        )) {
+            if let channelURL {
+                GroupChannelView(provider: GroupChannelViewProvider(channelURL: channelURL))
+            }
+        }
+    }
+}
+```
+Put the button inside a `NavigationStack`. (source: https://github.com/sendbird/sendbird-swiftui-ios/blob/1.2.2/Sample/QuickStartSwiftUI/CustomSample/CustomSampleSubView.swift#L36-L53 — the sample pushes its destination with a hidden `NavigationLink`) (source: https://github.com/sendbird/sendbird-swiftui-ios/blob/1.2.2/Sample/QuickStartSwiftUI/CustomSample/CustomViews/GroupChannel/SwiftUI/View/CustomGroupChannel.SwiftUI.View.Main.swift#L9-L15 — `GroupChannelView(provider:)` with a channel URL) (SendbirdSwiftUI.swiftinterface 1.2.2: `GroupChannelViewProvider.init(channelURL:startingPoint:messageListParams:)` 1144, `GroupChannelView.init(provider:headerItem:listItem:inputItem:)` 1634) (source: knowledge/curated/ios/products/chat.md — Create and list group channels)
+
 ## Related
 - UIKit host: knowledge/curated/ios/hosts/uikit.md
 - AI Agent: knowledge/curated/ios/products/ai-agent.md

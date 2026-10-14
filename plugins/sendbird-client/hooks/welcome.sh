@@ -4,7 +4,7 @@
 set -euo pipefail
 ROOT="${CLAUDE_PLUGIN_ROOT:-$(cd "$(dirname "$0")/.." && pwd)}"
 cat <<EOF
-Sendbird Client plugin loaded. Skills: /sendbird-client:setup, add-feature, auth-recipes, ui-customize, verify-integration, explain-error, performance-audit, push-setup, docs-search, trace-sdk
+Sendbird Client plugin loaded. Skills: /sendbird-client:setup, add-feature, auth-recipes, ui-customize, verify-integration, explain-error, performance-audit, push-setup, docs-search, trace-sdk, diagnose-channel, fix-build, start-chat, calls-incoming, permissions-setup
 
 Plugin root: $ROOT — use this path wherever an instruction says \${CLAUDE_PLUGIN_ROOT} and that variable is empty in your shell (Codex does not set it for shell commands).
 

@@ -35,6 +35,92 @@ SendBirdCall.addDelegate(self, identifier: UNIQUE_HANDLER_ID)   // SendBirdCallD
 ```
 (source: sendbird-calls-ios README §"device-specific event handler")
 
+## Receive calls in the background or after the app was closed (PushKit + CallKit)
+The docs say `didStartRinging` alone delivers incoming calls only while the app is in the foreground: "if both CallKit and PushKit are implemented, the Calls SDK will be able to receive incoming calls even when the app is in the background or closed." The SDK receives these calls only through PushKit, so the app reports each one to CallKit from `didStartRinging`. (source: https://sendbird.com/docs/calls/sdk/v1/ios/features/voip-push-notifications)
+
+Wiring, as in Sendbird's public Direct Call QuickStart:
+- Turn on the Push Notifications capability and the Background Modes "Voice over IP" mode, and upload the VoIP credential in the dashboard by following the docs page above.
+- At launch, add the Calls delegate and create a `PKPushRegistry` for `.voIP`. In `pushRegistry(_:didUpdate:for:)` register the token with `registerVoIPPush(token:unique:completionHandler:)`. The user must be authenticated first; if the token arrives earlier, keep it and register it after `authenticate` succeeds.
+- Forward every incoming VoIP push to `pushRegistry(_:didReceiveIncomingPushWith:for:completionHandler:)` on `SendBirdCall`. Its handler receives the call's UUID, or `nil` when the push did not produce a call; the sample then reports a placeholder call and ends it right away.
+- In `didStartRinging(_:)`, report the call with CallKit's `reportNewIncomingCall(with:update:completion:)`, using `call.callUUID` as the CallKit UUID.
+- In the `CXProviderDelegate`, find the call with `getCall(forUUID:)`; answer with `accept(with:)` and end with `end()`. Pass CallKit's audio session to `audioSessionDidActivate(_:)` and `audioSessionDidDeactivate(_:)`.
+
+<!-- compile: receiver IncomingCallCoordinator -->
+```swift
+import AVFoundation
+import CallKit
+import PushKit
+import SendBirdCalls
+
+final class IncomingCallCoordinator: NSObject, PKPushRegistryDelegate, SendBirdCallDelegate, CXProviderDelegate {
+    private let voipRegistry = PKPushRegistry(queue: .main)
+    private let provider = CXProvider(configuration: CXProviderConfiguration())
+
+    // Call after SendBirdCall.configure(appId:) at launch.
+    func start() {
+        SendBirdCall.addDelegate(self, identifier: "incoming-calls")
+        provider.setDelegate(self, queue: .main)
+        voipRegistry.delegate = self
+        voipRegistry.desiredPushTypes = [.voIP]
+    }
+
+    func pushRegistry(_ registry: PKPushRegistry, didUpdate pushCredentials: PKPushCredentials, for type: PKPushType) {
+        // The user must be authenticated before this call succeeds.
+        SendBirdCall.registerVoIPPush(token: pushCredentials.token, unique: false) { error in }
+    }
+
+    func pushRegistry(_ registry: PKPushRegistry, didReceiveIncomingPushWith payload: PKPushPayload,
+                      for type: PKPushType, completion: @escaping () -> Void) {
+        SendBirdCall.pushRegistry(registry, didReceiveIncomingPushWith: payload, for: type) { uuid in
+            if uuid == nil {
+                // Every VoIP push must be reported to CallKit; report a placeholder and end it.
+                let placeholder = UUID()
+                let update = CXCallUpdate()
+                update.remoteHandle = CXHandle(type: .generic, value: "invalid")
+                self.provider.reportNewIncomingCall(with: placeholder, update: update) { _ in
+                    self.provider.reportCall(with: placeholder, endedAt: Date(), reason: .failed)
+                }
+            }
+            completion()
+        }
+    }
+
+    func didStartRinging(_ call: DirectCall) {
+        guard let uuid = call.callUUID else { return }
+        let update = CXCallUpdate()
+        update.remoteHandle = CXHandle(type: .generic, value: call.caller?.userId ?? "Unknown")
+        update.hasVideo = call.isVideoCall
+        provider.reportNewIncomingCall(with: uuid, update: update) { error in }
+    }
+
+    func providerDidReset(_ provider: CXProvider) {}
+
+    func provider(_ provider: CXProvider, perform action: CXAnswerCallAction) {
+        guard let call = SendBirdCall.getCall(forUUID: action.callUUID) else { action.fail(); return }
+        let options = CallOptions(isAudioEnabled: true, isVideoEnabled: call.isVideoCall, useFrontCamera: true)
+        call.accept(with: AcceptParams(callOptions: options))
+        action.fulfill()
+    }
+
+    func provider(_ provider: CXProvider, perform action: CXEndCallAction) {
+        SendBirdCall.getCall(forUUID: action.callUUID)?.end()
+        action.fulfill()
+    }
+
+    func provider(_ provider: CXProvider, didActivate audioSession: AVAudioSession) {
+        SendBirdCall.audioSessionDidActivate(audioSession)
+    }
+
+    func provider(_ provider: CXProvider, didDeactivate audioSession: AVAudioSession) {
+        SendBirdCall.audioSessionDidDeactivate(audioSession)
+    }
+}
+```
+
+(source: https://github.com/sendbird/quickstart-calls-directcall-ios/blob/2ebe32e1f6abcf2dc08ee9a23d67ce69ad05d3de/QuickStart/AppDelegate.swift#L41-L45 — delegate and VoIP registry at launch) (source: https://github.com/sendbird/quickstart-calls-directcall-ios/blob/2ebe32e1f6abcf2dc08ee9a23d67ce69ad05d3de/QuickStart/AppDelegate%2BVoIPPush.swift#L15-L55 — token registration, forwarding, placeholder call) (source: https://github.com/sendbird/quickstart-calls-directcall-ios/blob/2ebe32e1f6abcf2dc08ee9a23d67ce69ad05d3de/QuickStart/AppDelegate%2BSendBirdCallsDelegates.swift#L16-L40 — `didStartRinging` reports to CallKit) (source: https://github.com/sendbird/quickstart-calls-directcall-ios/blob/2ebe32e1f6abcf2dc08ee9a23d67ce69ad05d3de/QuickStart/CXExtensions/CXCallManager.swift#L109-L189 — answer, end, audio session) (SendBirdCalls.swiftinterface 1.12.3: `DirectCall.accept(with:)` 112, `end()` 113, `PushRegistryHandler` 448, `didStartRinging(_:)` 650, `DirectCall` 680 with `callUUID` 694, `caller` 697, `isVideoCall` 760, `CallOptions` initializer 829, `addDelegate(_:identifier:)` 863, `getCall(forUUID:)` 870, `pushRegistry(_:didReceiveIncomingPushWith:for:completionHandler:)` 883, `registerVoIPPush(token:unique:completionHandler:)` 884, `audioSessionDidActivate(_:)` 897, `audioSessionDidDeactivate(_:)` 898, `AcceptParams(callOptions:)` 917)
+
+The QuickStart registers with `unique: true`, which keeps only this device's token. Use `unique: false` when the same user should ring on several devices (see "Only the most recently used device gets push notifications" in knowledge/curated/ios/cross-cutting/troubleshooting.md).
+
 ## Make a call
 ```swift
 let dialParams = DialParams(calleeId: CALLEE_ID, isVideoCall: false, callOptions: CallOptions(), customItems: [:])
