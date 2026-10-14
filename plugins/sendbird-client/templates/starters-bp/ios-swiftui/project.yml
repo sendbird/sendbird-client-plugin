@@ -1,0 +1,36 @@
+# source: knowledge/curated/ios/setup.md ("Packaging — prefer Swift Package Manager", "Keep shared dependencies compatible")
+# source: knowledge/curated/ios/hosts/swiftui.md ("SwiftUI-native chat views (SendbirdSwiftUI)")
+# XcodeGen spec: run `xcodegen generate` to create StarterSwiftUI.xcodeproj.
+name: StarterSwiftUI
+options:
+  deploymentTarget: { iOS: "15.0" }
+  bundleIdPrefix: com.example.starterbp
+# BP02: the App ID is a build setting (Config/Sendbird.xcconfig, filled from the optional
+# Config/Sendbird.local.xcconfig) that Info.plist carries into the app bundle.
+configFiles:
+  Debug: Config/Sendbird.xcconfig
+  Release: Config/Sendbird.xcconfig
+packages:
+  SendbirdChatSDK:
+    url: https://github.com/sendbird/sendbird-chat-sdk-ios
+    exactVersion: 4.39.11
+  SendbirdSwiftUI:
+    url: https://github.com/sendbird/sendbird-swiftui-ios
+    exactVersion: 1.2.2
+targets:
+  StarterSwiftUI:
+    type: application
+    platform: iOS
+    sources: [Sources]
+    dependencies:
+      - package: SendbirdChatSDK
+      - package: SendbirdSwiftUI
+        product: SendbirdSwiftUI
+    info:
+      path: Sources/Info.plist
+      properties:
+        UILaunchScreen: {}
+        SendbirdAppId: $(SENDBIRD_APP_ID)
+        NSCameraUsageDescription: Take photos and videos to send.
+        NSPhotoLibraryUsageDescription: Pick photos and videos to send.
+        NSMicrophoneUsageDescription: Record voice and video to send.

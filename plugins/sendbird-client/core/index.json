@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-10-14T01:57:45Z",
+  "generatedAt": "2026-10-14T07:49:16Z",
   "count": 48,
   "entries": [
     {
@@ -234,7 +234,7 @@
       "platform": "ios",
       "category": "cross-cutting",
       "status": "populated",
-      "lastVerifiedAgainst": "sendbird-chat-sdk-ios 4.39.10",
+      "lastVerifiedAgainst": "sendbird-chat-sdk-ios 4.39.11 / sendbird-uikit-ios 3.36.1",
       "verifiedDates": []
     },
     {

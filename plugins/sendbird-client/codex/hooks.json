@@ -1,0 +1,93 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/welcome.sh\"",
+            "statusMessage": "Sendbird plugin: session rules"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash|apply_patch",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/credential-guard.sh\"",
+            "statusMessage": "Sendbird plugin: block credentials in writes"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/destructive-command-guard.sh\"",
+            "statusMessage": "Sendbird plugin: confirm destructive Sendbird CLI commands"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash|apply_patch",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/source-claim-guard.sh\"",
+            "statusMessage": "Sendbird plugin: block unsourced Sendbird API code"
+          }
+        ]
+      }
+    ],
+    "SubagentStart": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/telemetry-start.sh\"",
+            "statusMessage": "Sendbird plugin: local telemetry (opt-in)"
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/telemetry-end.sh\"",
+            "statusMessage": "Sendbird plugin: local telemetry (opt-in)"
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/unsourced-claim-warn.sh\"",
+            "statusMessage": "Sendbird plugin: check agent answer sources"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/final-answer-gate.sh\"",
+            "statusMessage": "Sendbird plugin: check final answer sources"
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run-summary-gate.sh\"",
+            "statusMessage": "Sendbird plugin: check run summary (non-interactive)"
+          }
+        ]
+      }
+    ]
+  }
+}

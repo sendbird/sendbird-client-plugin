@@ -42,6 +42,7 @@
 - **Symptom — React Native:** After an upgrade, UIKit hooks report a missing BottomSheet or ActionMenu context.
 - **Cause:** The app installed its own copy of a package that UIKit already depends on, at a different version. The bundle then holds two copies, and React contexts from one copy do not match the other.
 - **Fix — React Native:** Do not add `@sendbird/uikit-react-native-foundation` or `@sendbird/uikit-chat-hooks` at a different version. `@sendbird/uikit-react-native` 3.12.9 pins both to exactly 3.12.9, so remove your own entry or match it exactly. (source: @sendbird/uikit-react-native 3.12.9 package.json `dependencies`)
+- **Fix — Web:** `@sendbird/uikit-react` 3.19.1 lists `@sendbird/chat` `^4.22.12` under `dependencies`, so it brings its own Chat SDK. If your `package.json` also lists `@sendbird/chat`, keep that entry inside UIKit's range or remove it, then run `npm ls @sendbird/chat` (or `yarn why @sendbird/chat`) and make sure only one version is installed. (source: https://unpkg.com/@sendbird/uikit-react@3.19.1/package.json)
 - **Cases:** https://community.sendbird.com/t/error-uikit-hooks-after-upgrading-to-react-native-0-72/8050
 
 ### React Native: `SendbirdUIKitContainer` throws "Cannot read property 'options' of undefined", or asks for media packages you don't use
@@ -84,7 +85,7 @@
 ### 400108 "User must be a member" for a user who appears in the channel
 
 - **Cause:** The user was invited but never joined. Their member state is `invited`, not `joined`, so member-only calls fail with `NON_AUTHORIZED` (400108). This also happens when a user has reached the 2,000 joined-channel limit, because new invitations then stay pending (see knowledge/curated/js/cross-cutting/pitfalls.md).
-- **Fix:** Check `channel.myMemberState`. If it is `MemberState.INVITED`, call `channel.acceptInvitation()`. To have invitations accepted automatically, call `sb.setChannelInvitationPreference(true)`. (source: @sendbird/chat 4.22.13 lib/__definition.d.ts:1923, 2097, 2472-2477, 4564, 4839 ; source: https://sendbird.com/docs/chat/sdk/v4/javascript/channel/inviting-users-to-a-group-channel/accept-or-decline-an-invitation ; source: https://sendbird.com/docs/chat/sdk/v4/javascript/channel/retrieving-channels/retrieve-a-list-of-channels)
+- **Fix:** Check `channel.myMemberState`. If it is `MemberState.INVITED`, call `channel.acceptInvitation()`. For a channel that requires an access code, pass it: both `acceptInvitation(accessCode?)` and `join(accessCode?)` take it as an optional argument. To have invitations accepted automatically, call `sb.setChannelInvitationPreference(true)`. (source: @sendbird/chat 4.22.13 lib/__definition.d.ts:1923, 2086, 2097, 2472-2477, 4564, 4839 ; source: https://sendbird.com/docs/chat/sdk/v4/javascript/channel/inviting-users-to-a-group-channel/accept-or-decline-an-invitation ; source: https://sendbird.com/docs/chat/sdk/v4/javascript/channel/retrieving-channels/retrieve-a-list-of-channels)
 - **Cases:** https://community.sendbird.com/t/not-authorized-user-must-be-a-member-when-user-already-member-in-groupchannel/8523, https://community.sendbird.com/t/new-group-channels-created-for-users-that-exceeded-2000-group-channels-causing-issues/6206
 
 ---

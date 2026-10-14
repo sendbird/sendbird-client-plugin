@@ -263,6 +263,35 @@ struct ChannelWithCustomHeader: View {
 ```
 (source: SendbirdSwiftUI.swiftinterface (1.2.2) lines 1579–1589 (header builders), 1648–1683 (header view configs); source: https://github.com/sendbird/sendbird-swiftui-ios/blob/1.2.2/Sample/QuickStartSwiftUI/CustomSample/CustomViews/GroupChannel/ViewConverter/Header/CustomGroupChannel.ViewConverter.Header.titleLabel.swift#L27-L33)
 
+### React to channel and message changes
+
+To run your own code when the channel or its messages change in a `GroupChannelView`, observe the provider you passed to it. `GroupChannelViewProvider` is an `ObservableObject` whose `channel` (`GroupChannel?`) and `fullMessages` (`[BaseMessage]`) are `@Published`, so `onReceive` on `$channel` and `$fullMessages` gets every new value the provider publishes.
+
+```swift
+import SwiftUI
+import SendbirdSwiftUI
+import SendbirdChatSDK
+
+struct ObservedChannelScreen: View {
+    @StateObject private var provider: GroupChannelViewProvider
+
+    init(channelURL: String) {
+        _provider = StateObject(wrappedValue: GroupChannelViewProvider(channelURL: channelURL))
+    }
+
+    var body: some View {
+        GroupChannelView(provider: provider)
+            .onReceive(provider.$channel) { channel in
+                print("members:", channel?.memberCount ?? 0)
+            }
+            .onReceive(provider.$fullMessages) { messages in
+                print("messages:", messages.count)
+            }
+    }
+}
+```
+(source: SendbirdSwiftUI.swiftinterface (1.2.2) lines 1057 (`GroupChannelViewProvider`), 1065 (`@Published channel`), 1080 (`@Published fullMessages`), 21651 (`ObservableObject` conformance))
+
 ### Theme, dark mode, strings
 
 SendbirdSwiftUI is built on Sendbird UIKit and uses the same `SBUTheme` and `SBUStringSet`. Colors and fonts have their own SwiftUI classes, `ColorSet` and `FontSet`, whose properties are SwiftUI `Color` and `Font`. In 1.2.2 the UIKit names `SBUColorSet` and `SBUFontSet` are deprecated and renamed to `ColorSet` and `FontSet`, so use the new names in SwiftUI code. Theme properties still take `UIColor` and `UIFont`; the package adds `asUIColor()` on `Color` and `asUIFont()` on `Font` to convert. The docs say to set the theme, `ColorSet`, and `FontSet` before SendbirdSwiftUI is initialized, and to call `SBUTheme.set(theme:)` after you change them at runtime so the generated theme picks them up.

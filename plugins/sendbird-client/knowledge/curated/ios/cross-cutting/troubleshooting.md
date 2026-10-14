@@ -73,6 +73,35 @@
 - **Fix:** For a custom tab bar, override `getAdjustedKeyboardHeight(with:)` and `getTabBarHeight()` in your channel view controller subclass to return the correct values (source: SendbirdUIKit 3.36.2 SendbirdUIKit.swiftinterface:1573, :1574). For a SwiftUI wrapper, apply `.ignoresSafeArea()` (at least the bottom edge) to the wrapped view.
 - **Cases:** https://github.com/sendbird/sendbird-uikit-ios/discussions/113, https://community.sendbird.com/t/uikit-textfield-goes-up-to-the-top-when-user-taps-the-textfield/2193
 
+### After creating a channel, a new channel list covers the whole app instead of opening the channel in place
+- **Cause:** When the create-channel screen finishes, its default `createChannelViewModel(_:didCreateChannel:withMessageListParams:)` calls `SendbirdUI.moveToChannel(channelURL:messageListParams:)` without a `rootViewController`. `moveToChannel` then starts from the window's root view controller (or the selected tab of a `UITabBarController` there) and looks for a channel list or channel screen only in the `UINavigationController` it finds at that spot. When your channel list sits somewhere else, for example inside a custom container, nothing is found, and UIKit presents a new `UINavigationController` with a fresh channel list over the root and opens the channel there. (source: https://github.com/sendbird/sendbird-uikit-ios/blob/3.36.1/Sources/SendbirdUI.swift#L763-L813 — `moveToChannel`; lines 879–898 `findChannelListViewController`; lines 839–851 the fallback that presents a new channel list) (source: https://github.com/sendbird/sendbird-uikit-ios/blob/3.36.1/Sources/View/SelectUser/CreateChannel/SBUCreateChannelViewController.swift#L313-L323)
+- **Fix:** Subclass `SBUCreateChannelViewController`, override `createChannelViewModel(_:didCreateChannel:withMessageListParams:)`, and pass a `rootViewController` that `moveToChannel` can search. The method's documentation says to pass your channel list or channel view controller when the hierarchy is complex; the navigation controller that pushed the create-channel screen (UIKit's channel list pushes it on its own navigation controller) also works because the lookup reads its `viewControllers`. Register the subclass once at launch.
+
+```swift
+import UIKit
+import SendbirdUIKit
+import SendbirdChatSDK
+
+final class InPlaceCreateChannelViewController: SBUCreateChannelViewController {
+    override func createChannelViewModel(
+        _ viewModel: SBUCreateChannelViewModel,
+        didCreateChannel channel: BaseChannel?,
+        withMessageListParams messageListParams: MessageListParams?
+    ) {
+        guard let channelURL = channel?.channelURL else { return }
+        SendbirdUI.moveToChannel(
+            channelURL: channelURL,
+            messageListParams: messageListParams,
+            rootViewController: navigationController // the stack that holds your channel list
+        )
+    }
+}
+
+// At launch, before the channel list is shown:
+// SBUViewControllerSet.CreateChannelViewController = InPlaceCreateChannelViewController.self
+```
+(source: https://github.com/sendbird/sendbird-uikit-ios/blob/3.36.1/Sources/SendbirdUI.swift#L750-L767 — `rootViewController` parameter documentation) (source: https://github.com/sendbird/sendbird-uikit-ios/blob/3.36.1/Sources/View/ChannelList/SBUGroupChannelListViewController.swift#L305-L310 — the channel list pushes the create-channel screen) (source: SendbirdUIKit 3.36.2 SendbirdUIKit.swiftinterface:16572 `moveToChannel(channelURL:basedOnChannelList:messageListParams:channelType:rootViewController:)`, :4196 `createChannelViewModel(_:didCreateChannel:withMessageListParams:)`, :16187 `SBUViewControllerSet.CreateChannelViewController`)
+
 ### Sendbird SwiftUI screens show two navigation bars
 - **Cause:** The Sendbird SwiftUI views host UIKit view controllers that bring their own navigation bar. In SendbirdSwiftUI 1.0.0-beta.1, a SwiftUI navigation bar on the host added a second one.
 - **Fix:** Update SendbirdSwiftUI. The release notes list fixes for this in 1.0.0-beta.2 ("Fixed multiple navigationBars appearing issue"), 1.0.1 (an unwanted navigation bar with the `.groupChannelView { }` builder inside a `TabView`), 1.1.3 (a missing navigation bar in a `TabView`), and 1.2.2 (an empty navigation bar above the header when the SDK pushes a channel view created by the `groupChannelView` builder). The `.navigationBarHidden(true)` workaround in the discussion was for 1.0.0-beta.1, and the discussion itself is marked out of date. (source: https://github.com/sendbird/sendbird-swiftui-ios/releases)

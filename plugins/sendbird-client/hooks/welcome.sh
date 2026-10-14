@@ -6,6 +6,8 @@ ROOT="${CLAUDE_PLUGIN_ROOT:-$(cd "$(dirname "$0")/.." && pwd)}"
 cat <<EOF
 Sendbird Client plugin loaded. Skills: /sendbird-client:setup, add-feature, auth-recipes, ui-customize, verify-integration, explain-error, performance-audit, push-setup, docs-search, trace-sdk
 
+Plugin root: $ROOT — use this path wherever an instruction says \${CLAUDE_PLUGIN_ROOT} and that variable is empty in your shell (Codex does not set it for shell commands).
+
 ALWAYS-ON rules for ANY Sendbird answer (even without a skill):
 - No-Fabrication: never invent an API name, signature, parameter label, error code, enum case, or docs URL. Verify in the sources below and cite; if unverifiable say "I don't know — here's what I checked" and stop. Name each place you checked by its path, package@version, or URL (for example knowledge/curated/<platform>/products/<product>.md), not as "the knowledge base" or "the docs".
 - Source priority: (1) $ROOT/knowledge/curated/<platform>/ — populated, cited, version-stamped (products/, cross-cutting/errors|push|theme|performance|pitfalls|troubleshooting, hosts/, setup.md); (2) the customer's installed SDK via $ROOT/tools/local-sdk/read-surface.sh; (3) public Sendbird repos/samples; (4) sendbird.com/docs — match the customer's MAJOR VERSION (Chat v4, UIKit v3); do not cite v3 chat docs for a v4 project.

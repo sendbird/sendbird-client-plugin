@@ -101,6 +101,7 @@ SBUDateFormatSet.Message.sentTimeFormatInOpenChannel = "HH:mm"
 - Set theme/color/font overrides before presenting the UIKit view controller.
 - Apply your changes when the user toggles theme (it is not automatic).
 - `SBUTheme.set(theme:)` and `SBUTheme.set(colorScheme:)` drop per-component colors you set earlier. Re-apply them after each call.
+- Alert text unreadable in dark mode with a theme you built yourself: UIKit alerts (`SBUAlertView`) take their colors from `SBUTheme.componentTheme` (`alertTitleColor`, `alertDetailColor`). A `SBUComponentTheme` created with its initializer defaults to the light colors (`onLightTextHighEmphasis`, `onLightTextMidEmphasis`), while `SBUComponentTheme.dark` uses the dark ones. For dark mode, start from `SBUComponentTheme.dark` or set those two colors yourself. (source: https://github.com/sendbird/sendbird-uikit-ios/blob/3.36.1/Sources/View/Common/AlertView/SBUAlertView.swift#L289-L307 (`theme` is `SBUTheme.componentTheme`, line 28); https://github.com/sendbird/sendbird-uikit-ios/blob/3.36.1/Sources/Theme/SBUTheme.swift#L3624-L3640 (initializer defaults), lines 3340–3362 (`dark`))
 
 ## Related
 - UIKit: knowledge/curated/ios/products/uikit.md

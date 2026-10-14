@@ -470,6 +470,8 @@ extension MyController: GroupChannelDelegate {
 - Initialize exactly once (app launch). Re-initializing per screen is an anti-pattern — see `knowledge/curated/ios/cross-cutting/performance.md`.
 - App ID is not a secret but read it from config/env, not hard-coded literals.
 - Session tokens/access tokens are secrets — never hard-code or log them.
+- `PollCreateParams` has no anonymous-vote setting in the SDK. The iOS "Create a poll" guide still lists an `isAnonymous` parameter, but `PollCreateParams` in 4.39.11 has only `title`, `data`, `optionTexts`, `allowUserSuggestion`, `allowMultipleVotes`, and `closeAt`, and its API reference page has no such property either. Code that sets `isAnonymous` does not compile. (source: https://sendbird.com/docs/chat/sdk/v4/ios/ref/Classes/PollCreateParams.html) (source: SendbirdChatSDK 4.39.11 `.swiftinterface` lines 5299–5305) (source: https://sendbird.com/docs/chat/sdk/v4/ios/message/managing-polls/create-a-poll)
+- `BaseMessage.sender` is `Sender?`. Unwrap it (`guard let sender = message.sender`) instead of force-unwrapping, and give the row a fallback when it is `nil`. (source: https://sendbird.com/docs/chat/sdk/v4/ios/ref/Classes/BaseMessage.html) (source: SendbirdChatSDK 4.39.11 `.swiftinterface` line 1005)
 - Every `GroupChannelCollection` / `MessageCollection` and every `addChannelDelegate` call must be paired with `dispose()` / `removeChannelDelegate(forIdentifier:)` when the owning screen is dismissed, or the SDK keeps delivering events to a dead view controller.
 
 ## Related

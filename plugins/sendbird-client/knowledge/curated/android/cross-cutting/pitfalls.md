@@ -40,6 +40,8 @@ fun resend(channel: GroupChannel, failed: FileMessage) {
 
 (source: sendbird-chat-4.36.5.aar javap com.sendbird.android.handler.BaseMessageCollectionHandler / com.sendbird.android.message.SendingStatus / javap -v com.sendbird.android.channel.BaseChannel (@Deprecated on resendFileMessage); https://sendbird.com/docs/chat/sdk/v4/android/local-caching/using-message-collection/message-collection)
 
+- To drop failed messages the user no longer wants to resend, remove them from the message collection: `collection.removeFailedMessages(failedMessages) { requestIds, e -> }` for selected ones, or `collection.removeAllFailedMessages { e -> }` for all of them. The first handler returns the request IDs that were removed. (source: https://sendbird.com/docs/chat/sdk/v4/android/ref/-sendbird-chat/com.sendbird.android.collection/-message-collection/index.html) (source: https://sendbird.com/docs/chat/sdk/v4/android/ref/-sendbird-chat/com.sendbird.android.handler/-remove-failed-messages-handler/index.html)
+
 ## Push
 - Register the FCM handler after init; declare the messaging service in the manifest (see push.md).
 

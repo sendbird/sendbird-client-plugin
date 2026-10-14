@@ -33,6 +33,16 @@ import { GroupChannel } from '@sendbird/uikit-react/GroupChannel';
 
 (source: https://sendbird.com/docs/chat/sdk/v4/javascript/local-caching/overview-local-caching ; @sendbird/chat@4.22.13 lib/__definition.d.ts:4815,4818 ; @sendbird/uikit-react@3.19.1 types/lib/Sendbird/types.d.ts:120,161)
 
+## iPhone Safari zooms in when the message input gets focus
+
+UIKit's own Storybook page turns this zoom off with a viewport meta tag whose comment names the iOS keyboard zoom. Put the same tag in your page's `<head>` if the zoom bothers your users. `maximum-scale=1` and `user-scalable=0` also turn off pinch zoom for the whole page, so weigh that against accessibility.
+
+```html
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1,user-scalable=0"/>
+```
+
+(source: https://github.com/sendbird/sendbird-uikit-react/blob/v3.19.1/.storybook/preview-head.html#L2-L3)
+
 ## Tall incoming messages (`autoscrollMessageOverflowToTop`)
 
 By default, a newly received message scrolls the list to the bottom. With `autoscrollMessageOverflowToTop`, when a newly received message is taller than the message list viewport, UIKit scrolls to the top of that message instead, so its beginning stays visible. It only acts when the user was already at the bottom of the list. Set it as a `SendbirdProvider` (or `App`) prop; a `GroupChannel` prop overrides it per channel. Use the prop, not `uikitOptions.groupChannel`, which has no such field in 3.19.1.

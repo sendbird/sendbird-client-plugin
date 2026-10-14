@@ -8,6 +8,8 @@
 ## Overview
 Sendbird UIKit gives prebuilt chat screens (channel list, conversation, settings) on top of Chat. Initialize UIKit, set the current user, then present the provided view controllers.
 
+The installation guide states that UIKit for iOS currently supports iPhone only, not iPad, so problems that appear only on iPad are outside what UIKit supports. The SwiftUI package has the same limit (knowledge/curated/ios/hosts/swiftui.md). (source: https://sendbird.com/docs/chat/uikit/v3/ios-uikit/essentials/installation)
+
 ## Install (SPM — prefer over CocoaPods)
 - SPM package `https://github.com/sendbird/sendbird-uikit-ios-spm`, products `SendbirdUIKit` (+ `SendbirdUIMessageTemplate`). `import SendbirdUIKit`.
 
@@ -171,6 +173,25 @@ SBUGroupChannelModule.List.CustomMessageCell = PollMessageCell.self
 SBUModuleSet.GroupChannelModule.ListComponent = PollAwareMessageList.self
 ```
 A cell that is not a subclass of a built-in cell goes through the list's `default:` branch, which calls `configure(with:)` with a plain `SBUBaseMessageCellParams` whose position is `.center`. Read everything else you need from `configuration.message`. (source: https://github.com/sendbird/sendbird-uikit-ios/blob/3.36.1/Sources/Module/Channel/GroupChannel/SBUGroupChannelModule.List.swift#L1196-L1221 (`generateCellIdentifier(by:)`; `CustomMessageCell` registered at lines 413–415; `default:` branch at lines 1072–1082); source: https://github.com/sendbird/sendbird-uikit-ios/blob/3.36.1/Sources/View/Channel/MessageCell/SBUBaseMessageCell.swift#L109-L127 (`messageContentView` at line 22, `configure(with:)` at line 173); source: https://github.com/sendbird/sendbird-uikit-ios/blob/3.36.1/Sources/Extension/NSObject+SBUIKit.swift#L13 (`sbu_className`))
+
+**Taps on such a cell.** The `default:` branch does not install tap or long-press handlers; the built-in cells get them from the list's `setMessageCellGestures(_:message:indexPath:)`, which sets the cell's `tapHandlerToContent` and `longPressHandlerToContent`. To make your cell respond, call `setMessageCellGestures` after `super` in a `configureCell(_:message:forRowAt:)` override. Do not call `setTapGesture(_:message:indexPath:)` there: it is the tap action itself (it calls the delegate's `didTapMessage`, or `didTapVoiceMessage` for a voice message), so calling it while configuring runs that action as soon as the row is drawn, for example opening an image without a tap.
+
+```swift
+import UIKit
+import SendbirdUIKit
+import SendbirdChatSDK
+
+final class TappableCustomMessageList: SBUGroupChannelModule.List {
+    override func configureCell(_ messageCell: SBUBaseMessageCell, message: BaseMessage, forRowAt indexPath: IndexPath) {
+        super.configureCell(messageCell, message: message, forRowAt: indexPath)
+        if message.customType == "poll" {
+            // Installs the handlers; the delegate runs only when the user taps or long-presses.
+            setMessageCellGestures(messageCell, message: message, indexPath: indexPath)
+        }
+    }
+}
+```
+(source: https://github.com/sendbird/sendbird-uikit-ios/blob/3.36.1/Sources/Module/Channel/GroupChannel/SBUGroupChannelModule.List.swift#L707-L728 (`setMessageCellGestures`; built-in cells call it at lines 948–1045, the `default:` branch at lines 1072–1082 does not); https://github.com/sendbird/sendbird-uikit-ios/blob/3.36.1/Sources/Module/Channel/SBUBaseChannelModule.List.swift#L914-L930 (`setTapGesture` calls the delegate); also the 3.36.2 release `.swiftinterface` lines 6583, 6617, and 986)
 
 **Change the text a user message shows.** `SBUUserMessageCell.configure(with:)` builds an `SBUUserMessageTextViewModel` from the message. The model uses `message.message` whenever `message` is not `nil`, and falls back to its `text` argument only when `message` is `nil`. To show other text, configure `messageTextView` again after `super`, with `message: nil` and your text. With `message: nil` the model has no mention data, so mentions in that message are not highlighted. `isEdited: false` drops the "(edited)" mark.
 
@@ -371,6 +392,27 @@ final class ReactionAwareChannelViewController: SBUGroupChannelViewController {
 }
 ```
 (source: https://github.com/sendbird/sendbird-uikit-ios/blob/3.36.1/Sources/View/Channel/SBUGroupChannelViewController.swift#L1641-L1659 (the reactions screen is created with `delegate = self` at lines 1123–1136); community context: https://github.com/sendbird/sendbird-uikit-ios/discussions/52)
+
+**Handle link taps yourself, for example to play a video link in the app.** A tap on a link in the message text and a tap on the link preview (OG) card of a user message both go through the cell's `urlTapHandler` to the view controller's `groupChannelModule(_:didTapURL:)`. Its default calls the UIKit `URL.open()` helper, which tries the URL as a universal link and otherwise hands it to the system, so a video link leaves the app. Override that method in your `SBUGroupChannelViewController` subclass. The link preview data (`OGMetaData`) has only `title`, `url`, `desc`, and `defaultImage`, with no media type, so decide yourself which URLs to play, for example by path extension.
+
+```swift
+import UIKit
+import AVKit
+import SendbirdUIKit
+
+final class InAppLinkChannelViewController: SBUGroupChannelViewController {
+    override func groupChannelModule(_ listComponent: SBUGroupChannelModule.List, didTapURL url: URL) {
+        guard ["mp4", "mov", "m3u8"].contains(url.pathExtension.lowercased()) else {
+            super.groupChannelModule(listComponent, didTapURL: url) // default: universal link, else the system opens it
+            return
+        }
+        let playerViewController = AVPlayerViewController()
+        playerViewController.player = AVPlayer(url: url)
+        present(playerViewController, animated: true) { playerViewController.player?.play() }
+    }
+}
+```
+(source: https://github.com/sendbird/sendbird-uikit-ios/blob/3.36.1/Sources/View/Channel/SBUGroupChannelViewController.swift#L1190-L1192 (default `url.open()`); https://github.com/sendbird/sendbird-uikit-ios/blob/3.36.1/Sources/Module/Channel/GroupChannel/SBUGroupChannelModule.List.swift#L1119-L1121 (`urlTapHandler` calls `didTapURL`); https://github.com/sendbird/sendbird-uikit-ios/blob/3.36.1/Sources/View/Channel/MessageCell/SBUUserMessageCell.swift#L339-L349 (`onTapWebview(sender:)` for the preview card, and lines 429–430 for text links); https://github.com/sendbird/sendbird-uikit-ios/blob/3.36.1/Sources/Extension/URL+SBUIKit.swift#L12-L20; also source: https://sendbird.com/docs/chat/sdk/v4/ios/ref/Classes/OGMetaData.html)
 
 ## Message input bar
 **Limit attachment options.** The "+" button opens a sheet whose items come from the input config. A value set in code takes priority over the value from the dashboard's UIKit configuration.

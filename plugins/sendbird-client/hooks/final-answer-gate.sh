@@ -72,12 +72,12 @@ done <<< "$sources"
 valid=1
 while IFS= read -r symbol; do
   supported=0
-  for source_file in "${resolved_sources[@]}"; do
+  for source_file in ${resolved_sources[@]+"${resolved_sources[@]}"}; do
     if source_supports_symbol "$source_file" "$symbol"; then supported=1; break; fi
   done
   [ "$supported" -eq 1 ] || { valid=0; break; }
 done <<< "$symbols"
-for tmp_source in "${tmp_sources[@]}"; do rm -f "$tmp_source"; done
+for tmp_source in ${tmp_sources[@]+"${tmp_sources[@]}"}; do rm -f "$tmp_source"; done
 [ "$valid" -eq 1 ] && exit 0
 
 jq -n '{decision: "block",

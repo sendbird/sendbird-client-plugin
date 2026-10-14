@@ -25,6 +25,17 @@ SendbirdChat.init(
 ```
 (source: sendbird.com/docs chat v4 android getting-started)
 
+Call `SendbirdChat.init()` from `Application.onCreate()`. If you call it from an Activity's or Fragment's `onCreate()` instead, set `isForeground = true` on `InitParams` (it defaults to `false`) so the SDK knows it is being initialized while the app is in the foreground. The docs warn that this placement needs extra care: when a push arrives while the app is in the background or killed, only the `Application` runs, so code that marks the push as delivered would find the SDK uninitialized (see knowledge/curated/android/cross-cutting/push.md — Mark a push as delivered).
+```kotlin
+SendbirdChat.init(
+    InitParams(APP_ID, applicationContext, useCaching = true).apply {
+        isForeground = true // init is called from an Activity or Fragment, not from Application.onCreate()
+    },
+    initResultHandler
+)
+```
+(source: https://sendbird.com/docs/chat/sdk/v4/android/getting-started/send-first-message) (source: https://sendbird.com/docs/chat/sdk/v4/android/ref/-sendbird-chat/com.sendbird.android.params/-init-params/index.html)
+
 ## Connect a user (auth)
 ```kotlin
 SendbirdChat.connect(userId) { user, e ->
@@ -408,6 +419,7 @@ SendbirdChat.addChannelHandler("UNIQUE_HANDLER_ID", object : GroupChannelHandler
 })
 // SendbirdChat.removeChannelHandler("UNIQUE_HANDLER_ID") on cleanup
 ```
+`onMessageReceived` is not called on the device that sent the message: the docs list its notified devices as every device with the channel open in the foreground except the sender's. Your own sent message comes back through the send call's handler instead. (source: https://sendbird.com/docs/chat/sdk/v4/android/event-handler/managing-channel-event-handlers/add-or-remove-a-channel-event-handler)
 `GroupChannelHandler` extends `BaseChannelHandler`, whose `onMessageReceived(channel, message)` is abstract (must override); `GroupChannelHandler` itself adds optional overrides such as `onTypingStatusUpdated` and `onUserMarkedRead`. Add/remove exactly once per active screen — a handler added without a matching remove leaks. (source: `sendbird-chat-sdk-android` 4.36.5 AAR, `javap` on `com.sendbird.android.SendbirdChat` (`addChannelHandler`/`removeChannelHandler`), `com.sendbird.android.handler.BaseChannelHandler`, `com.sendbird.android.handler.GroupChannelHandler`)
 
 ## Pitfalls

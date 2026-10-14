@@ -98,6 +98,7 @@ UIKit's texts are Android string resources named `sb_text_*` (headers, input hin
 
 - Compose "toast" messages are Snackbars whose text comes from these resources: after "Copy" in the message menu, `DefaultMessageMenuDialogContract` shows `context.getString(R.string.sb_text_toast_success_copy)`, and the download items use `sb_text_toast_success_start_download_file` / `sb_text_toast_success_download_file`, so the same overrides apply.
 - Format arguments must stay in place (for example `sb_text_channel_typing_indicator_single` is `%s is typing…`).
+- The "new message" tooltip in the Compose channel screen (`MessageTooltip`) reads `sb_text_channel_tooltip_singular` (`1 new message`) for one message and `sb_text_channel_tooltip_with_count` (`%d new messages`) for more, so override both, and keep `%d` in the second. (source: uikit-common-1.0.2.aar `res/values/values.xml` lines 70-71) (source: uikit-compose-1.3.6.aar `javap -c com.sendbird.uikit.compose.component.ButtonKt` — `MessageTooltip` loads both resources with `stringResource`)
 
 (source: https://sendbird.com/docs/chat/uikit/v3/android-view/customizations/resource-customization/string-resources) (source: https://github.com/sendbird/sendbird-uikit-android/blob/07ffe8efc97e2d71dedc466ad868df817e5f433e/uikit/src/main/res/values/strings.xml) (source: uikit-common-1.0.2.aar res/values/values.xml) (source: uikit-compose-1.3.6.aar javap -c com.sendbird.uikit.compose.channels.group.detail.DefaultMessageMenuDialogContract) (source: https://developer.android.com/studio/write/add-resources)
 

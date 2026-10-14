@@ -25,6 +25,23 @@ claude -p --model claude-sonnet-5-5 --plugin-dir sendbird-client-<version>.zip "
 
 Each release lists the zip's sha256. `--model` is optional; `claude-sonnet-5-5` is the model the release checks run on.
 
+## Use it in Codex
+
+The same plugin installs in Codex from the same repository:
+
+```bash
+codex plugin marketplace add sendbird/sendbird-client-plugin
+codex plugin add sendbird-client@sendbird
+```
+
+Codex runs the same skills; call them as `$sendbird-client:setup`, `$sendbird-client:add-feature`, and so on. Codex plugins have no agent definitions, so each agent is a skill with the agent's name that runs the agent's instructions, for example `$sendbird-client:sendbird-ios-agent`.
+
+We test the plugin in Codex with `gpt-6.1-sol` (`codex -m gpt-6.1-sol`, or `model = "gpt-6.1-sol"` in `~/.codex/config.toml`). An agent skill starts its subagent on `gpt-6.1-sol` and falls back to your session's model when that model is not available.
+
+Codex does not run a plugin's hooks until you trust them. When a session starts after you install or update the plugin, Codex shows "Hooks need review"; choose **Review hooks** (each hook says what it does) and press `t` to trust them, or open `/hooks` later. Until then the credential, source, and destructive-command guards in "What runs on your machine" do not run, and the session rules are not added. A `codex exec` run uses trusted hooks only, unless you pass `--dangerously-bypass-hook-trust` for that run.
+
+`codex plugin marketplace upgrade sendbird` refreshes the catalog.
+
 ## Keeping it up to date
 
 An installed plugin is a snapshot: Claude Code replaces it only when the plugin version changes, and every change that ships to users bumps the patch version. Third-party marketplaces such as `sendbird` do not auto-update by default. Turn it on in any one of these places:
@@ -66,15 +83,15 @@ Then run `/reload-plugins` or restart Claude Code. See the Claude Code docs: [ke
 
 This plugin runs inside Claude Code with your user account's permissions. Three kinds of code run locally:
 
-**Hooks** — shell scripts Claude Code runs automatically at the points below.
+**Hooks** — shell scripts Claude Code runs automatically at the points below. Codex runs the same scripts once you trust them (see "Use it in Codex"); there, file writes reach the guards as `apply_patch` or as a shell command that writes a source file.
 
 | When | Script | What it reads | What it can change | Network |
 |---|---|---|---|---|
 | Session start | `hooks/welcome.sh` | plugin files | adds the plugin's rules to the model's context | none |
 | Before a file write or shell command | `hooks/credential-guard.sh` | the content or command about to run | blocks it if it contains a credential | none |
 | Before a shell command | `hooks/destructive-command-guard.sh` | the command about to run | asks you to approve a Sendbird CLI `delete`, `revoke`, or `deactivate` run with `--yes`; in a `-p` run it is denied | none |
-| Before a file write | `hooks/source-claim-guard.sh` | the content about to be written, local files it cites | blocks Sendbird API code without a verifiable source | fetches the cited page if it is on `sendbird.com/docs` or `github.com/sendbird` |
-| After an agent finishes | `hooks/unsourced-claim-warn.sh` | the agent's reply | adds a warning when an API claim has no source | none |
+| Before a file write, or a shell command that writes a source file | `hooks/source-claim-guard.sh` | the content about to be written, local files it cites | blocks Sendbird API code without a verifiable source | fetches the cited page if it is on `sendbird.com/docs` or `github.com/sendbird` |
+| After an agent finishes | `hooks/unsourced-claim-warn.sh` | the agent's reply | adds a warning when an API claim has no source; in Codex, sends the agent back once to add sources | none |
 | When the answer ends | `hooks/final-answer-gate.sh` | the final answer (passed by Claude Code; older versions: the session transcript after your last prompt) | asks the model to revise an unsourced answer | same as `source-claim-guard.sh` |
 | When the answer ends, only when `SENDBIRD_NONINTERACTIVE` is set | `hooks/run-summary-gate.sh` | the final answer and the plugin's run summary schema | asks the model to fix a run summary that does not match the schema | none |
 | Before and after an agent runs | `hooks/telemetry-start.sh`, `hooks/telemetry-end.sh` | agent name, duration, outcome | nothing; writes a local log only if you opted in | none |

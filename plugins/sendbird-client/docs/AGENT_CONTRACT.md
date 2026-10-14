@@ -18,7 +18,7 @@ For a code task, resolve the platform agent with `bash "${CLAUDE_PLUGIN_ROOT}/to
 
 Resolve the active product scope with `bash "${CLAUDE_PLUGIN_ROOT}/tools/detection/resolve-products.sh" <project-dir>`. If the requested product is not in that list, say it is out of the configured scope and stop instead of writing code for it.
 
-If one unknown value changes the code that would be emitted, ask one focused question. Do not guess. If it does not change the output, state the limitation and continue. In a non-interactive run, do not ask; follow section 7.
+If one unknown value changes the code that would be emitted, ask one focused question. Do not guess. In Codex, a question tool may be missing or return no answer; then ask in the reply and stop. If it does not change the output, state the limitation and continue. In a non-interactive run, do not ask; follow section 7.
 
 ## 2. Build an evidence ledger
 
@@ -44,6 +44,7 @@ The source must contain the symbol or exact signature. A related page is not evi
 - Keep secrets out of source, commands, logs, and generated files. Application IDs are not secrets.
 - Never put a credential (access or session token, API token, private key) in the run summary, `profile.json`, or any other file the plugin writes for itself. A caller such as a CLI passes only the App ID and region; the customer's own app code reads tokens at runtime from its environment or backend.
 - Preserve the template's `source:` comment when code is copied so the write-boundary guard can validate it.
+- Write files with the host's file-editing tool: Write and Edit in Claude Code, `apply_patch` in Codex. Do not write source files with shell redirection, heredocs, or `sed -i`.
 - Limit edits to the requested product and the lifecycle code required to support it.
 - Install dependencies so the project's next clean install works. Never pass `--legacy-peer-deps` or `--force` to npm (or `--ignore-engines` to yarn): they hide a version conflict that breaks the next `npm install`. When a package's peer range rejects the project's versions, install the newest version whose `peerDependencies` accept them; check with `npm view <package>@<range> peerDependencies`.
 - Do not install tools or write files outside the project for your own checks (for example `npm i playwright` in `/tmp`). Use what the project and the machine already have, and report a check you could not run as not run.

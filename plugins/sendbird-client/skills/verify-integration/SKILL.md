@@ -7,7 +7,7 @@ allowed-tools: Read, Bash, Grep, Glob, WebFetch, Agent
 
 # /sendbird-client:verify-integration
 
-Resolve every plugin-owned path below from `${CLAUDE_PLUGIN_ROOT}`.
+Resolve every plugin-owned path below from `${CLAUDE_PLUGIN_ROOT}`. Where that variable is empty (Codex does not set it for shell commands), the plugin root is the folder two levels above this SKILL.md.
 Resolve the platform agent with `bash "${CLAUDE_PLUGIN_ROOT}/tools/routing/route-agent.sh" <project-dir> code`, then call `Agent` with that exact agent name. Do not perform the platform checklist yourself or return an integration verdict before the agent responds. If `Agent` is unavailable or fails, report that the platform inspection was not completed; a router result alone is not an inspection.
 
 Read-only sanity scan (Intent A — factual checks).
