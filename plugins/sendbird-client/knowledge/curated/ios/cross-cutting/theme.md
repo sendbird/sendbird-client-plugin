@@ -39,6 +39,21 @@ func applySendbirdAppearance(isDark: Bool, visibleScreen: SBUBaseViewController?
 ```
 Call it from your own appearance toggle, or from wherever your app observes the system appearance. The SDK's own doc comment on `set(colorScheme:)` describes these three steps. (source: https://github.com/sendbird/sendbird-uikit-ios/blob/3.36.1/Sources/Theme/SBUTheme.swift#L82-L117; source: https://github.com/sendbird/sendbird-uikit-ios/blob/3.36.1/Sources/View/SBUBaseViewController.swift#L116-L117 (`updateStyles()`))
 
+## Status bar style
+iOS has no status bar color to set; a screen chooses dark or light status bar content through `preferredStatusBarStyle`. Each UIKit view controller returns its theme's `statusBarStyle` there, for example `SBUGroupChannelListTheme.statusBarStyle` on the channel list and `SBUChannelTheme.statusBarStyle` on the channel screen. The light themes use `.darkContent` and the dark themes use `.lightContent`. UIKit also extends `UINavigationController` so that it returns its top view controller's style, which makes the setting work inside a navigation controller. Set the style after `SBUTheme.set(colorScheme:)`, because that call replaces the theme objects.
+
+```swift
+import UIKit
+import SendbirdUIKit
+
+@MainActor
+func useLightStatusBarContent() {
+    SBUTheme.groupChannelListTheme.statusBarStyle = .lightContent
+    SBUTheme.channelTheme.statusBarStyle = .lightContent
+}
+```
+A screen that is already showing asks for the style again only after `setNeedsStatusBarAppearanceUpdate()` is called on it. (source: https://github.com/sendbird/sendbird-uikit-ios/blob/3.36.1/Sources/View/ChannelList/SBUGroupChannelListViewController.swift#L135-L137; source: https://github.com/sendbird/sendbird-uikit-ios/blob/3.36.1/Sources/View/Channel/SBUGroupChannelViewController.swift#L171-L173; source: https://github.com/sendbird/sendbird-uikit-ios/blob/3.36.1/Sources/Extension/UINavigationController+SBUIKit.swift#L12-L14; source: https://github.com/sendbird/sendbird-uikit-ios/blob/3.36.1/Sources/Theme/SBUTheme.swift#L464-L470 (light `.darkContent`, dark `.lightContent` at line 495; static accessors at lines 231 and 252); SendbirdUIKit 3.36.2 `.swiftinterface` lines 14208, 14224, 14302 (`SBUGroupChannelListTheme`), 14401 (`SBUChannelTheme`); source: https://developer.apple.com/documentation/uikit/uiviewcontroller/setneedsstatusbarappearanceupdate())
+
 ## Fonts and colors
 `SBUFontSet` (`h1`…`h3`, `body1`…`body4`, `button1`…`button4`, `caption1`…`caption4`, `subtitle1`…`subtitle3`) and `SBUColorSet` (for example `primaryMain`) are static values. Component themes copy them when the theme objects are created. The first `SBUTheme` is created the first time it is used, and `set(colorScheme:)` creates new ones. So change the sets first, then call `set(colorScheme:)`. If you change a set after the themes exist and do not rebuild them, the screens keep the old font or color.
 
@@ -86,7 +101,7 @@ inputTheme.buttonTintColor = .systemBlue
 For one screen type only, override `setupStyles()` in an input view subclass instead (knowledge/curated/ios/products/uikit.md, "Restyle the input bar on open channels only"). (source: https://github.com/sendbird/sendbird-uikit-ios/blob/3.36.1/Sources/Theme/SBUTheme.swift#L1397-L1456 (deprecated setters, adaptive properties at lines 1452–1456, `buttonTintColor` at line 1443); source: https://github.com/sendbird/sendbird-uikit-ios/blob/3.36.1/Sources/Util/SBUPropertyWrapper.swift#L176-L235 (`SBUAdaptive`: read-only `wrappedValue`, `updateValues(base:liquidGlass:)`); source: https://github.com/sendbird/sendbird-uikit-ios/blob/3.36.1/Sources/View/Channel/MessageInput/SBUMessageInputView.swift#L902-L953; community context: https://github.com/sendbird/sendbird-uikit-ios/discussions/125)
 
 ## Date and time formats
-`SBUDateFormatSet` holds the format strings UIKit uses for dates, for example `SBUDateFormatSet.Message.sentTimeFormat` (the time under a message in group channels and threads, default `"hh:mm"`) and `SBUDateFormatSet.Message.sentTimeFormatInOpenChannel`. UIKit passes them to `DateFormatter.setLocalizedDateFormatFromTemplate(_:)`, so each string is a template: the device locale decides the order and separators.
+`SBUDateFormatSet` holds the format strings UIKit uses for dates, for example `SBUDateFormatSet.Message.sentTimeFormat` (the time under a message in group channels and threads, default `"hh:mm"`) and `SBUDateFormatSet.Message.sentTimeFormatInOpenChannel`. UIKit passes them to `DateFormatter.setLocalizedDateFormatFromTemplate(_:)`, so each string is a template: the device locale decides the order and separators. UIKit creates a new `DateFormatter` and never sets its `locale`, so the language of month and weekday names also follows the device's current locale.
 
 ```swift
 import SendbirdUIKit

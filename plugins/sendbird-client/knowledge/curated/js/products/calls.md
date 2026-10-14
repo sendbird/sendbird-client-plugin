@@ -36,6 +36,23 @@ await SendbirdCalls.authenticate({ userId: USER_ID, accessToken: ACCESS_TOKEN })
 ```
 (source: sendbird-calls-sdk-react-native README §authenticate)
 
+### React Native: camera and microphone permissions
+Calls needs system permission for the camera and microphone. On iOS, add `NSMicrophoneUsageDescription` and `NSCameraUsageDescription` to the app's `Info.plist`. On Android the permissions are declared in the React Native module's `AndroidManifest.xml`, and the docs request them at runtime with `react-native-permissions`, including `BLUETOOTH_CONNECT` on Android. Ask before the first dial or accept.
+
+```ts
+import { Platform } from 'react-native';
+import Permissions, { PERMISSIONS } from 'react-native-permissions';
+
+const CALL_PERMISSIONS = Platform.select({
+  android: [PERMISSIONS.ANDROID.CAMERA, PERMISSIONS.ANDROID.RECORD_AUDIO, PERMISSIONS.ANDROID.BLUETOOTH_CONNECT],
+  ios: [PERMISSIONS.IOS.CAMERA, PERMISSIONS.IOS.MICROPHONE],
+  default: [],
+});
+
+const result = await Permissions.requestMultiple(CALL_PERMISSIONS);
+```
+(source: https://sendbird.com/docs/calls/sdk/v1/react-native/getting-started/make-first-call — Step 2)
+
 ## Sign out
 "When users log out of their call client apps, they must be deauthenticated with `SendBirdCall.deauthenticate()` method." (source: sendbird-calls 1.10.21 README.md:656)
 

@@ -11,6 +11,9 @@ Sendbird Calls adds voice/video calls. **Direct calls** are 1:1: the caller dial
 ## Install (SPM only)
 - CocoaPods/Carthage are no longer supported. SPM package `https://github.com/sendbird/sendbird-calls-ios`, product `SendBirdCalls` (pulls `sendbird-webrtc-ios`). `import SendBirdCalls`.
 
+## Camera and microphone permissions
+Users must grant the app access to the microphone for audio calls and to the camera for video calls. Add `NSMicrophoneUsageDescription` and `NSCameraUsageDescription` to the app's `Info.plist`. To receive calls through VoIP push, also enable Background Modes with Voice over IP under Signing & Capabilities and add CallKit and PushKit. (source: https://sendbird.com/docs/calls/sdk/v1/ios/getting-started/make-first-call — Step 3 and the VoIP notifications note)
+
 ## Configure + authenticate
 ```swift
 import SendBirdCalls

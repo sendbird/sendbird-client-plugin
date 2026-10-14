@@ -47,6 +47,22 @@ const mmkv = createMMKV(); // react-native-mmkv v4; on v2/v3 (the docs' example)
 
 (source: https://sendbird.com/docs/chat/uikit/v3/react-native/essentials/send-first-message ; @sendbird/uikit-react-native@3.12.9 src/containers/SendbirdUIKitContainer.tsx:90,154-158 ; https://sendbird.com/docs/chat/sdk/v4/javascript/getting-started/environment-specific-implementation ; react-native-mmkv@4.3.2 lib/index.d.ts:1,3 — `MMKV` is a type only in v4, `createMMKV()` makes the instance)
 
+## Native permissions (UIKit)
+
+The UIKit native modules page lists the permissions UIKit's features need. Declaring them is not the same as being granted them at runtime.
+
+- Android, in `android/app/src/main/AndroidManifest.xml`: `RECORD_AUDIO` (voice messages), `READ_EXTERNAL_STORAGE` with `maxSdkVersion="32"` and `WRITE_EXTERNAL_STORAGE` with `maxSdkVersion="28"` (attachments), `CAMERA`, and `POST_NOTIFICATIONS` (notifications on Android 13 and later).
+- iOS, in `Info.plist`: Camera, Microphone, Photo Library, and Photo Library Additions usage descriptions. If you use `react-native-permissions`, run `pod install` after changing them.
+
+On Android 13 and later, notifications appear only after the user grants `POST_NOTIFICATIONS` at runtime. UIKit's notification service has `hasPushPermission()` and `requestPushPermission()`; on Android, the service made by `createNativeNotificationService` checks and requests it with `react-native-permissions` (`checkNotifications`, `requestNotifications`), and on iOS it asks Firebase Messaging.
+
+```ts
+const granted = (await platformServices.notification.hasPushPermission())
+  || (await platformServices.notification.requestPushPermission());
+```
+
+(source: https://sendbird.com/docs/chat/uikit/v3/react-native/essentials/native-modules) (source: https://developer.android.com/develop/ui/views/notifications/notification-permission) (source: @sendbird/uikit-react-native 3.12.9 lib/typescript/src/platform/types.d.ts:17-18 ; https://github.com/sendbird/sendbird-uikit-react-native/blob/v3.12.9/packages/uikit-react-native/src/platform/createNotificationService.native.ts#L63-L92)
+
 ## Sending a file (no `File` in React Native)
 
 React Native has no `File` type, and the docs say a `File` or `Blob` passed as `file` may not work there. Pass an object with all three fields of the SDK's `FileInfo` interface: `name`, `uri`, and `type` (the MIME type, for example `audio/m4a` for a recording). `FileCompat`, the type of `file`, is `File | Blob | FileInfo`.

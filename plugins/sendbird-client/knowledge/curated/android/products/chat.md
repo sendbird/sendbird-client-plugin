@@ -110,6 +110,31 @@ channel.sendFileMessage(FileMessageCreateParams(file)) { message, e -> }
 ```
 `FileMessageCreateParams` also has constructors taking a file URL `String` or a `FileMessage` (for resend). (source: `sendbird-chat-sdk-android` 4.36.5 AAR, `javap` on `com.sendbird.android.params.FileMessageCreateParams`, `BaseChannel.sendFileMessage`)
 
+### Upload progress
+Pass a `FileMessageWithProgressHandler` instead of a plain handler to see upload progress. `onProgress(bytesSent, totalBytesSent, totalBytesToSend)` reports the bytes, and `onResult(message, e)` reports the outcome. To cancel an upload that is still running, call `channel.cancelFileMessageUpload(requestId)` with the `requestId` of the message that `sendFileMessage` returned. Retrying a failed file message is in "Messages (file send / resend)" in knowledge/curated/android/cross-cutting/pitfalls.md.
+
+```kotlin
+import com.sendbird.android.channel.GroupChannel
+import com.sendbird.android.exception.SendbirdException
+import com.sendbird.android.handler.FileMessageWithProgressHandler
+import com.sendbird.android.message.FileMessage
+import com.sendbird.android.params.FileMessageCreateParams
+import java.io.File
+
+fun sendWithProgress(channel: GroupChannel, photo: File, onPercent: (Int) -> Unit): FileMessage? {
+    val params = FileMessageCreateParams(photo).apply { mimeType = "image/jpeg" }
+    return channel.sendFileMessage(params, object : FileMessageWithProgressHandler {
+        override fun onProgress(bytesSent: Int, totalBytesSent: Int, totalBytesToSend: Int) {
+            if (totalBytesToSend > 0) onPercent(totalBytesSent * 100 / totalBytesToSend)
+        }
+        override fun onResult(message: FileMessage?, e: SendbirdException?) {
+            // e == null: sent. Otherwise `message` is the failed message to offer for retry.
+        }
+    })
+}
+```
+(source: https://sendbird.com/docs/chat/sdk/v4/android/message/sending-a-message/track-file-upload-progress-using-a-handler) (source: https://sendbird.com/docs/chat/sdk/v4/android/message/sending-a-message/cancel-an-in-progress-file-upload) (source: https://sendbird.com/docs/chat/sdk/v4/android/ref/-sendbird-chat/com.sendbird.android.handler/-file-message-with-progress-handler/index.html) (source: https://sendbird.com/docs/chat/sdk/v4/android/ref/-sendbird-chat/com.sendbird.android.channel/-base-channel/index.html) (source: sendbird-chat 4.36.5 AAR, `javap` on `com.sendbird.android.channel.BaseChannel` — `sendFileMessage(FileMessageCreateParams, FileMessageWithProgressHandler)`, `cancelFileMessageUpload(String)`; `com.sendbird.android.params.FileMessageCreateParams` — `setMimeType`)
+
 ## Update and delete a message
 ```kotlin
 channel.updateUserMessage(message.messageId, UserMessageUpdateParams("Edited text")) { updated, e ->
@@ -410,6 +435,28 @@ SendbirdChat.addConnectionHandler("connection-banner", object : ConnectionHandle
 ```
 - The SDK reconnects by itself after a network drop; these callbacks only report it. All five methods are abstract and must be implemented. (source: https://sendbird.com/docs/chat/sdk/v4/android/event-handler/managing-connection-event-handlers/add-or-remove-a-connection-event-handler — reviewed 2026-10-07)
 - (source: `sendbird-chat` 4.36.5 AAR, `javap -public`: `SendbirdChat.addConnectionHandler(String, ConnectionHandler)`; `ConnectionHandler` — `onConnected(String)`, `onDisconnected(String)`, `onReconnectStarted()`, `onReconnectSucceeded()`, `onReconnectFailed()` — verified 2026-10-07)
+
+## App in the background
+The SDK follows the app's foreground and background state by itself. The API reference for `SendbirdChat.autoBackgroundDetection` says that, by default, the SDK tracks the `Application` through each Activity's `onResume()` and `onPause()`, opens the connection when the app comes to the foreground, and closes it when the app goes to the background. While the app is in the background it therefore receives no channel events; it can receive FCM push notifications instead, without calling `disconnect` yourself. When the app returns, `ConnectionHandler.onReconnectSucceeded()` reports the restored connection.
+
+To keep the connection open while another Activity is in front, for example while the user picks a photo in an external gallery, set `autoBackgroundDetection = false` before you start that Activity and set it back to `true` in your Activity's `onResume()`.
+
+```kotlin
+import android.app.Activity
+import android.content.Intent
+import com.sendbird.android.SendbirdChat
+
+fun openGalleryKeepingConnection(activity: Activity, pickIntent: Intent, requestCode: Int) {
+    SendbirdChat.autoBackgroundDetection = false
+    activity.startActivityForResult(pickIntent, requestCode)
+}
+
+// In your Activity's onResume():
+fun restoreBackgroundDetection() {
+    SendbirdChat.autoBackgroundDetection = true
+}
+```
+(source: https://sendbird.com/docs/chat/sdk/v4/android/ref/-sendbird-chat/com.sendbird.android/-sendbird-chat/auto-background-detection.html) (source: sendbird-chat 4.36.5 AAR, `javap` on `com.sendbird.android.SendbirdChat` — `getAutoBackgroundDetection()`, `setAutoBackgroundDetection(boolean)`)
 
 ## Handle incoming events without a collection
 ```kotlin

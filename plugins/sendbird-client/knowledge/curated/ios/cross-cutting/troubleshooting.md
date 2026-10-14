@@ -66,6 +66,15 @@
 - **Fix:** Pass the params at init with `SBUGroupChannelViewController(channelURL:startingPoint:messageListParams:)` (source: SendbirdUIKit 3.36.2 SendbirdUIKit.swiftinterface:7363; also source: https://github.com/sendbird/sendbird-uikit-ios/discussions/63). To change them later, set `viewModel.customizedMessageListParams` and call `loadInitialMessages(startingPoint:showIndicator:initialMessages:)`, which reloads the list with the new params (source: SendbirdUIKit 3.36.2 SendbirdUIKit.swiftinterface:7339, :1961, :1976).
 - **Cases:** https://github.com/sendbird/sendbird-uikit-ios/discussions/63
 
+### Messages sent before a user joined are missing
+- **Cause:** By default, a member sees only the messages sent after they joined the group channel. This is an application setting (chat history), not an SDK option, so no client code changes it. The cases below come from JavaScript apps; the setting belongs to the application and applies to every platform.
+- **Fix:** Turn on chat history for group channels in the dashboard's channel settings. Per the cases, it applies to users who join after it is turned on.
+- **Cases:** https://community.sendbird.com/t/error-calling-get-message-by-id-for-message-sent-before-user-joins-a-group-channel/9451, https://community.sendbird.com/t/getting-first-message-of-channel/9507, https://community.sendbird.com/t/chat-history-when-joining-private-group-channel/2237
+
+### UIKit shows an image or video as a generic file
+- **Cause:** UIKit picks the message cell from the file message's `type`, which is the MIME type sent in `mimeType`. A type that starts with `image` (except SVG) gets the image cell, one that starts with `video` gets the video cell, and one that starts with `audio` gets the audio or voice cell. Any other value, including an empty one, gets the generic file cell (source: https://github.com/sendbird/sendbird-uikit-ios/blob/3.36.1/Sources/Util/SBUUtils.swift#L22-L52).
+- **Fix:** Set `mimeType` on `FileMessageCreateParams` to the file's full MIME type, such as `image/jpeg` or `video/mp4` (source: SendbirdChatSDK 4.39.11 SendbirdChatSDK.swiftinterface:2434; also source: knowledge/curated/ios/products/chat.md). UIKit's own `sendFileMessage(fileData:fileName:mimeType:parentMessage:)` passes the value it is given to the same field (source: https://github.com/sendbird/sendbird-uikit-ios/blob/3.36.1/Sources/ViewModel/Channel/SBUBaseChannelViewModel.swift#L348-L352).
+
 ## UIKit layout and appearance
 
 ### The message input sits in the wrong place when the keyboard opens
@@ -129,12 +138,22 @@ final class InPlaceCreateChannelViewController: SBUCreateChannelViewController {
 - **Fix:** Register with `unique: false` in `SendbirdChat.registerDevicePushToken(_:unique:completionHandler:)` (source: SendbirdChatSDK 4.39.11 SendbirdChatSDK.swiftinterface:6399; also source: knowledge/curated/ios/cross-cutting/push.md). For Calls, use `unique: false` in `SendBirdCall.registerVoIPPush(token:unique:completionHandler:)` (source: SendBirdCalls 1.12.3 SendBirdCalls.swiftinterface:884; also source: knowledge/curated/ios/products/calls.md). The Chat case also says to turn on multi-device push in the dashboard.
 - **Cases:** https://community.sendbird.com/t/multi-device-ios-push-notification-support/3024, https://community.sendbird.com/t/notifications-for-multiple-devices/1536
 
+### No push notification shows while the app is open
+- **Cause:** Sendbird sends a push notification to a device only while it is disconnected from the server. The table on the push setup page says a single-device user gets the notification "when disconnected from the server and thus offline"; with multi-device support, the dashboard choice decides whether all devices or at least one must be offline. An app in the foreground is usually connected, so no push is sent to it.
+- **Fix:** Show in-app alerts from a channel delegate instead. Register one with `SendbirdChat.addChannelDelegate(_:identifier:)` and handle `channel(_:didReceive:)` from `BaseChannelDelegate` (source: SendbirdChatSDK 4.39.11 SendbirdChatSDK.swiftinterface:6376, :867, :868; also source: https://sendbird.com/docs/chat/sdk/v4/ios/event-delegate/managing-channel-delegates/add-or-remove-a-channel-delegate). Delivery rules and the multi-device setting: source: https://sendbird.com/docs/chat/sdk/v4/ios/push-notifications/configuring-preferences/register-push-notification-credentials (Step 6 table).
+
 ## Calls
 
 ### The app is terminated when a VoIP push arrives in the background
 - **Cause:** On iOS 13 and later, the system terminates an app that receives a VoIP push without reporting an incoming call to CallKit.
 - **Fix:** Forward the PushKit payload to `SendBirdCall.pushRegistry(_:didReceiveIncomingPushWith:for:completionHandler:)` (source: SendBirdCalls 1.12.3 SendBirdCalls.swiftinterface:883; also source: https://github.com/sendbird/sendbird-calls-ios). In `SendBirdCallDelegate.didStartRinging(_:)`, report the call with CallKit's `reportNewIncomingCall` (source: SendBirdCalls 1.12.3 SendBirdCalls.swiftinterface:650; also source: knowledge/curated/ios/products/calls.md). The public Calls QuickStart sample shows this flow.
 - **Cases:** https://community.sendbird.com/t/app-gets-terminated-when-voip-push-is-received-when-app-in-background/701
+
+## Upgrading from v3
+
+### v3 code fails to build after moving to Chat SDK v4
+- **Cause:** v4 is a different module with breaking changes. The import is `SendbirdChatSDK` instead of `SendBirdSDK`, the main class `SBDMain` is now `SendbirdChat`, the `SBD` prefix is gone from every type, `SBDError` is now `SBError`, `SBDChannelDelegate` is split into `BaseChannelDelegate`, `GroupChannelDelegate`, and `OpenChannelDelegate`, and each params class is split into create and update params (for example `SBDGroupChannelParams` into `GroupChannelCreateParams` and `GroupChannelUpdateParams`). Query setters were replaced by params classes. The SPM mirror `sendbird-chat-ios-spm` still ships v3 (`SendBirdSDK`), so a project that added it never gets v4.
+- **Fix:** Add `https://github.com/sendbird/sendbird-chat-sdk-ios` (product `SendbirdChatSDK`) and remove the v3 package (see knowledge/curated/ios/setup.md). Then follow the guide's steps in order: replace `import SendBirdSDK` with `import SendbirdChatSDK`, replace `SBDError` with `SBError`, replace `SBDMain` with `SendbirdChat`, and remove the remaining `SBD` prefixes. Calls that report "Missing arguments for parameters params" now take a params object. For UIKit, also follow the UIKit migration guide from v2 to v3. (source: https://sendbird.com/docs/chat/sdk/v4/ios/getting-started/migration-guide) (source: https://sendbird.com/docs/chat/uikit/v3/ios-uikit/miscellaneous/migration-guide/from-version-two) (source: knowledge/curated/ios/setup.md)
 
 ## Related
 

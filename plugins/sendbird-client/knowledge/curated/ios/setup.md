@@ -28,6 +28,12 @@ Swift Package Manager resolves a single version of `sendbird-chat-sdk-ios` (and 
 
 When you upgrade one Sendbird package, check its `Package.swift` and raise the shared pins if needed instead of pinning them exactly to an older release.
 
+### Keep UIKit and raise only the Chat SDK
+
+UIKit does not pin the Chat SDK to one release. At tag 3.36.1, `sendbird-uikit-ios-spm` declares `.package(name: "SendbirdChatSDK", url: "https://github.com/sendbird/sendbird-chat-sdk-ios", from: "4.39.6")`. In SwiftPM, `from:` means "this version or newer, up to the next major version", so any 4.x release from 4.39.6 satisfies UIKit. To run a newer Chat SDK under the same UIKit version, add `sendbird-chat-sdk-ios` to the app yourself with a higher minimum, for example `from: "4.39.11"`. SwiftPM then resolves the one shared version to 4.39.11 or later. The version it picked is recorded in `Package.resolved`. A 5.x Chat SDK would fall outside UIKit's range and fail to resolve.
+
+(source: https://github.com/sendbird/sendbird-uikit-ios-spm/blob/3.36.1/Package.swift#L19-L25; https://github.com/swiftlang/swift-package-manager/blob/swift-6.0-RELEASE/Sources/PackageDescription/PackageDependency.swift#L196-L223 — `from:` is `.upToNextMajor(from:)`)
+
 (source: Package.swift of sendbird/sendbird-uikit-ios-spm@3.36.0 line 23, sendbird/sendbird-swiftui-ios@1.2.2 lines 19 and 23, sendbird/SendBird-Desk-iOS-Framework@v1.2.2 line 17; README Requirements of sendbird-uikit-ios-spm@3.36.0 and SendBird-Desk-iOS-Framework@v1.2.2)
 
 ## App ID
@@ -62,6 +68,7 @@ If the project already supplies the App ID another way, such as an existing conf
 ## Pitfalls
 - Binary frameworks (Calls/Live/AI Agent Core) may need a device build (simulator slice arch limits).
 - App ID from the Info.plist build setting (see "App ID" above); tokens are secrets — never hard-code.
+- One App ID per app run. The authentication docs say the initialize method "must be called once across your client app", and they describe no way to switch to another App ID at runtime; keep development and production App IDs in separate build configurations. (source: https://sendbird.com/docs/chat/sdk/v4/ios/application/authenticating-a-user/authentication)
 
 ## Related
 - Architecture: knowledge/curated/ios/architecture.md
