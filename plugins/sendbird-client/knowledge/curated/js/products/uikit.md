@@ -135,6 +135,42 @@ import { Message } from '@sendbird/uikit-react/GroupChannel/components/Message';
 
 (source: https://github.com/sendbird/sendbird-uikit-react/blob/v3.19.1/src/modules/GroupChannel/components/Message/MessageView.tsx lines 323-331 and 479-498 — children first, then `renderMessage`; the separators are drawn outside both ; src/modules/GroupChannel/components/MessageList/index.tsx:67 — the default `renderMessage` is `<Message {...props} />` ; src/ui/FileMessageItemBody/index.tsx:43-55 ; @sendbird/uikit-react@3.19.1 types/modules/GroupChannel/components/GroupChannelUI/GroupChannelUIView.d.ts:37,41 `renderMessage`, `renderMessageContent` ; types/modules/GroupChannel/components/Message/MessageView.d.ts:11-51 `MessageProps` (`children` at 21, deprecated `renderMessage` at 46-50) ; types/types.d.ts:50 `RenderMessageParamsType` ; types/ui/MessageContent/index.d.ts:16,19-60 `MessageBody`, `MessageContentProps`, `MessageComponentRenderers` ; types/ui/MessageContent/MessageBody/index.d.ts:9-22 ; types/utils/index.d.ts:48 `CoreMessageType` ; types/modules/GroupChannel/context/types.d.ts:17-20,72 `onBeforeDownloadFileMessage` ; CHANGELOG.md v3.13.3)
 
+### Message menu items
+On the web, each message has a menu button. To change its items, render `MessageContent` from `renderMessageContent` and give it `renderMessageMenu`, which returns `MessageMenu` with `renderMenuItems`. `renderMenuItems` receives the built-in items in `items` (`CopyMenuItem`, `ReplyMenuItem`, `ThreadMenuItem`, `OpenInChannelMenuItem`, `EditMenuItem`, `ResendMenuItem`, `DeleteMenuItem`, `MarkAsUnreadMenuItem`); the items you return, in that order, are the menu. `MenuItem` makes an item of your own. On mobile layouts the docs use `MobileMenu` from `@sendbird/uikit-react/ui/MobileMenu` the same way.
+
+```tsx
+import { GroupChannel } from '@sendbird/uikit-react/GroupChannel';
+import MessageContent from '@sendbird/uikit-react/ui/MessageContent';
+import { MessageMenu, MenuItem } from '@sendbird/uikit-react/ui/MessageMenu';
+
+function ChannelWithShortMenu({ channelUrl, onReport }: { channelUrl: string; onReport: (messageId: number) => void }) {
+  return (
+    <GroupChannel
+      channelUrl={channelUrl}
+      renderMessageContent={(contentProps) => (
+        <MessageContent
+          {...contentProps}
+          renderMessageMenu={(menuProps) => (
+            <MessageMenu
+              {...menuProps}
+              renderMenuItems={({ items }) => (
+                <>
+                  <items.CopyMenuItem />
+                  <items.ReplyMenuItem />
+                  <items.DeleteMenuItem />
+                  <MenuItem onClick={() => onReport(menuProps.message.messageId)}>Report</MenuItem>
+                </>
+              )}
+            />
+          )}
+        />
+      )}
+    />
+  );
+}
+```
+(source: https://sendbird.com/docs/chat/uikit/v3/react/tutorial/customize-message-menu) (source: https://github.com/sendbird/sendbird-uikit-react/blob/v3.19.1/src/ui/MessageMenu/MessageMenu.tsx ; @sendbird/uikit-react 3.19.1 types/ui/MessageMenu/MessageMenu.d.ts:7-27 — `RenderMenuItemsParams`, `renderMenuItems` ; types/ui/MessageMenu/index.d.ts:2-4 ; types/ui/MessageContent/index.d.ts:55)
+
 ### Message input: icons, attach button, disabling, file types
 - `renderSendMessageIcon`, `renderVoiceMessageIcon`, and `renderFileUploadIcon` are `GroupChannel` props. The send and voice renderers replace only the icon; UIKit keeps its own button and click handler around it.
 - `renderFileUploadIcon` is different: whatever it returns replaces the whole attach button, including the hidden `<input type="file">` and its click handler. A custom attach control must open its own picker and send the file itself, for example with `sendFileMessage` from `useGroupChannel().actions`.
@@ -252,6 +288,56 @@ import { GroupChannelHeader } from '@sendbird/uikit-react/GroupChannel/component
 
 Use `onChatHeaderActionClick` on `GroupChannel` if you only need to react to the default info button. (source: https://github.com/sendbird/sendbird-uikit-react/blob/v3.19.1/src/modules/GroupChannel/components/GroupChannelHeader/GroupChannelHeaderView.tsx ; @sendbird/uikit-react@3.19.1 types/modules/GroupChannel/components/GroupChannelUI/GroupChannelUIView.d.ts:25 ; types/modules/GroupChannel/components/GroupChannelHeader/index.d.ts:3-6 ; types/ui/Header/index.d.ts:6-10 `HeaderCustomProps` ; types/modules/GroupChannelList/components/GroupChannelListHeader/index.d.ts:4-11 ; types/modules/GroupChannel/context/types.d.ts:74)
 
+### Threads
+Set `replyType="THREAD"` on `GroupChannel` (or `uikitOptions.groupChannel.replyType: 'thread'` on the provider) to show "Reply in thread" in the message menu. The thread screen is a separate module, `Thread`, that you render yourself: `onReplyInThreadClick({ message })` on `GroupChannel` gives you the parent message, and `Thread` takes `channelUrl` and `message`. `onMoveToParentMessage` on `Thread` receives the parent message and its channel. `threadReplySelectType` decides whether tapping a reply in the channel opens the thread or scrolls to the parent message. Threads are one level deep, in group and supergroup channels only.
+
+```tsx
+import { useState } from 'react';
+import { GroupChannel } from '@sendbird/uikit-react/GroupChannel';
+import Thread from '@sendbird/uikit-react/Thread';
+import type { FileMessage, MultipleFilesMessage, UserMessage } from '@sendbird/chat/message';
+
+type ParentMessage = UserMessage | FileMessage | MultipleFilesMessage; // UIKit's SendableMessageType
+
+function ChannelWithThread({ channelUrl }: { channelUrl: string }) {
+  const [parent, setParent] = useState<ParentMessage | null>(null);
+  return (
+    <>
+      <GroupChannel
+        channelUrl={channelUrl}
+        replyType="THREAD"
+        onReplyInThreadClick={({ message }) => setParent(message)}
+      />
+      {parent && (
+        <Thread channelUrl={channelUrl} message={parent} onHeaderActionClick={() => setParent(null)} />
+      )}
+    </>
+  );
+}
+```
+(source: https://sendbird.com/docs/chat/uikit/v3/react/features/message-threading/threads) (source: https://sendbird.com/docs/chat/uikit/v3/react/modules/thread) (source: @sendbird/uikit-react 3.19.1 types/modules/GroupChannel/context/types.d.ts:57-58, 75-77 — `replyType`, `threadReplySelectType`, `onReplyInThreadClick` ; types/modules/Thread/context/ThreadProvider.d.ts:10-18 — `channelUrl`, `message`, `onHeaderActionClick`, `onMoveToParentMessage` ; types/modules/Thread/index.d.ts ; types/utils/index.d.ts:49 — `SendableMessageType`)
+
+### Channel settings menu
+`ChannelSettings` draws its menu with `renderModerationPanel({ menuItems })`. `menuItems` has an `operator` and a `nonOperator` object; each key is one row (the operator rows are `operators`, `allUsers`, `mutedUsers`, `bannedUsers`, and `freezeChannel`; the non-operator row is `allUsers`), and the rows appear in key order. Return `MenuListByRole` with a changed copy to remove, reorder, or add rows; a row with `hideMenu: true` is skipped. `renderLeaveChannel` replaces the leave button, and `renderHeader` the header.
+
+```tsx
+import ChannelSettings from '@sendbird/uikit-react/ChannelSettings';
+import { MenuListByRole } from '@sendbird/uikit-react/ChannelSettings/components/ChannelSettingMenuList';
+
+function SettingsWithoutFreeze({ channelUrl }: { channelUrl: string }) {
+  return (
+    <ChannelSettings
+      channelUrl={channelUrl}
+      renderModerationPanel={({ menuItems }) => {
+        const { freezeChannel, ...operatorRows } = menuItems.operator;
+        return <MenuListByRole menuItems={{ ...menuItems, operator: operatorRows }} />;
+      }}
+    />
+  );
+}
+```
+(source: https://sendbird.com/docs/chat/uikit/v3/react/tutorial/customize-channel-settings) (source: https://github.com/sendbird/sendbird-uikit-react/blob/v3.19.1/src/modules/ChannelSettings/components/ChannelSettingsUI/hooks/useMenuItems.tsx#L68-L120 — row keys ; https://github.com/sendbird/sendbird-uikit-react/blob/v3.19.1/src/modules/ChannelSettings/components/ChannelSettingsUI/MenuListByRole.tsx#L28 — `hideMenu` ; @sendbird/uikit-react 3.19.1 types/modules/ChannelSettings/components/ChannelSettingsUI/index.d.ts:6-14 ; types/modules/ChannelSettings/components/ChannelSettingsUI/MenuListByRole.d.ts)
+
 ### After a reconnect: what `SendbirdProvider` and `GroupChannel` do
 This describes 3.19.1 as the public source shows it; it is not a documented contract.
 
@@ -333,6 +419,40 @@ function ChannelScreen({ onBack, onOpenSettings }: { onBack: () => void; onOpenS
 The fragment adds the typing-indicator bubble under the newest message itself, so you don't render it in `renderMessage`. `messageListQueryParams` (for example `customTypesFilter`) filters which messages load at all.
 
 (source: https://github.com/sendbird/sendbird-uikit-react-native/blob/v3.12.10/packages/uikit-react-native/src/fragments/createGroupChannelFragment.tsx lines 47-76 and 204-212 — your `renderMessage` result, or `GroupChannelMessageRenderer`, wrapped with the typing bubble ; @sendbird/uikit-react-native@3.12.10 src/domain/groupChannel/types.ts:27-69 `GroupChannelProps['Fragment']` (`renderMessage` at 41, `messageListQueryParams` at 66), 205-213 `GroupChannelModule` ; src/components/ChannelMessageList/index.tsx:75-92 `renderMessage` props, 158-165, 465-485 (what `onPress` / `onLongPress` do) ; src/index.ts:12,30 ; https://sendbird.com/docs/chat/uikit/v3/react-native/group-channel-screens/chat-in-a-group-channel)
+
+### Message menu (long press)
+A long press opens a bottom sheet. `renderMessage` receives that sheet as `bottomSheetItem` (its `sheetItems` are the menu rows) together with the `onLongPress` that opens it; a pending message gets neither. To change the rows, open your own copy of the sheet with `useBottomSheet().openSheet(...)` from `@sendbird/uikit-react-native-foundation` and pass that as `onLongPress` to `GroupChannelMessageRenderer`. Because `useBottomSheet` is a hook, do this in a component that `renderMessage` returns.
+
+```tsx
+import { createGroupChannelFragment, GroupChannelMessageRenderer } from '@sendbird/uikit-react-native';
+import { useBottomSheet } from '@sendbird/uikit-react-native-foundation';
+import type { ComponentProps } from 'react';
+
+type RendererProps = ComponentProps<typeof GroupChannelMessageRenderer>;
+const GroupChannelFragment = createGroupChannelFragment();
+
+function MessageWithReport({ onReport, ...props }: RendererProps & { onReport: () => void }) {
+  const { openSheet } = useBottomSheet();
+  const sheet = props.bottomSheetItem;
+  const onLongPress = sheet
+    ? () => openSheet({ ...sheet, sheetItems: [...sheet.sheetItems, { icon: 'info', title: 'Report', onPress: onReport }] })
+    : props.onLongPress;
+  return <GroupChannelMessageRenderer {...props} onLongPress={onLongPress} />;
+}
+
+function ChannelScreen({ onBack, onOpenSettings }: { onBack: () => void; onOpenSettings: () => void }) {
+  return (
+    <GroupChannelFragment
+      channel={channel}
+      onChannelDeleted={onBack}
+      onPressHeaderLeft={onBack}
+      onPressHeaderRight={onOpenSettings}
+      renderMessage={(props) => <MessageWithReport {...props} onReport={() => { /* report props.message */ }} />}
+    />
+  );
+}
+```
+(source: https://github.com/sendbird/sendbird-uikit-react-native/blob/v3.12.9/packages/uikit-react-native/src/components/ChannelMessageList/index.tsx#L75-L93 — `renderMessage` props incl. `bottomSheetItem` ; the default sheet and `onLongPress` at lines 445-487) (source: https://github.com/sendbird/sendbird-uikit-react-native/blob/v3.12.9/packages/uikit-react-native-foundation/src/ui/BottomSheet/index.tsx#L11-L21 — `BottomSheetItem`) (source: https://github.com/sendbird/sendbird-uikit-react-native/blob/v3.12.9/packages/uikit-react-native-foundation/src/ui/Dialog/index.tsx#L182-L186 — `useBottomSheet`) (source: https://sendbird.com/docs/chat/uikit/v3/react-native/group-channel-screens/chat-in-a-group-channel)
 
 ### Message input: attachments, disabling, placeholder, TextInput props
 - Fragment props: `placeholder` (3.12.6+) replaces the send-mode placeholder in every state, including muted, frozen, and disabled; edit mode keeps the localized text. `partialTextInputProps` (3.10.2+) is typed `Partial<Pick<TextInputProps, 'autoCorrect'>>`, so `autoCorrect` is the only `TextInput` prop UIKit passes through; other `TextInput` props are not accepted.
@@ -445,6 +565,59 @@ const GroupChannelFragment = createGroupChannelFragment({
 To change every UIKit header at once (for example to hand them to React Navigation), pass `styles.HeaderComponent` to `SendbirdUIKitContainer` instead; the default headers render through it.
 
 (source: https://github.com/sendbird/sendbird-uikit-react-native/blob/v3.12.10/packages/uikit-react-native/src/domain/groupChannel/component/GroupChannelHeader.tsx lines 11-51 ; src/domain/groupChannel/types.ts:70-74,143-151 ; src/domain/groupChannel/index.ts:8 ; src/containers/SendbirdUIKitContainer.tsx:107-113,252 ; @sendbird/uikit-react-native-foundation@3.12.10 src/ui/Header/index.tsx:12-25 `HeaderProps` ; src/index.ts:7,33 `Icon`, `Header` ; https://sendbird.com/docs/chat/uikit/v3/react-native/customization/sendbirduikitcontainer)
+
+### Threads
+Turn threads on with `uikitOptions={{ groupChannel: { replyType: 'thread', threadReplySelectType: 'thread' } }}` on `SendbirdUIKitContainer`; `threadReplySelectType` (`'thread'` or `'parent'`) decides what a tap on a reply in the channel opens. The thread screen is its own fragment: create it with `createGroupChannelThreadFragment()` and put it on a screen of your navigator. The channel fragment's `onPressReplyMessageInThread(parentMessage, startingPoint)` is where you navigate to that screen. The thread fragment needs `channel`, `parentMessage`, `onParentMessageDeleted`, `onChannelDeleted`, and `onPressHeaderLeft`. Threads are one level deep, in group and supergroup channels only.
+
+```tsx
+import { createGroupChannelThreadFragment } from '@sendbird/uikit-react-native';
+import type { FileMessage, UserMessage } from '@sendbird/chat/message';
+
+const GroupChannelThreadFragment = createGroupChannelThreadFragment();
+
+function ThreadScreen({ parentMessage, onBack }: { parentMessage: UserMessage | FileMessage; onBack: () => void }) {
+  return (
+    <GroupChannelThreadFragment
+      channel={channel}
+      parentMessage={parentMessage}
+      onParentMessageDeleted={onBack}
+      onChannelDeleted={onBack}
+      onPressHeaderLeft={onBack}
+    />
+  );
+}
+```
+(source: https://sendbird.com/docs/chat/uikit/v3/react-native/features/message-threading/threads) (source: https://github.com/sendbird/sendbird-uikit-react-native/blob/v3.12.9/packages/uikit-react-native/src/domain/groupChannelThread/types.ts ; https://github.com/sendbird/sendbird-uikit-react-native/blob/v3.12.9/packages/uikit-react-native/src/domain/groupChannel/types.ts#L28-L34 — `onPressReplyMessageInThread` ; https://github.com/sendbird/sendbird-uikit-react-native/blob/v3.12.9/packages/uikit-react-native/src/index.ts#L41)
+
+### Channel settings menu items
+`createGroupChannelSettingsFragment()` returns a fragment whose `menuItemsCreator(defaultMenuItems)` receives the default rows as `MenuBarProps` objects (`icon`, `name`, `onPress`, and optional `actionLabel`, `actionItem`, `visible`, `disabled`) and returns the rows to show. Add, remove, or reorder rows there. The fragment's required props are `channel`, `onPressHeaderLeft`, `onPressMenuModeration`, `onPressMenuMembers`, and `onPressMenuLeaveChannel`.
+
+```tsx
+import { Share } from 'react-native';
+import { createGroupChannelSettingsFragment } from '@sendbird/uikit-react-native';
+
+const GroupChannelSettingsFragment = createGroupChannelSettingsFragment();
+
+function SettingsScreen({ go }: { go: (route: 'back' | 'moderation' | 'members' | 'list') => void }) {
+  return (
+    <GroupChannelSettingsFragment
+      channel={channel}
+      onPressHeaderLeft={() => go('back')}
+      onPressMenuModeration={() => go('moderation')}
+      onPressMenuMembers={() => go('members')}
+      onPressMenuLeaveChannel={() => go('list')}
+      menuItemsCreator={(items) => [
+        { icon: 'channels', name: 'Share channel', onPress: () => Share.share({ message: channel.url }) },
+        ...items,
+      ]}
+    />
+  );
+}
+```
+(source: https://sendbird.com/docs/chat/uikit/v3/react-native/group-channel-screens/configure-group-channel-settings) (source: https://github.com/sendbird/sendbird-uikit-react-native/blob/v3.12.9/packages/uikit-react-native/src/domain/groupChannelSettings/types.ts#L8-L31 ; https://github.com/sendbird/sendbird-uikit-react-native/blob/v3.12.9/packages/uikit-react-native-foundation/src/ui/MenuBar/index.tsx#L13-L27 — `MenuBarProps`)
+
+### Keyboard covering the input
+The message input of the group channel fragment is wrapped in React Native's `KeyboardAvoidingView`. When something sits above the fragment, such as a navigator header, pass its height as `keyboardAvoidOffset` so the input ends up directly above the keyboard; the docs describe the value as the adjusted y position of the keyboard. The thread fragment takes the same prop. (source: https://sendbird.com/docs/chat/uikit/v3/react-native/group-channel-screens/chat-in-a-group-channel) (source: https://github.com/sendbird/sendbird-uikit-react-native/blob/v3.12.9/packages/uikit-react-native/src/domain/groupChannel/types.ts#L49 ; https://github.com/sendbird/sendbird-uikit-react-native/blob/v3.12.9/packages/uikit-react-native/src/components/ChannelInput/index.tsx#L3 ; https://github.com/sendbird/sendbird-uikit-react-native/blob/v3.12.9/packages/uikit-react-native/src/domain/groupChannelThread/types.ts#L43)
 
 ## Pitfalls
 - React: import `@sendbird/uikit-react/dist/index.css` or the UI renders unstyled.

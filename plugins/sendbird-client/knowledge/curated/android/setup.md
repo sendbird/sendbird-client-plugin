@@ -52,6 +52,7 @@ SendbirdChat.init(params, initResultHandler)
 
 ## Pitfalls
 - App ID from BuildConfig/secret; tokens are secrets.
+- One App ID per app run. The authentication docs say the initialization method "must be called once across your client app", and they describe no way to switch to another App ID at runtime; keep development and production App IDs in separate build types or flavors. (source: https://sendbird.com/docs/chat/sdk/v4/android/application/authenticating-a-user/authentication)
 - Match Chat/UIKit min versions required by AI Agent (see products/ai-agent.md).
 
 ## Related

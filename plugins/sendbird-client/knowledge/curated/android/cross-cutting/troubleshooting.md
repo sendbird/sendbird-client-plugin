@@ -61,6 +61,24 @@
 - **Fix:** Keep the UIKit reply type as `THREAD` so the thread UI still works, and load the main list with the Chat `ReplyType.NONE`. Either pass your own `MessageListParams` (with `replyType = ReplyType.NONE`) through `ChannelFragment.Builder.setMessageListParams(...)`, which UIKit uses as given apart from forcing `reverse`, or override `createMessageListParams()` in a custom `ChannelViewModel`, as the staff answer does. (source: https://sendbird.com/docs/chat/uikit/v3/android-view/customizations/chat-customization/filter-message-list) (source: https://github.com/sendbird/sendbird-uikit-android/blob/07ffe8efc97e2d71dedc466ad868df817e5f433e/uikit/src/main/java/com/sendbird/uikit/consts/ReplyType.kt#L8) (source: https://github.com/sendbird/sendbird-uikit-android/blob/07ffe8efc97e2d71dedc466ad868df817e5f433e/uikit/src/main/java/com/sendbird/uikit/fragments/ChannelFragment.java#L1585 — `setMessageListParams`) (source: https://sendbird.com/docs/chat/sdk/v4/android/ref/-sendbird-chat/com.sendbird.android.message/-reply-type/index.html) (source: https://sendbird.com/docs/chat/sdk/v4/android/ref/-sendbird-chat/com.sendbird.android.params/-message-list-params/index.html)
 - **Cases:** https://github.com/sendbird/sendbird-uikit-android/discussions/38
 
+### Messages look sent but are gone after leaving and reopening the channel
+- **Cause:** The channel is ephemeral. The channel overview says messages in an ephemeral group channel aren't saved in Sendbird's database, so they can't be loaded again.
+- **Fix:** Create channels whose history you need with `isEphemeral` left unset or `false` on `GroupChannelCreateParams`, and check `channel.isEphemeral` on existing ones. (source: https://sendbird.com/docs/chat/sdk/v4/android/channel/overview-channel) (source: https://sendbird.com/docs/chat/sdk/v4/android/ref/-sendbird-chat/com.sendbird.android.params/-group-channel-create-params/index.html)
+- **Cases:** https://community.sendbird.com/t/message-appears-to-get-deleted-right-after-sending-it/1902 (an iOS app; the cause is the channel type, not the platform)
+
+### Messages sent before a user joined are missing
+- **Cause:** By default, a member sees only the messages sent after they joined the group channel. This is an application setting (chat history), not an SDK option. The cases below come from JavaScript apps; the setting belongs to the application and applies to every platform.
+- **Fix:** Turn on chat history for group channels in the dashboard's channel settings. Per the cases, it applies to users who join after it is turned on.
+- **Cases:** https://community.sendbird.com/t/error-calling-get-message-by-id-for-message-sent-before-user-joins-a-group-channel/9451, https://community.sendbird.com/t/getting-first-message-of-channel/9507, https://community.sendbird.com/t/chat-history-when-joining-private-group-channel/2237
+
+### UIKit shows an image or video as a generic file
+- **Cause:** UIKit picks the view from the file message's `type`, the MIME type sent in `mimeType`. Only a type that starts with `image` (except SVG) gets the image view, and only one that starts with `video` gets the video view; anything else, including an empty type, gets the generic file view. (source: https://github.com/sendbird/sendbird-uikit-android/blob/07ffe8efc97e2d71dedc466ad868df817e5f433e/uikit/src/main/java/com/sendbird/uikit/activities/viewholder/MessageViewHolderFactory.java#L291-L327)
+- **Fix:** Set `mimeType` on `FileMessageCreateParams` to the file's full MIME type, such as `image/jpeg` or `video/mp4`. (source: https://sendbird.com/docs/chat/sdk/v4/android/ref/-sendbird-chat/com.sendbird.android.params/-file-message-create-params/index.html) (source: knowledge/curated/android/products/uikit.md — Custom message views, including file messages)
+
+### The keyboard covers the message input when the channel screen is inside your own Activity
+- **Cause:** UIKit's own `ChannelActivity` is declared with `android:windowSoftInputMode="adjustResize|stateAlwaysHidden"`, so the window shrinks above the keyboard. An Activity of yours that hosts `ChannelFragment` does not get that declaration. (source: https://github.com/sendbird/sendbird-uikit-android/blob/07ffe8efc97e2d71dedc466ad868df817e5f433e/uikit/src/main/AndroidManifest.xml#L48-L51)
+- **Fix:** Declare `android:windowSoftInputMode="adjustResize"` on that Activity in your manifest. Android's guide says `adjustResize` resizes the layout to the space left by the keyboard. (source: https://developer.android.com/develop/ui/views/touch-and-input/keyboard-input/visibility)
+
 ### A `ChannelFragment` (or a subclass) shows no messages after you navigate back to it with the Navigation component
 - **Cause:** In UIKit versions before 3.25.2, messages in `ChannelFragment` were not displayed after returning from another fragment when the app used the Navigation component. The 3.25.2 release notes list this as a fixed issue.
 - **Fix:** Upgrade UIKit to 3.25.2 or later. (source: https://github.com/sendbird/sendbird-uikit-android/blob/07ffe8efc97e2d71dedc466ad868df817e5f433e/CHANGELOG.md#L15-L16 — v3.25.2)
@@ -87,6 +105,10 @@
 - **Fix:** Upload credentials from the same Firebase project as the app's `google-services.json`. Register the device's current token again: the `SendbirdPushHandler` path re-registers on `onNewToken`, and the manual path calls `SendbirdChat.registerPushToken(...)` after `connect`. (source: knowledge/curated/android/cross-cutting/push.md) (source: https://sendbird.com/docs/chat/sdk/v4/android/push-notifications/managing-push-notifications/push-notification-tester) (source: https://sendbird.com/docs/chat/sdk/v4/android/ref/-sendbird-chat/com.sendbird.android/-sendbird-chat/index.html) (source: https://sendbird.com/docs/chat/sdk/v4/android/ref/-sendbird-chat/com.sendbird.android.push/-sendbird-push-handler/index.html)
 - **Cases:** https://community.sendbird.com/t/issue-in-receiving-calls-notifications/565, https://community.sendbird.com/t/fcm-mismatchsenderid/7978, https://community.sendbird.com/t/urgent-fcm-push-alerts-not-being-sent/4020
 
+### Only the most recently used device gets push notifications
+- **Cause:** The token is registered as unique, which deletes the user's other tokens. The API reference for `SendbirdPushHandler.isUniquePushToken` says: "If true, all the previously registered token for the current User will be deleted and this token will be the unique one. Default value is false". The manual path has the same switch as the `unique` argument of `SendbirdChat.registerPushToken(token, unique, handler)`.
+- **Fix:** Return `false` from `isUniquePushToken`, or pass `unique = false`. Then turn on multi-device support in the dashboard, as Step 6 of the FCM setup guide describes. (source: https://sendbird.com/docs/chat/sdk/v4/android/ref/-sendbird-chat/com.sendbird.android.push/-sendbird-push-handler/index.html) (source: https://sendbird.com/docs/chat/sdk/v4/android/push-notifications/multi-device-support/set-up-push-notifications-for-fcm) (source: knowledge/curated/android/cross-cutting/push.md — Handler-based vs manual token registration)
+
 ## Calls
 
 ### `onRinging` never fires for incoming calls until the device has dialed once
@@ -98,6 +120,12 @@
 - **Cause:** The Calls AAR declares `RECORD_AUDIO`, `CAMERA` and `BLUETOOTH_CONNECT` in its manifest, but those are runtime permissions. Declaring them does not grant them, and if they are granted only after media starts (for example after entering a group call room), audio and video may stay off.
 - **Fix:** Request microphone and camera permissions at runtime, plus `BLUETOOTH_CONNECT` on Android 12 and later, before you dial, accept, or enter a room. (source: sendbird-calls 1.12.5 pkg.aar AndroidManifest.xml)
 - **Cases:** https://community.sendbird.com/t/microphone-not-working/2346 — community, https://community.sendbird.com/t/quickstart-call-github-sample-incoming-video-is-not-showing-up/6892 — community, https://community.sendbird.com/t/audio-video-not-working-after-permission-granted/2698
+
+## Upgrading from v3
+
+### v3 code fails to compile after moving to Chat SDK v4
+- **Cause:** v4 renamed and repackaged the SDK. The main class `SendBird` is now `SendbirdChat`, `SendBirdException` is now `SendbirdException`, and classes moved into new packages such as `com.sendbird.android.channel`, `com.sendbird.android.message`, and `com.sendbird.android.handler`. `ChannelHandler` is split into `BaseChannelHandler`, `GroupChannelHandler`, and `OpenChannelHandler`. Params classes are split into create and update params (for example `GroupChannelParams` into `GroupChannelCreateParams` and `GroupChannelUpdateParams`), builders became constructors, getters and setters became properties, and some methods were replaced (for example, `addUsers` on the create params by the `users` property).
+- **Fix:** Follow the migration guide: remove every `import com.sendbird.android.*` line, replace `SendBird` with `SendbirdChat` and `SendBirdException` with `SendbirdException`, then add the v4 imports and let the IDE optimize them. On a Mac, the guide's migration script does the first three steps. (source: https://sendbird.com/docs/chat/sdk/v4/android/getting-started/migration-guide) (source: https://sendbird.com/docs/chat/uikit/v3/android-view/miscellaneous/migration-guide)
 
 ## Related
 - Errors: knowledge/curated/android/cross-cutting/errors.md

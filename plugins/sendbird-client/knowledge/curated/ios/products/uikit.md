@@ -966,6 +966,21 @@ SendbirdUI.connectIfNeeded { user, error in
 ```
 (source: https://github.com/sendbird/sendbird-uikit-ios/blob/3.36.1/Sources/Manager/SBUEmojiManager.swift#L56-L75 (`loadAllEmojis(completionHandler:)` at line 149); source: https://github.com/sendbird/sendbird-uikit-ios/blob/3.36.1/Sources/SendbirdUI.swift#L250-L254 (the load starts in a `defer` after connect); community context: https://github.com/sendbird/sendbird-uikit-ios/discussions/50)
 
+## Attachment permissions (Info.plist)
+UIKit lets users attach photos, videos, and documents, and save media. The docs list four `Info.plist` usage descriptions for these features: `NSPhotoLibraryUsageDescription` (pick from the library), `NSCameraUsageDescription` (take a photo or video), `NSMicrophoneUsageDescription` (record sound with a video), and `NSPhotoLibraryAddUsageDescription` (save media to the library). When camera capture from the message input fails while picking from the library works, check the camera and microphone keys first. Documents from iCloud also need the iCloud capability with iCloud Documents checked under Signing & Capabilities.
+
+```xml
+<key>NSPhotoLibraryUsageDescription</key>
+<string>$(PRODUCT_NAME) would like access to your photo library</string>
+<key>NSCameraUsageDescription</key>
+<string>$(PRODUCT_NAME) would like to use your camera</string>
+<key>NSMicrophoneUsageDescription</key>
+<string>$(PRODUCT_NAME) would like to use your microphone (for videos)</string>
+<key>NSPhotoLibraryAddUsageDescription</key>
+<string>$(PRODUCT_NAME) would like to save photos to your photo library</string>
+```
+(source: https://sendbird.com/docs/chat/uikit/v3/ios-uikit/miscellaneous/get-attachment-permission; source: https://github.com/sendbird/sendbird-uikit-ios/blob/3.36.1/README.md#L150-L178)
+
 ## Pitfalls
 - Assign custom cell, input view, and component types once at launch, before the first screen that uses them is created.
 - Initialize once at launch; set `currentUser` before presenting any UIKit screen.

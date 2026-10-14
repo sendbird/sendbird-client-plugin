@@ -120,6 +120,36 @@ channel.sendFileMessage(params: FileMessageCreateParams(file: fileData)) { messa
 ```
 `FileMessageCreateParams` also takes `fileURL` (pre-uploaded), `fileName`, `thumbnailSizes`, `mimeType`. (source: `SendbirdChatSDK.swiftinterface` (4.39.10) line 2418 `FileMessageCreateParams`, `BaseChannel.sendFileMessage(params:completionHandler:)` line 513)
 
+### Upload progress and resending a failed file message
+Pass a `progressHandler` to `sendFileMessage(params:progressHandler:completionHandler:)` to show upload progress. It receives the request ID, the bytes sent since the last call, the total bytes sent so far, and the total bytes to send. The class method `BaseChannel.cancelUploadingFileMessage(requestId:completionHandler:)` cancels an upload that is still in progress.
+
+To retry a failed file message, check `isResendable(in:)` and call `resendFileMessage(_:binaryData:completionHandler:)` (or the overload with `progressHandler:`). Pass only a failed message. The API reference says that when the failed message already has a file URL, the SDK only resends the message command and ignores the data; when it has no file URL, the upload itself failed, and the SDK uploads `binaryData` first. With a `MessageCollection`, the final state arrives in `messageCollection(_:context:channel:updatedMessages:)`, where `context.sendingStatus` is `.succeeded` or `.failed` (see "Local caching and offline messages" below).
+
+```swift
+import Foundation
+import SendbirdChatSDK
+
+func sendPhoto(_ data: Data, in channel: GroupChannel, onProgress: @escaping (Double) -> Void) {
+    let params = FileMessageCreateParams(file: data)
+    params.fileName = "photo.jpg"
+    params.mimeType = "image/jpeg"
+    channel.sendFileMessage(params: params, progressHandler: { _, _, totalBytesSent, totalBytesExpectedToSend in
+        guard totalBytesExpectedToSend > 0 else { return }
+        onProgress(Double(totalBytesSent) / Double(totalBytesExpectedToSend))
+    }, completionHandler: { message, error in
+        // error == nil: sent. Otherwise `message` is the failed message to offer for retry.
+    })
+}
+
+func retry(_ failed: FileMessage, originalData: Data?, in channel: GroupChannel) {
+    guard failed.isResendable(in: channel) else { return }
+    channel.resendFileMessage(failed, binaryData: originalData) { message, error in
+        // error == nil: sent. Otherwise it is still failed.
+    }
+}
+```
+(source: https://sendbird.com/docs/chat/sdk/v4/ios/message/sending-a-message/track-file-upload-progress-using-a-handler; https://sendbird.com/docs/chat/sdk/v4/ios/ref/Classes/BaseChannel.html (`resendFileMessage(_:binaryData:completionHandler:)`: failed messages only, file URL vs. binary data); https://sendbird.com/docs/chat/sdk/v4/ios/local-caching/using-message-collection/message-collection; `SendbirdChatSDK.swiftinterface` (4.39.11): `extension BaseChannel` 482 — `sendFileMessage(params:progressHandler:completionHandler:)` 517, `resendFileMessage(_:binaryData:completionHandler:)` 528, `resendFileMessage(_:binaryData:progressHandler:completionHandler:)` 532, `cancelUploadingFileMessage(requestId:completionHandler:)` 539 (a class method); `extension BaseMessage` 934 — `isResendable(in:)` 941 (the no-argument `isResendable()` at 939 is deprecated); `MultiProgressHandler` 3604)
+
 ### Send a file from an app extension (Share Extension)
 The API reference says that an app extension that uploads a file message must call `SendbirdChat.setSharedContainerIdentifier(_:)`, which sets the `sharedContainerIdentifier` of the `URLSessionConfiguration` the SDK uses for its background session. Apple's `sharedContainerIdentifier` documentation says the value must identify a container shared between the app extension and its containing app.
 
@@ -472,7 +502,7 @@ extension MyController: GroupChannelDelegate {
 - Session tokens/access tokens are secrets — never hard-code or log them.
 - `PollCreateParams` has no anonymous-vote setting in the SDK. The iOS "Create a poll" guide still lists an `isAnonymous` parameter, but `PollCreateParams` in 4.39.11 has only `title`, `data`, `optionTexts`, `allowUserSuggestion`, `allowMultipleVotes`, and `closeAt`, and its API reference page has no such property either. Code that sets `isAnonymous` does not compile. (source: https://sendbird.com/docs/chat/sdk/v4/ios/ref/Classes/PollCreateParams.html) (source: SendbirdChatSDK 4.39.11 `.swiftinterface` lines 5299–5305) (source: https://sendbird.com/docs/chat/sdk/v4/ios/message/managing-polls/create-a-poll)
 - `BaseMessage.sender` is `Sender?`. Unwrap it (`guard let sender = message.sender`) instead of force-unwrapping, and give the row a fallback when it is `nil`. (source: https://sendbird.com/docs/chat/sdk/v4/ios/ref/Classes/BaseMessage.html) (source: SendbirdChatSDK 4.39.11 `.swiftinterface` line 1005)
-- Every `GroupChannelCollection` / `MessageCollection` and every `addChannelDelegate` call must be paired with `dispose()` / `removeChannelDelegate(forIdentifier:)` when the owning screen is dismissed, or the SDK keeps delivering events to a dead view controller.
+- Every `GroupChannelCollection` / `MessageCollection` and every `addChannelDelegate` call must be paired with `dispose()` / `removeChannelDelegate(forIdentifier:)` when the owning screen is dismissed, or the SDK keeps delivering events to a dead view controller. In SwiftUI, "dismissed" is not `.onDisappear`: that also runs when a pushed screen covers the list; see `knowledge/curated/ios/hosts/swiftui.md` "Releasing a collection when its screen goes away".
 
 ## Related
 - Getting started: https://sendbird.com/docs/chat/sdk/v4/ios/getting-started/send-first-message

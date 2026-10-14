@@ -28,6 +28,16 @@ Do not hand the session to the sign-in object through a `weak` property assigned
 
 (source: templates/ios/swiftui/uikit and templates/ios/swiftui/chat, build-verified with tools/templates/compile-check-ios.sh against the pinned and latest SPM packages on 2026-10-14)
 
+## Releasing a collection when its screen goes away
+
+Do not dispose a channel or message collection in `.onDisappear`. SwiftUI also calls `.onDisappear` on a list screen when a `NavigationLink` pushes another screen on top of it, so the list is torn down while the user is still in it. A list built from that collection then empties, the row that was tapped is gone, and SwiftUI pops the conversation it just pushed: tapping a channel lands back on an empty list.
+
+Keep the collection in the screen's `@StateObject` view model, create it once (guard against a second `.onAppear`), and dispose it in the view model's `deinit`. The view model is released when the screen leaves the view hierarchy for good, for example on sign-out, but not while a pushed conversation covers it. The same applies to a message collection owned by a conversation screen that pushes a detail screen.
+
+This happened in a generated SwiftUI app run on an iOS simulator on 2026-10-15: with the dispose call in the channel list's `.onDisappear`, every tap on a channel returned to an empty list; the same app with only that call removed opened the conversation, showed the other user's message, sent a reply, and received the next message live.
+
+(source: knowledge/curated/ios/products/chat.md — `GroupChannelCollection`, `MessageCollection`, `dispose()`)
+
 ## Keeping custom views after a screen disappears
 
 SendbirdSwiftUI resets customized view adaptors whenever a SendbirdSwiftUI view's `onDisappear` is called. `GlobalOptions.enableViewAdaptorAutoReset` (since 1.0.3, default `true`) controls this; set it to `false` before the SendbirdSwiftUI view appears to keep its customized views. In 1.2.2 each view's `onDisappear` checks the flag before it resets that view's adaptors.

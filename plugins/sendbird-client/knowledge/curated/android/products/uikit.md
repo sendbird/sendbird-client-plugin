@@ -345,6 +345,26 @@ FragmentProviders.channelList = ChannelListFragmentProvider { args ->
 ```
 (source: https://sendbird.com/docs/chat/uikit/v3/android-view/customizations/channel-list-customization/filter-channel-list) (source: https://github.com/sendbird/sendbird-uikit-android/blob/07ffe8efc97e2d71dedc466ad868df817e5f433e/uikit/src/main/java/com/sendbird/uikit/fragments/ChannelListFragment.java#L572) (source: https://github.com/sendbird/sendbird-uikit-android/blob/07ffe8efc97e2d71dedc466ad868df817e5f433e/uikit-samples/src/main/java/com/sendbird/uikit/samples/customization/channellist/ChannelItemFilteringSample.kt#L24)
 
+## Channel list: what a tap opens (View host)
+By default a tap on a channel row starts UIKit's `ChannelActivity` for that channel. A listener set with `ChannelListFragment.Builder.setOnItemClickListener(...)` replaces that: `onItemClicked` calls your listener and returns without starting the default screen. Register it through `FragmentProviders.channelList` so every channel list uses it.
+
+```kotlin
+import com.sendbird.uikit.fragments.ChannelListFragment
+import com.sendbird.uikit.interfaces.providers.ChannelListFragmentProvider
+import com.sendbird.uikit.providers.FragmentProviders
+
+// Once, in Application.onCreate():
+fun openChannelsInMyScreen(openChat: (channelUrl: String) -> Unit) {
+    FragmentProviders.channelList = ChannelListFragmentProvider { args ->
+        ChannelListFragment.Builder().withArguments(args)
+            .setUseHeader(true)
+            .setOnItemClickListener { _, _, channel -> openChat(channel.url) }
+            .build()
+    }
+}
+```
+(source: https://github.com/sendbird/sendbird-uikit-android/blob/07ffe8efc97e2d71dedc466ad868df817e5f433e/uikit/src/main/java/com/sendbird/uikit/fragments/ChannelListFragment.java#L286-L292 — `onItemClicked`; the default `startChannelActivity` at lines 178-186; `Builder.setOnItemClickListener` at line 546) (source: https://github.com/sendbird/sendbird-uikit-android/blob/07ffe8efc97e2d71dedc466ad868df817e5f433e/uikit/src/main/java/com/sendbird/uikit/providers/FragmentProviders.kt#L255-L257 — the default `channelList` provider) (source: https://sendbird.com/docs/chat/uikit/v3/android-view/customizations/global-customization/fragments)
+
 ## Header (View host)
 - Simple changes go through `ChannelFragment.Builder`: `setUseHeader(false)` removes the header, `setHeaderTitle(...)` fixes the title, `setUseHeaderLeftButton` / `setUseHeaderRightButton` turn the buttons on or off, `setHeaderLeftButtonIcon(resId, tint)` changes the icon, and `setOnHeaderLeftButtonClickListener { }` replaces the default action (finishing the Activity). `ChannelListFragment.Builder` has the same set. (source: https://github.com/sendbird/sendbird-uikit-android/blob/07ffe8efc97e2d71dedc466ad868df817e5f433e/uikit/src/main/java/com/sendbird/uikit/fragments/ChannelFragment.java#L1241) (source: https://github.com/sendbird/sendbird-uikit-android/blob/07ffe8efc97e2d71dedc466ad868df817e5f433e/uikit/src/main/java/com/sendbird/uikit/fragments/ChannelListFragment.java#L389)
 - A fully custom header is a `ChannelHeaderComponent` subclass set with `ChannelModule.setHeaderComponent(...)`. Fill it from `notifyChannelChanged(channel)` and `notifyHeaderDescriptionChanged(description)` (the description carries the typing indicator text). Call `onLeftButtonClicked(view)` from your back button to run the listener the fragment bound, which finishes the Activity by default.
@@ -414,6 +434,90 @@ ModuleProviders.channel = ChannelModuleProvider { context, _ ->
 The header applies the appearance and then sets a fixed text size (`HeaderView.kt` lines 118-119), so `android:textSize` in your appearance has no effect in 3.26.3. For another size or font, replace the header with a custom `ChannelHeaderComponent` as shown above. (source: https://sendbird.com/docs/chat/uikit/v3/android-view/customizations/resource-customization/style-resources) (source: https://github.com/sendbird/sendbird-uikit-android/blob/main/uikit/src/main/res/values/styles.xml#L250-L255) (source: https://github.com/sendbird/sendbird-uikit-android/blob/main/uikit/src/main/res/values/styles_dark.xml#L362-L367) (source: https://github.com/sendbird/sendbird-uikit-android/blob/main/uikit/src/main/java/com/sendbird/uikit/internal/ui/components/HeaderView.kt#L97-L119) (source: https://github.com/sendbird/sendbird-uikit-android/blob/main/uikit/src/main/java/com/sendbird/uikit/fragments/ChannelFragment.java#L248-L256) (community context: https://github.com/sendbird/sendbird-uikit-android/discussions/29)
 
 **Long channel names are cut to one line.** This is the layout, not a bug: the channel list row title is `singleLine` with `ellipsize="end"` (`sb_view_channel_list_item.xml` line 32-40), and the channel header title is `maxLines="1"` with `ellipsize="end"` (`sb_view_header.xml` line 54-59). To show more of the name, render the row with a custom channel item (see "Channel list" above) or the header with a custom `ChannelHeaderComponent`. (source: https://github.com/sendbird/sendbird-uikit-android/blob/main/uikit/src/main/res/layout/sb_view_channel_list_item.xml#L32-L40) (source: https://github.com/sendbird/sendbird-uikit-android/blob/main/uikit/src/main/res/layout/sb_view_header.xml#L54-L59) (community context: https://github.com/sendbird/sendbird-uikit-android/discussions/28)
+
+## Message menu and message taps (View host)
+A long press on a message opens the message menu, which `makeMessageContextMenu(message)` builds as a list of `DialogListItem`s; each item is identified by its string resource key, such as `R.string.sb_text_channel_anchor_edit`. To change the menu, subclass `ChannelFragment`, filter or add items in `makeMessageContextMenu`, and handle your own items in `onMessageContextMenuItemClicked` (return `true` when you handled it). Install the subclass with `ChannelFragment.Builder(channelUrl).setCustomFragment(...)`, usually inside `FragmentProviders.channel`.
+
+To replace a tap or long press completely, set `setOnMessageClickListener` or `setOnMessageLongClickListener` on the builder. When a long-click listener is set, UIKit calls it and does not open the menu; a click listener likewise replaces the default action, such as opening a photo. The builder also has listeners for profile, mention, quote-reply, thread-info, and reaction taps. Click events fire only for UIKit's default message views, not for views you replaced.
+
+```kotlin
+import android.view.View
+import com.sendbird.android.message.BaseMessage
+import com.sendbird.uikit.R
+import com.sendbird.uikit.fragments.ChannelFragment
+import com.sendbird.uikit.interfaces.providers.ChannelFragmentProvider
+import com.sendbird.uikit.model.DialogListItem
+import com.sendbird.uikit.providers.FragmentProviders
+
+class NoEditChannelFragment : ChannelFragment() {
+    override fun makeMessageContextMenu(message: BaseMessage): MutableList<DialogListItem> =
+        super.makeMessageContextMenu(message).filterTo(mutableListOf()) {
+            it.key != R.string.sb_text_channel_anchor_edit
+        }
+
+    override fun onMessageContextMenuItemClicked(message: BaseMessage, view: View, position: Int, item: DialogListItem): Boolean {
+        return super.onMessageContextMenuItemClicked(message, view, position, item)
+    }
+}
+
+// Once, in Application.onCreate():
+fun useNoEditMenu() {
+    FragmentProviders.channel = ChannelFragmentProvider { channelUrl, args ->
+        ChannelFragment.Builder(channelUrl).withArguments(args)
+            .setCustomFragment(NoEditChannelFragment())
+            .setUseHeader(true)
+            .build()
+    }
+}
+```
+(source: https://sendbird.com/docs/chat/uikit/v3/android-view/customizations/chat-customization/message-context-menu) (source: https://sendbird.com/docs/chat/uikit/v3/android-view/customizations/chat-customization/message-click-events) (source: https://github.com/sendbird/sendbird-uikit-android/blob/07ffe8efc97e2d71dedc466ad868df817e5f433e/uikit/src/main/java/com/sendbird/uikit/fragments/BaseMessageListFragment.java#L329-L337 — a long-click listener skips the menu; click listener at lines 238-242) (source: https://github.com/sendbird/sendbird-uikit-android/blob/07ffe8efc97e2d71dedc466ad868df817e5f433e/uikit/src/main/java/com/sendbird/uikit/fragments/ChannelFragment.java#L778-L790 — the default items) (source: uikit 3.26.3 AAR, `javap` on `com.sendbird.uikit.fragments.ChannelFragment$Builder` — `setOnMessageClickListener`, `setOnMessageLongClickListener`; `com.sendbird.uikit.model.DialogListItem`)
+
+## Message threads (View host)
+Threads are off until you set the reply type. With `UIKitConfig.groupChannelConfig.replyType = ReplyType.THREAD`, the message menu shows "Reply in thread" and opens UIKit's thread screen (`MessageThreadActivity`). `threadReplySelectType` decides what a tap on a reply in the channel opens: `ThreadReplySelectType.THREAD` opens the thread, `PARENT` scrolls to the parent message. Threads are one level deep, and they work in group and supergroup channels only. To keep replies out of the main list, see "Thread replies show up in the main UIKit message list" in knowledge/curated/android/cross-cutting/troubleshooting.md.
+
+```kotlin
+import com.sendbird.uikit.consts.ReplyType
+import com.sendbird.uikit.consts.ThreadReplySelectType
+import com.sendbird.uikit.model.configurations.UIKitConfig
+
+// Once, in Application.onCreate(), after SendbirdUIKit.init(...):
+fun turnOnThreads() {
+    UIKitConfig.groupChannelConfig.replyType = ReplyType.THREAD
+    UIKitConfig.groupChannelConfig.threadReplySelectType = ThreadReplySelectType.THREAD
+}
+```
+The thread screen's header and input are `MessageThreadHeaderComponent` and `MessageThreadInputComponent` of `MessageThreadModule`; replace them through `ModuleProviders.messageThread`. (source: https://sendbird.com/docs/chat/uikit/v3/android-view/features/message-threading/threads) (source: uikit 3.26.3 AAR, `javap` on `com.sendbird.uikit.model.configurations.ChannelConfig` — `setReplyType`, `setThreadReplySelectType`) (source: https://github.com/sendbird/sendbird-uikit-android/blob/07ffe8efc97e2d71dedc466ad868df817e5f433e/uikit/src/main/java/com/sendbird/uikit/providers/ModuleProviders.kt#L205)
+
+## Channel settings and member list (View host)
+The settings screen lists `ChannelSettingsMenuComponent.Menu` items in the order of `ChannelSettingsMenuComponent.defaultMenuSet`: `MODERATIONS` (operators only), `NOTIFICATIONS`, `MEMBERS`, `SEARCH_IN_CHANNEL`, and `LEAVE_CHANNEL`. To remove, reorder, or add rows (since 3.16.0), give a new `ChannelSettingsMenuComponent` a list through `params.setMenuList(list, provider)` and set it on the module through `ModuleProviders.channelSettings`. A `CUSTOM` entry needs the provider, which returns the row's view; build it with `createMenuView(...)` and handle its clicks yourself. On the member list, `MemberListFragment.Builder.setUseHeaderRightButton(false)` hides the invite button.
+
+```kotlin
+import com.sendbird.uikit.fragments.MemberListFragment
+import com.sendbird.uikit.interfaces.providers.ChannelSettingsModuleProvider
+import com.sendbird.uikit.interfaces.providers.MemberListFragmentProvider
+import com.sendbird.uikit.modules.ChannelSettingsModule
+import com.sendbird.uikit.modules.components.ChannelSettingsMenuComponent
+import com.sendbird.uikit.providers.FragmentProviders
+import com.sendbird.uikit.providers.ModuleProviders
+
+// Once, in Application.onCreate():
+fun customizeSettingsScreens() {
+    ModuleProviders.channelSettings = ChannelSettingsModuleProvider { context, _ ->
+        ChannelSettingsModule(context).apply {
+            val menus = ChannelSettingsMenuComponent.defaultMenuSet.toMutableList().apply {
+                remove(ChannelSettingsMenuComponent.Menu.LEAVE_CHANNEL)
+            }
+            setChannelSettingsMenuComponent(ChannelSettingsMenuComponent().apply { params.setMenuList(menus, null) })
+        }
+    }
+    FragmentProviders.memberList = MemberListFragmentProvider { channelUrl, args ->
+        MemberListFragment.Builder(channelUrl).withArguments(args)
+            .setUseHeaderRightButton(false)
+            .build()
+    }
+}
+```
+(source: https://github.com/sendbird/sendbird-uikit-android/blob/07ffe8efc97e2d71dedc466ad868df817e5f433e/uikit/src/main/java/com/sendbird/uikit/modules/components/ChannelSettingsMenuComponent.java#L42-L87 — `Menu` and `defaultMenuSet`; moderation shown only to operators at line 206; `setMenuList` at line 357) (source: https://sendbird.com/docs/chat/uikit/v3/android-view/group-channel-screens/configure-group-channel-settings) (source: https://github.com/sendbird/sendbird-uikit-android/blob/07ffe8efc97e2d71dedc466ad868df817e5f433e/uikit-samples/src/main/java/com/sendbird/uikit/samples/customization/channelsettings/GroupChannelSettingSample.kt#L89-L103) (source: https://sendbird.com/docs/chat/uikit/v3/android-view/tutorial/customize-channel-settings) (source: uikit 3.26.3 AAR, `javap` on `com.sendbird.uikit.modules.ChannelSettingsModule` — `setChannelSettingsMenuComponent`; `ChannelSettingsMenuComponent$Params` — `setMenuList`; `MemberListFragment$Builder` — `setUseHeaderRightButton`)
 
 ## Theme + push (optional)
 - `SendbirdUIKit.setDefaultThemeMode(...)` for light/dark.

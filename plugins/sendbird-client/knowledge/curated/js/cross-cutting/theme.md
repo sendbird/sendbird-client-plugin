@@ -65,6 +65,42 @@ function ChatRoot() {
 
 (source: https://sendbird.com/docs/chat/uikit/v3/react/theme-and-style-resources/localization-resources/text ; https://sendbird.com/docs/chat/uikit/v3/react/theme-and-style-resources/color-resources ; github.com/sendbird/sendbird-uikit-react v3.19.1 src/lib/hooks/useTheme.ts:116-126 — `colorSet` merged over the defaults and applied with `css-vars-ponyfill` when the object changes ; src/lib/utils/colorMapper.ts:7-26 (descriptive aliases) ; src/lib/Sendbird/context/SendbirdProvider.tsx:96,413-420 (`stringSet` merged over `getStringSet('en')`) ; @sendbird/uikit-react@3.19.1 types/lib/Sendbird/types.d.ts:147-149 `colorSet`, `stringSet`, `dateLocale` ; types/ui/Label/stringSet.d.ts:8,132-133)
 
+### Restyle one component (message input)
+`colorSet` changes CSS variables that every component reads, so it can't color the input alone. UIKit's styles use BEM class names, and the docs say components can be customized by overriding the applicable rules in UIKit's stylesheet. The input's text area is `.sendbird-message-input--textarea` inside `.sendbird-message-input`, and its theme colors are applied under the theme class, `.sendbird-theme--light` or `.sendbird-theme--dark`. Repeat that full selector in your own CSS and load it after `@sendbird/uikit-react/dist/index.css`, so your rule has the same specificity and comes later.
+
+<!-- compile: skip -->
+```css
+.sendbird-theme--light .sendbird-message-input .sendbird-message-input--textarea {
+  background-color: #f4f1ff;
+  border-color: #c9bdf5;
+}
+```
+(source: https://sendbird.com/docs/chat/uikit/v3/react/theme-and-style-resources/color-resources) (source: https://github.com/sendbird/sendbird-uikit-react/blob/v3.19.1/src/ui/MessageInput/index.scss#L3-L30 ; https://github.com/sendbird/sendbird-uikit-react/blob/v3.19.1/src/styles/_color-themes.scss#L166-L178 — `.sendbird-theme--#{$theme} &`)
+
+### Date and time formats
+`dateLocale` picks the language, and the `DATE_FORMAT__*` keys of `stringSet` pick the patterns. UIKit formats these dates with `date-fns` `format(date, pattern, { locale: dateLocale })`, so a pattern uses `date-fns` tokens. The defaults in 3.19.1 include `DATE_FORMAT__MESSAGE_CREATED_AT: 'p'` (the time under a message), `DATE_FORMAT__MESSAGE_LIST__DATE_SEPARATOR: 'MMMM dd, yyyy'`, and `DATE_FORMAT__LAST_MESSAGE_CREATED_AT__TODAY: 'p'` (the channel list).
+
+```tsx
+import type { ReactNode } from 'react';
+import { SendbirdProvider } from '@sendbird/uikit-react/SendbirdProvider';
+import { ko } from 'date-fns/locale';
+import '@sendbird/uikit-react/dist/index.css';
+
+const dateStrings = {
+  DATE_FORMAT__MESSAGE_CREATED_AT: 'HH:mm',
+  DATE_FORMAT__MESSAGE_LIST__DATE_SEPARATOR: 'yyyy. M. d. (EEE)',
+};
+
+function KoreanDatesApp({ children }: { children: ReactNode }) {
+  return (
+    <SendbirdProvider appId={APP_ID} userId={USER_ID} dateLocale={ko} stringSet={dateStrings}>
+      {children}
+    </SendbirdProvider>
+  );
+}
+```
+(source: https://sendbird.com/docs/chat/uikit/v3/react/theme-and-style-resources/localization-resources/date) (source: https://github.com/sendbird/sendbird-uikit-react/blob/v3.19.1/src/ui/Label/stringSet.ts#L223-L231 — default patterns ; https://github.com/sendbird/sendbird-uikit-react/blob/v3.19.1/src/ui/MessageStatus/index.tsx#L100 — `format(..., { locale: dateLocale })` ; @sendbird/uikit-react 3.19.1 types/ui/Label/stringSet.d.ts:201-208)
+
 ## React Native (`@sendbird/uikit-react-native`)
 
 ### Light / dark and custom colors
@@ -136,6 +172,33 @@ const StringSetKo = createBaseStringSet({
 `dateLocale` is what localizes UIKit's dates. In the set that `createBaseStringSet` builds, the date separator (`GROUP_CHANNEL.LIST_DATE_SEPARATOR`), the message time (`GROUP_CHANNEL.MESSAGE_BUBBLE_TIME`), the channel list time (`GROUP_CHANNEL_LIST.CHANNEL_PREVIEW_TITLE_CAPTION`), and the matching open channel and thread entries format with `locale ?? dateLocale`. UIKit calls them without a `locale` argument, so they use your `dateLocale`. `StringSetEn` is `createBaseStringSet({ dateLocale: enUS })`, so the default set formats dates with the `enUS` locale.
 
 (source: https://github.com/sendbird/sendbird-uikit-react-native/blob/v3.12.10/packages/uikit-react-native/src/localization/createBaseStringSet.ts#L34-L43 lines 119, 130, 225 ; https://github.com/sendbird/sendbird-uikit-react-native/blob/v3.12.10/packages/uikit-react-native/src/localization/StringSet.en.ts#L5 ; packages/uikit-react-native/src/components/GroupChannelMessageRenderer/GroupChannelMessageDateSeparator.tsx:27 ; src/components/GroupChannelMessageRenderer/index.tsx:179 ; src/containers/GroupChannelPreviewContainer.tsx:100) (community context: https://github.com/sendbird/sendbird-uikit-react-native/issues/22 — a 2022 report in which a maintainer proposed this fallback)
+
+### Status bar
+UIKit for React Native does not set the status bar's color or style on its screens; the only `StatusBar` it renders is in the full-screen file viewer, with `barStyle={'light-content'}`. Set the status bar yourself with React Native's `StatusBar` component, for example to match your theme. What UIKit does read is `styles.statusBarTranslucent` on `SendbirdUIKitContainer` (default `true`): when it is `true`, UIKit headers add the top safe-area inset so they start below a translucent status bar. Set it to `false` if your status bar is not translucent and the header shows extra space at the top.
+
+```tsx
+import type { ReactNode } from 'react';
+import { StatusBar } from 'react-native';
+import { SendbirdUIKitContainer } from '@sendbird/uikit-react-native';
+import { createMMKV } from 'react-native-mmkv';
+
+const mmkv = createMMKV();
+
+function ChatRoot({ children }: { children: ReactNode }) {
+  return (
+    <SendbirdUIKitContainer
+      appId={APP_ID}
+      chatOptions={{ localCacheStorage: mmkv }}
+      platformServices={platformServices}
+      styles={{ statusBarTranslucent: false }}
+    >
+      <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
+      {children}
+    </SendbirdUIKitContainer>
+  );
+}
+```
+(source: https://github.com/sendbird/sendbird-uikit-react-native/blob/v3.12.9/packages/uikit-react-native/src/containers/SendbirdUIKitContainer.tsx#L254-L257 — `statusBarTranslucent ?? true` ; https://github.com/sendbird/sendbird-uikit-react-native/blob/v3.12.9/packages/uikit-react-native-foundation/src/styles/HeaderStyleContext.tsx#L39 — `topInset: statusBarTranslucent ? top : 0` ; https://github.com/sendbird/sendbird-uikit-react-native/blob/v3.12.9/packages/uikit-react-native/src/components/FileViewer/index.tsx#L113 ; @sendbird/uikit-react-native 3.12.9 lib/typescript/src/containers/SendbirdUIKitContainer.d.ts:55-61 ; https://reactnative.dev/docs/statusbar)
 
 ## Pitfalls
 - React: import the UIKit CSS (`@sendbird/uikit-react/dist/index.css`) or theming has nothing to style.

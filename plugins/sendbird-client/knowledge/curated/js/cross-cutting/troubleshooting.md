@@ -98,6 +98,20 @@
 - **Fix:** Turn on chat history for group channels in the dashboard's channel settings. The change applies only to users who join after it is turned on. Earlier joins are not backfilled.
 - **Cases:** https://community.sendbird.com/t/error-calling-get-message-by-id-for-message-sent-before-user-joins-a-group-channel/9451, https://community.sendbird.com/t/getting-first-message-of-channel/9507, https://community.sendbird.com/t/chat-history-when-joining-private-group-channel/2237
 
+### Messages look sent but are gone after leaving and reopening the channel
+
+- **Cause:** The channel is ephemeral. The channel overview says messages sent in an ephemeral group channel are not saved in Sendbird's database, so they can't be loaded again.
+- **Fix:** Leave `isEphemeral` unset or `false` in the create params of channels whose history you need, and check `channel.isEphemeral` on existing ones. (source: https://sendbird.com/docs/chat/sdk/v4/javascript/channel/overview-channel) (source: @sendbird/chat 4.22.13 lib/__definition.d.ts:5557 — `GroupChannelCreateParams.isEphemeral` ; :189 — `BaseChannel.isEphemeral`)
+- **Cases:** https://community.sendbird.com/t/message-appears-to-get-deleted-right-after-sending-it/1902 (an iOS app; the cause is the channel type, not the platform)
+
+### Thread replies also show up in the main message list
+
+- **Cause — Web:** When UIKit's reply type is anything other than `NONE`, `GroupChannel` loads its list with the Chat SDK's `ReplyType.ONLY_REPLY_TO_CHANNEL`, so replies that were also sent to the channel are listed. (source: https://github.com/sendbird/sendbird-uikit-react/blob/v3.19.1/src/modules/GroupChannel/context/GroupChannelProvider.tsx#L181-L184)
+- **Fix — Web:** Keep `replyType="THREAD"` for the thread UI and pass `messageListQueryParams={{ replyType: ReplyType.NONE }}` to `GroupChannel`. The provider spreads your `messageListQueryParams` last when it creates the message collection, so your `replyType` wins. (source: https://github.com/sendbird/sendbird-uikit-react/blob/v3.19.1/src/modules/GroupChannel/context/GroupChannelProvider.tsx#L478-L486) (source: @sendbird/uikit-react 3.19.1 types/modules/GroupChannel/context/types.d.ts:65)
+- **Fix — React Native:** Pass `messageListQueryParams={{ replyType: ReplyType.NONE }}` to the group channel fragment. The fragment builds the collection's `MessageFilter` from those params. (source: https://github.com/sendbird/sendbird-uikit-react-native/blob/v3.12.9/packages/uikit-react-native/src/fragments/createGroupChannelFragment.tsx#L363-L377) (source: https://github.com/sendbird/sendbird-uikit-react-native/blob/v3.12.9/packages/uikit-react-native/src/domain/groupChannel/types.ts#L58-L65)
+- `ReplyType` comes from `@sendbird/chat/message`. (source: @sendbird/chat 4.22.13 lib/__definition.d.ts:2647, 4077-4081)
+- **Cases:** https://github.com/sendbird/sendbird-uikit-ios/discussions/116 (the same symptom in UIKit for iOS)
+
 ### Filtering messages by custom type does nothing
 
 - **Cause:** The parameter is named `customTypesFilter`. A `customTypes` key is not part of the message list params, so it is silently ignored. (source: @sendbird/chat 4.22.13 lib/__definition.d.ts:2629-2638, 2712-2727)
@@ -127,6 +141,16 @@
 - **Cause:** `sendFileMessage` does not report progress. Early v4 releases had no progress API at all, which is what the case below describes.
 - **Fix:** In 4.22.13, upload first with `channel.uploadFile({ file, progressHandler })`. The `progressHandler` receives `(requestId, progress, total)`. Then send the message with the returned `url` as `fileUrl`. (source: @sendbird/chat 4.22.13 lib/__definition.d.ts:516, 1794, 1824-1838, 5173 ; source: https://sendbird.com/docs/chat/sdk/v4/javascript/message/sending-a-message/track-file-upload-progress-using-a-handler)
 - **Cases:** https://community.sendbird.com/t/getting-upload-progress/5127
+
+---
+
+## Push
+
+### React Native on iOS: every push notification arrives twice
+
+- **Cause:** Sendbird sends one push per registered APNs credential, so two certificates for the same bundle ID produce two notifications. The credential lives in the dashboard, so the cause is the same whether the app is native iOS or React Native.
+- **Fix:** Keep one APNs credential per bundle ID in the dashboard. (source: knowledge/curated/ios/cross-cutting/troubleshooting.md — Every push notification arrives twice)
+- **Cases:** https://community.sendbird.com/t/chat-push-notification-is-coming-twice-in-ios/1913, https://community.sendbird.com/t/duplicate-push-notifications/4696 (native iOS apps)
 
 ---
 

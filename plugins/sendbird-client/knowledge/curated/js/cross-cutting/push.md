@@ -8,7 +8,7 @@
 
 ## Overview
 
-On React Native (and hybrid) the device gets an FCM (Android) or APNs (iOS) token from the native layer; register it with Sendbird after the user connects. Browser web push is a separate service-worker flow.
+On React Native (and hybrid) the device gets an FCM (Android) or APNs (iOS) token from the native layer; register it with Sendbird after the user connects. In a browser, the Chat SDK does not support push notifications: the push overview says only a hybrid app built with React Native can handle push with the Chat SDK, and that web apps delivered through browsers such as Chrome and Edge can build their own notifications from Sendbird's webhooks instead. (source: https://sendbird.com/docs/chat/sdk/v4/javascript/push-notifications/overview-push-notifications)
 
 ## Register / unregister a push token
 
@@ -38,6 +38,28 @@ await sb.disconnect();
 
 (source: https://sendbird.com/docs/chat/sdk/v4/javascript/application/authenticating-a-user/authentication — Disconnect from the Sendbird server, reviewed 2026-10-11; `@sendbird/chat` 4.22.13 `lib/__definition.d.ts`: `SendbirdChat.disconnect()` 4388, `unregisterFCMPushTokenForCurrentUser(token)` 4508, `unregisterAPNSPushTokenForCurrentUser(token)` 4528 — verified 2026-10-11; also source: https://sendbird.com/docs/chat/sdk/v4/javascript/ref/classes/_sendbird_chat.default.html)
 
+## One device or many (`unique`)
+
+The register methods take `PushTokenRegistrationDetails` as their second argument. Its `unique` field decides what happens to the user's other tokens: with `unique: true`, all tokens previously registered for the user are removed and only this one is kept, so only the most recently registered device gets push; with `unique: false`, the token is added alongside the others. If only the last device a user signed in on gets push, check for `unique: true`, and turn on multi-device support in the dashboard.
+
+```ts
+await sb.registerFCMPushTokenForCurrentUser(fcmToken, { unique: false });
+await sb.registerAPNSPushTokenForCurrentUser(apnsToken, { unique: false });
+```
+
+(source: https://sendbird.com/docs/chat/sdk/v4/javascript/ref/classes/_sendbird_chat.default.html) (source: @sendbird/chat 4.22.13 lib/__definition.d.ts:3952-3970 — `PushTokenRegistrationDetails.unique` ; lib/__definition.d.ts:4499-4502, 4519-4522)
+
+## Delivery receipts for messages that arrived as push
+
+A message delivered to an online member is marked as delivered automatically. For a member who was offline, the docs say to call `markAsDelivered` when the member brings the app to the foreground or comes back online: `sb.groupChannel.markAsDelivered(channelUrl)` does it by channel URL, and `channel.markAsDelivered()` on a channel you already have. Online members then get `onUndeliveredMemberStatusUpdated` on their group channel handler. `sb.markPushNotificationAsDelivered(pushData)` is a different call: its doc comment says it is for push delivery tracking only and does not mark the message as delivered.
+
+```ts
+// For example in a React Native AppState 'active' listener, after connect has resolved:
+await sb.groupChannel.markAsDelivered(CHANNEL_URL);
+```
+
+(source: https://sendbird.com/docs/chat/sdk/v4/javascript/message/marking-messages-as-delivered-in-a-group-channel/mark-messages-as-delivered) (source: https://sendbird.com/docs/chat/sdk/v4/javascript/ref/classes/_sendbird_chat.default.html) (source: @sendbird/chat 4.22.13 lib/__definition.d.ts:6338-6342 — `GroupChannelModule.markAsDelivered(channelUrl)` ; lib/__definition.d.ts:2134 — `GroupChannel.markAsDelivered()` ; lib/__definition.d.ts:4533-4540 — `markPushNotificationAsDelivered`)
+
 ## Setup checklist
 
 - React Native: obtain the FCM/APNs token via the native push module, then register it after connect.
@@ -63,12 +85,26 @@ function channelUrlFromPushData(data?: { [key: string]: string | object }) {
 
 (source: github.com/sendbird/sendbird-uikit-react-native v3.12.9 sample/src/libs/notification.ts, sample/ios/SendbirdUIKitSample/AppDelegate.swift ; @sendbird/uikit-utils@3.12.9 lib/typescript/src/sendbird/message.d.ts:19-22)
 
+## No push while the app is open (React Native)
+
+Sendbird sends a push only to a device that is disconnected. The delivery table in the push setup docs says a single-device user gets the notification "when disconnected from the server and thus offline"; with multi-device support, the dashboard setting decides whether all devices or at least one must be offline. A React Native app in the foreground has called `sb.setForegroundState()` and is connected, so it gets no push. Show in-app alerts from the `onMessageReceived` callback of a `GroupChannelHandler` instead, and keep push for the background.
+
+```ts
+import { GroupChannelHandler } from '@sendbird/chat/groupChannel';
+
+sb.groupChannel.addGroupChannelHandler('in-app-alerts', new GroupChannelHandler({
+  onMessageReceived: (_channel, message) => { /* show an in-app banner for message */ },
+}));
+```
+
+(source: https://sendbird.com/docs/chat/sdk/v4/javascript/ref/classes/_sendbird_chat_groupChannel.GroupChannelModule.html) (source: https://sendbird.com/docs/chat/sdk/v4/javascript/ref/classes/_sendbird_chat_groupChannel.GroupChannelHandler.html) (source: https://sendbird.com/docs/chat/sdk/v4/ios/push-notifications/configuring-preferences/register-push-notification-credentials — Step 6 table; the delivery rule is server-side) (source: @sendbird/chat 4.22.13 lib/__definition.d.ts:5426 — `onMessageReceived` ; knowledge/curated/js/hosts/react-native.md — App lifecycle)
+
 ## Pitfalls
 
 - Register after the user connects; tokens are per-user.
 - On logout, unregister this device's token before `sb.disconnect()`; a disconnected user still receives push.
 - Use the FCM methods for Android tokens and the APNS methods for iOS tokens — don't mix.
-- Browser web push (service worker) is a separate setup, not these token methods.
+- The Chat SDK has no browser push; for web notifications use webhooks (see Overview).
 
 ## Related
 

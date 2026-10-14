@@ -82,6 +82,26 @@ SendbirdUIKit.setEdgeToEdgeConfig(
 (source: https://github.com/sendbird/sendbird-uikit-android/blob/main/uikit/src/main/java/com/sendbird/uikit/SendbirdUIKit.java#L832) (source: https://github.com/sendbird/sendbird-uikit-android/blob/main/uikit/src/main/java/com/sendbird/uikit/model/EdgeToEdgeConfig.kt#L10) (source: https://github.com/sendbird/sendbird-uikit-android/blob/main/uikit/src/main/java/com/sendbird/uikit/internal/extensions/ViewExtensions.kt#L158-L208) (source: https://github.com/sendbird/sendbird-uikit-android/blob/main/uikit/src/main/java/com/sendbird/uikit/activities/ChannelListActivity.java#L114-L122) (source: https://github.com/sendbird/sendbird-uikit-android/blob/main/uikit/src/main/java/com/sendbird/uikit/SendbirdUIKit.java#L111) (source: https://github.com/sendbird/sendbird-uikit-android/blob/main/uikit/src/main/res/values/styles.xml#L3-L7) (source: https://github.com/sendbird/sendbird-uikit-android/blob/main/uikit/src/main/res/values/styles_dark.xml#L3-L7) (source: https://github.com/sendbird/sendbird-uikit-android/blob/main/CHANGELOG.md — v3.23.0) (source: https://developer.android.com/about/versions/15/behavior-changes-15#edge-to-edge) (source: https://android.googlesource.com/platform/frameworks/base/+/refs/heads/main/core/res/res/values/themes_material.xml)
 - **Cases:** https://github.com/sendbird/sendbird-uikit-android/discussions/27 (staff answer written before UIKit 3.23.0)
 
+## Message input colors (View host)
+Each screen (module) points each of its components to a style, and a component style is the smallest unit you can restyle. The channel screen's `Module.Channel` points `sb_component_channel_message_input` to `Component.ChannelMessageInput`, which holds the input's attributes, such as `sb_message_input_background`, `sb_message_input_text_background`, `sb_message_input_text_appearance`, and the button icons and tints. To change only the input, create a style that inherits `Component.ChannelMessageInput`, then redefine `Module.Channel` in your app's `styles.xml` with all four of its component items, pointing the input item at your style. The dark theme uses `Module.Dark.Channel` and `Component.Dark.ChannelMessageInput` the same way.
+
+<!-- compile: skip -->
+```xml
+<style name="Component.ChannelMessageInput.Brand" parent="Component.ChannelMessageInput">
+    <item name="sb_message_input_background">@color/brand_input_background</item>
+</style>
+<style name="Module.Channel">
+    <item name="sb_component_header">@style/Component.Header.Channel</item>
+    <item name="sb_component_list">@style/Component.List.Channel</item>
+    <item name="sb_component_channel_message_input">@style/Component.ChannelMessageInput.Brand</item>
+    <item name="sb_component_status">@style/Component.Status.Channel</item>
+</style>
+```
+(source: https://sendbird.com/docs/chat/uikit/v3/android-view/customizations/resource-customization/style-resources) (source: https://sendbird.com/docs/chat/uikit/v3/android-view/tutorial/customize-channel-settings — redefines `Module.ChannelSettings` the same way) (source: https://github.com/sendbird/sendbird-uikit-android/blob/07ffe8efc97e2d71dedc466ad868df817e5f433e/uikit/src/main/res/values/styles.xml#L65-L70 — `Module.Channel`; `Component.ChannelMessageInput` at lines 286-300) (source: https://github.com/sendbird/sendbird-uikit-android/blob/07ffe8efc97e2d71dedc466ad868df817e5f433e/uikit/src/main/res/values/styles_dark.xml#L66-L71)
+
+## Dates and times (View host)
+UIKit formats message times and date separators with the platform's `android.text.format.DateUtils.formatDateTime(...)` and date flags, not with a format pattern. The device's locale therefore decides the language, such as Korean month names, and the order of the parts, and UIKit's public API has no setter for a date or time pattern. The one word UIKit supplies itself is "Yesterday", the string resource `sb_text_yesterday`. To show a different format, draw the time yourself in a custom message view (see "Custom message views, including file messages" in knowledge/curated/android/products/uikit.md). (source: https://github.com/sendbird/sendbird-uikit-android/blob/07ffe8efc97e2d71dedc466ad868df817e5f433e/uikit/src/main/java/com/sendbird/uikit/utils/DateUtils.java#L25-L92) (source: uikit 3.26.3 AAR, `javap` — the only date class is `com.sendbird.uikit.utils.DateUtils`, with no format setter) (source: https://developer.android.com/reference/android/text/format/DateUtils#formatDateTime(android.content.Context,%20long,%20int))
+
 ## Strings and localization (View and Compose hosts)
 UIKit's texts are Android string resources named `sb_text_*` (headers, input hint, menu items, error and "toast" messages). The View UIKit keeps them in `uikit/src/main/res/values/strings.xml`; the Compose UIKit gets them from `uikit-common-1.0.2.aar` (`res/values/values.xml`, 239 strings). Both ship only the default `values` folder (no translated folders), so:
 

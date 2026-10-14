@@ -85,6 +85,71 @@ The handler-based guide shows the same order (unregister in a completion, then `
 
 (source: sendbird-chat-4.36.5.aar `javap -public` com.sendbird.android.push.SendbirdPushHelper — `unregisterHandler(boolean, PushRequestCompleteHandler)`, `javap -v` shows `Deprecated: true` on `unregisterPushHandler` and the `unregisterAllTokens` parameter name; com.sendbird.android.handler.PushRequestCompleteHandler — `onComplete(boolean, String)`, `onError(SendbirdException)`; com.sendbird.android.SendbirdChat — `unregisterPushToken(String, CompletionHandler)`, `unregisterPushTokenAll(CompletionHandler)`, `disconnect(DisconnectHandler)`; source: https://sendbird.com/docs/chat/sdk/v4/android/application/authenticating-a-user/authentication; https://sendbird.com/docs/chat/sdk/v4/android/push-notifications/multi-device-support/set-up-push-notifications-for-fcm — reviewed 2026-10-11; also source: https://sendbird.com/docs/chat/sdk/v4/android/ref/-sendbird-chat/com.sendbird.android.push/-sendbird-push-helper/index.html; also source: https://sendbird.com/docs/chat/sdk/v4/android/ref/-sendbird-chat/com.sendbird.android/-sendbird-chat/index.html)
 
+## Open the channel from a notification tap
+
+Sendbird sends Android push as FCM data messages, so your handler builds the notification itself and decides what a tap opens. The `sendbird` entry of `remoteMessage.data` is a JSON string whose `channel.channel_url` names the channel. With UIKit, `ChannelListActivity.newRedirectToChannelIntent(context, channelUrl)` opens the channel list and moves straight into that channel. The UIKit sample also wraps a redirect intent for the channel in the notification's `PendingIntent`.
+
+## Delivery receipts for offline members
+
+A member who is offline gets the message only as a push. Call `SendbirdChat.markAsDelivered(remoteMessage.data)` in your handler's `onMessageReceived` so the sender sees it as delivered; online members are marked automatically. The docs require `SendbirdChat.init(...)` in `Application.onCreate()`, or the call may not work for a push that arrives while the app is terminated.
+
+```kotlin
+import android.app.PendingIntent
+import android.content.Context
+import com.google.firebase.messaging.RemoteMessage
+import com.sendbird.android.SendbirdChat
+import com.sendbird.android.push.SendbirdPushHandler
+import com.sendbird.uikit.activities.ChannelListActivity
+import org.json.JSONObject
+
+class TapToChannelPushHandler : SendbirdPushHandler() {
+    override val isUniquePushToken: Boolean
+        get() = false
+    override fun onNewToken(newToken: String?) { }
+    override fun onMessageReceived(context: Context, remoteMessage: RemoteMessage) {
+        val payload = remoteMessage.data["sendbird"] ?: return
+        SendbirdChat.markAsDelivered(remoteMessage.data)   // delivery receipt for this offline member
+        val channelUrl = JSONObject(payload).getJSONObject("channel").getString("channel_url")
+        val openChannel = ChannelListActivity.newRedirectToChannelIntent(context, channelUrl)
+        val tap = PendingIntent.getActivity(
+            context, channelUrl.hashCode(), openChannel,
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        )
+        // Build your notification with setContentIntent(tap), then show it.
+    }
+}
+```
+
+(source: https://sendbird.com/docs/chat/sdk/v4/android/push-notifications/multi-device-support/set-up-push-notifications-for-fcm — parsing `sendbird` and `channel_url`) (source: https://sendbird.com/docs/chat/sdk/v4/android/message/marking-messages-as-delivered-in-a-group-channel/mark-messages-as-delivered) (source: https://github.com/sendbird/sendbird-uikit-android/blob/07ffe8efc97e2d71dedc466ad868df817e5f433e/uikit-samples/src/main/java/com/sendbird/uikit/samples/common/fcm/MyFirebaseMessagingService.kt#L45-L67 — `markAsDelivered` and the tap intent at lines 103-117) (source: https://github.com/sendbird/sendbird-uikit-android/blob/07ffe8efc97e2d71dedc466ad868df817e5f433e/uikit/src/main/java/com/sendbird/uikit/activities/ChannelListActivity.java#L62) (source: sendbird-chat 4.36.5 AAR, `javap` on `com.sendbird.android.SendbirdChat` — `markAsDelivered(Map)`)
+
+## Android 13 and later: the notification permission
+
+On Android 13 (API level 33) and later, showing notifications needs the `POST_NOTIFICATIONS` runtime permission. Declare `<uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>` in the app's manifest and request it at runtime; until the user grants it, the notifications your handler builds are not shown. The Chat SDK and UIKit AARs do not declare it in their manifests, and UIKit's source never requests it; the UIKit sample app declares it in its own manifest and requests it in its home Activity.
+
+```kotlin
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.activity.ComponentActivity
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
+
+class HomeActivity : ComponentActivity() {
+    private val askNotifications = registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        // granted == false: explain in your UI why chat notifications are off
+    }
+
+    fun requestNotificationPermissionIfNeeded() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return
+        val permission = Manifest.permission.POST_NOTIFICATIONS
+        if (ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED) return
+        askNotifications.launch(permission)
+    }
+}
+```
+
+(source: https://developer.android.com/develop/ui/views/notifications/notification-permission) (source: https://github.com/sendbird/sendbird-uikit-android/blob/07ffe8efc97e2d71dedc466ad868df817e5f433e/uikit-samples/src/main/java/com/sendbird/uikit/samples/basic/BasicHomeActivity.kt#L49-L62 — the sample's runtime request; the declaration is in uikit-samples/src/main/AndroidManifest.xml line 8) (source: sendbird-chat 4.36.5 and uikit 3.26.3 AAR `AndroidManifest.xml` — no `POST_NOTIFICATIONS`)
+
 ## Read the payload and build the notification yourself
 
 In the docs and in the public UIKit sample, the app's own messaging service builds the notification from the FCM data message (see the `sendNotification(...)` step in the FCM guide). A Sendbird push carries a JSON string under the `sendbird` data key. The docs read the title from its `push_title` field, the body from its `message` field, and the channel to open from `channel.channel_url`; put those on the notification you build.
