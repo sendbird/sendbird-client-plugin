@@ -20,12 +20,25 @@ import SwiftUI
 import UIKit
 import SendBirdCalls
 
-private let callsSwiftUIAppId = ProcessInfo.processInfo.environment["SENDBIRD_APP_ID"] ?? "YOUR_SENDBIRD_APP_ID"
+// App ID: the SENDBIRD_APP_ID Info.plist key (set it to $(SENDBIRD_APP_ID) and define that build setting)
+// works however the app is launched. The environment variable exists only when Xcode or a test runner
+// launches the app, so it is a fallback for development.
+private let callsSwiftUIAppId: String = {
+    if let value = Bundle.main.object(forInfoDictionaryKey: "SENDBIRD_APP_ID") as? String,
+       !value.isEmpty, !value.hasPrefix("$(") {
+        return value
+    }
+    return ProcessInfo.processInfo.environment["SENDBIRD_APP_ID"] ?? "YOUR_SENDBIRD_APP_ID"
+}()
 
 /// Observable 1:1 call state for SwiftUI. Own it at the app root and call `configure()` at launch,
 /// so the device-wide delegate is registered before any incoming call arrives.
 @MainActor
 final class CallsSession: NSObject, ObservableObject {
+    /// The one session the app uses. Start it from the app's own sign-in code and show it from any view,
+    /// so sign-in never depends on which view or object happened to receive a reference.
+    static let shared = CallsSession()
+
     enum CallState { case idle, dialing, ringing, connected, ended }
 
     @Published private(set) var isAuthenticated = false

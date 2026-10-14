@@ -11,7 +11,7 @@ getting-started, verified 2026-06-09). **Build-verified**: compiles + links agai
 ## How to splice
 1. Add the SPM package `https://github.com/sendbird/sendbird-chat-sdk-ios` (product `SendbirdChatSDK`, from 4.0.0) — prefer SPM, do not add CocoaPods.
 2. Call `SendbirdChatBootstrap.initialize()` once in `application(_:didFinishLaunchingWithOptions:)`.
-3. Call `.connect(userId:)` after login. Read `SENDBIRD_APP_ID` from env — never hard-code; tokens are secrets.
+3. Call `.connect(userId:)` after login. Read the App ID from the `SENDBIRD_APP_ID` Info.plist key, filled by the `SENDBIRD_APP_ID` build setting (see `knowledge/curated/ios/setup.md` "App ID") — never hard-code; tokens are secrets.
 
 ## Variations (see knowledge/curated/ios/products/chat.md, all cited)
 - Authenticated: `SendbirdChat.connect(userId:authToken:) { ... }`.

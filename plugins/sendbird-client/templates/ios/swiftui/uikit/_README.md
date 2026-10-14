@@ -19,21 +19,32 @@ at the pinned and latest versions (`tools/templates/compile-check-ios.sh`, xcode
 1. Add the package via SPM: `https://github.com/sendbird/sendbird-swiftui-ios`, product `SendbirdSwiftUI`, from `1.2.2`
    (it pulls `SendbirdChatSDK` and `SendbirdUIMessageTemplate` itself). The docs state it currently supports iPhone only, not iPad.
 2. Copy `SendbirdChatUI.swift` into your app target.
-3. Own the session at the app root and start it from the view lifecycle:
+3. Use the one shared session. Show it from the app root, and start it from the app's own sign-in code
+   (source: knowledge/curated/ios/hosts/swiftui.md "Start the session from the app's sign-in"):
    ```swift
    @main
    struct MyApp: App {
-       @StateObject private var chatUI = SendbirdChatUISession()
        var body: some Scene {
            WindowGroup {
-               SendbirdChatRootView(session: chatUI, userId: "USER_ID")
-                   .task { chatUI.start(userId: "USER_ID") }
+               ContentView()
+                   .environmentObject(SendbirdChatUISession.shared)
            }
        }
    }
+
+   // In the app's sign-in success handler, whatever type or thread it runs on:
+   Task { @MainActor in SendbirdChatUISession.shared.start(userId: userId) }
+   // In its logout handler:
+   Task { @MainActor in SendbirdChatUISession.shared.signOut() }
    ```
-4. Provide the App ID via the `SENDBIRD_APP_ID` env/build setting (do not hard-code). Authenticated apps
-   pass `accessToken:`; it is a secret.
+   A chat view reads it with `@EnvironmentObject private var chatUI: SendbirdChatUISession` and shows
+   `SendbirdChatRootView(session: chatUI, userId: id)` once `chatUI.userId` is set. Do not pass the session to
+   the sign-in object through a `weak` property set in `.onAppear`: sign-in then works only on that one
+   instance, and on any other instance it silently does nothing.
+4. Provide the App ID through the Info.plist key `SENDBIRD_APP_ID` set to `$(SENDBIRD_APP_ID)`, and define the
+   `SENDBIRD_APP_ID` build setting (see `knowledge/curated/ios/setup.md` "App ID"). The template reads that key
+   and falls back to the environment variable, which exists only when Xcode launches the app. Do not hard-code.
+   Authenticated apps pass `accessToken:`; it is a secret.
 5. Add the photo library, camera, and microphone usage strings the README lists for attachments.
 
 ## Variations (see knowledge/curated/ios/hosts/swiftui.md, all cited)

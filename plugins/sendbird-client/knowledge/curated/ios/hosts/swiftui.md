@@ -20,6 +20,14 @@ Sendbird ships SwiftUI views for Chat in a separate package: add `https://github
 
 (source: sendbird/sendbird-swiftui-ios Package.swift (1.2.2); SendbirdSwiftUI.swiftinterface (1.2.2) line 897; https://sendbird.com/docs/chat/uikit/v3/swiftui/essentials/installation)
 
+## Start the session from the app's sign-in
+
+Connect from the code that runs when the user signs in, not from a view's lifecycle. Keep one session object for the whole app so the sign-in code and the views use the same instance; the SwiftUI templates give each session class a `static let shared` for this, and views read it as an environment object.
+
+Do not hand the session to the sign-in object through a `weak` property assigned in `.onAppear`. Sign-in then works only on that one instance. Called on any other instance, it does nothing and logs nothing, and the chat screen stays on its signed-out state. This happened in a generated app run on an iOS simulator on 2026-10-13.
+
+(source: templates/ios/swiftui/uikit and templates/ios/swiftui/chat, build-verified with tools/templates/compile-check-ios.sh against the pinned and latest SPM packages on 2026-10-14)
+
 ## Keeping custom views after a screen disappears
 
 SendbirdSwiftUI resets customized view adaptors whenever a SendbirdSwiftUI view's `onDisappear` is called. `GlobalOptions.enableViewAdaptorAutoReset` (since 1.0.3, default `true`) controls this; set it to `false` before the SendbirdSwiftUI view appears to keep its customized views. In 1.2.2 each view's `onDisappear` checks the flag before it resets that view's adaptors.

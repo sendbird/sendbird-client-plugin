@@ -30,6 +30,30 @@ When you upgrade one Sendbird package, check its `Package.swift` and raise the s
 
 (source: Package.swift of sendbird/sendbird-uikit-ios-spm@3.36.0 line 23, sendbird/sendbird-swiftui-ios@1.2.2 lines 19 and 23, sendbird/SendBird-Desk-iOS-Framework@v1.2.2 line 17; README Requirements of sendbird-uikit-ios-spm@3.36.0 and SendBird-Desk-iOS-Framework@v1.2.2)
 
+## App ID
+
+Read the App ID from the app's Info.plist, filled in from a build setting, so the value is there however the app is launched. An environment variable set in the Xcode scheme exists only when Xcode or a test runner launches the app. When the user opens the app from the home screen, `ProcessInfo.processInfo.environment` does not contain it, and the SDK initializes with the placeholder instead of the real App ID.
+
+1. Define the build setting `SENDBIRD_APP_ID` (in an `.xcconfig` file, the target's build settings, or XcodeGen `settings.base`).
+2. Add the Info.plist key `SENDBIRD_APP_ID` with the value `$(SENDBIRD_APP_ID)`. With XcodeGen, put it under the target's `info.properties`.
+3. Read it once at launch. The iOS templates do this and keep the environment variable only as a development fallback:
+
+```swift
+enum SendbirdAppConfig {
+    static let appId: String = {
+        if let value = Bundle.main.object(forInfoDictionaryKey: "SENDBIRD_APP_ID") as? String,
+           !value.isEmpty, !value.hasPrefix("$(") {
+            return value
+        }
+        return ProcessInfo.processInfo.environment["SENDBIRD_APP_ID"] ?? "YOUR_SENDBIRD_APP_ID"
+    }()
+}
+```
+
+If the project already supplies the App ID another way, such as an existing config or constants file, keep that way. The App ID identifies the application and is not a secret; access and session tokens are, so they never go into Info.plist or source.
+
+(source: templates/ios/uikit/chat/InitConnect.swift, build-verified with tools/templates/compile-check-ios.sh against the pinned and latest SPM packages on 2026-10-14. The environment-only failure was seen on 2026-10-13 when generated apps ran on an iOS simulator.)
+
 ## Common tasks
 - Initialize Chat: see knowledge/curated/ios/products/chat.md (build-verified).
 - Prebuilt UI: knowledge/curated/ios/products/uikit.md.
@@ -37,7 +61,7 @@ When you upgrade one Sendbird package, check its `Package.swift` and raise the s
 
 ## Pitfalls
 - Binary frameworks (Calls/Live/AI Agent Core) may need a device build (simulator slice arch limits).
-- App ID from config/env; tokens are secrets — never hard-code.
+- App ID from the Info.plist build setting (see "App ID" above); tokens are secrets — never hard-code.
 
 ## Related
 - Architecture: knowledge/curated/ios/architecture.md

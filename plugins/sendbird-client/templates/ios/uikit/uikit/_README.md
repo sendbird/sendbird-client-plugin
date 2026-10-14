@@ -11,7 +11,7 @@ Sendbird UIKit on iOS. From the public `sendbird-uikit-ios` README quickstart
 1. SPM package `https://github.com/sendbird/sendbird-uikit-ios-spm`, product `SendbirdUIKit` (prefer SPM, no CocoaPods).
 2. Call `SendbirdUIKitBootstrap.initialize()` once at launch.
 3. Call `setCurrentUser(userId:)` before presenting any screen, then `presentChannelList(from:)`.
-4. App ID from env — never hard-code; access token is a secret.
+4. App ID from the `SENDBIRD_APP_ID` Info.plist key, filled by the `SENDBIRD_APP_ID` build setting (see `knowledge/curated/ios/setup.md` "App ID") — never hard-code; access token is a secret.
 
 ## Variations (see knowledge/curated/ios/products/uikit.md, all cited)
 - Open a specific channel: `SBUGroupChannelViewController(channelURL:)`.
