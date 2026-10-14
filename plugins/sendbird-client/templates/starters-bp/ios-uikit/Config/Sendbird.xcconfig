@@ -1,0 +1,7 @@
+// BP02: the Sendbird App ID as a build setting. Info.plist carries it into the app bundle as
+// SendbirdAppId, so every launch reads the same value (from Xcode or from the home screen).
+// Put your value in Config/Sendbird.local.xcconfig (not committed):
+//   SENDBIRD_APP_ID = <your App ID>
+// or pass it on the command line: xcodebuild ... SENDBIRD_APP_ID=<your App ID>
+SENDBIRD_APP_ID =
+#include? "Sendbird.local.xcconfig"

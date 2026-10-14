@@ -110,6 +110,29 @@ import MessageContent, { MessageBody } from '@sendbird/uikit-react/ui/MessageCon
 
 `onBeforeDownloadFileMessage` (3.13.3+) runs before the default file bubble opens a file; resolve `false` to cancel. It only affects the default body, not a body you render yourself.
 
+Messages from users you blocked: the docs say that in a 1-to-N group channel the user may still receive messages from a blocked user, depending on the chat view. To hide or replace them, check `sender.isBlockedByMe` (a `Sender` field) in `renderMessage`:
+
+```tsx
+import { GroupChannel } from '@sendbird/uikit-react/GroupChannel';
+import { Message } from '@sendbird/uikit-react/GroupChannel/components/Message';
+
+<GroupChannel
+  channelUrl={CHANNEL_URL}
+  renderMessage={(props) => {
+    const { message } = props;
+    if ((message.isUserMessage() || message.isFileMessage()) && message.sender.isBlockedByMe) {
+      return (
+        <Message {...props}>
+          <div className="blocked-message">Message from a blocked user</div>
+        </Message>
+      );
+    }
+    return <Message {...props} />;
+  }}
+/>
+```
+(source: https://sendbird.com/docs/chat/sdk/v4/javascript/user/moderating-a-user/block-and-unblock-other-members ; @sendbird/chat@4.22.13 lib/__definition.d.ts:4927-4936 — `Sender.isBlockedByMe`)
+
 (source: https://github.com/sendbird/sendbird-uikit-react/blob/v3.19.1/src/modules/GroupChannel/components/Message/MessageView.tsx lines 323-331 and 479-498 — children first, then `renderMessage`; the separators are drawn outside both ; src/modules/GroupChannel/components/MessageList/index.tsx:67 — the default `renderMessage` is `<Message {...props} />` ; src/ui/FileMessageItemBody/index.tsx:43-55 ; @sendbird/uikit-react@3.19.1 types/modules/GroupChannel/components/GroupChannelUI/GroupChannelUIView.d.ts:37,41 `renderMessage`, `renderMessageContent` ; types/modules/GroupChannel/components/Message/MessageView.d.ts:11-51 `MessageProps` (`children` at 21, deprecated `renderMessage` at 46-50) ; types/types.d.ts:50 `RenderMessageParamsType` ; types/ui/MessageContent/index.d.ts:16,19-60 `MessageBody`, `MessageContentProps`, `MessageComponentRenderers` ; types/ui/MessageContent/MessageBody/index.d.ts:9-22 ; types/utils/index.d.ts:48 `CoreMessageType` ; types/modules/GroupChannel/context/types.d.ts:17-20,72 `onBeforeDownloadFileMessage` ; CHANGELOG.md v3.13.3)
 
 ### Message input: icons, attach button, disabling, file types
@@ -428,6 +451,7 @@ To change every UIKit header at once (for example to hand them to React Navigati
 - React: don't mix the drop-in `App` component with the granular `GroupChannelList`/`GroupChannel` components in the same tree — pick one composition style per screen.
 - React: the package's shipped root `types/index.d.ts` lags the actual v3 component tree (it still lists `ChannelList` / `withSendBird`, a v2-era surface). Verify prop names against the subpath's real TSX source, not that file, before citing them.
 - React: `renderFileUploadIcon` replaces the attach button and its file picker, not only the icon (see "Message input" above).
+- React: pass `render*` props as functions that return an element, `renderMessageInput={() => <MyInput />}`, not the component itself (`renderMessageInput={MyInput}`). `GroupChannelUIView` calls them as plain functions (`renderMessageInput?.()`) and returns early for its loading and error states, so the hooks inside a component passed directly run as part of UIKit's render on some renders only, and React reports a change in the order of hooks. Wrap the arrow function in `useCallback` if you want a stable reference. (source: https://github.com/sendbird/sendbird-uikit-react/blob/v3.19.1/src/modules/GroupChannel/components/GroupChannelUI/GroupChannelUIView.tsx#L117-L152 — early returns, then `renderChannelHeader?.(...)` and `renderMessageInput?.()`; prop types `() => React.ReactElement` at line 43)
 - React Native: `platformServices` is required; follow the quickstart's factory setup exactly.
 - React Native: changing `channelListQueryParams` on a mounted channel list fragment does not reload the list (see "Channel list" above).
 - App ID from env; access/session tokens are secrets — never hard-code.

@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # PreToolUse write/shell guard: block tool calls that contain a credential literal.
+# Claude Code sends Write/Edit/MultiEdit/Bash; Codex sends Bash and apply_patch.
 #
 # Thin plugin-side wrapper: reads the Claude Code hook JSON, extracts the body being
 # written or run, and delegates the actual pattern check to core/commands/check-credential.sh
@@ -17,6 +18,7 @@ case "$tool" in
   Edit)  body="$(jget .tool_input.new_string)"; path="$(jget .tool_input.file_path)";;
   MultiEdit) body="$(printf '%s' "$HOOK_JSON" | jq -r '[.tool_input.edits[]?.new_string // empty] | join("\n")' 2>/dev/null)"; path="$(jget .tool_input.file_path)";;
   Bash) body="$(jget .tool_input.command)"; path="shell command";;
+  apply_patch) body="$(patch_added)"; path="$(patch_paths | paste -sd, -)";;
   *) exit 0;;
 esac
 [ -n "$body" ] || exit 0

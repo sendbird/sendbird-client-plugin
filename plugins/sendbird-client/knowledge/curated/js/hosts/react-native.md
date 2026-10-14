@@ -47,6 +47,21 @@ const mmkv = createMMKV(); // react-native-mmkv v4; on v2/v3 (the docs' example)
 
 (source: https://sendbird.com/docs/chat/uikit/v3/react-native/essentials/send-first-message ; @sendbird/uikit-react-native@3.12.9 src/containers/SendbirdUIKitContainer.tsx:90,154-158 ; https://sendbird.com/docs/chat/sdk/v4/javascript/getting-started/environment-specific-implementation ; react-native-mmkv@4.3.2 lib/index.d.ts:1,3 — `MMKV` is a type only in v4, `createMMKV()` makes the instance)
 
+## Sending a file (no `File` in React Native)
+
+React Native has no `File` type, and the docs say a `File` or `Blob` passed as `file` may not work there. Pass an object with all three fields of the SDK's `FileInfo` interface: `name`, `uri`, and `type` (the MIME type, for example `audio/m4a` for a recording). `FileCompat`, the type of `file`, is `File | Blob | FileInfo`.
+
+```ts
+function sendRecording(uri: string) {
+  channel
+    .sendFileMessage({ file: { name: 'recording.m4a', uri, type: 'audio/m4a' } })
+    .onSucceeded((message) => {})
+    .onFailed((error) => {});
+}
+```
+
+(source: https://sendbird.com/docs/chat/sdk/v4/javascript/getting-started/environment-specific-implementation — "File message without File" ; @sendbird/chat@4.22.13 lib/__definition.d.ts:1733-1742 `FileCompat`, `FileInfo`, :1792 `FileMessageCreateParams.file`)
+
 ## Version compatibility checklist
 
 - `@sendbird/uikit-react-native@3.12.9` declares peers `@sendbird/chat ^4.20.2`, `react-native >=0.65.0`, `react >=17.0.2`, and `react-native-mmkv >=2.0.0`. Install `@sendbird/chat` yourself and keep it current within 4.x: 4.20.5 fixes a `hasBot of undefined` error when loading cached channels, and 4.22.10 fixes file uploads on Expo SDK 56+ `fetch`. (source: @sendbird/uikit-react-native@3.12.9 package.json peerDependencies ; @sendbird/chat CHANGELOG.md v4.20.5, v4.22.10)

@@ -7,7 +7,7 @@ allowed-tools: Read, Bash, Grep, Glob, WebFetch, Agent
 
 # /sendbird-client:explain-error
 
-Resolve every plugin-owned path below from `${CLAUDE_PLUGIN_ROOT}`.
+Resolve every plugin-owned path below from `${CLAUDE_PLUGIN_ROOT}`. Where that variable is empty (Codex does not set it for shell commands), the plugin root is the folder two levels above this SKILL.md.
 Resolve the platform agent with `bash "${CLAUDE_PLUGIN_ROOT}/tools/routing/route-agent.sh" <project-dir> code` when code inspection or a fix is required.
 
 Detect the customer's platform and installed SDK version before interpreting a numeric code. Never carry a symbol or description from one platform's error enum to another platform.

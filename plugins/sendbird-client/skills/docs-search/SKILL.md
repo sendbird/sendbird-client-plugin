@@ -7,7 +7,7 @@ allowed-tools: WebFetch, Read, Glob, Grep, Bash, Agent
 
 # /sendbird-client:docs-search
 
-Resolve every plugin-owned path below from `${CLAUDE_PLUGIN_ROOT}`.
+Resolve every plugin-owned path below from `${CLAUDE_PLUGIN_ROOT}`. Where that variable is empty (Codex does not set it for shell commands), the plugin root is the folder two levels above this SKILL.md.
 Resolve the docs agent with `bash "${CLAUDE_PLUGIN_ROOT}/tools/routing/route-agent.sh" <project-dir> docs` before delegating.
 
 Delegate to `sendbird-docs-agent` to answer the user's query.

@@ -398,6 +398,8 @@ sb.groupChannel.addGroupChannelHandler('UNIQUE_HANDLER_ID', new GroupChannelHand
 ```
 `GroupChannelHandler` is exported from the `@sendbird/chat/groupChannel` subpath. Add/remove exactly once per mounted screen — a handler added without a matching remove leaks. (source: `@sendbird/chat@4.22.13` lib/__definition.d.ts:6187 `addGroupChannelHandler`, :6193 `removeGroupChannelHandler`, :5863 `GroupChannelHandler`, :5426 `onMessageReceived`, :5403 `onChannelChanged`; package export confirmed in `groupChannel.d.ts`)
 
+`onMessageReceived` is not called on the device that sent the message: the docs list its notified devices as every device with the channel open in the foreground except the sender's. Your own sent message comes back through the `sendUserMessage` / `sendFileMessage` request handlers (`onSucceeded`) instead. (source: https://sendbird.com/docs/chat/sdk/v4/javascript/event-handler/managing-channel-event-handlers/add-or-remove-a-channel-event-handler — "List of group channel events")
+
 ## React vs React Native
 - The core SDK is identical; only the surrounding app differs. Templates: `templates/js/react/chat/`, `templates/js/react-native/chat/`.
 - For full prebuilt UI use Sendbird UIKit (`@sendbird/uikit-react` / `@sendbird/uikit-react-native`) — see `knowledge/curated/js/products/uikit.md`.

@@ -61,6 +61,10 @@
 - **Fix:** Keep the UIKit reply type as `THREAD` so the thread UI still works, and load the main list with the Chat `ReplyType.NONE`. Either pass your own `MessageListParams` (with `replyType = ReplyType.NONE`) through `ChannelFragment.Builder.setMessageListParams(...)`, which UIKit uses as given apart from forcing `reverse`, or override `createMessageListParams()` in a custom `ChannelViewModel`, as the staff answer does. (source: https://sendbird.com/docs/chat/uikit/v3/android-view/customizations/chat-customization/filter-message-list) (source: https://github.com/sendbird/sendbird-uikit-android/blob/07ffe8efc97e2d71dedc466ad868df817e5f433e/uikit/src/main/java/com/sendbird/uikit/consts/ReplyType.kt#L8) (source: https://github.com/sendbird/sendbird-uikit-android/blob/07ffe8efc97e2d71dedc466ad868df817e5f433e/uikit/src/main/java/com/sendbird/uikit/fragments/ChannelFragment.java#L1585 — `setMessageListParams`) (source: https://sendbird.com/docs/chat/sdk/v4/android/ref/-sendbird-chat/com.sendbird.android.message/-reply-type/index.html) (source: https://sendbird.com/docs/chat/sdk/v4/android/ref/-sendbird-chat/com.sendbird.android.params/-message-list-params/index.html)
 - **Cases:** https://github.com/sendbird/sendbird-uikit-android/discussions/38
 
+### A `ChannelFragment` (or a subclass) shows no messages after you navigate back to it with the Navigation component
+- **Cause:** In UIKit versions before 3.25.2, messages in `ChannelFragment` were not displayed after returning from another fragment when the app used the Navigation component. The 3.25.2 release notes list this as a fixed issue.
+- **Fix:** Upgrade UIKit to 3.25.2 or later. (source: https://github.com/sendbird/sendbird-uikit-android/blob/07ffe8efc97e2d71dedc466ad868df817e5f433e/CHANGELOG.md#L15-L16 — v3.25.2)
+
 ## Push notifications
 
 ### No chat push arrives when the app is killed

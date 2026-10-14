@@ -1,0 +1,46 @@
+{
+  "name": "sendbird-client",
+  "version": "0.1.39",
+  "description": "Sendbird integration helper for Chat (incl. auth/session), UIKit, and Calls across iOS, Android, and JS",
+  "author": {
+    "name": "Sendbird",
+    "url": "https://sendbird.com"
+  },
+  "homepage": "https://sendbird.com/docs",
+  "repository": "https://github.com/sendbird/sendbird-client-plugin",
+  "license": "Apache-2.0",
+  "keywords": [
+    "sendbird",
+    "chat",
+    "uikit",
+    "calls",
+    "ios",
+    "android",
+    "javascript",
+    "react",
+    "react-native"
+  ],
+  "skills": [
+    "./skills/",
+    "./codex/skills/"
+  ],
+  "hooks": "./codex/hooks.json",
+  "interface": {
+    "shortDescription": "Verified Sendbird client SDK integration",
+    "developerName": "Sendbird",
+    "category": "Developer Tools",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://sendbird.com/docs",
+    "defaultPrompt": [
+      "Set up Sendbird in this project.",
+      "Add a Sendbird channel list screen to this app.",
+      "Verify this Sendbird integration."
+    ],
+    "displayName": "Sendbird Client",
+    "longDescription": "Sendbird integration helper for Chat (incl. auth/session), UIKit, and Calls across iOS, Android, and JS"
+  }
+}

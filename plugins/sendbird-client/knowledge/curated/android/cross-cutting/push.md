@@ -85,6 +85,46 @@ The handler-based guide shows the same order (unregister in a completion, then `
 
 (source: sendbird-chat-4.36.5.aar `javap -public` com.sendbird.android.push.SendbirdPushHelper — `unregisterHandler(boolean, PushRequestCompleteHandler)`, `javap -v` shows `Deprecated: true` on `unregisterPushHandler` and the `unregisterAllTokens` parameter name; com.sendbird.android.handler.PushRequestCompleteHandler — `onComplete(boolean, String)`, `onError(SendbirdException)`; com.sendbird.android.SendbirdChat — `unregisterPushToken(String, CompletionHandler)`, `unregisterPushTokenAll(CompletionHandler)`, `disconnect(DisconnectHandler)`; source: https://sendbird.com/docs/chat/sdk/v4/android/application/authenticating-a-user/authentication; https://sendbird.com/docs/chat/sdk/v4/android/push-notifications/multi-device-support/set-up-push-notifications-for-fcm — reviewed 2026-10-11; also source: https://sendbird.com/docs/chat/sdk/v4/android/ref/-sendbird-chat/com.sendbird.android.push/-sendbird-push-helper/index.html; also source: https://sendbird.com/docs/chat/sdk/v4/android/ref/-sendbird-chat/com.sendbird.android/-sendbird-chat/index.html)
 
+## Read the payload and build the notification yourself
+
+In the docs and in the public UIKit sample, the app's own messaging service builds the notification from the FCM data message (see the `sendNotification(...)` step in the FCM guide). A Sendbird push carries a JSON string under the `sendbird` data key. The docs read the title from its `push_title` field, the body from its `message` field, and the channel to open from `channel.channel_url`; put those on the notification you build.
+
+```kotlin
+import com.google.firebase.messaging.RemoteMessage
+import org.json.JSONObject
+
+data class SendbirdPush(val title: String, val body: String, val channelUrl: String)
+
+fun parseSendbirdPush(remoteMessage: RemoteMessage): SendbirdPush? {
+    val raw = remoteMessage.data["sendbird"] ?: return null // not a Sendbird push
+    val sendbird = JSONObject(raw)
+    return SendbirdPush(
+        title = sendbird.optString("push_title"),
+        body = sendbird.optString("message"),
+        channelUrl = sendbird.getJSONObject("channel").getString("channel_url"),
+    )
+}
+```
+(source: https://sendbird.com/docs/chat/sdk/v4/android/push-notifications/managing-push-notifications/set-up-push-notifications-for-fcm)
+
+## Mark a push as delivered
+
+`SendbirdPushHelper.markPushNotificationAsDelivered(remoteMessage.data)` reports to Sendbird that a push reached the device. `SendbirdChat.init()` must already have run, and the docs require it to be called in `Application.onCreate()`, because a push can arrive while no Activity exists. If your app uses multi-device support with a `SendbirdPushHandler` (or `SendbirdHmsPushHandler`), the SDK makes this call for you.
+
+```kotlin
+import com.google.firebase.messaging.FirebaseMessagingService
+import com.google.firebase.messaging.RemoteMessage
+import com.sendbird.android.push.SendbirdPushHelper
+
+class MyMessagingService : FirebaseMessagingService() {
+    override fun onMessageReceived(remoteMessage: RemoteMessage) {
+        // SendbirdChat.init() ran in Application.onCreate() before this point.
+        SendbirdPushHelper.markPushNotificationAsDelivered(remoteMessage.data)
+    }
+}
+```
+(source: https://sendbird.com/docs/chat/sdk/v4/android/push-notifications/marking-push-notifications-as-delivered/mark-push-notifications-as-delivered) (source: https://sendbird.com/docs/chat/sdk/v4/android/ref/-sendbird-chat/com.sendbird.android.push/-sendbird-push-helper/index.html)
+
 ## Payload size (FCM limit)
 
 Sendbird delivers Android push as FCM data messages, and the `sendbird` payload carries message details — for a FILE message this includes a `files` array with file data. FCM rejects a message whose payload (keys and values together) exceeds 4096 bytes ("Message too big", `INVALID_ARGUMENT`), and Sendbird can't raise that limit. Keep what you attach to messages small, and trim optional payload fields in the dashboard's notification settings; don't assume large file metadata will always fit.

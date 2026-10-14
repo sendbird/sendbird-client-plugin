@@ -7,7 +7,7 @@ allowed-tools: Read, Bash, Grep, Glob, WebFetch, Agent
 
 # /sendbird-client:performance-audit
 
-Resolve every plugin-owned path below from `${CLAUDE_PLUGIN_ROOT}`.
+Resolve every plugin-owned path below from `${CLAUDE_PLUGIN_ROOT}`. Where that variable is empty (Codex does not set it for shell commands), the plugin root is the folder two levels above this SKILL.md.
 Resolve the platform agent with `bash "${CLAUDE_PLUGIN_ROOT}/tools/routing/route-agent.sh" <project-dir> code` before delegating.
 
 Scan for known anti-patterns (read-first; fixes confirmed).
