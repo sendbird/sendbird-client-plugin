@@ -1,5 +1,7 @@
-# Code that runs on customers' machines, and the CI and release setup, needs a code owner's
-# review (pre-release security review C11). A repository ruleset makes this review required.
+# Code that runs on customers' machines, and this file, need a code owner's review
+# (pre-release security review C11). A repository ruleset makes this review required.
+# This repository runs no workflows; releases are validated, merged, and tagged by the
+# publishing process before and after each release PR.
 # This repository only receives release PRs built from the reviewed source, so the release
 # approval account is a code owner too and releases merge without a manual step.
 /.github/                        @tezpark @sendbird-sdk-deployment-2
