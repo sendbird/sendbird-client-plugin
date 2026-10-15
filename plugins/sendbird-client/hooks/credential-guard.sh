@@ -10,7 +10,7 @@
 set -uo pipefail
 HERE="$(cd "$(dirname "$0")" && pwd)"
 source "$HERE/lib/hook-helpers.sh"
-read_stdin_json
+read_stdin_json guard
 
 tool="$(jget .tool_name)"
 case "$tool" in

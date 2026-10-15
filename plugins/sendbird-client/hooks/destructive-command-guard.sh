@@ -11,13 +11,18 @@ set -uo pipefail
 HERE="$(cd "$(dirname "$0")" && pwd)"
 # shellcheck source=lib/hook-helpers.sh
 source "$HERE/lib/hook-helpers.sh"
-read_stdin_json
+read_stdin_json guard
 
 [ "$(jget .tool_name)" = "Bash" ] || exit 0
 cmd="$(jget .tool_input.command)"
 [ -n "$cmd" ] || exit 0
 
-# Look at each simple command (split on ; && || | and newlines) on its own.
+# Normalize before matching: quotes, backticks, and command substitution become spaces, so a
+# command wrapped as bash -c "sendbird ...", sh -c'...', zsh -c, eval "...", $(...), or with a
+# quoted program name reads as plain words. Then look at each simple command (split on
+# ; && || | and newlines) on its own. An env or sudo prefix needs nothing: the CLI name is
+# matched anywhere after a space.
+norm="$(printf '%s\n' "$cmd" | tr "\"'\`()" '     ')"
 hit=""
 while IFS= read -r part; do
   # the CLI: sendbird, sendbird-cli, or npx/pnpm dlx/bunx @sendbird/cli
@@ -25,7 +30,7 @@ while IFS= read -r part; do
   printf '%s' "$part" | grep -Eq '(^|[[:space:]])(delete|revoke|deactivate)([[:space:]]|$)' || continue
   printf '%s' "$part" | grep -Eq '(^|[[:space:]])(--yes|-y)([[:space:]=]|$)' || continue
   hit="$part"; break
-done < <(printf '%s\n' "$cmd" | sed -E 's/(&&|\|\||;|\|)/\n/g')
+done < <(printf '%s\n' "$norm" | sed -E 's/(&&|\|\||;|\|)/\n/g')
 [ -n "$hit" ] || exit 0
 
 jq -n --arg c "$(printf '%s' "$hit" | sed -E 's/^[[:space:]]+//' | cut -c1-200)" '{

@@ -1,4 +1,4 @@
-// source: https://github.com/sendbird/sendbird-uikit-ios (README quickstart, verified 2026-06-09)
+// source: https://github.com/sendbird/sendbird-uikit-ios/blob/3.36.2/README.md (README quickstart, verified 2026-06-09)
 // source: https://github.com/sendbird/sendbird-uikit-ios/blob/3.36.1/Sources/SBUGlobals.swift#L22-L26 (accessToken, currentUser)
 // source: https://github.com/sendbird/sendbird-uikit-ios/blob/3.36.1/Sources/Theme/SBUTheme.swift#L252 (channelTheme)
 // Build-verified: SendbirdUI.initialize / SBUGlobals.currentUser / SBUUser /

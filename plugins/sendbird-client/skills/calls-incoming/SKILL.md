@@ -7,7 +7,7 @@ allowed-tools: Read, Edit, Write, Bash, Grep, Glob, WebFetch, Agent
 
 # /sendbird-client:calls-incoming
 
-Resolve every plugin-owned path below from `${CLAUDE_PLUGIN_ROOT}`.
+Resolve every plugin-owned path below from `${CLAUDE_PLUGIN_ROOT}`. Where that variable is empty (Codex does not set it for shell commands), the plugin root is the folder two levels above this SKILL.md.
 Resolve the platform agent with `bash "${CLAUDE_PLUGIN_ROOT}/tools/routing/route-agent.sh" <project-dir> code` before delegating.
 Resolve the active product scope with `bash "${CLAUDE_PLUGIN_ROOT}/tools/detection/resolve-products.sh" <project-dir>` and run `resolve-products.sh <project-dir> --check calls` before anything else. If it reports `product not supported yet: calls`, tell the customer that Sendbird Calls is not supported yet in this plugin, change nothing, and stop; in a non-interactive run, end with status `declined` and that reason. If Calls is outside the configured scope, say so and stop.
 

@@ -1,10 +1,37 @@
 #!/usr/bin/env bash
 # Shared helpers for hook scripts. Source this file. Reads stdin JSON once.
 
-# read_stdin_json : caches the stdin payload into $HOOK_JSON (empty if none/not json)
+# JQ_MISSING_REASON : what a guard tells the user when jq is missing (welcome.sh says it too)
+JQ_MISSING_REASON='The Sendbird plugin safety checks (credential, source citation, and destructive-command guards) need jq, which is not on PATH, so this call was not checked. Approve it only if you trust it, and install jq to turn the checks back on.'
+
+# ask_without_jq : the PreToolUse "ask" decision, built with printf because jq is absent
+ask_without_jq() {
+  printf '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"ask","permissionDecisionReason":"%s"}}\n' "$JQ_MISSING_REASON"
+}
+
+# read_stdin_json [guard] : caches the stdin payload into $HOOK_JSON (empty if none/not json).
+# Every hook reads its input with jq. Without jq on PATH no check can run, so the hook stops
+# here instead of reading '{}' and letting everything through: a PreToolUse guard (called with
+# "guard") asks the user to approve the call, and any other hook exits 0 without blocking.
 read_stdin_json() {
+  if ! command -v jq >/dev/null 2>&1; then
+    cat >/dev/null 2>&1 || true
+    [ "${1:-}" = guard ] && ask_without_jq
+    exit 0
+  fi
   HOOK_JSON="$(cat 2>/dev/null || true)"
   if ! printf '%s' "$HOOK_JSON" | jq -e . >/dev/null 2>&1; then HOOK_JSON='{}'; fi
+}
+
+# is_noninteractive : 0 when SENDBIRD_NONINTERACTIVE turns on a non-interactive run (1, true, or
+# yes in any case). Empty, 0, false, no, and any other value keep the run interactive. welcome.sh
+# and run-summary-gate.sh both use this, so the model is told about the run summary exactly when
+# the gate checks it. (tr, not ${v,,}: stock macOS bash 3.2.)
+is_noninteractive() {
+  case "$(printf '%s' "${SENDBIRD_NONINTERACTIVE:-}" | tr '[:upper:]' '[:lower:]')" in
+    1|true|yes) return 0 ;;
+    *) return 1 ;;
+  esac
 }
 
 # jget <jq-path> : echo a string field from $HOOK_JSON ('' if absent)
@@ -32,6 +59,91 @@ final_answer_text() {
         end' "$tp" 2>/dev/null)"
   fi
   printf '%s' "$text"
+}
+
+# --- Cited sources (source-claim-guard.sh, final-answer-gate.sh) ---------------------------
+# A cited source counts only when the model cannot have written it in this session.
+
+# public_source_url <url> : 0 for a page Sendbird controls: sendbird.com/docs, or a file at a
+# ref in a sendbird GitHub repository (/blob/ or /raw/, or raw.githubusercontent.com). Issues,
+# discussions, pull requests, and other GitHub pages are written by anyone, so they do not count.
+public_source_url() {
+  printf '%s' "$1" | grep -Eq '^https://sendbird\.com/docs/|^https://github\.com/sendbird/[A-Za-z0-9._-]+/(blob|raw)/[^[:space:]]+|^https://raw\.githubusercontent\.com/sendbird/[A-Za-z0-9._-]+/[^[:space:]]+'
+}
+
+# sdk_source_path <path> <cwd> : prints the real path of a local .d.ts or .swiftinterface when it
+# is inside an installed SDK (node_modules/@sendbird or node_modules/sendbird-*, Pods, .build,
+# SourcePackages, DerivedData, the Gradle cache) or the plugin's own knowledge/ or templates/;
+# prints nothing for any other file, such as one the model just wrote in the app's folders.
+# A relative path resolves from <cwd>; ".." is resolved before the check.
+sdk_source_path() {
+  local p="$1" cwd="$2" d real root
+  case "$p" in /*) ;; *) p="${cwd:-$(pwd)}/$p" ;; esac
+  [ -f "$p" ] || return 0
+  d="$(cd "$(dirname "$p")" 2>/dev/null && pwd -P)" || return 0
+  real="$d/$(basename "$p")"
+  root="$(cd "${CLAUDE_PLUGIN_ROOT:-$(dirname "${BASH_SOURCE[0]}")/../..}" 2>/dev/null && pwd -P)"
+  case "$real" in
+    "$root"/knowledge/*|"$root"/templates/*) printf '%s' "$real" ;;
+    */node_modules/@sendbird/*|*/node_modules/sendbird-*|*/Pods/*|*/.build/*|*/SourcePackages/*|*/DerivedData/*|*/.gradle/caches/*)
+      printf '%s' "$real" ;;
+  esac
+}
+
+# resolve_cited_sources <cwd> : reads cited source tokens on stdin, one per line, and fills
+# RESOLVED_SOURCES with the files to search for a symbol: plugin files (knowledge/, templates/),
+# the plugin's cache of the customer's installed SDK, installed SDK interfaces, and fetched
+# copies of public pages. Fetched copies are also in TMP_SOURCES; remove them when done.
+resolve_cited_sources() {
+  local cwd="$1" source tmp_source local_path root="${CLAUDE_PLUGIN_ROOT:-.}"
+  RESOLVED_SOURCES=(); TMP_SOURCES=()
+  while IFS= read -r source; do
+    [ -n "$source" ] || continue
+    case "$source" in *..*) continue ;; esac
+    case "$source" in
+      knowledge/*|templates/*)
+        RESOLVED_SOURCES+=("$root/$source") ;;
+      .sendbird-client/cache/*)
+        RESOLVED_SOURCES+=("${cwd:-$(pwd)}/$source") ;;
+      *.swiftinterface|*.d.ts)
+        local_path="$(sdk_source_path "$source" "$cwd")"
+        [ -z "$local_path" ] || RESOLVED_SOURCES+=("$local_path") ;;
+      https://*)
+        public_source_url "$source" || continue
+        tmp_source="$(mktemp)"
+        if curl -fsSL --max-time 8 "$source" -o "$tmp_source" 2>/dev/null; then
+          RESOLVED_SOURCES+=("$tmp_source"); TMP_SOURCES+=("$tmp_source")
+        else
+          rm -f "$tmp_source"
+        fi ;;
+    esac
+  done
+}
+
+# source_supports_symbol <file> <symbol> : 0 when the file names the symbol, or for Type.member
+# the member as a whole word
+source_supports_symbol() {
+  local file="$1" symbol="$2" method
+  [ -s "$file" ] || return 1
+  grep -Fq -- "$symbol" "$file" && return 0
+  method="${symbol#*.}"
+  grep -Eq -- "(^|[^A-Za-z0-9_])${method}([^A-Za-z0-9_]|$)" "$file"
+}
+
+# all_symbols_sourced <symbols> : 0 when every symbol (one per line) is in one of
+# RESOLVED_SOURCES. Removes the fetched copies either way.
+all_symbols_sourced() {
+  local symbol supported source_file valid=1
+  while IFS= read -r symbol; do
+    [ -n "$symbol" ] || continue
+    supported=0
+    for source_file in ${RESOLVED_SOURCES[@]+"${RESOLVED_SOURCES[@]}"}; do
+      if source_supports_symbol "$source_file" "$symbol"; then supported=1; break; fi
+    done
+    [ "$supported" -eq 1 ] || { valid=0; break; }
+  done <<< "$1"
+  for source_file in ${TMP_SOURCES[@]+"${TMP_SOURCES[@]}"}; do rm -f "$source_file"; done
+  [ "$valid" -eq 1 ]
 }
 
 # emit_warning <text> : warn-only output (exit 0 in caller). Never blocks.

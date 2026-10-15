@@ -94,7 +94,7 @@ Return:
 
 ## 7. Non-interactive runs
 
-When `SENDBIRD_NONINTERACTIVE` is set (for example `SENDBIRD_NONINTERACTIVE=1 claude -p ...` in CI or a script), nobody can answer a question during the run.
+When `SENDBIRD_NONINTERACTIVE` is `1`, `true`, or `yes` in any case (for example `SENDBIRD_NONINTERACTIVE=1 claude -p ...` in CI or a script), nobody can answer a question during the run. Any other value, including an empty one, `0`, `false`, or `no`, keeps the run interactive.
 
 - Never ask the user a question, and never end the answer with one.
 - For a value you would otherwise ask for, use the environment (`SENDBIRD_APP_ID`, `SENDBIRD_PRODUCTS`, `SENDBIRD_REGION`, `SENDBIRD_PLAN`) or the project's `profile.json` when they have it.

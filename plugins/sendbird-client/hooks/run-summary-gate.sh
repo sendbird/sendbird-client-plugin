@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Stop hook for non-interactive runs (SENDBIRD_NONINTERACTIVE set): the caller, a CLI or a
+# Stop hook for non-interactive runs (SENDBIRD_NONINTERACTIVE=1, true, or yes): the caller, a CLI or a
 # script, decides what to do next from the run summary the answer ends with, so its shape is
 # checked before the run ends. A follow-up request sent with --resume does not get the
 # session-start instructions again, and such a run once ended with "status": "ok" and no
@@ -12,7 +12,7 @@ HERE="$(cd "$(dirname "$0")" && pwd)"
 source "$HERE/lib/hook-helpers.sh"
 read_stdin_json
 
-[ -n "${SENDBIRD_NONINTERACTIVE:-}" ] || exit 0
+is_noninteractive || exit 0
 [ "$(jget '.stop_hook_active')" = "true" ] && exit 0
 SCHEMA="${CLAUDE_PLUGIN_ROOT:-$HERE/..}/core/schemas/run-summary.schema.json"
 [ -r "$SCHEMA" ] || exit 0

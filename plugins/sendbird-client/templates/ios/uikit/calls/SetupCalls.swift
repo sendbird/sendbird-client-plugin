@@ -1,4 +1,4 @@
-// source: https://github.com/sendbird/sendbird-calls-ios (README implementation guide, verified 2026-06-09)
+// source: https://github.com/sendbird/sendbird-calls-ios/blob/1.12.3/README.md (README implementation guide, verified 2026-06-09)
 // Build-verified: SendBirdCall.configure / AuthenticateParams / authenticate / DialParams /
 // CallOptions / dial compile + link against SendBirdCalls (xcodebuild BUILD SUCCEEDED for
 // generic/platform=iOS, 2026-06-09; the binary framework's simulator slice has an arch limit
