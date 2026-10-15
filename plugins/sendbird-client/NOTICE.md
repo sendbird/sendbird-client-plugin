@@ -26,6 +26,40 @@ comment or in the `_README.md` next to it.
 Troubleshooting entries link to the public Sendbird community forum and GitHub discussions
 where a problem was reported. The entries themselves are written for this plugin.
 
+## Code from MIT-licensed Sendbird repositories
+
+Some code templates and knowledge files contain code from the following public Sendbird
+repositories, which are licensed under the MIT License:
+
+- `sendbird/sendbird-uikit-android` — Copyright (c) 2021 Sendbird
+- `sendbird/sendbird-uikit-react` — Copyright (c) 2021 Sendbird
+- `sendbird/sendbird-uikit-react-native` (packages `uikit-react-native`, `uikit-react-native-foundation`, `uikit-chat-hooks`, `uikit-utils`) — Copyright (c) 2021 Sendbird
+- `sendbird/sendbird-uikit-sample-android-jetpack-compose` — Copyright (c) 2021 Sendbird
+- `sendbird/quickstart-calls-directcall-android` — Copyright (c) 2019 SendBird
+- `sendbird/quickstart-calls-directcall-ios` — Copyright (c) 2020 SendBird, Inc.
+
+The MIT License for that code:
+
+```text
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```
+
 ## Third-party files
 
 - **Gradle Wrapper** — `gradlew`, `gradlew.bat`, `gradle/wrapper/gradle-wrapper.jar`, and
