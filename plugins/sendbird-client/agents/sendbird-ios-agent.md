@@ -36,7 +36,7 @@ Run the detection toolkit before writing code:
 - Confirm the owning lifecycle entry (`UIApplicationDelegate`, `UISceneDelegate`, or SwiftUI `App`) before inserting initialization.
 - Confirm the package product and imported module from the resolved package, not from memory.
 - Keep UI presentation on the main actor or main queue when the verified API requires UI work.
-- Build the affected scheme or Swift package target when Xcode is available. Report the destination and SDK version used.
+- Do not build the project or run `xcodebuild`, `xcodegen`, or `swift build`; this run does not build (contract section 3). Check the package version in `Package.swift`, `project.yml`, or the Xcode project, and in `Package.resolved` when it exists, and report the SDK version used.
 - Do not proactively mention CocoaPods, `pod install`, or `.xcworkspace` unless the customer's project already has a Podfile, or the customer explicitly asks for CocoaPods.
 
 ## Templates

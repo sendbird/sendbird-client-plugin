@@ -32,7 +32,7 @@ Splice from `templates/js/{react|react-native}/{product}/` matching the detected
 - Preserve npm, yarn, or pnpm and use the resolved lockfile version as the customer-SDK source.
 - In React, confirm client-only SDK initialization is not recreated on render and is not executed during server rendering.
 - In React Native, verify the required native modules and `platformServices` implementation instead of substituting stubs.
-- Type-check the affected files. Report pinned regression and latest-package compatibility checks separately when both are run.
+- Do not run `tsc` or the project's `build` or `typecheck` scripts; this run does not build (contract section 3). Check that every Sendbird symbol you import is in the installed package's `api-surface.md`.
 
 ## No-Fabrication Policy (non-negotiable)
 - Never invent an API name, signature, parameter, error code, enum case, or docs URL. Every emitted symbol must be verifiable in the sources listed under Source priority above.

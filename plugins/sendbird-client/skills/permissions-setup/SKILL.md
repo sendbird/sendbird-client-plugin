@@ -18,7 +18,7 @@ Resolve the active product scope with `bash "${CLAUDE_PLUGIN_ROOT}/tools/detecti
 4. Server or Platform API: say that this plugin writes client code only and does not generate server or Platform API code, name what the server must do in one sentence, and link the Platform API overview (https://sendbird.com/docs/chat/platform-api/v3/overview) or a more specific page you have opened and checked.
 5. Client: write the code through the platform agent, from the curated sections below. A client check only changes what the UI offers; it is not a security boundary. Say so whenever a requirement is really about preventing an action, and pair it with the setting or server item that enforces it.
 6. Before you finish, follow each screen that used a control you removed or hid, and make sure a member can still reach it the way the requirement allows. Removing the only path into a channel screen leaves the app unusable even though every rule is met.
-7. Verify with the customer's toolchain (docs/AGENT_CONTRACT.md section 4) and report each requirement as done in code, handed to settings, or handed to the server.
+7. Check the result by reading the project (docs/AGENT_CONTRACT.md section 4; this run does not build, contract section 3) and report each requirement as done in code, handed to settings, or handed to the server.
 
 | Requirement | Layer | Source |
 | --- | --- | --- |

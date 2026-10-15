@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "generatedAt": "2026-10-14T19:23:16Z",
-  "count": 48,
+  "count": 49,
   "entries": [
     {
       "file": "knowledge/curated/android/architecture.md",
@@ -172,6 +172,14 @@
       "verifiedDates": [
         "2026-09-22"
       ]
+    },
+    {
+      "file": "knowledge/curated/common/plans.md",
+      "platform": "common",
+      "category": "plans",
+      "status": "populated",
+      "lastVerifiedAgainst": "https://sendbird.com/pricing/chat (Compare features table), 2026-10-15",
+      "verifiedDates": []
     },
     {
       "file": "knowledge/curated/common/pricing-quotas.md",
