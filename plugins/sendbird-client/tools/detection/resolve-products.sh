@@ -2,21 +2,57 @@
 # Resolve the active product scope for one project.
 # Usage: resolve-products.sh <project-dir> [--check <product>]
 # Order: SENDBIRD_PRODUCTS > .sendbird-client/profile.json enabledProducts > every supported product.
+# A product in config .productScope.notYetSupported is never in scope: it is left out of the
+# default, dropped (with a note on stderr) from SENDBIRD_PRODUCTS or the profile, and
+# `--check <product>` fails with "product not supported yet" instead of "out of configured scope".
 set -euo pipefail
 dir="${1:?usage: resolve-products.sh <project-dir> [--check <product>]}"
 HERE="$(cd "$(dirname "$0")" && pwd)"
 ROOT="$(cd "$HERE/../.." && pwd)"
 config="$ROOT/config/plugin-config.json"
 supported="$(jq -r '.products[]' "$config" | sort)"
+not_yet="$(jq -r '.productScope.notYetSupported[]? // empty' "$config" | sort)"
+is_not_yet() { [ -n "$not_yet" ] && printf '%s\n' "$not_yet" | grep -Fxq "$1"; }
+not_yet_note() { # $1 = product, $2 = optional "left out of ..." clause
+  echo "product not supported yet: $1${2:+ ($2)} — this plugin release does not support it yet; tell the customer it is not supported yet and do not write code for it" >&2
+}
 
-selected=""
+if [ "${2:-}" = "--check" ]; then
+  requested="${3:?usage: resolve-products.sh <project-dir> --check <product>}"
+  if is_not_yet "$requested"; then not_yet_note "$requested"; exit 1; fi
+fi
+
+selected=""; source_name=""
 if [ -n "${SENDBIRD_PRODUCTS:-}" ]; then
   selected="$(printf '%s' "$SENDBIRD_PRODUCTS" | tr ',' '\n' | tr -d ' ' | sed '/^$/d' | sort -u)"
+  source_name="SENDBIRD_PRODUCTS"
 else
   profile="$dir/.sendbird-client/profile.json"
   [ -f "$profile" ] && selected="$(jq -r '.enabledProducts[]? // empty' "$profile" 2>/dev/null | sed '/^$/d' | sort -u || true)"
+  [ -n "$selected" ] && source_name="$profile enabledProducts"
 fi
-[ -n "$selected" ] || selected="$supported"
+
+if [ -n "$selected" ]; then
+  kept=""
+  while IFS= read -r product; do
+    [ -n "$product" ] || continue
+    if is_not_yet "$product"; then
+      not_yet_note "$product" "left out of the scope from $source_name"
+      continue
+    fi
+    kept="${kept:+$kept$'\n'}$product"
+  done <<< "$selected"
+  if [ -z "$kept" ]; then
+    echo "no supported product left in the scope from $source_name" >&2
+    exit 1
+  fi
+  selected="$kept"
+else
+  selected=""
+  while IFS= read -r product; do
+    is_not_yet "$product" || selected="${selected:+$selected$'\n'}$product"
+  done <<< "$supported"
+fi
 
 while IFS= read -r product; do
   [ -n "$product" ] || continue
@@ -27,7 +63,6 @@ while IFS= read -r product; do
 done <<< "$selected"
 
 if [ "${2:-}" = "--check" ]; then
-  requested="${3:?usage: resolve-products.sh <project-dir> --check <product>}"
   printf '%s\n' "$selected" | grep -Fxq "$requested" && exit 0
   echo "product out of configured scope: $requested" >&2
   exit 1

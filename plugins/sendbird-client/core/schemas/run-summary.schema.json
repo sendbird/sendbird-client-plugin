@@ -14,7 +14,7 @@
       "pattern": "^[a-z][a-z0-9-]*$"
     },
     "status": {
-      "description": "completed: work done. needs_input: stopped before changing anything that depends on an answer (see questions). failed: could not finish (see reason). declined: request is outside the plugin's scope or would need an unverifiable API (see reason).",
+      "description": "completed: work done. needs_input: stopped before changing anything that depends on an answer (see questions). failed: could not finish (see reason). declined: request is outside the plugin's scope, asks for a product the plugin does not support yet, or would need an unverifiable API (see reason).",
       "enum": ["completed", "needs_input", "failed", "declined"]
     },
     "project": {

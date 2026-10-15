@@ -16,7 +16,7 @@ Run the detector for the current project. Record these values before reading or 
 
 For a code task, resolve the platform agent with `bash "${CLAUDE_PLUGIN_ROOT}/tools/routing/route-agent.sh" <project-dir> code`. For a documentation task, use the same command with `docs`. Do not maintain a second routing table in prose.
 
-Resolve the active product scope with `bash "${CLAUDE_PLUGIN_ROOT}/tools/detection/resolve-products.sh" <project-dir>`. If the requested product is not in that list, say it is out of the configured scope and stop instead of writing code for it.
+Resolve the active product scope with `bash "${CLAUDE_PLUGIN_ROOT}/tools/detection/resolve-products.sh" <project-dir>`. If the requested product is not in that list, say it is out of the configured scope and stop instead of writing code for it. If `resolve-products.sh <project-dir> --check <product>` reports `product not supported yet`, say that this plugin does not support that product yet (not that it is out of scope) and stop without writing, fixing, or setting up its code, even when the customer asks for it directly.
 
 If one unknown value changes the code that would be emitted, ask one focused question. Do not guess. In Codex, a question tool may be missing or return no answer; then ask in the reply and stop. If it does not change the output, state the limitation and continue. In a non-interactive run, do not ask; follow section 7.
 
@@ -104,6 +104,7 @@ When `SENDBIRD_NONINTERACTIVE` is set (for example `SENDBIRD_NONINTERACTIVE=1 cl
   - authentication: connect with the user ID only, and list the token server under `manualSteps`
   - navigation: the project's existing navigation; without one, switch screens with state
   - push: leave it out, and list it under `manualSteps`
+- A request for a product outside the active scope or not supported yet (section 1) changes nothing and ends with `status: "declined"` and the reason.
 - If a value that changes the emitted code is still unknown, change nothing and stop with `status: "needs_input"` and one `questions` entry per missing value. Examples: the host is `hybrid` or `unknown`; there is no App ID for setup; the request assumes an integration the project does not have, such as theming UIKit screens in an app without UIKit.
 - End the final answer with one fenced `json` block that validates against `core/schemas/run-summary.schema.json`. Paths in `changes` are relative to the project root.
 

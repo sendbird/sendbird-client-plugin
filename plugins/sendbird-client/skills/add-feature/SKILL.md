@@ -1,6 +1,6 @@
 ---
 name: add-feature
-description: Add a Sendbird feature to the project (channel, message, reaction, thread, typing, file, push, call, and more). Use when the customer wants to add a specific Sendbird capability to existing code.
+description: Add a Sendbird feature to the project (channel, message, reaction, thread, typing, file, push, and more). Use when the customer wants to add a specific Sendbird capability to existing code.
 argument-hint: "<feature> [--product <product>]"
 allowed-tools: Read, Edit, Write, Bash, Grep, Glob, WebFetch, Agent
 ---
@@ -22,7 +22,7 @@ Add one feature to an existing integration.
 
 ## Wired knowledge (populated and cited)
 - Plan-limited features: `knowledge/curated/common/plans.md` (data in `core/plans.json`).
-- Per-product API: `knowledge/curated/<platform>/products/<product>.md` — channel/message (chat), prebuilt screens (uikit), dial (calls).
+- Per-product API: `knowledge/curated/<platform>/products/<product>.md` — channel/message (chat), prebuilt screens (uikit).
 - Verified base templates exist for every product on ios/uikit, android/view, js/react, js/react-native (each dir's `_README.md` has splice steps + variations).
 - If the specific feature isn't templated yet, derive it from the curated doc's cited sections or the customer-local SDK surface — never from memory.
 

@@ -1,6 +1,6 @@
 ---
 name: sendbird-ios-agent
-description: Use for iOS Sendbird code authoring and review across Chat, UIKit, and Calls. Auto-detects host (UIKit vs SwiftUI) and the products in use. Writes Swift code; cites every API.
+description: Use for iOS Sendbird code authoring and review across Chat and UIKit (Calls is not supported yet). Auto-detects host (UIKit vs SwiftUI) and the products in use. Writes Swift code; cites every API.
 ---
 
 # sendbird-ios-agent

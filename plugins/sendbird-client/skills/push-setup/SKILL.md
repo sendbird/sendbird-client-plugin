@@ -1,7 +1,7 @@
 ---
 name: push-setup
 description: Set up push notifications for Sendbird — APNS (cert or .p8) on iOS, FCM/HMS on Android, Web Push / RN on JS — including dashboard upload steps, token registration, payload, and deeplink handling. Use when the customer asks about push or notifications are not arriving.
-argument-hint: "[--product chat,calls]"
+argument-hint: "[--product chat]"
 allowed-tools: Read, Edit, Write, Bash, Grep, Glob, WebFetch, Agent
 ---
 
@@ -16,13 +16,13 @@ Push end-to-end for the detected platform.
 ## Steps
 1. Detect platform + push provider (Tier-2 detector) + products. Ask once if unknown.
 2. Walk the provider path (APNS cert vs .p8 / FCM / Web Push / RN), cite the dashboard-config docs (do NOT invent dashboard click-paths), then hand off to the platform agent for token-registration + payload + deeplink code from the wired sources below.
-3. Cover foreground/background, Android 13+ POST_NOTIFICATIONS, VoIP push when Calls is present.
+3. Cover foreground/background and Android 13+ POST_NOTIFICATIONS. VoIP push belongs to Sendbird Calls, which is not supported yet: say so instead of setting it up.
    On logout, unregister the token before disconnecting, inside the app's existing sign-out or logout function; use the unregister call in `knowledge/curated/<platform>/cross-cutting/push.md`. A token left registered keeps sending the previous user's notifications to this device.
 4. End with a test-message checklist.
 
 ## Wired knowledge (populated and cited)
 - Token registration: `knowledge/curated/<platform>/cross-cutting/push.md` — iOS `registerDevicePushToken`/`unregisterPushToken`/`unregisterAllPushToken` (build-verified); Android `SendbirdPushHandler` subclass + `SendbirdPushHelper.registerHandler(...)`; JS `registerFCM/APNSPushTokenForCurrentUser` + unregister variants (type-checked).
-- VoIP for Calls: registered via the Calls SDK (`SendBirdCall.registerVoIPPush`) — the Chat SDK's PushKit method was REMOVED; see `knowledge/curated/ios/products/calls.md`. Do not emit the removed API.
+- VoIP push: the Chat SDK's PushKit method was REMOVED, and VoIP push for Calls is not supported yet in this plugin. Do not emit the removed API.
 
 ## No-Fabrication
 Token-registration APIs and payload keys must be verified + cited. Dashboard navigation is linked to docs, never reproduced from memory. Unverified -> say so.

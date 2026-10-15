@@ -1,6 +1,6 @@
 ---
 name: calls-incoming
-description: Make Sendbird Calls ring when the app is in the background or was closed, and fix common in-call audio and video problems — iOS PushKit with CallKit, Android FCM with a call notification, React Native native push, and web media and WebSocket checks. Use when an app that already uses Sendbird Calls misses incoming calls, crashes on a VoIP push, or has no audio or video during a call.
+description: Sendbird Calls is not supported yet in this plugin release, so this skill answers that and changes nothing. Once Calls is supported it makes Sendbird Calls ring when the app is in the background or was closed, and fixes common in-call audio and video problems — iOS PushKit with CallKit, Android FCM with a call notification, React Native native push, and web media and WebSocket checks. Use when an app that already uses Sendbird Calls misses incoming calls, crashes on a VoIP push, or has no audio or video during a call.
 argument-hint: "[symptom]"
 allowed-tools: Read, Edit, Write, Bash, Grep, Glob, WebFetch, Agent
 ---
@@ -9,7 +9,7 @@ allowed-tools: Read, Edit, Write, Bash, Grep, Glob, WebFetch, Agent
 
 Resolve every plugin-owned path below from `${CLAUDE_PLUGIN_ROOT}`.
 Resolve the platform agent with `bash "${CLAUDE_PLUGIN_ROOT}/tools/routing/route-agent.sh" <project-dir> code` before delegating.
-Resolve the active product scope with `bash "${CLAUDE_PLUGIN_ROOT}/tools/detection/resolve-products.sh" <project-dir>` and run `resolve-products.sh <project-dir> --check calls`. If Calls is outside the scope, say so and stop.
+Resolve the active product scope with `bash "${CLAUDE_PLUGIN_ROOT}/tools/detection/resolve-products.sh" <project-dir>` and run `resolve-products.sh <project-dir> --check calls` before anything else. If it reports `product not supported yet: calls`, tell the customer that Sendbird Calls is not supported yet in this plugin, change nothing, and stop; in a non-interactive run, end with status `declined` and that reason. If Calls is outside the configured scope, say so and stop.
 
 This skill works on an app that already uses Sendbird Calls. Calls is not offered in the new-app setup questions; when the project has no Calls SDK, say so and point to the Calls docs instead of installing it here.
 
