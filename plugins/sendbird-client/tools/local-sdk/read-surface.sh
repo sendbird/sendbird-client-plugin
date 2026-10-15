@@ -42,9 +42,16 @@ case "$plat" in
     # Module names verified in the public SPM packages (sendbird-chat-sdk-ios,
     # sendbird-uikit-ios-spm, sendbird-live-sdk-ios). Match on `<Module>.swiftmodule/`,
     # never on the whole path: a project folder named `uikit-demo` must not turn the
-    # Chat interface into a UIKit candidate.
+    # Chat interface into a UIKit candidate. AI Agent, Desk, and Calls names come from the
+    # curated install sections (knowledge/curated/ios/products/ai-agent.md and desk.md
+    # "Install (SPM)", calls.md "Install (SPM only)"). Since 1.23.0 the AI Agent Messenger
+    # module is built from source and its public API ships in the SendbirdAIAgentCore binary,
+    # so either name counts; `|` separates names.
     case "$product" in
-      chat) module="SendbirdChatSDK";; uikit) module="SendbirdUIKit";; live) module="SendbirdLiveSDK";; *) module="";;
+      chat) module="SendbirdChatSDK";; uikit) module="SendbirdUIKit";; live) module="SendbirdLiveSDK";;
+      ai-agent) module="SendbirdAIAgentCore|SendbirdAIAgentMessenger";;
+      desk) module="SendBirdDesk";; calls) module="SendBirdCalls";;
+      *) module="";;
     esac
     # Where an installed xcframework lives: CocoaPods (Pods/), SwiftPM CLI
     # (.build/artifacts), and Xcode's SPM cache (DerivedData/<Project>-<hash>/
@@ -77,7 +84,7 @@ case "$plat" in
           n = split($2, parts, "/"); sm = ""
           for (k = n; k >= 1; k--) if (parts[k] ~ /\.swiftmodule$/) { sm = parts[k]; break }
           sub(/\.swiftmodule$/, "", sm)
-          if (mod != "" ? sm != mod : index(tolower(sm), tolower(prod)) == 0) next
+          if (mod != "" ? index("|" mod "|", "|" sm "|") == 0 : index(tolower(sm), tolower(prod)) == 0) next
           r = 4
           if ($2 ~ /\/ios-arm64\/.*\/arm64-apple-ios\.swiftinterface$/) r = 0
           else if ($2 ~ /-apple-ios\.swiftinterface$/) r = 1

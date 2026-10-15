@@ -1,4 +1,4 @@
-// source: https://github.com/sendbird/sendbird-calls-sdk-react-native (README, verified 2026-06-09)
+// source: https://github.com/sendbird/sendbird-calls-sdk-react-native/blob/v1.2.0/README.md (README, verified 2026-06-09)
 // Symbols quoted from the RN quickstart; full RN tsc not run in-repo (needs a react-native env).
 // App ID/user from env; tokens are secrets.
 

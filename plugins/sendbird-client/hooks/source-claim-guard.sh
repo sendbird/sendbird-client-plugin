@@ -5,23 +5,14 @@ set -uo pipefail
 HERE="$(cd "$(dirname "$0")" && pwd)"
 # shellcheck source=lib/hook-helpers.sh
 source "$HERE/lib/hook-helpers.sh"
-read_stdin_json
+read_stdin_json guard
 
 cwd="$(jget '.cwd')"
-
-source_supports_symbol() {
-  local file="$1" symbol="$2" method
-  [ -s "$file" ] || return 1
-  grep -Fq -- "$symbol" "$file" && return 0
-  method="${symbol#*.}"
-  grep -Eq -- "(^|[^A-Za-z0-9_])${method}([^A-Za-z0-9_]|$)" "$file"
-}
 
 # body_is_sourced <body> <existing file text>: 0 when every Sendbird symbol in <body> is found in a
 # source that <body> or the existing file cites.
 body_is_sourced() {
-local body="$1" existing="$2" context symbols instance_methods sources source tmp_source symbol supported source_file valid
-local -a resolved_sources=() tmp_sources=()
+local body="$1" existing="$2" context symbols instance_methods sources
 context="${existing}${existing:+$'\n'}${body}"
 symbols="$(printf '%s' "$body" | grep -Eo '(SendbirdChat|SendBirdCall|SendbirdCalls|AIAgentMessenger|SendbirdUIKit|SendbirdLive|SendbirdDesk|SendBirdDesk|MessengerLauncher|GroupChannel|BaseMessage|SBU[A-Z][A-Za-z0-9_]*|SBA[A-Z][A-Za-z0-9_]*|SBDSK[A-Za-z0-9_]*)(\.[A-Za-z_][A-Za-z0-9_]*)?' | sort -u || true)"
 if printf '%s' "$context" | grep -Eq '@sendbird/|sendbird-(calls|desk)|Sendbird(Chat|UIKit|Calls|Live|Desk)|AIAgentMessenger'; then
@@ -31,37 +22,10 @@ fi
 [ -n "$symbols" ] || return 0
 
 sources="$(printf '%s' "$context" | grep -Eo 'source:[[:space:]]*[^)`[:space:]]+' | sed -E 's/^source:[[:space:]]*//' | sort -u || true)"
-while IFS= read -r source; do
-  [ -n "$source" ] || continue
-  case "$source" in
-    knowledge/curated/*)
-      resolved_sources+=("${CLAUDE_PLUGIN_ROOT:-.}/$source") ;;
-    .sendbird-client/cache/*)
-      resolved_sources+=("${cwd:-$(pwd)}/$source") ;;
-    *.swiftinterface|*.d.ts)
-      resolved_sources+=("$source") ;;
-    https://sendbird.com/docs/*|https://github.com/sendbird/*)
-      tmp_source="$(mktemp)"
-      if curl -fsSL --max-time 8 "$source" -o "$tmp_source" 2>/dev/null; then
-        resolved_sources+=("$tmp_source")
-        tmp_sources+=("$tmp_source")
-      else
-        rm -f "$tmp_source"
-      fi
-      ;;
-  esac
-done <<< "$sources"
-
-valid=1
-while IFS= read -r symbol; do
-  supported=0
-  for source_file in ${resolved_sources[@]+"${resolved_sources[@]}"}; do
-    if source_supports_symbol "$source_file" "$symbol"; then supported=1; break; fi
-  done
-  [ "$supported" -eq 1 ] || { valid=0; break; }
-done <<< "$symbols"
-for tmp_source in ${tmp_sources[@]+"${tmp_sources[@]}"}; do rm -f "$tmp_source"; done
-[ "$valid" -eq 1 ]
+# Plugin files, the plugin's SDK cache, installed SDK interfaces, and public Sendbird pages
+# (hooks/lib/hook-helpers.sh resolve_cited_sources); a file the model wrote in the app does not count.
+resolve_cited_sources "$cwd" <<< "$sources"
+all_symbols_sourced "$symbols"
 }
 
 # existing_text <path>: the file's current content; a relative path resolves from the session cwd
@@ -76,7 +40,7 @@ deny() {
   jq -n '{hookSpecificOutput:{
     hookEventName:"PreToolUse",
     permissionDecision:"deny",
-    permissionDecisionReason:"Sendbird API code requires a concrete source comment whose file or public URL contains the emitted symbol. Preserve the template source comment or cite knowledge/curated, the customer SDK cache, a version-matched public source, or stop if unverifiable."
+    permissionDecisionReason:"Sendbird API code requires a concrete source comment whose file or public URL contains the emitted symbol. Preserve the template source comment or cite knowledge/curated, the customer SDK cache or installed SDK files (node_modules/@sendbird, Pods, .build, SourcePackages, DerivedData), a version-matched sendbird.com/docs page or a file in a public sendbird/* repo (a /blob/ or /raw/ link, not an issue or discussion), or stop if unverifiable."
   }}'
   exit 0
 }

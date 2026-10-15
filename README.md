@@ -90,13 +90,15 @@ This plugin runs inside Claude Code with your user account's permissions. Three 
 | Session start | `hooks/welcome.sh` | plugin files | adds the plugin's rules to the model's context | none |
 | Before a file write or shell command | `hooks/credential-guard.sh` | the content or command about to run | blocks it if it contains a credential | none |
 | Before a shell command | `hooks/destructive-command-guard.sh` | the command about to run | asks you to approve a Sendbird CLI `delete`, `revoke`, or `deactivate` run with `--yes`; in a `-p` run it is denied | none |
-| Before a file write, or a shell command that writes a source file | `hooks/source-claim-guard.sh` | the content about to be written, local files it cites | blocks Sendbird API code without a verifiable source | fetches the cited page if it is on `sendbird.com/docs` or `github.com/sendbird` |
+| Before a file write, or a shell command that writes a source file | `hooks/source-claim-guard.sh` | the content about to be written, local files it cites | blocks Sendbird API code without a verifiable source: a plugin file, an installed SDK file (`node_modules/@sendbird`, `Pods`, `.build`, Xcode `SourcePackages` or `DerivedData`, the Gradle cache), or a public page; a file the model wrote in your project does not count | fetches the cited page if it is on `sendbird.com/docs` or is a file in a `github.com/sendbird` repository (a `/blob/` or `/raw/` link); issues, discussions, and pull requests are not fetched |
 | After an agent finishes | `hooks/unsourced-claim-warn.sh` | the agent's reply | adds a warning when an API claim has no source; in Codex, sends the agent back once to add sources | none |
 | When the answer ends | `hooks/final-answer-gate.sh` | the final answer (passed by Claude Code; older versions: the session transcript after your last prompt) | asks the model to revise an unsourced answer | same as `source-claim-guard.sh` |
-| When the answer ends, only when `SENDBIRD_NONINTERACTIVE` is set | `hooks/run-summary-gate.sh` | the final answer and the plugin's run summary schema | asks the model to fix a run summary that does not match the schema | none |
+| When the answer ends, only when `SENDBIRD_NONINTERACTIVE` is `1`, `true`, or `yes` | `hooks/run-summary-gate.sh` | the final answer and the plugin's run summary schema | asks the model to fix a run summary that does not match the schema | none |
 | Before and after an agent runs | `hooks/telemetry-start.sh`, `hooks/telemetry-end.sh` | agent name, duration, outcome | nothing; writes a local log only if you opted in | none |
 
 The two fetching hooks send a plain request for the cited public page (8-second timeout); nothing from your project or conversation is sent.
+
+The hooks read their input with `jq`. When `jq` is not on your `PATH`, the credential, source, and destructive-command guards cannot check a call, so instead of blocking or allowing it they ask you to approve every file write and shell command, and the session start says that `jq` is missing. The other hooks then do nothing. Install `jq` to turn the checks back on.
 
 **Scripts the agent runs** through Claude Code's Bash tool, under your Claude Code permission settings: project detection (reads manifests such as `package.json`, `Podfile`, `Package.swift`, `build.gradle`) and the installed-SDK reader (reads `node_modules/@sendbird/*`, `Pods/`, `.build/`, this project's Xcode `DerivedData`, and the Gradle cache).
 

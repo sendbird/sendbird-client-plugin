@@ -1,4 +1,4 @@
-// source: https://github.com/sendbird/sendbird-calls-ios (README "Receive a call", "Make a call", and
+// source: https://github.com/sendbird/sendbird-calls-ios/blob/1.12.3/README.md (README "Receive a call", "Make a call", and
 //   "Callback and delegate thread handling", verified 2026-09-30)
 //   + SendBirdCalls.swiftinterface 1.12.3 (verified 2026-09-30): SendBirdCall.configure(appId:) line 858,
 //   addDelegate(_:identifier:) line 863, authenticate(with:completionHandler:) line 877,

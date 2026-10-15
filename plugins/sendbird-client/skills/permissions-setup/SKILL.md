@@ -7,7 +7,7 @@ allowed-tools: Read, Edit, Write, Bash, Grep, Glob, WebFetch, Agent
 
 # /sendbird-client:permissions-setup
 
-Resolve every plugin-owned path below from `${CLAUDE_PLUGIN_ROOT}`.
+Resolve every plugin-owned path below from `${CLAUDE_PLUGIN_ROOT}`. Where that variable is empty (Codex does not set it for shell commands), the plugin root is the folder two levels above this SKILL.md.
 Resolve the platform agent with `bash "${CLAUDE_PLUGIN_ROOT}/tools/routing/route-agent.sh" <project-dir> code` before delegating.
 Resolve the active product scope with `bash "${CLAUDE_PLUGIN_ROOT}/tools/detection/resolve-products.sh" <project-dir>` and decline out-of-scope products.
 

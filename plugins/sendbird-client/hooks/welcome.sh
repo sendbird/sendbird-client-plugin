@@ -3,6 +3,10 @@
 # it is the plugin's ALWAYS-ON policy, active even when no skill is invoked.
 set -euo pipefail
 ROOT="${CLAUDE_PLUGIN_ROOT:-$(cd "$(dirname "$0")/.." && pwd)}"
+# shellcheck source=lib/hook-helpers.sh
+source "$(cd "$(dirname "$0")" && pwd)/lib/hook-helpers.sh"
+# Without jq the guards cannot read their input and ask the user about every call instead.
+command -v jq >/dev/null 2>&1 || echo "WARNING: jq is not installed, so the Sendbird plugin safety checks cannot run and will ask for confirmation before every file write and shell command. Install jq to turn them back on."
 # Products this release does not support yet (config .productScope.notYetSupported). The rule is
 # built from the config so that removing a product there is the whole change that turns it back on.
 CONFIG="$ROOT/config/plugin-config.json"
@@ -38,11 +42,10 @@ ALWAYS-ON rules for ANY Sendbird answer (even without a skill):
 - Never state pricing/quota figures or "latest" version numbers from memory; tokens are secrets — never hard-code or log them.
 EOF
 # Non-interactive runs (claude -p, CI, scripts): the caller cannot answer a question mid-run.
-case "${SENDBIRD_NONINTERACTIVE:-}" in
-  1|true|TRUE|yes)
+if is_noninteractive; then
     cat <<EOF2
 
-NON-INTERACTIVE MODE (SENDBIRD_NONINTERACTIVE is set): nobody can answer a question in this run. Follow $ROOT/docs/AGENT_CONTRACT.md section 7:
+NON-INTERACTIVE MODE (SENDBIRD_NONINTERACTIVE is on): nobody can answer a question in this run. Follow $ROOT/docs/AGENT_CONTRACT.md section 7:
 - Never ask the user a question and never end with one.
 - A value the skill would ask for: use the environment or the project's profile.json if it has it. Adding the Sendbird dependency that the request clearly needs is allowed — the request is the consent; list it under changes.
 - A request to add a product's screen or feature includes installing it. Use a safe default instead of asking: the user ID from the app's sign-in code, user-ID-only connect (token server under manualSteps), existing navigation or a state switch, no push (under manualSteps).
@@ -50,5 +53,4 @@ NON-INTERACTIVE MODE (SENDBIRD_NONINTERACTIVE is set): nobody can answer a quest
 - If a value that changes the emitted code is still unknown (hybrid or unknown host, no App ID, a request that assumes an integration the project does not have), change nothing and stop with status needs_input and one entry in questions per missing value.
 - End the final answer with one fenced json block that validates against $ROOT/core/schemas/run-summary.schema.json.
 EOF2
-    ;;
-esac
+fi

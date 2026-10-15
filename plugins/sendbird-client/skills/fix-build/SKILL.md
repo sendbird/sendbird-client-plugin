@@ -7,7 +7,7 @@ allowed-tools: Read, Edit, Bash, Grep, Glob, WebFetch, Agent
 
 # /sendbird-client:fix-build
 
-Resolve every plugin-owned path below from `${CLAUDE_PLUGIN_ROOT}`.
+Resolve every plugin-owned path below from `${CLAUDE_PLUGIN_ROOT}`. Where that variable is empty (Codex does not set it for shell commands), the plugin root is the folder two levels above this SKILL.md.
 Resolve the platform agent with `bash "${CLAUDE_PLUGIN_ROOT}/tools/routing/route-agent.sh" <project-dir> code` before delegating a fix.
 
 Works from the error text the customer pasted (or a log file they point to). It does not run a build unless the customer explicitly asks for one in this request.

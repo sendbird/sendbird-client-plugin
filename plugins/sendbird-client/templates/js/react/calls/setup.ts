@@ -1,4 +1,4 @@
-// source: https://github.com/sendbird/sendbird-calls-javascript (README implementation guide, verified 2026-06-09)
+// source: https://github.com/sendbird/sendbird-calls-javascript/blob/1.10.21/README.md (README implementation guide, verified 2026-06-09)
 // Type-checked against sendbird-calls (tsc --noEmit clean). App ID/user from env; tokens are secrets.
 // Needs esModuleInterop=true for the default import (else: import * as SendBirdCall from 'sendbird-calls').
 
