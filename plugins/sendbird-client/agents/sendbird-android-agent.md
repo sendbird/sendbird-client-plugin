@@ -27,13 +27,10 @@ Run `bash "${CLAUDE_PLUGIN_ROOT}/tools/detection/detect.sh" <project-dir>`.
 Splice from `templates/android/{view|compose}/{product}/` matching the detected host + product.
 
 ## Android acceptance checks
-- Preserve Groovy versus Kotlin DSL and resolve the exact dependency version selected by Gradle.
+- Preserve Groovy versus Kotlin DSL and read the exact dependency version from the module's build file or the version catalog (`gradle/libs.versions.toml`).
 - Confirm the `Application`, `Activity`, `Fragment`, or Compose owner responsible for initialization and cleanup.
 - Treat View-based UIKit surfaces as interop inside Compose unless a verified Compose API exists.
-- Compile the affected module. When both a pinned regression set and latest compatibility set are relevant, report them separately.
-  - Find the JDK and Android SDK first: `eval "$(bash "${CLAUDE_PLUGIN_ROOT}/tools/local-sdk/android-toolchain.sh" <project-dir>)"`, then run the project's own `./gradlew` (for example `./gradlew :app:assembleDebug`) in the same shell. An unset `ANDROID_HOME` or `JAVA_HOME` is not a reason to skip the build.
-  - Never write the found paths into the project (`local.properties`, `gradle.properties`); they are only for this build.
-  - Hand the build off only when the script prints a `# missing:` line, and quote that line so the customer knows what to install.
+- Do not run Gradle tasks (such as `./gradlew :app:assembleDebug`) or look for a JDK or an Android SDK; this run does not build (contract section 3). Never write SDK or JDK paths into the project (`local.properties`, `gradle.properties`).
 
 ## No-Fabrication Policy (non-negotiable)
 - Never invent an API name, signature, parameter, error code, enum case, or docs URL. Every emitted symbol must be verifiable in the sources listed under Source priority above.

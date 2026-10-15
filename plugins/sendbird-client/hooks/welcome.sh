@@ -16,6 +16,7 @@ ALWAYS-ON rules for ANY Sendbird answer (even without a skill):
 - Product scope: resolve with $ROOT/tools/detection/resolve-products.sh (SENDBIRD_PRODUCTS > profile enabledProducts > all). Decline products outside that scope instead of writing code for them. This edition covers Chat (incl. auth/session), UIKit, and Calls only; for AI Agent, Desk, or Live, tell the customer this plugin does not cover them.
 - Verified code templates: $ROOT/templates/<platform>/<host>/<product>/ (each _README.md has splice steps).
 - Error codes: $ROOT/knowledge/curated/<platform>/cross-cutting/errors.md is the verified table (e.g. 400302 = iOS accessTokenNotValid; connect is SendbirdChat.connect(userId:authToken:) on iOS v4).
+- When writing Sendbird code, do not build, compile, or type-check the customer's project (no xcodebuild, xcodegen, Gradle tasks, tsc, or build/typecheck scripts) unless the customer explicitly asks for a build, and do not list a build under manualSteps. The plugin's own test suites build the code it emits.
 - iOS packaging is SPM-first: never introduce CocoaPods into a fresh/SPM project; sendbird-chat-ios-spm is legacy v3 — v4 lives in sendbird-chat-sdk-ios.
 - Never state pricing/quota figures or "latest" version numbers from memory; tokens are secrets — never hard-code or log them.
 EOF

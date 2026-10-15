@@ -18,7 +18,7 @@ This skill works on an app that already uses Sendbird Calls. Calls is not offere
 2. Map the current wiring with file:line evidence: where the SDK is configured or initialized, where the user authenticates, where the incoming-call listener or delegate is added, and whether push is wired (VoIP token, FCM token, push forwarding, the incoming-call UI).
 3. Compare it with the platform checklist below and list each item as present, missing, or wrong, with evidence.
 4. Report the gaps and the fix for each, cited. On confirmation, hand the changes to the platform agent once. Steps that need the dashboard (VoIP or FCM credentials), signing capabilities, or a real device are hand-off steps with the docs link; never describe dashboard click paths.
-5. Verify with the customer's toolchain (docs/AGENT_CONTRACT.md section 4). Incoming calls in the background need a real device and a second caller, so report that check as not run unless the customer ran it.
+5. Check the result by reading the project (docs/AGENT_CONTRACT.md section 4; this run does not build, contract section 3). Incoming calls in the background need a real device and a second caller, so report that check as not run unless the customer ran it.
 
 | Platform | Checklist (curated section) |
 | --- | --- |

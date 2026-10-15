@@ -46,6 +46,7 @@ The source must contain the symbol or exact signature. A related page is not evi
 - Preserve the template's `source:` comment when code is copied so the write-boundary guard can validate it.
 - Write files with the host's file-editing tool: Write and Edit in Claude Code, `apply_patch` in Codex. Do not write source files with shell redirection, heredocs, or `sed -i`.
 - Limit edits to the requested product and the lifecycle code required to support it.
+- Some Chat features work only on higher Sendbird plans (`core/plans.json`, `knowledge/curated/common/plans.md`). Do not add one the customer did not ask for, and before adding one they did ask for, check it with `tools/detection/resolve-plan.sh <project-dir> --check <feature-id>`: build on `ok`, ask first on `confirm`, and write no code on `sales`.
 - Install dependencies so the project's next clean install works. Never pass `--legacy-peer-deps` or `--force` to npm (or `--ignore-engines` to yarn): they hide a version conflict that breaks the next `npm install`. When a package's peer range rejects the project's versions, install the newest version whose `peerDependencies` accept them; check with `npm view <package>@<range> peerDependencies`.
 - Do not install tools or write files outside the project for your own checks (for example `npm i playwright` in `/tmp`). Use what the project and the machine already have, and report a check you could not run as not run.
 - Keep the signatures of existing functions, classes, and constructors you edit. Callers you cannot see would break. Get what the SDK needs (an Android `Context`, the SDK instance) from the `Application` class or a holder instead of a new parameter.
@@ -58,23 +59,24 @@ Do every step that can be done inside the customer project before reporting. A s
 - On a SwiftUI host, start the Sendbird session from the app's own sign-in code on the one shared session the views also show (`knowledge/curated/ios/hosts/swiftui.md` "Start the session from the app's sign-in"). Do not pass the session to the sign-in object through a `weak` property set in `.onAppear`.
 - If the app already has a sign-out or logout function, disconnect there and clean up the handlers you added. Add a standalone helper only when no such function exists, and name the helper in the hand-off.
 - When the project already gets a Sendbird token from its own backend, register the session handler with that call. Without such a call, leave it out; do not add a placeholder endpoint.
-- Find the build toolchain before saying a build cannot run. On Android, `tools/local-sdk/android-toolchain.sh` looks for a JDK and an Android SDK in the standard install locations; an unset `ANDROID_HOME` or `JAVA_HOME` alone is not a reason to skip the build.
-- Files your own verification created (build outputs such as `.gradle/`, `build/`, `node_modules/`, a generated `.xcodeproj`) are not hand-off steps. Leave them out of `changes` and `manualSteps`; at most mention them once in the answer.
+- This run does not build, compile, or type-check the project. Do not run `xcodebuild`, `xcodegen`, `swift build`, Gradle tasks (such as `./gradlew assembleDebug`), `tsc`, or the project's `build` or `typecheck` scripts, and do not look for a JDK or an Android SDK to build with. Run a build only when the customer explicitly asks for one. The plugin's own test suites build the code patterns it emits; a build here only makes the run longer.
+- A build is not a hand-off step either. Do not put "build the project" or "run the type check" in `manualSteps`; at most say once in the answer that the customer can build the app as usual.
+- Files that installing dependencies created (such as `node_modules/` or `.gradle/`) are not hand-off steps. Leave them out of `changes` and `manualSteps`; at most mention them once in the answer.
 - A hand-off step is allowed only for work that needs something the project does not contain: a token-issuing server, a dashboard setting, a signing key or certificate, a device or simulator run, or a value nobody supplied. Each step says what is missing and why the plugin could not do it.
 
 ## 4. Verify the result
 
-Verification must exercise the edited path, not only inspect text:
+Check the edited path by reading the project. These checks need no build:
 
-- dependency resolves at the selected version
-- generated source compiles or type-checks with the customer's toolchain when available
+- the Sendbird dependency is declared at the selected version in the manifest (`package.json`, the Gradle build file or version catalog, `Package.swift`, `project.yml`, or the Xcode project), and the lockfile or `Package.resolved` names the same version when the project has one
+- every Sendbird symbol in the edited files is in the evidence ledger (section 2) for that version
 - initialization occurs once at the detected lifecycle entry
 - session and token refresh handlers are registered before connection
 - listeners, delegates, and handlers have matching cleanup
 - the logout path: when the project has a sign-out or logout function (for example `onLogout`), it now disconnects, removes the handlers you added, and, when you set up push, unregisters the push token (`knowledge/curated/<platform>/cross-cutting/push.md`). Do this in the project; it is never a `manualSteps` entry
 - host-specific requirements are present
 
-Report each check as pass, fail, or not run. Never describe a skipped check as passed.
+Report each check as pass, fail, or not run. Never describe a skipped check as passed. A build or type check is not one of these checks; the answer may say once that this run did not build the project.
 
 ## 5. Delegate once
 
@@ -86,7 +88,7 @@ Return:
 
 1. detected task envelope
 2. changed files and why each changed
-3. verification commands and their actual results
+3. the checks from section 4 and their results
 4. symbol-to-source evidence
 5. anything not verified and the exact next action; only steps that "Finish what the project allows" (section 3) could not complete
 
@@ -95,7 +97,7 @@ Return:
 When `SENDBIRD_NONINTERACTIVE` is set (for example `SENDBIRD_NONINTERACTIVE=1 claude -p ...` in CI or a script), nobody can answer a question during the run.
 
 - Never ask the user a question, and never end the answer with one.
-- For a value you would otherwise ask for, use the environment (`SENDBIRD_APP_ID`, `SENDBIRD_PRODUCTS`, `SENDBIRD_REGION`) or the project's `profile.json` when they have it.
+- For a value you would otherwise ask for, use the environment (`SENDBIRD_APP_ID`, `SENDBIRD_PRODUCTS`, `SENDBIRD_REGION`, `SENDBIRD_PLAN`) or the project's `profile.json` when they have it.
 - Adding the Sendbird dependency that the request clearly needs is allowed: the request is the consent. List it under `changes`.
 - A request to add a product's screen or feature includes installing and initializing that product. Do not stop to ask for a choice that has a safe default; use the default and say so in the answer:
   - the user ID: the one the app's existing sign-in code already has
@@ -106,4 +108,6 @@ When `SENDBIRD_NONINTERACTIVE` is set (for example `SENDBIRD_NONINTERACTIVE=1 cl
 - End the final answer with one fenced `json` block that validates against `core/schemas/run-summary.schema.json`. Paths in `changes` are relative to the project root.
 
 The caller answers by running again with the value in the environment or in the prompt (for example `host: swiftui`).
+
+A feature the customer's plan does not include (section 3, `knowledge/curated/common/plans.md`) is asked about before any file is written: the run changes nothing and returns `needs_input` with a question whose id is `confirm-<feature-id>` and whose options are `yes` and `no`. The caller answers in the prompt with `confirm-<feature-id>=yes` (build it) or `confirm-<feature-id>=no` (leave it out), next to any other answers.
 

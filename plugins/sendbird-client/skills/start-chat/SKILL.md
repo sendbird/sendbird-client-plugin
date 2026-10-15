@@ -17,7 +17,7 @@ Resolve the active product scope with `bash "${CLAUDE_PLUGIN_ROOT}/tools/detecti
 3. Find or create the channel: create a group channel with only the other user's ID and `isDistinct` set to true. With distinct on, the server returns the existing channel that has the same members instead of creating a second one. Do not query for an existing channel first and do not create a non-distinct channel. Create only after connect has completed (`products/chat.md` "Call APIs only after connect completes").
 4. Open the channel screen by the URL of the returned channel, with no channel list in between, using the host's section below. Keep the app's navigation: push onto the existing stack or route, so the back action returns to the screen that had the button.
 5. Push tap (only when asked, or when the app already handles Sendbird push): read the channel URL from the Sendbird payload and open the same screen. Use only the host sections below; where a host has no verified section, say so and leave push out.
-6. Hand the splice to the platform agent once, with the host section and the files and lines from step 2. Verify with the customer's toolchain (docs/AGENT_CONTRACT.md section 4) and report pass, fail, or not run.
+6. Hand the splice to the platform agent once, with the host section and the files and lines from step 2. Check the result by reading the project (docs/AGENT_CONTRACT.md section 4; this run does not build, contract section 3) and report each check as pass, fail, or not run.
 
 | Host | Open a channel by URL (and push tap) |
 | --- | --- |
