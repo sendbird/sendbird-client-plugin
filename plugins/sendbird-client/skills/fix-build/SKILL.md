@@ -25,7 +25,6 @@ Works from the error text the customer pasted (or a log file they point to). It 
 | webpack 5, Vite, or Create React App names a Node.js core module (`crypto`, `events`, `https`, ...) inside a Sendbird package; "process is not defined" from UIKit React | `knowledge/curated/js/cross-cutting/troubleshooting.md` "webpack 5, Vite, or Create React App: ..." |
 | React Native: missing BottomSheet or ActionMenu context, or other errors from two copies of a Sendbird package | `knowledge/curated/js/cross-cutting/troubleshooting.md` "Errors that come from two copies of a Sendbird package"; `knowledge/curated/js/hosts/react-native.md` "Version compatibility checklist" |
 | React Native: the UIKit container throws "Cannot read property 'options' of undefined", or asks for media packages | `knowledge/curated/js/cross-cutting/troubleshooting.md`, the UIKit container entry under "Build and setup" |
-| React Native Calls: the Android 16 KB page-size check fails | `knowledge/curated/js/cross-cutting/troubleshooting.md` "React Native Calls: ..." |
 | Gradle cannot resolve `com.sendbird.sdk:*` | `knowledge/curated/android/cross-cutting/troubleshooting.md` "Gradle can't resolve ..."; `knowledge/curated/android/setup.md` "Packaging (Gradle)" |
 | Android 15 crash on 16 KB pages, or unexpected Conscrypt `.so` files | `knowledge/curated/android/cross-cutting/troubleshooting.md` (16 KB entry); `knowledge/curated/android/setup.md` "Getting a newer Chat SDK under UIKit" |
 | Manifest merger fails on a `FileProvider` (`provider@authorities` or `FILE_PROVIDER_PATHS`) | `knowledge/curated/android/cross-cutting/troubleshooting.md` "Manifest merger fails on a `FileProvider` ..." |
@@ -36,7 +35,7 @@ Rules for iOS packaging come from the plugin's policy: install with Swift Packag
 When the error fits none of these rows, look for it in `knowledge/curated/<platform>/cross-cutting/troubleshooting.md` and `pitfalls.md`, then in the docs (`${CLAUDE_PLUGIN_ROOT}/core/docs-index.json`). If no verified source covers this framework or message, say "I have no verified guidance for this build error", list what you checked, and stop. Do not write bundler configuration, polyfills, or Gradle workarounds from memory.
 
 ## Wired knowledge (populated and cited)
-- `knowledge/curated/js/cross-cutting/troubleshooting.md` "Build and setup" — Next.js, webpack 5, Vite, Create React App, duplicate packages, the React Native UIKit container, React Native Calls 16 KB.
+- `knowledge/curated/js/cross-cutting/troubleshooting.md` "Build and setup" — Next.js, webpack 5, Vite, Create React App, duplicate packages, the React Native UIKit container.
 - `knowledge/curated/android/cross-cutting/troubleshooting.md` "Build and install" — Gradle repository, 16 KB pages, UIKit init, FileProvider merger.
 - `knowledge/curated/<platform>/setup.md` — coordinates, repositories, and version pairing; `knowledge/curated/js/hosts/react-native.md` — React Native version checklist.
 

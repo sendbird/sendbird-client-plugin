@@ -1,7 +1,7 @@
 ---
 name: setup
 description: Wizard to integrate Sendbird into the current project. Detects platform, host, package manager, lifecycle, and products; installs the SDK, inserts init + connect, and scaffolds a first screen. Use when starting a Sendbird integration or running first-time setup.
-argument-hint: "[new-app] [--product chat|uikit|calls]"
+argument-hint: "[new-app] [--product chat|uikit]"
 allowed-tools: Read, Edit, Write, Bash, Grep, Glob, WebFetch, Agent, AskUserQuestion
 ---
 
@@ -24,7 +24,7 @@ Resolve the active product scope with `bash "${CLAUDE_PLUGIN_ROOT}/tools/detecti
 ## New app (empty folder)
 Use this when the request is to create a new app, or the project folder is empty (detection finds no platform).
 
-1. Read the questions from `${CLAUDE_PLUGIN_ROOT}/core/catalog.json`. Drop options whose `product` is outside the active scope (`resolve-products.sh`), and drop a question with no options left. Skip a question whose `when` does not match the answers so far. Leave out a question with `"offered": false`; that feature is not offered in new-app setup for now. If the request itself names that feature (for example in `notes`, or `--product calls`), build it as usual.
+1. Read the questions from `${CLAUDE_PLUGIN_ROOT}/core/catalog.json`. Drop options whose `product` is outside the active scope (`resolve-products.sh`), and drop a question with no options left. Skip a question whose `when` does not match the answers so far. Leave out a question with `"offered": false`; that feature is not offered in new-app setup for now. If the request itself names that feature (for example in `notes`), build it as usual, unless its product is not supported yet (`resolve-products.sh --check <product>` reports `not supported yet`); that product is declined, never built.
 2. Get the answers:
    - Interactive: ask with AskUserQuestion (in Codex, request_user_input when it is listed), using the catalog's question text and option labels as written (translated into the customer's language if needed). With neither tool, or when request_user_input returns no answer, ask in your reply and stop until the customer answers; do not pick an answer for them. Use `multiSelect` for `multi` questions. Ask `platform` first, then the rest together (at most 4 questions per call). Do not add, drop, or reword options.
    - Non-interactive (`SENDBIRD_NONINTERACTIVE`): read answers from the request, written as `answers: platform=react; chat=channel-list,conversation; notes=...`. Besides the catalog questions, an answer may be `confirm-<feature-id>=yes` or `confirm-<feature-id>=no`, where `<feature-id>` is an `id` in `core/plans.json`: it answers the plan confirmation from step 3. Any other answer that is not a catalog option id is an error. If the request has no answers yet, change nothing and stop with `status: "needs_input"`, returning every catalog question in scope at once, in catalog order, each with its `id`, `question`, `type`, option ids as `options`, the option labels as `labels` (same order), and `when` when it has one, so the caller can ask them all and run again once (with `--resume` it continues this session). If answers are given but a `required` question that applies is missing, return only the missing ones the same way. When `SENDBIRD_LOCALE` is set (a language such as `ko` or `ja`), write `question` and `labels` in that language; never translate `id`, `options`, or `when`, since the caller passes answers back by option id.
@@ -40,8 +40,8 @@ Use this when the request is to create a new app, or the project folder is empty
 ## Wired knowledge (read these FIRST — populated and cited)
 - Install coordinates + packaging policy: `knowledge/curated/<platform>/setup.md` (iOS is SPM-first).
 - Plan-limited features and the confirm-before-adding rule: `knowledge/curated/common/plans.md` (data in `core/plans.json`).
-- Product init/connect/send: `knowledge/curated/<platform>/products/<product>.md` (chat/uikit/calls — all populated; iOS snippets build-verified, JS type-checked).
-- Verified splice code: `templates/ios/uikit/{chat/InitConnect.swift, uikit/SetupUIKit.swift, calls/SetupCalls.swift}` and the matching `templates/android/view/...`, `templates/js/react/...`, `templates/js/react-native/...` files (each `_README.md` documents splice steps).
+- Product init/connect/send: `knowledge/curated/<platform>/products/<product>.md` (chat/uikit — all populated; iOS snippets build-verified, JS type-checked).
+- Verified splice code: `templates/ios/uikit/{chat/InitConnect.swift, uikit/SetupUIKit.swift}` and the matching `templates/android/view/...`, `templates/js/react/...`, `templates/js/react-native/...` files (each `_README.md` documents splice steps).
 - Non-native hosts (SwiftUI/Compose): the host `_README.md` under templates explains the verified interop path — no host-native SDK API exists; do not invent one.
 
 ## No-Fabrication

@@ -1,6 +1,6 @@
 ---
 name: sendbird-android-agent
-description: Use for Android Sendbird code authoring and review across Chat, UIKit, and Calls. Auto-detects host (View XML vs Jetpack Compose) and Gradle flavor. Writes Kotlin/Java; cites every API.
+description: Use for Android Sendbird code authoring and review across Chat and UIKit (Calls is not supported yet). Auto-detects host (View XML vs Jetpack Compose) and Gradle flavor. Writes Kotlin/Java; cites every API.
 ---
 
 # sendbird-android-agent
