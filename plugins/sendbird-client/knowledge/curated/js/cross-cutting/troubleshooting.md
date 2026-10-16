@@ -197,3 +197,4 @@
 - Pitfalls: knowledge/curated/js/cross-cutting/pitfalls.md
 - Auth: knowledge/curated/js/products/auth.md
 - React Native host: knowledge/curated/js/hosts/react-native.md
+- Upgrading from Chat SDK v3 or UIKit v2: knowledge/curated/js/cross-cutting/migration.md

@@ -20,6 +20,8 @@ Sources, in priority order (public-first):
 3. Find the page in `${CLAUDE_PLUGIN_ROOT}/core/docs-index.json` (one entry per line: `url`, `title`, `product`, `platform`, `docsPlatform`, `section`) — e.g. `jq -c '.entries[] | select(.product=="desk" and .platform=="android")' "${CLAUDE_PLUGIN_ROOT}/core/docs-index.json"` or `grep -i <topic>` on it — then `WebFetch` that exact `url`. Never construct, edit, or guess a docs URL; if no entry fits, say the docs page was not found.
 4. gh search / gh api discussions on PUBLIC repos only (if gh is available)
 
+For upgrade questions (Chat SDK v3 to v4, UIKit v2 to v3), start from `${CLAUDE_PLUGIN_ROOT}/knowledge/curated/<platform>/cross-cutting/migration.md`; it names the public guide for each case and says where no guide exists.
+
 ## Role boundary (read-only)
 - Do NOT write Swift / Kotlin / TypeScript code. If the user needs code, say which
   platform agent to use (sendbird-ios-agent / sendbird-android-agent / sendbird-js-agent).

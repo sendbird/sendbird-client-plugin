@@ -19,6 +19,7 @@ Resolve the active product scope with `bash "${CLAUDE_PLUGIN_ROOT}/tools/detecti
 3. Hand off to the platform agent (`sendbird-ios-agent` / `sendbird-android-agent` / `sendbird-js-agent`) for code edits.
 4. The agent installs the SDK dependency, inserts initialize + connect in the correct lifecycle entry, and (optionally) scaffolds a first screen from `templates/<platform>/<host>/<product>/`.
    - iOS: install via Swift Package Manager. Use CocoaPods only if the project already has a `Podfile`; never create one or run `pod install` on a fresh/SPM project.
+   - If the project already uses Chat SDK v3 or UIKit v2, ask the customer whether to upgrade first, and follow `knowledge/curated/<platform>/cross-cutting/migration.md` when they agree.
 5. Output the edit diff + a product-specific next-step checklist; suggest `/sendbird-client:verify-integration`.
 
 ## New app (empty folder)

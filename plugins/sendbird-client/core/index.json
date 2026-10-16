@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-10-14T19:23:16Z",
-  "count": 49,
+  "generatedAt": "2026-10-16T01:06:21Z",
+  "count": 52,
   "entries": [
     {
       "file": "knowledge/curated/android/architecture.md",
@@ -19,6 +19,16 @@
       "lastVerifiedAgainst": "sendbird-chat-sdk-android 4.36.5",
       "verifiedDates": [
         "2026-10-10"
+      ]
+    },
+    {
+      "file": "knowledge/curated/android/cross-cutting/migration.md",
+      "platform": "android",
+      "category": "cross-cutting",
+      "status": "populated",
+      "lastVerifiedAgainst": "sendbird-chat-sdk-android 4.36.5 / sendbird-uikit-android 3.26.3 (new names); public migration guides fetched 2026-10-16",
+      "verifiedDates": [
+        "2026-10-16"
       ]
     },
     {
@@ -228,6 +238,16 @@
       ]
     },
     {
+      "file": "knowledge/curated/ios/cross-cutting/migration.md",
+      "platform": "ios",
+      "category": "cross-cutting",
+      "status": "populated",
+      "lastVerifiedAgainst": "sendbird-chat-sdk-ios 4.39.11 / sendbird-uikit-ios 3.36.2 (new names); public migration guides fetched 2026-10-16",
+      "verifiedDates": [
+        "2026-10-16"
+      ]
+    },
+    {
       "file": "knowledge/curated/ios/cross-cutting/performance.md",
       "platform": "ios",
       "category": "cross-cutting",
@@ -364,6 +384,16 @@
       "lastVerifiedAgainst": "@sendbird/chat 4.22.13",
       "verifiedDates": [
         "2026-10-10"
+      ]
+    },
+    {
+      "file": "knowledge/curated/js/cross-cutting/migration.md",
+      "platform": "js",
+      "category": "cross-cutting",
+      "status": "populated",
+      "lastVerifiedAgainst": "@sendbird/chat 4.22.13 / @sendbird/uikit-react 3.19.1 / @sendbird/uikit-react-native 3.12.9 (new names); public migration guides fetched 2026-10-16",
+      "verifiedDates": [
+        "2026-10-16"
       ]
     },
     {

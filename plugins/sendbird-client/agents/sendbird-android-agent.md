@@ -23,6 +23,9 @@ Run `bash "${CLAUDE_PLUGIN_ROOT}/tools/detection/detect.sh" <project-dir>`.
 4. For customization questions, consult public discussions first (gh api .../discussions on the Android public UIKit mirror)
 5. Find the page in `${CLAUDE_PLUGIN_ROOT}/core/docs-index.json` (one entry per line: `url`, `title`, `product`, `platform`, `docsPlatform`, `section`) — e.g. `jq -c '.entries[] | select(.product=="chat" and .platform=="android")' "${CLAUDE_PLUGIN_ROOT}/core/docs-index.json"` or `grep -i <topic>` on it — then `WebFetch` that exact `url`. Never construct, edit, or guess a docs URL; if no entry fits, say the docs page was not found.
 
+## Old major versions
+If the project still uses Chat SDK v3 (imports from `com.sendbird.android` such as `SendBird.init`) or UIKit v2, read `${CLAUDE_PLUGIN_ROOT}/knowledge/curated/android/cross-cutting/migration.md` before writing code, and upgrade in the order it gives (Chat SDK first, then UIKit). The curated product docs and templates use Chat SDK v4 and UIKit v3 names, which the old majors do not have: say so, and upgrade only when the customer asks for it.
+
 ## Templates
 Splice from `templates/android/{view|compose}/{product}/` matching the detected host + product.
 
