@@ -24,6 +24,15 @@ Add one feature to an existing integration.
 - Plan-limited features: `knowledge/curated/common/plans.md` (data in `core/plans.json`).
 - Per-product API: `knowledge/curated/<platform>/products/<product>.md` — channel/message (chat), prebuilt screens (uikit).
 - Verified base templates exist for every product on ios/uikit, android/view, js/react, js/react-native (each dir's `_README.md` has splice steps + variations).
+- Chat message features have templates on all six hosts, under `templates/<platform>/<host>/chat/` (the `_README.md` there has per-feature splice steps):
+
+  | Feature | ios/uikit, android/view | ios/swiftui | android/compose | js/react, js/react-native |
+  |---|---|---|---|---|
+  | Send an image or file, upload progress, cancel, resend a failed one | `FileMessageSender` | `FileUploadModel` | `FileUploadViewModel` | `FileMessageUpload.ts` (no upload progress on React Native) |
+  | Edit and delete your own messages, other members' edits and deletes | `MessageEditing` | `MessageActionsModel` | `MessageActionsViewModel` | `MessageEditing.ts` |
+  | Unread counts (total badge, per channel, mark as read) | `UnreadCount` | `UnreadCountModel` | `UnreadCountViewModel` | `UnreadCount.ts` |
+  | Typing indicator and read receipts | `TypingAndReadReceipts` | `ChannelActivityModel` | `ChannelActivityViewModel` | `TypingAndReadReceipts.ts` |
+
 - If the specific feature isn't templated yet, derive it from the curated doc's cited sections or the customer-local SDK surface — never from memory.
 
 ## No-Fabrication

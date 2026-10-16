@@ -43,6 +43,7 @@ Use this when the request is to create a new app, or the project folder is empty
 - Plan-limited features and the confirm-before-adding rule: `knowledge/curated/common/plans.md` (data in `core/plans.json`).
 - Product init/connect/send: `knowledge/curated/<platform>/products/<product>.md` (chat/uikit — all populated; iOS snippets build-verified, JS type-checked).
 - Verified splice code: `templates/ios/uikit/{chat/InitConnect.swift, uikit/SetupUIKit.swift}` and the matching `templates/android/view/...`, `templates/js/react/...`, `templates/js/react-native/...` files (each `_README.md` documents splice steps).
+- Chat features a request names (for example in `notes`): images and files, edit and delete, unread counts, typing indicator, and read receipts have verified files on every host under `templates/<platform>/<host>/chat/` (feature table in `skills/add-feature/SKILL.md`; splice steps in that folder's `_README.md`).
 - Non-native hosts (SwiftUI/Compose): the host `_README.md` under templates explains the verified interop path — no host-native SDK API exists; do not invent one.
 
 ## No-Fabrication
