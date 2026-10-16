@@ -1,72 +1,167 @@
 {
   "_note": "Version watch (curated SDK-symbol freshness). source-freshness watches cited github.com docs; this watches PUBLISHED PACKAGE versions for curated docs whose symbols are cited against a binary/package interface (swiftinterface, .d.ts, maven/CHANGELOGS) that source-freshness cannot poll. For each entry: read the `last-verified-against: <stampToken> <version>` from the curated file, fetch the latest published version, flag STALE when latest > stamped. Public sources only (no token needed). Every coordinate below was probe-verified to resolve (2026-06-18). Extend by adding entries.",
   "_note2": "All 5 products covered on all 3 platforms (15 product docs) + AI Agent's extra react-native/android entries = 21 entries. The Android Desk entry resolves as `com.sendbird.sdk:sendbird-desk-android-sdk` (confirmed via the Android compile harness, 2026-06-18).",
+  "_note3": "New API watch (tools/curated/new-api-diff.sh) reads two more fields per entry. `surface` says where the published public API surface comes from: `npm` (the package tarball's .d.ts, read with the TypeScript compiler), `maven-aar` (the AAR next to `coord`, read with javap -public), or `spm-binary` (the xcframework zip that the release Package.swift of `repo` names for `module`, sha256-verified, its ios-arm64 public .swiftinterface). `changelog` is the public changelog file (`repo`, `path`, `ref`) whose feature notes between the stamped and latest versions name the new features. Module names are the binaryTarget names in each repo's release Package.swift (read 2026-10-16).",
   "entries": [
     {
       "file": "knowledge/curated/ios/products/chat.md",
       "stampToken": "sendbird-chat-sdk-ios",
       "type": "github-release",
-      "coord": "sendbird/sendbird-chat-sdk-ios"
+      "coord": "sendbird/sendbird-chat-sdk-ios",
+      "surface": {
+        "kind": "spm-binary",
+        "repo": "sendbird/sendbird-chat-sdk-ios",
+        "module": "SendbirdChatSDK"
+      },
+      "changelog": {
+        "repo": "sendbird/sendbird-chat-sdk-ios",
+        "path": "CHANGELOG.md",
+        "ref": "master"
+      }
     },
     {
       "file": "knowledge/curated/android/products/chat.md",
       "stampToken": "sendbird-chat-sdk-android",
       "type": "maven",
-      "coord": "https://repo.sendbird.com/public/maven/com/sendbird/sdk/sendbird-chat/maven-metadata.xml"
+      "coord": "https://repo.sendbird.com/public/maven/com/sendbird/sdk/sendbird-chat/maven-metadata.xml",
+      "surface": {
+        "kind": "maven-aar"
+      },
+      "changelog": {
+        "repo": "sendbird/sendbird-chat-sdk-android",
+        "path": "CHANGELOG.md",
+        "ref": "main"
+      }
     },
     {
       "file": "knowledge/curated/js/products/chat.md",
       "stampToken": "@sendbird/chat",
       "type": "npm",
-      "coord": "@sendbird/chat"
+      "coord": "@sendbird/chat",
+      "surface": {
+        "kind": "npm"
+      },
+      "changelog": {
+        "repo": "sendbird/sendbird-chat-sdk-javascript",
+        "path": "CHANGELOG.md",
+        "ref": "main"
+      }
     },
     {
       "file": "knowledge/curated/ios/products/uikit.md",
       "stampToken": "sendbird-uikit-ios",
       "type": "github-release",
-      "coord": "sendbird/sendbird-uikit-ios-spm"
+      "coord": "sendbird/sendbird-uikit-ios-spm",
+      "surface": {
+        "kind": "spm-binary",
+        "repo": "sendbird/sendbird-uikit-ios-spm",
+        "module": "SendbirdUIKit"
+      },
+      "changelog": {
+        "repo": "sendbird/sendbird-uikit-ios-spm",
+        "path": "CHANGELOG.md",
+        "ref": "main"
+      }
     },
     {
       "file": "knowledge/curated/android/products/uikit.md",
       "stampToken": "sendbird-uikit-android",
       "type": "maven",
-      "coord": "https://repo.sendbird.com/public/maven/com/sendbird/sdk/uikit/maven-metadata.xml"
+      "coord": "https://repo.sendbird.com/public/maven/com/sendbird/sdk/uikit/maven-metadata.xml",
+      "surface": {
+        "kind": "maven-aar"
+      },
+      "changelog": {
+        "repo": "sendbird/sendbird-uikit-android",
+        "path": "CHANGELOG.md",
+        "ref": "main"
+      }
     },
     {
       "file": "knowledge/curated/js/products/uikit.md",
       "stampToken": "@sendbird/uikit-react",
       "type": "npm",
-      "coord": "@sendbird/uikit-react"
+      "coord": "@sendbird/uikit-react",
+      "surface": {
+        "kind": "npm"
+      },
+      "changelog": {
+        "repo": "sendbird/sendbird-uikit-react",
+        "path": "CHANGELOG.md",
+        "ref": "main"
+      }
     },
     {
       "file": "knowledge/curated/js/products/uikit.md",
       "stampToken": "@sendbird/uikit-react-native",
       "type": "npm",
-      "coord": "@sendbird/uikit-react-native"
+      "coord": "@sendbird/uikit-react-native",
+      "surface": {
+        "kind": "npm"
+      },
+      "changelog": {
+        "repo": "sendbird/sendbird-uikit-react-native",
+        "path": "CHANGELOG.md",
+        "ref": "main"
+      }
     },
     {
       "file": "knowledge/curated/ios/products/calls.md",
       "stampToken": "sendbird-calls-ios",
       "type": "github-release",
-      "coord": "sendbird/sendbird-calls-ios"
+      "coord": "sendbird/sendbird-calls-ios",
+      "surface": {
+        "kind": "spm-binary",
+        "repo": "sendbird/sendbird-calls-ios",
+        "module": "SendBirdCalls"
+      },
+      "changelog": {
+        "repo": "sendbird/sendbird-calls-ios",
+        "path": "CHANGELOG.md",
+        "ref": "master"
+      }
     },
     {
       "file": "knowledge/curated/android/products/calls.md",
       "stampToken": "sendbird-calls-android",
       "type": "maven",
-      "coord": "https://repo.sendbird.com/public/maven/com/sendbird/sdk/sendbird-calls/maven-metadata.xml"
+      "coord": "https://repo.sendbird.com/public/maven/com/sendbird/sdk/sendbird-calls/maven-metadata.xml",
+      "surface": {
+        "kind": "maven-aar"
+      },
+      "changelog": {
+        "repo": "sendbird/sendbird-calls-android",
+        "path": "CHANGELOG.md",
+        "ref": "master"
+      }
     },
     {
       "file": "knowledge/curated/js/products/calls.md",
       "stampToken": "sendbird-calls",
       "type": "npm",
-      "coord": "sendbird-calls"
+      "coord": "sendbird-calls",
+      "surface": {
+        "kind": "npm"
+      },
+      "changelog": {
+        "repo": "sendbird/sendbird-calls-javascript",
+        "path": "CHANGELOG.md",
+        "ref": "master"
+      }
     },
     {
       "file": "knowledge/curated/js/products/calls.md",
       "stampToken": "@sendbird/calls-react-native",
       "type": "npm",
-      "coord": "@sendbird/calls-react-native"
+      "coord": "@sendbird/calls-react-native",
+      "surface": {
+        "kind": "npm"
+      },
+      "changelog": {
+        "repo": "sendbird/sendbird-calls-sdk-react-native",
+        "path": "CHANGELOG.md",
+        "ref": "main"
+      }
     }
   ]
 }

@@ -87,6 +87,12 @@ const oneLine = (s) => stripComments(s).replace(/\s+/g, ' ').replace(/\s*;\s*$/,
 const clip = (s, n = 400) => (s.length > n ? `${s.slice(0, n)} …` : s);
 
 const hasMod = (node, kind) => !!(ts.getCombinedModifierFlags(node) & kind);
+// JS_DTS_MARK_DEPRECATED=1 (set by tools/curated/new-api-diff.sh) appends ` @deprecated` to
+// a member whose JSDoc has @deprecated and adds a `_deprecated_` line to a deprecated
+// declaration's section. Off by default, so the customer-facing surface is unchanged.
+const MARK_DEP = process.env.JS_DTS_MARK_DEPRECATED === '1';
+const isDep = (n) => MARK_DEP && !!n && typeof ts.getJSDocDeprecatedTag === 'function' && !!ts.getJSDocDeprecatedTag(n);
+const depMark = (n) => (isDep(n) ? ' @deprecated' : '');
 function isPublicMember(m) {
   if (hasMod(m, ts.ModifierFlags.Private) || hasMod(m, ts.ModifierFlags.Protected)) return false;
   const n = m.name && ts.isIdentifier(m.name) ? m.name.text : m.name && m.name.getText ? m.name.getText() : '';
@@ -115,11 +121,11 @@ function resolvedInterfaceProps(target, d, display) {
     // Prefer the type as written in the declaring file: the checker prints a type it
     // cannot resolve (a missing @types package) as a wrong name such as `React`.
     if (pd && (ts.isPropertySignature(pd) || ts.isPropertyDeclaration(pd)) && pd.type) {
-      lines.push(clip(oneLine(`${name}${opt}: ${pd.type.getText(pd.getSourceFile())}`)));
+      lines.push(clip(oneLine(`${name}${opt}: ${pd.type.getText(pd.getSourceFile())}`)) + depMark(pd));
       continue;
     }
     if (pd && (ts.isMethodSignature(pd) || ts.isMethodDeclaration(pd))) {
-      lines.push(clip(oneLine(pd.getText(pd.getSourceFile()))));
+      lines.push(clip(oneLine(pd.getText(pd.getSourceFile()))) + depMark(pd));
       continue;
     }
     const ty = checker.typeToString(checker.getTypeOfSymbolAtLocation(p, d), d);
@@ -287,7 +293,7 @@ function record(sym, importPath, displayName) {
     unresolvedBases(d, sf, display, importPath);
     const heritage = (d.heritageClauses || []).map((h) => oneLine(h.getText(sf))).join(' ');
     if (heritage) lines.push(`_${heritage}_`);
-    for (const m of d.members) if (isPublicMember(m)) lines.push(clip(oneLine(m.getText(sf))));
+    for (const m of d.members) if (isPublicMember(m)) lines.push(clip(oneLine(m.getText(sf))) + depMark(m));
     lines.push(...inheritedFromHiddenBases(d));
   } else if (ts.isInterfaceDeclaration(d)) {
     kind = 'interface';
@@ -297,14 +303,14 @@ function record(sym, importPath, displayName) {
       lines.push(`_${heritage}_ — all properties, including inherited:`);
       lines.push(...resolvedInterfaceProps(target, d, display));
     } else {
-      for (const m of d.members) if (isPublicMember(m)) lines.push(clip(oneLine(m.getText(sf))));
+      for (const m of d.members) if (isPublicMember(m)) lines.push(clip(oneLine(m.getText(sf))) + depMark(m));
     }
   } else if (ts.isEnumDeclaration(d)) {
     kind = 'enum';
-    for (const m of d.members) lines.push(clip(oneLine(m.getText(sf))));
+    for (const m of d.members) lines.push(clip(oneLine(m.getText(sf))) + depMark(m));
   } else if (ts.isFunctionDeclaration(d)) {
     kind = 'function';
-    for (const fd of decls.filter(ts.isFunctionDeclaration)) lines.push(clip(oneLine(fd.getText(sf))));
+    for (const fd of decls.filter(ts.isFunctionDeclaration)) lines.push(clip(oneLine(fd.getText(sf))) + depMark(fd));
   } else if (ts.isTypeAliasDeclaration(d)) {
     kind = 'type'; lines.push(clip(oneLine(d.getText(sf)), 600));
   } else if (ts.isVariableDeclaration(d)) {
@@ -324,6 +330,7 @@ function record(sym, importPath, displayName) {
     for (const [, name] of ns.nested) lines.push(`_see ${name}_`);
     nested = ns.nested;
   }
+  if (isDep(d)) lines.unshift('_deprecated_');
   if (incompleteBases.has(display)) {
     lines.unshift('_base types did not fully resolve (see Unresolved references): inherited members may be missing and types printed for them may be wrong; check the installed source before citing them._');
   }
