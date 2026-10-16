@@ -77,7 +77,7 @@ SDK callbacks return a `SendbirdException` (`com.sendbird.android.exception.Send
 | 800701 | `SendbirdError.ERR_DATABASE_ERROR_ENCRYPTION` | A sqlcipher problem, possibly an undeclared sqlcipher dependency or a wrong encryption key. If the password is forgotten, clear the data with `SendbirdChat.clearCachedData` |
 | 900020 | `SendbirdError.ERR_NOT_A_MEMBER` | `USER_NOT_MEMBER`: the request failed because the user isn't a member of the channel |
 | 900041 | `SendbirdError.ERR_USER_IS_MUTED` | `MUTED_USER_IN_CHANNEL_SEND_MESSAGE_NOT_ALLOWED`: the user is muted in the channel and isn't allowed to send the message |
-| 900050 | `SendbirdError.ERR_CHANNEL_IS_FROZEN` | `CHANNEL_FROZEN`: the channel is frozen and no one can send a message to it |
+| 900050 | `SendbirdError.ERR_CHANNEL_IS_FROZEN` | `CHANNEL_FROZEN`: the request failed because the channel is frozen. Operators can still send messages in a frozen channel; other members can't. The error-codes page words this as "no one can send", but the freeze page and the Chat API moderation overview both name the operator exception |
 | 900060 | `SendbirdError.ERR_PROFANITY_MESSAGE_BLOCK` | `PROFANITY_MESSAGE_BLOCKED`: the request specifies a message containing a profanity word |
 | 900100 | `SendbirdError.ERR_INVALID_AUTHORITY` | `BANNED_USER_SEND_MESSAGE_NOT_ALLOWED`: the user is banned from the channel and isn't allowed to send the message (the page's server name differs from this constant's name) |
 | 900200 | `SendbirdError.ERR_TOO_MANY_MESSAGES` | `TOO_MANY_MESSAGES`: the number of sent messages exceeds the allowed amount |
@@ -87,6 +87,7 @@ SDK callbacks return a `SendbirdException` (`com.sendbird.android.exception.Send
 (source: https://sendbird.com/docs/chat/sdk/v4/android/error-codes — meanings)
 (source: sendbird-common-1.0.7 (dependency of sendbird-chat-4.36.5) javap com.sendbird.android.exception.SendbirdError — codes and constant names)
 (The Platform API error-codes page, https://sendbird.com/docs/chat/platform-api/v3/error-codes, was also checked for every "No public description" code; it lists none of them.)
+(900050 row, operator exception: source: https://sendbird.com/docs/chat/sdk/v4/android/channel/moderating-a-channel/freeze-and-unfreeze-a-channel ; https://sendbird.com/docs/chat/platform-api/v3/moderation/moderation-overview — reviewed 2026-10-16)
 
 ## Handling tips
 - Session token expired or revoked: the SDK calls `SessionHandler.onSessionTokenRequired`; answer it with a new token (see auth).

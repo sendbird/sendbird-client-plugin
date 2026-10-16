@@ -54,7 +54,7 @@ Current init, connect, and send code: knowledge/curated/js/products/chat.md.
 | `isGroupChannel`, `isOpenChannel` (getters) | `isGroupChannel()`, `isOpenChannel()` (the guide's table prints `isGroupChannel()` twice) |
 | `getUnreadItemCount()`, `getTotalUnreadChannelCount()`, `getTotalUnreadMessageCount()` on the main object | the same methods on `sb.groupChannel`; `getUnreadItemCount` takes `UnreadItemCountParams` and `getTotalUnreadMessageCount` takes `TotalUnreadMessageCountParams` |
 | `updateCurrentUserInfoWithProfileImage(...)`, `updateCurrentUserInfo(nickname, profileUrl)` | `updateCurrentUserInfo(UserUpdateParams)` |
-| `onReadReceiptUpdated` | `onUnreadMemberStatusUpdated` |
+| `onReadReceiptUpdated` | `onUnreadMemberStatusUpdated` in the guide, but it is deprecated since 4.18.2; use `onUserMarkedRead(channel, userIds)` (source: https://sendbird.com/docs/chat/sdk/v4/javascript/message/managing-read-status-in-a-group-channel/mark-messages-as-read ; `@sendbird/chat` 4.22.13 `lib/__definition.d.ts` 5886 `@deprecated since v4.18.2 Please use onUserMarkedRead instead.`) |
 | `onDeliveryReceiptUpdated` | `onUndeliveredMemberStatusUpdated` |
 | `useMemberAsMessageSender` | `useMemberInfoInMessage` |
 | `clearCache()` | `clearCachedData()` |

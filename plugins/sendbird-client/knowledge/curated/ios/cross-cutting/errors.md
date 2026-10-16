@@ -95,7 +95,7 @@ The swiftinterface has no doc comments on these cases, so each meaning comes fro
 | 900030 | `socketGuestNotAllowed` | A guest isn't allowed to perform this operation |
 | 900040 | `socketMutedUserInApplicationSendMessageNotAllowed` | The user is muted in the application and can't send messages |
 | 900041 | `socketMutedUserInChannelSendMessageNotAllowed` | The user is muted in the channel and can't send messages |
-| 900050 | `socketChannelFrozen` | The channel is frozen, so no one can send messages to it |
+| 900050 | `socketChannelFrozen` | The channel is frozen. Operators can still send messages in a frozen channel; other members can't. The error-codes page words this as "no one can send", but the freeze page and the Chat API moderation overview both name the operator exception |
 | 900060 | `socketProfanityMessageBlocked` | The message contains a profanity word |
 | 900061 | `socketBannedUrlsBlocked` | The message contains a URL that isn't allowed |
 | 900065 | `socketRestrictedDomainBlocked` | The request comes from a domain that isn't allowed |
@@ -119,6 +119,8 @@ The swiftinterface has no doc comments on these cases, so each meaning comes fro
 800000, 800102, 800111, 800130–800170, 800191, 800220–800240, 800251, 800301, 800302, 800400, 800600–800800 rows (source: SendbirdChatSDK.swiftinterface (4.39.11) lines 1538, 1541, 1543–1546, 1549, 1552–1555, 1559–1561, 1564–1568, 1923; https://sendbird.com/docs/chat/sdk/v4/ios/error-codes)
 
 900010–900500 rows (source: SendbirdChatSDK.swiftinterface (4.39.11) lines 1571–1597; https://sendbird.com/docs/chat/sdk/v4/ios/error-codes)
+
+900050 row, operator exception (source: https://sendbird.com/docs/chat/sdk/v4/ios/channel/moderating-a-channel/freeze-and-unfreeze-a-channel ; https://sendbird.com/docs/chat/platform-api/v3/moderation/moderation-overview — reviewed 2026-10-16)
 
 Neither page describes 400107, 400312, 400313, 403200, 409000, 800000, 800111, 800191, 800221, 800251, or 800800. Where a page names a code differently from the iOS symbol (400110, 400303, 900029), the meaning column follows the page and notes the page's name. The iOS page lists `timerWasExpired` under 800310, while the enum value is 800301; that row keeps the enum value.
 
