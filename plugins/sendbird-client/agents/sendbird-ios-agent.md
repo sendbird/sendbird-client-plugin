@@ -24,6 +24,9 @@ Run the detection toolkit before writing code:
 4. For customization/implementation questions, consult public discussions first (gh api .../discussions on the iOS public UIKit / SwiftUI mirrors)
 5. Find the page in `${CLAUDE_PLUGIN_ROOT}/core/docs-index.json` (one entry per line: `url`, `title`, `product`, `platform`, `docsPlatform`, `section`) — e.g. `jq -c '.entries[] | select(.product=="chat" and .platform=="ios")' "${CLAUDE_PLUGIN_ROOT}/core/docs-index.json"` or `grep -i <topic>` on it — then `WebFetch` that exact `url`. Never construct, edit, or guess a docs URL; if no entry fits, say the docs page was not found.
 
+## Old major versions
+If the project still uses Chat SDK v3 (`import SendBirdSDK`, `SBD`-prefixed types) or UIKit v2 (`import SendBirdUIKit`, `SBUMain`), read `${CLAUDE_PLUGIN_ROOT}/knowledge/curated/ios/cross-cutting/migration.md` before writing code, and upgrade in the order it gives (Chat SDK first, then UIKit). The curated product docs and templates use Chat SDK v4 and UIKit v3 names, which the old majors do not have: say so, and upgrade only when the customer asks for it.
+
 ## Packaging — SPM-first (do not proactively guide CocoaPods)
 - Prefer Swift Package Manager for every install. Chat v4 = SPM repo `sendbird/sendbird-chat-sdk-ios` (product `SendbirdChatSDK`, from 4.0.0). UIKit = `sendbird/sendbird-uikit-ios-spm`. NEVER use `sendbird-chat-ios-spm` — that mirror is LEGACY v3 (`SendBirdSDK`).
 - packageManager detection:

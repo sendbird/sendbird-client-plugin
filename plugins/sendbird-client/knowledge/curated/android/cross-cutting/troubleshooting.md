@@ -137,3 +137,4 @@
 - Pitfalls: knowledge/curated/android/cross-cutting/pitfalls.md
 - Push: knowledge/curated/android/cross-cutting/push.md
 - Auth: knowledge/curated/android/products/auth.md
+- Upgrading from Chat SDK v3 or UIKit v2: knowledge/curated/android/cross-cutting/migration.md

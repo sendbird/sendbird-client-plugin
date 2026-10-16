@@ -6,7 +6,7 @@
 > Common iOS integration mistakes. Conceptual guidance; any API named is cited in the linked product docs. Verified 2026-06-10.
 
 ## Setup / packaging
-- Use Swift Package Manager, not CocoaPods, for new projects (see knowledge/curated/ios/setup.md). Don't add `sendbird-chat-ios-spm` (legacy v3) for v4.
+- Use Swift Package Manager, not CocoaPods, for new projects (see knowledge/curated/ios/setup.md). Don't add `sendbird-chat-ios-spm` (legacy v3) for v4. To move a v3 app to v4, see knowledge/curated/ios/cross-cutting/migration.md.
 - Initialize once at launch; set `SBUGlobals.currentUser` (UIKit) before presenting any screen.
 
 ## Auth

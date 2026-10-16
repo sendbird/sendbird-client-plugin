@@ -29,6 +29,7 @@ Works from the error text the customer pasted (or a log file they point to). It 
 | Android 15 crash on 16 KB pages, or unexpected Conscrypt `.so` files | `knowledge/curated/android/cross-cutting/troubleshooting.md` (16 KB entry); `knowledge/curated/android/setup.md` "Getting a newer Chat SDK under UIKit" |
 | Manifest merger fails on a `FileProvider` (`provider@authorities` or `FILE_PROVIDER_PATHS`) | `knowledge/curated/android/cross-cutting/troubleshooting.md` "Manifest merger fails on a `FileProvider` ..." |
 | Xcode: "No such module" for a Sendbird module, a package that does not resolve, or a version conflict between Sendbird packages | `knowledge/curated/ios/setup.md` "Packaging — prefer Swift Package Manager" and "Keep shared dependencies compatible"; `knowledge/curated/ios/cross-cutting/pitfalls.md` "Setup / packaging" |
+| Compile errors right after moving from Chat SDK v3 to v4 or UIKit v2 to v3: old names (`SBDMain`, `SendBird.init`, `new SendBird(...)`) no longer resolve, or calls ask for a `params` argument | `knowledge/curated/<platform>/cross-cutting/migration.md`; on iOS also `knowledge/curated/ios/cross-cutting/troubleshooting.md` "Upgrading from v3" |
 
 Rules for iOS packaging come from the plugin's policy: install with Swift Package Manager; use CocoaPods only when the project already has a `Podfile`, and never create one. `sendbird-chat-ios-spm` is the legacy v3 package; Chat v4 lives in `sendbird-chat-sdk-ios`.
 
@@ -37,6 +38,7 @@ When the error fits none of these rows, look for it in `knowledge/curated/<platf
 ## Wired knowledge (populated and cited)
 - `knowledge/curated/js/cross-cutting/troubleshooting.md` "Build and setup" — Next.js, webpack 5, Vite, Create React App, duplicate packages, the React Native UIKit container.
 - `knowledge/curated/android/cross-cutting/troubleshooting.md` "Build and install" — Gradle repository, 16 KB pages, UIKit init, FileProvider merger.
+- `knowledge/curated/<platform>/cross-cutting/migration.md` — Chat SDK v3 to v4 and UIKit v2 to v3 renames, in the order of the public migration guides.
 - `knowledge/curated/<platform>/setup.md` — coordinates, repositories, and version pairing; `knowledge/curated/js/hosts/react-native.md` — React Native version checklist.
 
 ## No-Fabrication
