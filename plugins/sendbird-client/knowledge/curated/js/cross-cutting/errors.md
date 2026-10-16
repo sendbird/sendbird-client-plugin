@@ -18,7 +18,7 @@ Every member of the shipped enum is listed. The enum members carry no JSDoc. Mea
 |------|-----------|--------------------------|
 | 400108 | `NON_AUTHORIZED` | Not authorized |
 | 400105 | `INVALID_REQUIRED_FORM_VALUE` | Required value missing/invalid |
-| 400111 | `INVALID_TOKEN` | Invalid token |
+| 400111 | `INVALID_TOKEN` | The request specifies an invalid value. (Docs name: `INVALID_VALUE`.) Despite the enum member's name, the JavaScript, iOS, and Android error-codes pages and the Platform API error-codes page all describe 400111 as an invalid parameter value, not a token error (source: https://sendbird.com/docs/chat/sdk/v4/javascript/error-codes ; https://sendbird.com/docs/chat/platform-api/v3/error-codes — reviewed 2026-10-16) |
 | 400201 | `NOT_FOUND_IN_DATABASE` | Resource not found |
 | 400202 | `ERR_DUPLICATED_DATA` | Duplicated data |
 | 400300 | `USER_AUTH_DEACTIVATED` | User deactivated |
@@ -69,7 +69,7 @@ Every member of the shipped enum is listed. The enum members carry no JSDoc. Mea
 | 800600 | `COLLECTION_DISPOSED` | No public description |
 | 800700 | `DATABASE_ERROR` | No public description |
 | 900021 | `USER_DEACTIVATED` | The request failed because the user is deactivated in the service. |
-| 900050 | `CHANNEL_IS_FROZEN` | The request failed because the channel is frozen and no one can send the message to the channel. (Docs name: `CHANNEL_FROZEN`.) |
+| 900050 | `CHANNEL_IS_FROZEN` | The request failed because the channel is frozen. (Docs name: `CHANNEL_FROZEN`.) Operators can still send messages in a frozen channel; other members can't. The error-codes page words this as "no one can send", but the freeze page and the Chat API moderation overview both name the operator exception (source: https://sendbird.com/docs/chat/sdk/v4/javascript/channel/moderating-a-channel/freeze-and-unfreeze-a-channel ; https://sendbird.com/docs/chat/platform-api/v3/moderation/moderation-overview — reviewed 2026-10-16) |
 | 900081 | `RECEIVER_USER_DEACTIVATED` | The request failed because the user is trying to send the message to the deactivated user in a 1-to-1 distinct channel. (Docs name: `DEACTIVATED_USER_RECEIVE_MESSAGE_NOT_ALLOWED`.) |
 | 900200 | `UNKNOWN_SERVER_ERROR` | No public description of this symbol. The server-side table on the JavaScript error codes page lists 900200 under a different name, `TOO_MANY_MESSAGES` ("The number of the sent messages exceeds the allowed amount."). |
 | 901500 | `NOT_SUPPORTED_FEATURE_IN_IN_REVIEW_MESSAGE` | No public description |
