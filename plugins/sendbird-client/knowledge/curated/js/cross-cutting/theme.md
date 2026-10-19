@@ -176,6 +176,8 @@ const StringSetKo = createBaseStringSet({
 ### Status bar
 UIKit for React Native does not set the status bar's color or style on its screens; the only `StatusBar` it renders is in the full-screen file viewer, with `barStyle={'light-content'}`. Set the status bar yourself with React Native's `StatusBar` component, for example to match your theme. What UIKit does read is `styles.statusBarTranslucent` on `SendbirdUIKitContainer` (default `true`): when it is `true`, UIKit headers add the top safe-area inset so they start below a translucent status bar. Set it to `false` if your status bar is not translucent and the header shows extra space at the top.
 
+React Native 0.87 removed the `StatusBar` `backgroundColor` and `translucent` props and their static setters, so passing `backgroundColor` fails type-checking. They were Android-only and already had no effect under Android 15 edge-to-edge. The app now draws behind the status bar, so color that area with the background of your top view (the screen root or header) and use `barStyle` only to pick light or dark icons. (source: https://github.com/facebook/react-native/blob/main/CHANGELOG.md — v0.87.0 Breaking, "Remove deprecated `StatusBar` `backgroundColor` / `translucent`" ; https://reactnative.dev/docs/0.86/statusbar — `backgroundColor` warning)
+
 ```tsx
 import type { ReactNode } from 'react';
 import { StatusBar } from 'react-native';
@@ -190,9 +192,8 @@ function ChatRoot({ children }: { children: ReactNode }) {
       appId={APP_ID}
       chatOptions={{ localCacheStorage: mmkv }}
       platformServices={platformServices}
-      styles={{ statusBarTranslucent: false }}
     >
-      <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
+      <StatusBar barStyle="dark-content" />
       {children}
     </SendbirdUIKitContainer>
   );
@@ -204,6 +205,7 @@ function ChatRoot({ children }: { children: ReactNode }) {
 - React: import the UIKit CSS (`@sendbird/uikit-react/dist/index.css`) or theming has nothing to style.
 - React: a `colorSet` object created inside the render function is re-applied on every render.
 - React Native: `localization.stringSet` must be a full `StringSet`; passing only the keys you change fails type-checking.
+- React Native 0.87+: `StatusBar` has no `backgroundColor` or `translucent` prop; color the top view behind the status bar instead (see Status bar).
 - Drive `theme` (React) or `styles.theme` (React Native) from your app state to follow system dark mode.
 
 ## Related

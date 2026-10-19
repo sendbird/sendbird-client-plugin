@@ -10,6 +10,7 @@
 - `SendbirdChat.init(...)` once; reuse the `sb` instance (see chat.md).
 - React UIKit: import `@sendbird/uikit-react/dist/index.css` or the UI is unstyled (see uikit.md).
 - React Native UIKit/AI Agent: `platformServices` / `nativeModules` (mmkv) are required — follow the quickstart, don't guess factory calls.
+- React Native 0.87+: `<StatusBar backgroundColor=...>` fails type-checking because 0.87 removed the prop; color the top view behind the status bar instead (see theme.md, Status bar).
 
 ## Auth
 
