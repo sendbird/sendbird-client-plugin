@@ -1,9 +1,13 @@
-import { SafeAreaView, Text } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 export default function App() {
   return (
-    <SafeAreaView>
+    <View style={styles.screen}>
       <Text>Home</Text>
-    </SafeAreaView>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  screen: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+});

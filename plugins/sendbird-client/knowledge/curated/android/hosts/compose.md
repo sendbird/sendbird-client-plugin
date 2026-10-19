@@ -234,7 +234,7 @@ fun ChannelWithPlainTitle(navController: NavController, channelUrl: String) {
 See knowledge/curated/android/cross-cutting/theme.md — "Jetpack Compose host".
 
 ### Push: the unique-token flag
-The Compose UIKit registers push through the Chat SDK's `SendbirdPushHandler` / `SendbirdPushHelper` (Step 4 of the Compose push guide). The unique flag is the handler's `isUniquePushToken` property: when the handler receives a new FCM token it calls `SendbirdPushHelper.registerPushToken(token, isUniquePushToken())` internally. Override it in your handler; the handler shape and registration order are in knowledge/curated/android/cross-cutting/push.md.
+The Compose UIKit registers push through the Chat SDK's `SendbirdPushHandler` / `SendbirdPushHelper` (Step 4 of the Compose push guide). The unique flag is the handler's `isUniquePushToken` property: when the handler receives a new FCM token, the SDK registers it and passes along the handler's `isUniquePushToken()` value. That registration call is internal to the SDK (a Kotlin `internal` method in the 4.36.5 AAR), so the app does not call it. (source: https://sendbird.com/docs/chat/sdk/v4/android/ref/-sendbird-chat/com.sendbird.android.push/-sendbird-push-handler/index.html ; sendbird-chat 4.36.5 `javap -public` of the push helper and handler classes, where the token registration methods carry the `$sendbird_release` suffix of Kotlin `internal`) Override it in your handler; the handler shape and registration order are in knowledge/curated/android/cross-cutting/push.md.
 
 ```kotlin
 import com.google.firebase.messaging.RemoteMessage

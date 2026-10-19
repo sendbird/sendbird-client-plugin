@@ -12,6 +12,7 @@ are listed in `../BEST_PRACTICES.md`.
 - `src/auth/session.ts` — the one app-wide session store; `src/auth/login.ts` — `onLoginSucceeded` / `onLogout` for your own sign-in.
 - `src/auth/token.ts` — the hook that asks your server for a session token (returns none for now).
 - `src/screens/SignedInApp.tsx` — `SendbirdProvider` (init + connect), the connection status line, `GroupChannelList` + `GroupChannel`, sign-out.
+  Below 768px (`UIKIT_BREAKPOINT` in `src/sendbird/uikit.ts`) it shows one pane at a time: the list first, then the conversation, whose header back button returns to the list.
 - `src/sendbird/config.ts` (App ID), `src/sendbird/uikit.ts` (theme, cache), `src/sendbird/errors.ts` (error codes).
 - `package-lock.json` — exact dependency versions, so `npm ci` installs the same tree.
 
@@ -19,18 +20,18 @@ are listed in `../BEST_PRACTICES.md`.
 
 | ID | File:line | What the code does |
 |---|---|---|
-| BP01 | `src/screens/SignedInApp.tsx:56` | One `SendbirdProvider` at the root of the signed-in tree; it reuses the cached Chat SDK instance. |
+| BP01 | `src/screens/SignedInApp.tsx:58` | One `SendbirdProvider` at the root of the signed-in tree; it reuses the cached Chat SDK instance. |
 | BP02 | `src/sendbird/config.ts:3` | Reads `VITE_SENDBIRD_APP_ID`, inlined by Vite at build time; empty is reported on the sign-in screen. |
 | BP03 | `src/auth/session.ts:45` | The provider mounts, and connects, only after `onLoginSucceeded(userId)`. |
-| BP04 | `src/screens/SignedInApp.tsx:26` | `configureSession` returns a `SessionHandler`; the provider sets it before it connects. Token source: `src/auth/token.ts:3`. |
-| BP05 | `src/screens/SignedInApp.tsx:56` | UIKit connects as the signed-in user (`userId`, `accessToken` props). |
-| BP06 | `src/screens/SignedInApp.tsx:138` | The channel list mounts after the first successful connect. |
-| BP07 | `src/screens/SignedInApp.tsx:89` | A `ConnectionHandler` drives the status line (Connected, Connecting…, Offline). |
-| BP08 | `src/screens/SignedInApp.tsx:89` | The handler is added once the instance is ready and removed on unmount, under one identifier. |
-| BP09 | `src/screens/SignedInApp.tsx:74` | Sign-out calls `disconnect()` on the connected instance. A browser has no FCM or APNs token to unregister. |
-| BP11 | `src/sendbird/uikit.ts:16` | `localCacheEnabled: true` (already the React UIKit default). |
+| BP04 | `src/screens/SignedInApp.tsx:28` | `configureSession` returns a `SessionHandler`; the provider sets it before it connects. Token source: `src/auth/token.ts:3`. |
+| BP05 | `src/screens/SignedInApp.tsx:58` | UIKit connects as the signed-in user (`userId`, `accessToken` props). |
+| BP06 | `src/screens/SignedInApp.tsx:156` | The channel list mounts after the first successful connect. |
+| BP07 | `src/screens/SignedInApp.tsx:92` | A `ConnectionHandler` drives the status line (Connected, Connecting…, Offline). |
+| BP08 | `src/screens/SignedInApp.tsx:92` | The handler is added once the instance is ready and removed on unmount, under one identifier. |
+| BP09 | `src/screens/SignedInApp.tsx:77` | Sign-out calls `disconnect()` on the connected instance. A browser has no FCM or APNs token to unregister. |
+| BP11 | `src/sendbird/uikit.ts:23` | `localCacheEnabled: true` (already the React UIKit default). |
 | BP12 | `src/sendbird/uikit.ts:8` | Theme and brand colors in one module, as constants. |
-| BP13 | `src/sendbird/errors.ts:4` | Maps the verified error codes to a message; token errors return to sign-in (`src/screens/SignedInApp.tsx:41`). |
+| BP13 | `src/sendbird/errors.ts:4` | Maps the verified error codes to a message; token errors return to sign-in (`src/screens/SignedInApp.tsx:43`). |
 | BP16 | `src/auth/session.ts:1` | One store; every screen reads it with `useSession()`. |
 | BP17 | `src/screens/LoginScreen.tsx:39` | Stable `data-testid` values (see below). |
 
@@ -59,9 +60,9 @@ npm run build      # tsc --noEmit + vite build
 | `sb_login_user_id` | user ID input (`#user`) | `src/screens/LoginScreen.tsx:39` |
 | `sb_login_button` | Sign in button | `src/screens/LoginScreen.tsx:44` |
 | `sb_app_id_missing` | missing App ID message | `src/screens/LoginScreen.tsx:30` |
-| `sb_connection_status` | status line (`data-state` holds the SDK state) | `src/screens/SignedInApp.tsx:168` |
-| `sb_channel_list` | container of the UIKit channel list | `src/screens/SignedInApp.tsx:142` |
-| `sb_logout_button` | Sign out button | `src/screens/SignedInApp.tsx:134` |
+| `sb_connection_status` | status line (`data-state` holds the SDK state) | `src/screens/SignedInApp.tsx:194` |
+| `sb_channel_list` | container of the UIKit channel list | `src/screens/SignedInApp.tsx:160` |
+| `sb_logout_button` | Sign out button | `src/screens/SignedInApp.tsx:152` |
 | `sb_message_input`, `sb_send_button` | not set | UIKit renders the input; use its classes `.sendbird-message-input--textarea` and `.sendbird-message-input--send` (in `@sendbird/uikit-react/dist/index.css` 3.19.1). |
 | `sb_open_channels` | not used | The web layout shows the channel list as soon as the user is connected. |
 

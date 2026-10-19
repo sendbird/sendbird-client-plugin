@@ -48,5 +48,5 @@ resolve_cited_sources "$(jget '.cwd')" <<< "$sources"
 all_symbols_sourced "$symbols" && exit 0
 
 jq -n '{decision: "block",
-  reason: "Final-answer citation gate (Sendbird plugin): this answer names Sendbird APIs/code but cites no source. Re-emit it citing a verifiable source per symbol — knowledge/curated/<platform>/... , the customer-local SDK surface or installed SDK files, a file in a public sendbird/* repo (a /blob/ or /raw/ link, not an issue or discussion), or a version-matched sendbird.com/docs page — or state: I do not know, and list what you checked. Do not invent symbols."}'
+  reason: "Final-answer citation gate (Sendbird plugin): this answer names Sendbird APIs/code but cites no source. Write the whole answer again as the reply itself (the user may see only this reply, so do not say it is repeated or mention this check), citing a verifiable source per symbol — knowledge/curated/<platform>/... , the customer-local SDK surface or installed SDK files, a file in a public sendbird/* repo (a /blob/ or /raw/ link, not an issue or discussion), or a version-matched sendbird.com/docs page — or state: I do not know, and list what you checked. Do not invent symbols."}'
 exit 0

@@ -20,6 +20,12 @@ SCHEMA="${CLAUDE_PLUGIN_ROOT:-$HERE/..}/core/schemas/run-summary.schema.json"
 text="$(final_answer_text)"
 [ -n "$text" ] || exit 0
 
+# A manualSteps entry about building or type-checking the project, including a note that this run
+# did not build it (docs/AGENT_CONTRACT.md section 3: a build is not a hand-off step). Running the
+# app on a device, simulator, emulator, or browser, and work on a server or signing, stay allowed.
+# The same rule as tests/e2e/lib/run-summary.py "hands the build or type check off to the customer".
+build_step='^(?!.*\b(device|simulator|emulator|browser|token|server|backend|endpoint|dashboard|signing|certificate)\b).*(\b(xcodebuild|gradlew|assemble(debug|release)|tsc)\b|\b(npm|yarn|pnpm) (run )?(build|typecheck|type-check)\b|\b(build|compile|type-?check)\w*\s+(the\s+|your\s+)?(project|app|module|scheme|target|code)\b)'
+
 # the last ```json fenced block of the answer
 block="$(printf '%s\n' "$text" | awk '/^[[:space:]]*```json[[:space:]]*$/ {on=1; buf=""; next}
   on && /^[[:space:]]*```[[:space:]]*$/ {on=0; last=buf; next} on {buf = buf $0 "\n"} END {printf "%s", last}')"
@@ -29,7 +35,7 @@ if [ -z "$block" ]; then
 elif ! printf '%s' "$block" | jq -e 'type == "object"' >/dev/null 2>&1; then
   problems="the last json block is not a JSON object"
 else
-  problems="$(printf '%s' "$block" | jq -r --slurpfile s "$SCHEMA" '
+  problems="$(printf '%s' "$block" | jq -r --slurpfile s "$SCHEMA" --arg build "$build_step" '
     ($s[0]) as $S | . as $d
     | ($S.properties.status.enum) as $st
     | [ ($S.required[] as $k | select(($d | has($k)) | not) | "missing field \($k)"),
@@ -42,6 +48,8 @@ else
                     (if (.action | IN("created","modified","deleted") | not) then "changes action must be created, modified, or deleted" else empty end),
                     (keys[] | select(IN("path","action","summary") | not) | "unknown changes field \(.)") end) end),
         (if ($d.manualSteps | type) != "array" and ($d | has("manualSteps")) then "manualSteps must be an array of strings" else empty end),
+        (if ($d.manualSteps | type) == "array" then ($d.manualSteps[] | strings | select(test($build; "i"))
+          | "manualSteps entry \(tojson) is about building or type-checking the project, which is not a hand-off (docs/AGENT_CONTRACT.md section 3): remove it, and at most say once in the answer text, outside the json block, that this run did not build the project") else empty end),
         (if $d.status == "needs_input" and (($d.questions // []) | length) == 0 then "needs_input needs at least one questions entry" else empty end),
         (if $d.status == "needs_input" and (($d.changes // []) | length) > 0 then "needs_input must not list changes" else empty end),
         (if ($d.status | IN("failed","declined")) and ((($d.reason // "") | type) != "string" or ($d.reason // "") == "") then "\($d.status) needs a reason" else empty end)

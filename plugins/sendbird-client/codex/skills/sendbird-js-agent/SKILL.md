@@ -1,6 +1,6 @@
 ---
 name: sendbird-js-agent
-description: Use for JS Sendbird code authoring and review across React (Web) and React Native, spanning Chat and UIKit (Calls is not supported yet). Detects host from package.json. Writes TS/JS; cites every API.
+description: Use for JS Sendbird code authoring and review across React (Web) and React Native, spanning Chat, UIKit, and Calls. Detects host from package.json. Writes TS/JS; cites every API.
 ---
 
 # sendbird-js-agent

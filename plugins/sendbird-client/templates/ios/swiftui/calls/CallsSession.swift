@@ -6,7 +6,8 @@
 //   AcceptParams init(callOptions:) line 917, DirectCall.accept(with:) / end() lines 112-113,
 //   updateLocalVideoView(_:) / updateRemoteVideoView(_:) lines 164-165, DirectCall.delegate line 763,
 //   SendBirdCallDelegate lines 649-650, DirectCallDelegate lines 654-661,
-//   SendBirdVideoView init(frame:contentMode:) line 451.
+//   SendBirdVideoView init(frame:contentMode:) line 451, deauthenticate(completionHandler:) line 878 (verified 2026-10-17),
+//   CallOptions init(isAudioEnabled:isVideoEnabled:localVideoView:remoteVideoView:useFrontCamera:) line 829.
 // Calls has no SwiftUI-native SDK: this is SwiftUI interop — an ObservableObject over the verified SDK calls
 // plus a UIViewRepresentable around the SDK's SendBirdVideoView (standard SwiftUI, not an SDK API).
 // Build-verified with tools/templates/compile-check-ios.sh (xcodebuild BUILD SUCCEEDED against pinned and
@@ -63,10 +64,22 @@ final class CallsSession: NSObject, ObservableObject {
         }
     }
 
+    /// Sign-out: call from the app's own sign-out code so this device stops ringing for the user.
+    func signOut() {
+        SendBirdCall.deauthenticate { [weak self] _ in
+            Task { @MainActor in
+                self?.isAuthenticated = false
+                self?.activeCall = nil
+                self?.state = .idle
+            }
+        }
+    }
+
     /// Place a 1:1 call. `video: true` makes it a video call; show it with `CallVideoView`.
     func dial(calleeId: String, video: Bool = false) {
         state = .dialing
-        let params = DialParams(calleeId: calleeId, isVideoCall: video, callOptions: CallOptions(), customItems: [:])
+        let options = CallOptions(isAudioEnabled: true, isVideoEnabled: video)
+        let params = DialParams(calleeId: calleeId, isVideoCall: video, callOptions: options, customItems: [:])
         let call = SendBirdCall.dial(with: params) { [weak self] _, error in
             if let error {
                 Task { @MainActor in
@@ -79,9 +92,11 @@ final class CallsSession: NSObject, ObservableObject {
         activeCall = call
     }
 
-    /// Accept the ringing call.
+    /// Accept the ringing call, with video when the caller placed a video call.
     func accept() {
-        activeCall?.accept(with: AcceptParams(callOptions: CallOptions()))
+        guard let call = activeCall else { return }
+        let options = CallOptions(isAudioEnabled: true, isVideoEnabled: call.isVideoCall)
+        call.accept(with: AcceptParams(callOptions: options))
     }
 
     /// Hang up, or decline a ringing call.

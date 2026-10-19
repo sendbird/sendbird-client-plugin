@@ -10,25 +10,31 @@ shapes from the public `sendbird-calls-android` README and the public
 `tools/templates/compile-check-android.sh`.
 
 ## Files
-- `DirectCallVideo.kt` — `DirectCallViewModel` (incoming-call listener, `dialVideo`, `accept`, `end`,
-  exposed as `StateFlow<DirectCall?>`) and a `DirectCallVideo(call)` composable: remote video full
+- `DirectCallVideo.kt` — `DirectCallViewModel` (incoming-call listener, `dial(calleeId, video)`, `dialVideo`,
+  `accept`, `end`, exposed as `call: StateFlow<DirectCall?>` and `state: StateFlow<CallState>` with `IDLE`,
+  `DIALING`, `RINGING`, `CONNECTED`) and a `DirectCallVideo(call)` composable: remote video full
   screen, local preview in the corner, both `SendBirdVideoView` in `AndroidView`.
 
 ## How to splice
 1. Gradle: `implementation("com.sendbird.sdk:sendbird-calls:1.12.5")`.
-2. Keep `SendBirdCall.init(...)` + `authenticate(...)` as in `templates/android/view/calls/SetupCalls.java`.
-3. Copy `DirectCallVideo.kt`, adjust the package. Request `CAMERA` and `RECORD_AUDIO` at runtime
-   before `dialVideo(...)` or `accept(...)`.
+2. Keep `SendBirdCall.init(...)` + `authenticate(...)` as in `templates/android/view/calls/SetupCalls.java`. `authenticate(...)` goes in the app's sign-in code (`onLoginSucceeded`) and `deauthenticate()` in its sign-out code (`onLogout`).
+3. Copy `DirectCallVideo.kt`, adjust the package. Request `SetupCalls.callPermissions()` (`RECORD_AUDIO`,
+   `CAMERA`, and `BLUETOOTH_CONNECT` on Android 12+) at runtime before `dial(...)` or `accept(...)`, for example
+   with `rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions())`.
 4. Drive it from a composable:
    ```kotlin
    @Composable
    fun CallScreen(vm: DirectCallViewModel = viewModel()) {
        val call by vm.call.collectAsState()
-       call?.let { DirectCallVideo(it, Modifier.fillMaxSize()) }
+       val state by vm.state.collectAsState()
+       // RINGING: show Accept (vm.accept(call)) and Decline (vm.end()); DIALING or CONNECTED: show End (vm.end()).
+       call?.takeIf { it.isVideoCall }?.let { DirectCallVideo(it, Modifier.fillMaxSize()) }
    }
    ```
 5. App ID from BuildConfig/secret — never hard-code; the access token is a secret.
+   Hand-off (`manualSteps`) holds only the steps in `knowledge/curated/android/products/calls.md` "Manual steps" (App ID, a token server when the app uses tokens, push credentials). No Calls doc has a dashboard step that enables Calls, so never tell the customer to enable Calls.
 
 ## Notes (see knowledge/curated/android/products/calls.md, all cited)
 - `onRinging` sets the call's `DirectCallListener` before `accept(...)`, as the README requires.
-- Background calls arrive through FCM: pass the data to `SendBirdCall.handleFirebaseMessageData(...)`.
+- Incoming calls arrive through FCM, also while the app is open (Authentication docs, "WebSocket"): pass the data to
+  `SendBirdCall.handleFirebaseMessageData(...)`. Without FCM, `onRinging` never runs; dialing out still works.

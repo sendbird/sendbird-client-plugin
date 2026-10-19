@@ -23,7 +23,7 @@ Every member of the shipped enum is listed. The enum members carry no JSDoc. Mea
 | 400202 | `ERR_DUPLICATED_DATA` | Duplicated data |
 | 400300 | `USER_AUTH_DEACTIVATED` | User deactivated |
 | 400301 | `USER_AUTH_DELETED_OR_NOT_FOUND` | User deleted/not found |
-| 400302 | `SESSION_TOKEN_EXPIRED` | Session/access token expired — refresh via SessionHandler |
+| 400302 | `SESSION_TOKEN_EXPIRED` | The access token provided for the request specifies an invalid value. (Docs name: `INVALID_ACCESS_TOKEN`.) Despite the enum member's name, the JavaScript, iOS, and Android error-codes pages describe 400302 as an invalid access token, not an expired one (source: https://sendbird.com/docs/chat/sdk/v4/javascript/error-codes — reviewed 2026-10-16) |
 | 400304 | `APPLICATION_NOT_FOUND` | App ID not found |
 | 400309 | `SESSION_KEY_EXPIRED` | Session key expired |
 | 400310 | `SESSION_REVOKED` | Session revoked |

@@ -1,2 +1,7 @@
 node_modules/
 dist/
+
+# Local env files: values set on this machine never go into git
+.env
+.env.local
+.env.*.local

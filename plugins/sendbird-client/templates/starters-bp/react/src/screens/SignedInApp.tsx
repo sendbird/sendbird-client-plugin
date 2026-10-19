@@ -4,6 +4,8 @@
 // source: knowledge/curated/js/hosts/react.md ("Integration notes")
 // source: knowledge/curated/js/products/chat.md ("Connection state and reconnection")
 // source: https://github.com/sendbird/sendbird-uikit-react/blob/v3.19.1/src/hooks/useConnectionState.ts#L8-L31
+// source: https://github.com/sendbird/sendbird-uikit-react/blob/v3.19.1/src/modules/GroupChannelList/context/GroupChannelListProvider.tsx#L141-L146
+// source: knowledge/curated/js/cross-cutting/troubleshooting.md ("selecting a channel always opens the first one")
 //
 // Everything below SendbirdProvider: it initializes the Chat SDK once (it reuses the cached
 // instance), connects with the signed-in user, and hosts the UIKit channel list and conversation.
@@ -18,7 +20,7 @@ import { setSignOutWork, signOut } from '../auth/session';
 import { fetchSessionToken } from '../auth/token';
 import { SENDBIRD_APP_ID } from '../sendbird/config';
 import { describeError, type ErrorView } from '../sendbird/errors';
-import { SDK_INIT_PARAMS, UIKIT_COLOR_SET, UIKIT_THEME } from '../sendbird/uikit';
+import { SDK_INIT_PARAMS, UIKIT_BREAKPOINT, UIKIT_COLOR_SET, UIKIT_THEME } from '../sendbird/uikit';
 
 export function SignedInApp({ userId, accessToken }: { userId: string; accessToken?: string }) {
   const [connectError, setConnectError] = useState<ErrorView | null>(null);
@@ -63,6 +65,7 @@ export function SignedInApp({ userId, accessToken }: { userId: string; accessTok
       sdkInitParams={SDK_INIT_PARAMS}
       theme={UIKIT_THEME}
       colorSet={UIKIT_COLOR_SET}
+      breakpoint={UIKIT_BREAKPOINT}
       eventHandlers={eventHandlers}
     >
       <SignOutBridge />
@@ -115,10 +118,25 @@ function useConnection(): ConnectionState {
   return state;
 }
 
+// True below UIKIT_BREAKPOINT, where the screen shows one pane at a time.
+function useNarrowScreen(): boolean {
+  const query = `(max-width: ${UIKIT_BREAKPOINT})`;
+  const [narrow, setNarrow] = useState(() => window.matchMedia(query).matches);
+  useEffect(() => {
+    const mq = window.matchMedia(query);
+    const update = () => setNarrow(mq.matches);
+    update();
+    mq.addEventListener('change', update);
+    return () => mq.removeEventListener('change', update);
+  }, [query]);
+  return narrow;
+}
+
 function Home({ userId, connectError }: { userId: string; connectError: ErrorView | null }) {
   const connectionState = useConnection();
   const [connectedOnce, setConnectedOnce] = useState(false);
   const [channelUrl, setChannelUrl] = useState<string | null>(null);
+  const narrow = useNarrowScreen();
 
   useEffect(() => {
     if (connectionState === ConnectionState.OPEN) setConnectedOnce(true);
@@ -138,15 +156,23 @@ function Home({ userId, connectError }: { userId: string; connectError: ErrorVie
       {/* BP06: the UIKit screens mount after the first successful connect; with the local cache
           they keep working while the SDK reconnects. */}
       {connectedOnce ? (
-        <div className="panes">
+        <div className={channelUrl ? 'panes has-channel' : 'panes'}>
           <section className="list" data-testid="sb_channel_list">
+            {/* On a phone the list opens first: auto-selecting the newest channel would hide it
+                right after sign-in and again after every back tap. */}
             <GroupChannelList
+              selectedChannelUrl={channelUrl ?? undefined}
+              disableAutoSelect={narrow}
               onChannelSelect={(channel) => setChannelUrl(channel?.url ?? null)}
               onChannelCreated={(channel) => setChannelUrl(channel.url)}
             />
           </section>
           <section className="conversation">
-            {channelUrl ? <GroupChannel channelUrl={channelUrl} /> : <p className="empty">Nothing selected.</p>}
+            {channelUrl ? (
+              <GroupChannel channelUrl={channelUrl} onBackClick={() => setChannelUrl(null)} />
+            ) : (
+              <p className="empty">Nothing selected.</p>
+            )}
           </section>
         </div>
       ) : (

@@ -1,6 +1,6 @@
 # Sendbird Client plugin for Claude Code
 
-`sendbird-client` helps you add Sendbird Chat (including authentication and sessions) and UIKit to iOS (UIKit and SwiftUI), Android (View and Compose), and JavaScript (React and React Native) apps from Claude Code. It writes setup and feature code from verified documentation and templates, reads the Sendbird SDK you have installed, and never invents an API name. Sendbird Calls is not supported yet; the plugin tells you so instead of writing Calls code.
+`sendbird-client` helps you add Sendbird Chat (including authentication and sessions), UIKit, and Calls to iOS (UIKit and SwiftUI), Android (View and Compose), and JavaScript (React and React Native) apps from Claude Code. It writes setup and feature code from verified documentation and templates, reads the Sendbird SDK you have installed, and never invents an API name.
 
 ## Install
 
@@ -14,6 +14,8 @@ Then, in your project:
 ```text
 /sendbird-client:setup --product chat
 ```
+
+For 1:1 voice and video calls, run `/sendbird-client:setup --product calls`, or ask in plain language, for example "Let the signed-in user place 1:1 voice and video calls to another user and accept or decline incoming calls with Sendbird Calls." On iOS, Android, and React Native, incoming calls need push credentials (VoIP or FCM) in the Sendbird dashboard even while the app is open; the plugin lists that as a manual step.
 
 To use it for one run without installing (for example from a script or another CLI), download
 `sendbird-client-<version>.zip` from [Releases](https://github.com/sendbird/sendbird-client-plugin/releases)
@@ -87,27 +89,27 @@ This plugin runs inside Claude Code with your user account's permissions. Three 
 
 | When | Script | What it reads | What it can change | Network |
 |---|---|---|---|---|
-| Session start | `hooks/welcome.sh` | plugin files | adds the plugin's rules to the model's context | none |
+| Session start | `hooks/welcome.sh` | plugin files, and the names of the files in the session's folder (to tell whether it is empty) | adds the plugin's rules to the model's context, and in an empty folder says to start a new app with setup | none |
 | Before a file write or shell command | `hooks/credential-guard.sh` | the content or command about to run | blocks it if it contains a credential | none |
 | Before a shell command | `hooks/destructive-command-guard.sh` | the command about to run | asks you to approve a Sendbird CLI `delete`, `revoke`, or `deactivate` run with `--yes`; in a `-p` run it is denied | none |
 | Before a file write, or a shell command that writes a source file | `hooks/source-claim-guard.sh` | the content about to be written, local files it cites | blocks Sendbird API code without a verifiable source: a plugin file, an installed SDK file (`node_modules/@sendbird`, `Pods`, `.build`, Xcode `SourcePackages` or `DerivedData`, the Gradle cache), or a public page; a file the model wrote in your project does not count | fetches the cited page if it is on `sendbird.com/docs` or is a file in a `github.com/sendbird` repository (a `/blob/` or `/raw/` link); issues, discussions, and pull requests are not fetched |
-| After an agent finishes | `hooks/unsourced-claim-warn.sh` | the agent's reply | adds a warning when an API claim has no source; in Codex, sends the agent back once to add sources | none |
+| After an agent finishes | `hooks/unsourced-claim-warn.sh` | the agent's reply | when an API claim has no source, sends the plugin's own agents back once to add sources (in Codex, every agent); for any other agent that ran in the foreground, adds a warning | none |
 | When the answer ends | `hooks/final-answer-gate.sh` | the final answer (passed by Claude Code; older versions: the session transcript after your last prompt) | asks the model to revise an unsourced answer | same as `source-claim-guard.sh` |
-| When the answer ends, only when `SENDBIRD_NONINTERACTIVE` is `1`, `true`, or `yes` | `hooks/run-summary-gate.sh` | the final answer and the plugin's run summary schema | asks the model to fix a run summary that does not match the schema | none |
+| When the answer ends, only when `SENDBIRD_NONINTERACTIVE` is `1`, `true`, or `yes` | `hooks/run-summary-gate.sh` | the final answer and the plugin's run summary schema | asks the model to fix a run summary that does not match the schema, or that lists a build or a note that the run did not build under `manualSteps` | none |
 | Before and after an agent runs | `hooks/telemetry-start.sh`, `hooks/telemetry-end.sh` | agent name, duration, outcome | nothing; writes a local log only if you opted in | none |
 
 The two fetching hooks send a plain request for the cited public page (8-second timeout); nothing from your project or conversation is sent.
 
 The hooks read their input with `jq`. When `jq` is not on your `PATH`, the credential, source, and destructive-command guards cannot check a call, so instead of blocking or allowing it they ask you to approve every file write and shell command, and the session start says that `jq` is missing. The other hooks then do nothing. Install `jq` to turn the checks back on.
 
-**Scripts the agent runs** through Claude Code's Bash tool, under your Claude Code permission settings: project detection (reads manifests such as `package.json`, `Podfile`, `Package.swift`, `build.gradle`) and the installed-SDK reader (reads `node_modules/@sendbird/*`, `Pods/`, `.build/`, this project's Xcode `DerivedData`, and the Gradle cache).
+**Scripts the agent runs** through Claude Code's Bash tool, under your Claude Code permission settings: project detection (reads manifests such as `package.json`, `Podfile`, `Package.swift`, `build.gradle`) the installed-SDK reader (reads `node_modules/@sendbird/*`, `Pods/`, `.build/`, this project's Xcode `DerivedData`, and the Gradle cache), the offline docs search `core/commands/search.sh` (reads the docs page index and curated knowledge shipped inside the plugin and, when given your project, its lockfiles to learn the installed SDK versions; it makes no network request and writes no file), and the docs page reader `core/commands/fetch-doc.sh` (one HTTPS request with `curl` for a `sendbird.com/docs` page that the plugin's page index lists; it prints the page and writes no file). The plugin ships no official page text; pages are read from `sendbird.com/docs` when they are needed.
 
 **Instructions** — skills and agents that tell Claude how to work. They change what Claude does in your session.
 
 **Network requests made through Claude Code's tools.** Besides the two fetching hooks, the plugin's instructions lead to three kinds of requests, both under your Claude Code permission settings:
 
 - **Installing the SDK.** When you ask for setup, the agent runs the package manager your project already uses (npm, yarn, or pnpm; Swift Package Manager, or CocoaPods only when the project already has a `Podfile`; Gradle), which downloads the Sendbird packages from npm, GitHub, the CocoaPods trunk, and Sendbird's Maven repository (`repo.sendbird.com`).
-- **Looking up docs.** Agents and skills read official pages on `sendbird.com/docs` and `github.com/sendbird` with Claude Code's web fetch tool. The plugin does not limit which domains that tool can reach; your Claude Code permission settings do.
+- **Looking up docs.** Agents and skills read official pages on `sendbird.com/docs` with `core/commands/fetch-doc.sh` (only pages listed in the plugin's page index) or Claude Code's web fetch tool, and pages on `github.com/sendbird` with the web fetch tool. The plugin does not limit which domains that tool can reach; your Claude Code permission settings do.
 - **Searching public Sendbird repositories.** Agents may run the GitHub CLI (`gh search code`, `gh api` for public discussions) through Claude Code's Bash tool. These send your search terms, such as a Sendbird API name, to the GitHub API under your own `gh` login.
 
 None of them sends your project files or conversation to Sendbird. Claude Code itself sends your conversation, and the files it reads, to its model provider under your Claude Code terms; that is outside this plugin.

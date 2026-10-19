@@ -13,6 +13,7 @@
     "interop",
     "existingIntegration",
     "products",
+    "legacyMajors",
     "region",
     "schemaVersion",
     "detectedAt",
@@ -72,6 +73,39 @@
           "calls",
           "live"
         ]
+      }
+    },
+    "legacyMajors": {
+      "type": "array",
+      "description": "Sendbird SDKs found on an older major version (tools/detection/common/detect-legacy-majors.sh): Chat v3 and UIKit below v3. major is the major the project pins, or, for a package name only an older major used, the last major published under that name. package is the pod, Swift package, Gradle artifact, or npm package that was found. Empty when every detected SDK is on the current major or no version could be read.",
+      "items": {
+        "type": "object",
+        "required": [
+          "product",
+          "major",
+          "package"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "product": {
+            "type": "string",
+            "enum": [
+              "chat",
+              "uikit",
+              "ai-agent",
+              "desk",
+              "calls",
+              "live"
+            ]
+          },
+          "major": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "package": {
+            "type": "string"
+          }
+        }
       }
     },
     "region": {

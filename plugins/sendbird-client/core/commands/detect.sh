@@ -37,6 +37,9 @@ existing="$(bash "$DETECT/common/detect-existing-integration.sh" "$dir")"
 present="$(printf '%s' "$existing" | sed -nE 's/.*present=([a-z]+).*/\1/p')"
 ever="$(printf '%s' "$existing" | sed -nE 's/.*version=([^ ]+).*/\1/p')"
 products="$(bash "$DETECT/common/detect-products.sh" "$dir")"
+# Older majors: "<product> <major> <package>" lines -> [{product, major, package}]
+legacy_json="$(bash "$DETECT/common/detect-legacy-majors.sh" "$dir" \
+  | jq -R -s -c 'split("\n") | map(select(length > 0) | split(" ") | {product: .[0], major: (.[1] | tonumber), package: .[2]})')"
 region="$(bash "$DETECT/common/detect-region.sh" "$dir")"
 push_provider="$(bash "$DETECT/tier2/detect-push-provider.sh" "$dir")"
 state_management="$(bash "$DETECT/tier2/detect-state-management.sh" "$dir")"
@@ -49,12 +52,12 @@ jq -n \
   --arg dep "$dep" --arg life "$life" --arg interop "$interop" \
   --arg present "$present" --arg ever "$ever" --arg region "$region" \
   --arg pushProvider "$push_provider" --arg stateManagement "$state_management" --arg appIdSource "$app_id_source" \
-  --argjson products "$prod_json" \
+  --argjson products "$prod_json" --argjson legacyMajors "$legacy_json" \
   '{
      platform: $platform, host: $host, packageManager: $pm,
      deploymentTarget: $dep, lifecycle: $life, interop: $interop,
      existingIntegration: { present: ($present=="true"), version: $ever },
-     products: $products, region: $region,
+     products: $products, legacyMajors: $legacyMajors, region: $region,
      tier2: { pushProvider: $pushProvider, stateManagement: $stateManagement, appIdSource: $appIdSource },
      schemaVersion: 1, detectedAt: (now | todateiso8601)
    }'

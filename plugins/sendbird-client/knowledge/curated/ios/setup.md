@@ -6,6 +6,8 @@
 
 > Verified against the public mirrors and rebuilt against the latest SPM releases on 2026-09-08. Shared-dependency minimums read from the public `Package.swift` manifests on 2026-09-30. Prefer SPM; cite each coordinate. Do not invent versions.
 
+> A plugin run does not build, compile, or type-check the project: do not run `xcodebuild build`, `xcodegen generate`, or `swift build` unless the customer asks for a build (`docs/AGENT_CONTRACT.md` section 3). The rebuilds above are the plugin's own tests.
+
 ## Overview
 Add the SDK(s) you need via Swift Package Manager, initialize once at launch, then connect/authenticate. Packaging is SPM-first.
 

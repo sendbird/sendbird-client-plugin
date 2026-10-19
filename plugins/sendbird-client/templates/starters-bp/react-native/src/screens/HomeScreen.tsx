@@ -1,4 +1,5 @@
-import { Button, SafeAreaView, StyleSheet, Text } from 'react-native';
+import { Button, StyleSheet, Text } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { onLogout } from '../auth/login';
 import type { SessionState } from '../auth/session';
 

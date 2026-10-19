@@ -27,8 +27,19 @@ file_contains "$dir" "*.swift" 'import[[:space:]]+Send[Bb]irdCalls' && mark call
 file_contains "$dir" "*.swift" 'import[[:space:]]+SendbirdAIAgent' && mark ai-agent
 file_contains "$dir" "*.swift" 'import[[:space:]]+Send[Bb]irdDesk' && mark desk
 file_contains "$dir" "*.swift" 'import[[:space:]]+SendbirdLive' && mark live
-{ has_glob "$dir" "Podfile" && file_contains "$dir" "Podfile" "pod[[:space:]]+'SendbirdUIKit'"; } && mark uikit
-{ has_glob "$dir" "Podfile" && file_contains "$dir" "Podfile" "pod[[:space:]]+'SendbirdChat"; } && mark chat
+# CocoaPods looks pod names up case-sensitively, and the UIKit pod spells the brand with a
+# capital B ("Cocoapod uses the name of SendBirdUIKit"). Single or double quotes, with or
+# without a subspec. The v4 Chat pod is listed in the curated setup page.
+#   source: https://github.com/sendbird/sendbird-uikit-ios/blob/v3.18.2/README.md
+#   source: knowledge/curated/ios/setup.md
+{ has_glob "$dir" "Podfile" && file_contains "$dir" "Podfile" "pod[[:space:]]+['\"]SendBirdUIKit['\"/]"; } && mark uikit
+{ has_glob "$dir" "Podfile" && file_contains "$dir" "Podfile" "pod[[:space:]]+['\"]SendbirdChat"; } && mark chat
+# Older majors under names of their own (Chat v3 pod, Swift module, SPM repository, Gradle
+# artifact, npm packages); tools/detection/common/detect-legacy-majors.sh cites the sources
+# and reports the major.
+while IFS=' ' read -r product _major _package; do
+  [ -n "$product" ] && mark "$product"
+done < <(bash "$HERE/detect-legacy-majors.sh" "$dir")
 # Android: Gradle build files and the version catalog (gradle/libs.versions.toml), in the
 # "com.sendbird.sdk:<artifact>" form or as group = "com.sendbird.sdk", name = "<artifact>".
 # Artifacts from knowledge/curated/android/setup.md "Packaging (Gradle)" and hosts/compose.md.
