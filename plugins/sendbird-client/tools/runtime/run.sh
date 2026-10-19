@@ -6,11 +6,16 @@
 # this repository's tests (tests/runtime/run.sh passes --app-id-env SENDBIRD_TEST_APP_ID).
 #
 # Usage: run.sh <project-dir> --host <react|react-native|ios-uikit|ios-swiftui|android-view|android-compose>
-#               [--check] [--out DIR] [--app-id-env NAME] [--expect-text TEXT]... [--expect-element ID]...
-#               [--b-custom-type TYPE] [--direct-chat USER] [--chat-screens] [--rich] [--keep]
+#               [--platform ios|android] [--check] [--out DIR] [--app-id-env NAME] [--expect-text TEXT]...
+#               [--expect-element ID]... [--b-custom-type TYPE] [--direct-chat USER] [--chat-screens] [--rich] [--keep]
+#   --platform        react-native only, and required there: run the app's ios/ project on an iOS
+#                     simulator or its android/ project on an Android emulator, one platform per run.
+#                     The app is a release build with its JavaScript bundled in, so no Metro server
+#                     runs (hosts/react-native.sh)
 #   --rich            after the two-way exchange, drive the conversation features one by one: a
 #                     reaction on B's message, edit and delete of A's own messages, an image
-#                     attachment, and a message search; user B checks each on the server (lib/rich.sh)
+#                     attachment, and a message search; user B checks each on the server (lib/rich.sh).
+#                     Not supported for --host react-native (exit 64)
 #   --check           preflight only: report what the run needs and what is missing (JSON on stdout).
 #                     Copies, installs, builds, and launches nothing. Exit 0 ready, 2 not ready.
 #   --app-id-env      read the App ID from this environment variable only. Default: SENDBIRD_APP_ID,
@@ -25,7 +30,7 @@
 #                     flag (with the file whose Chat SDK code sends messages, when there is one)
 #   --direct-chat     the app opens a 1:1 chat with USER from a button (no channel list): user B
 #                     is USER, A taps the button, sends, and must see B's reply. Not supported for
-#                     --host react (exit 64) or react-native (not supported at all yet)
+#                     --host react or react-native (exit 64)
 #   --b-custom-type   customType on user B's first message, for a customization that renders
 #                     such messages differently (the marker is then checked with --expect-*)
 #   --expect-text     text that must be on the chat screen (a customization), repeatable
@@ -48,12 +53,13 @@
 # RT_GRADLEW: a Gradle wrapper for an Android project that has none of its own.
 set -uo pipefail
 HERE="$(cd "$(dirname "$0")" && pwd)"
-usage() { echo "usage: run.sh <project-dir> --host <react|react-native|ios-uikit|ios-swiftui|android-view|android-compose> [--check] [--out DIR] [--app-id-env NAME] [--expect-text TEXT]... [--expect-element ID]... [--b-custom-type TYPE] [--direct-chat USER] [--chat-screens] [--rich] [--keep]" >&2; exit 64; }
+usage() { echo "usage: run.sh <project-dir> --host <react|react-native|ios-uikit|ios-swiftui|android-view|android-compose> [--platform ios|android] [--check] [--out DIR] [--app-id-env NAME] [--expect-text TEXT]... [--expect-element ID]... [--b-custom-type TYPE] [--direct-chat USER] [--chat-screens] [--rich] [--keep]" >&2; exit 64; }
 
-project=""; host=""; out=""; keep=0; check=0; app_id_env=""; expect_text=""; expect_element=""; b_custom_type=""; direct_user=""; chat_screens=0; rich=0
+project=""; host=""; platform=""; out=""; keep=0; check=0; app_id_env=""; expect_text=""; expect_element=""; b_custom_type=""; direct_user=""; chat_screens=0; rich=0
 while [ $# -gt 0 ]; do
   case "$1" in
     --host) [ $# -ge 2 ] || usage; host="$2"; shift 2 ;;
+    --platform) [ $# -ge 2 ] || usage; platform="$2"; shift 2 ;;
     --out) [ $# -ge 2 ] || usage; out="$2"; shift 2 ;;
     --app-id-env) [ $# -ge 2 ] || usage; app_id_env="$2"; shift 2 ;;
     --expect-text) [ $# -ge 2 ] || usage; expect_text="${expect_text}${2}"$'\n'; shift 2 ;;
@@ -80,6 +86,19 @@ esac
 # way to press a "chat with USER" button, so --direct-chat would silently run the wrong scenario.
 if [ -n "$direct_user" ] && [ "$host" = react ]; then
   echo "--direct-chat is not supported for --host react (only ios-uikit, ios-swiftui, android-view, android-compose)" >&2; exit 64
+fi
+# A React Native app runs on one platform per run; every other host has its platform already.
+if [ "$host" = react-native ]; then
+  case "$platform" in
+    ios|android) ;;
+    "") echo "--host react-native needs --platform ios or --platform android" >&2; exit 64 ;;
+    *) echo "unknown --platform: $platform (ios or android)" >&2; exit 64 ;;
+  esac
+  # neither has been run on React Native screens: refuse instead of running an unchecked scenario
+  [ -z "$direct_user" ] || { echo "--direct-chat is not supported for --host react-native (only ios-uikit, ios-swiftui, android-view, android-compose)" >&2; exit 64; }
+  [ "$rich" = 0 ] || { echo "--rich is not supported for --host react-native (only ios-uikit, ios-swiftui, android-view, android-compose)" >&2; exit 64; }
+elif [ -n "$platform" ]; then
+  echo "--platform applies to --host react-native only" >&2; exit 64
 fi
 [[ -z "$app_id_env" || "$app_id_env" =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]] || { echo "bad --app-id-env name: $app_id_env" >&2; usage; }
 project="$(cd "$project" && pwd)"
@@ -140,7 +159,29 @@ preflight() {
       notes+=("installs pinned tools into $TOOLS_DIR (outside the project): playwright with chromium, vite, @sendbird/chat for user B")
       notes+=("copies the project to a temporary folder, runs npm install there, and serves it with vite") ;;
     react-native)
-      missing+=("react-native is not supported by the runtime harness yet") ;;
+      grep -Eqs '"react-native"[[:space:]]*:' "$project/package.json" || missing+=("package.json does not list react-native")
+      bash "$HERE/lib/rn-app.sh" entry "$project" >/dev/null \
+        || missing+=("no index.js (or index.ts, index.tsx, index.jsx) at the project root: the entry a release build bundles")
+      # the app's own sign-in form first, as on iOS and Android; else the harness calls onLoginSucceeded
+      if [ "$(bash "$HERE/lib/signin-form.sh" rn "$project")" = 1 ]; then signin="the app's sign-in form (a TextInput)"
+      elif f="$(bash "$HERE/lib/rn-app.sh" login "$project")"; then signin="onLoginSucceeded in $f"
+      else missing+=("no sign-in form and no exported onLoginSucceeded(userId) for the harness to sign in with"); fi
+      grep -Eqs '"@sendbird/uikit-react-native"' "$project/package.json" && chat_ui=1
+      notes+=("installs pinned tools into $TOOLS_DIR (outside the project): @sendbird/chat for user B")
+      if [ "$platform" = ios ]; then
+        for t in pod xcodegen xcodebuild xcrun; do command -v "$t" >/dev/null || missing+=("$t not found"); done
+        compgen -G "$project/ios/*.xcodeproj" >/dev/null || missing+=("no ios/*.xcodeproj: the app's iOS project")
+        [ -f "$project/ios/Podfile" ] || missing+=("no ios/Podfile: React Native's iOS dependencies are installed with CocoaPods")
+        notes+=("copies the project to a temporary folder and runs npm install and pod install there")
+        notes+=("builds the app's ios/ project in the Release configuration (JavaScript bundled in, no Metro) and a separate UI test project, on a simulator created for this run and deleted afterwards")
+      else
+        eval "$(bash "$HERE/../local-sdk/android-toolchain.sh" "$project/android" 2>/dev/null)"
+        [ -n "${ANDROID_HOME:-}" ] && [ -n "${JAVA_HOME:-}" ] || missing+=("no JDK 17 or Android SDK found (tools/local-sdk/android-toolchain.sh)")
+        [ -f "$project/android/app/build.gradle" ] || [ -f "$project/android/app/build.gradle.kts" ] || missing+=("no android/app/build.gradle: the app's Android project")
+        [ -x "$project/android/gradlew" ] || command -v gradle >/dev/null || missing+=("no Gradle wrapper (android/gradlew) and no gradle on PATH")
+        notes+=("copies the project to a temporary folder and runs npm install there")
+        notes+=("builds the app's android/ project as a release build (JavaScript bundled in, no Metro; signed the way its build.gradle signs release builds) with an instrumented test; starts a read-only emulator of RT_AVD, or uses RT_ANDROID_SERIAL")
+      fi ;;
     ios-uikit|ios-swiftui)
       for t in xcodegen xcodebuild xcrun; do command -v "$t" >/dev/null || missing+=("$t not found"); done
       [ -f "$project/project.yml" ] || missing+=("no project.yml: the iOS harness builds XcodeGen projects only")
@@ -166,10 +207,10 @@ preflight() {
   [ "$chat_screens" = 1 ] && chat_ui=1
   local msg_note; msg_note="$(message_steps_note "$chat_ui" "$([ "$chat_ui" = 1 ] || chat_sdk_send "$project")")"
   [ -z "$msg_note" ] || notes+=("$msg_note")
-  jq -n --arg host "$host" --arg from "$([ -n "$RT_APP_ID" ] && echo "$app_id_from")" --arg how "$how" --arg signin "$signin" \
+  jq -n --arg host "$host" --arg platform "$platform" --arg from "$([ -n "$RT_APP_ID" ] && echo "$app_id_from")" --arg how "$how" --arg signin "$signin" \
     --argjson chat "$chat_ui" --arg msgnote "$msg_note" '
     ($ARGS.positional | map(select(startswith("M:")) | ltrimstr("M:"))) as $missing |
-    {ready: ($missing | length == 0), host: $host,
+    {ready: ($missing | length == 0), host: $host} + (if $platform == "" then {} else {platform: $platform} end) + {
      appId: (if $from == "" then null else {from: $from} end), appIdHow: $how, signIn: $signin,
      checks: (if $chat == 1 then ["connect", "channel", "message-a-receives", "message-a-sends"] else ["connect"] end),
      messageSteps: (if $msgnote == "" then {run: true} else {run: false, why: $msgnote, enableWith: "--chat-screens"} end),
@@ -188,10 +229,10 @@ mkdir -p "$out"; out="$(cd "$out" && pwd)"
 
 finish() {  # finish <status> <reason> <exit>
   python3 -I "$HERE/lib/redact.py" "$out"
-  jq -n --arg status "$1" --arg reason "$2" --arg host "$host" --arg project "$project" \
+  jq -n --arg status "$1" --arg reason "$2" --arg host "$host" --arg platform "$platform" --arg project "$project" \
     --arg userA "${RT_USER_A:-}" --arg userB "${RT_USER_B:-}" --argjson appid "${appid_json:-null}" \
     --slurpfile steps "$out/steps.jsonl" --arg msgstate "${msg_state:-}" \
-    '{status:$status, reason:$reason, host:$host, project:$project, users:{a:$userA, b:$userB},
+    '{status:$status, reason:$reason, host:$host} + (if $platform == "" then {} else {platform:$platform} end) + {project:$project, users:{a:$userA, b:$userB},
       messageSteps:(if $msgstate == "" then null elif $msgstate == "run" then {run:true}
         else {run:false, why:$msgstate, enableWith:"--chat-screens"} end),
       appIdSource:(if $appid then {how:$appid.how, env:$appid.env, buildSettings:$appid.buildSettings,
@@ -209,10 +250,6 @@ if [ -z "$RT_APP_ID" ]; then
   finish skip "$app_id_missing" 2
 fi
 [ "$rich" = 1 ] && [ "$host" = react ] && echo "note: --rich is not implemented for react yet; running the basic checks"
-if [ "$host" = react-native ]; then
-  echo "SKIP: react-native is not supported by the runtime harness yet"
-  finish skip "react-native is not supported yet" 2
-fi
 command -v node >/dev/null && command -v npm >/dev/null && command -v jq >/dev/null || finish skip "node, npm, and jq are required" 2
 
 # --- tools: pinned, outside the repo and the project ---------------------------------------------
@@ -235,6 +272,8 @@ cleanup() { if [ "$keep" -eq 1 ]; then echo "kept working copy: $work (contains 
 trap cleanup EXIT
 cp -R "$project/." "$work/"
 rm -rf "$work/node_modules" "$work/build" "$work/app/build" "$work/.gradle" "$work"/*.xcodeproj "$work/.sendbird-client"
+# React Native: what pod install and the native builds leave behind
+rm -rf "$work/ios/Pods" "$work/ios/build" "$work/android/build" "$work/android/app/build" "$work/android/.gradle"
 
 if ! appid_json="$(python3 -I "$HERE/lib/appid.py" apply "$work")"; then
   [ -n "$appid_json" ] || appid_json=null
@@ -260,8 +299,8 @@ rand() { LC_ALL=C tr -dc 'a-z0-9' < /dev/urandom | head -c 6; }
 RT_USER_A="rt-${host}-a-$(rand)"; RT_USER_B="${direct_user:-rt-${host}-b-$(rand)}"; RT_DIRECT="$([ -n "$direct_user" ] && echo 1 || echo 0)"
 export RT_DIRECT RT_RICH="$rich"
 export RT_USER_A RT_USER_B RT_WORK="$work" RT_OUT="$out" RT_CHAT_UI="$chat_ui" RT_EXPECT_TEXT="$expect_text" RT_EXPECT_SELECTOR="$expect_element" RT_B_CUSTOM_TYPE="$b_custom_type"
-export RT_ENV_NAMES="$env_names" RT_BUILD_SETTINGS="$build_settings" RT_GRADLE_PROPS="$gradle_props" RT_TOOLS="$TOOLS" RT_HERE="$HERE"
-echo "runtime: $host | A=$RT_USER_A B=$RT_USER_B | chat screens: $([ "$chat_ui" = 1 ] && echo yes || echo no) | App ID via $(jq -r '.how | join(", ")' <<<"$appid_json") | out $out"
+export RT_ENV_NAMES="$env_names" RT_BUILD_SETTINGS="$build_settings" RT_GRADLE_PROPS="$gradle_props" RT_TOOLS="$TOOLS" RT_HERE="$HERE" RT_PLATFORM="$platform"
+echo "runtime: $host${platform:+ ($platform)} | A=$RT_USER_A B=$RT_USER_B | chat screens: $([ "$chat_ui" = 1 ] && echo yes || echo no) | App ID via $(jq -r '.how | join(", ")' <<<"$appid_json") | out $out"
 
 case "$host" in
   react)
@@ -275,6 +314,8 @@ case "$host" in
     bash "$HERE/hosts/ios.sh" 2>&1 | tee "$out/driver.log.raw"; rc="${PIPESTATUS[0]}" ;;
   android-view|android-compose)
     bash "$HERE/hosts/android.sh" 2>&1 | tee "$out/driver.log.raw"; rc="${PIPESTATUS[0]}" ;;
+  react-native)
+    bash "$HERE/hosts/react-native.sh" 2>&1 | tee "$out/driver.log.raw"; rc="${PIPESTATUS[0]}" ;;
 esac
 
 # Without chat screens the iOS and Android drivers stop after connect and record nothing for the

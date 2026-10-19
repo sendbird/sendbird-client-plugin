@@ -106,11 +106,12 @@ The hooks read their input with `jq`. When `jq` is not on your `PATH`, the crede
 
 **Instructions** — skills and agents that tell Claude how to work. They change what Claude does in your session.
 
-**Network requests made through Claude Code's tools.** Besides the two fetching hooks, the plugin's instructions lead to three kinds of requests, both under your Claude Code permission settings:
+**Network requests made through Claude Code's tools.** Besides the two fetching hooks, the plugin's instructions lead to four kinds of requests, all under your Claude Code permission settings:
 
 - **Installing the SDK.** When you ask for setup, the agent runs the package manager your project already uses (npm, yarn, or pnpm; Swift Package Manager, or CocoaPods only when the project already has a `Podfile`; Gradle), which downloads the Sendbird packages from npm, GitHub, the CocoaPods trunk, and Sendbird's Maven repository (`repo.sendbird.com`).
 - **Looking up docs.** Agents and skills read official pages on `sendbird.com/docs` with `core/commands/fetch-doc.sh` (only pages listed in the plugin's page index) or Claude Code's web fetch tool, and pages on `github.com/sendbird` with the web fetch tool. The plugin does not limit which domains that tool can reach; your Claude Code permission settings do.
 - **Searching public Sendbird repositories.** Agents may run the GitHub CLI (`gh search code`, `gh api` for public discussions) through Claude Code's Bash tool. These send your search terms, such as a Sendbird API name, to the GitHub API under your own `gh` login.
+- **Running your app (run check).** Only when you ask for a run check and agree to the build, `tools/runtime/run.sh` copies your project to a temporary folder (your project is never changed), installs its dependencies there with npm (and CocoaPods for a React Native app on iOS), and builds it with Xcode or Gradle, which download what the build needs. It installs its own pinned tools (Playwright with Chromium, Vite, and the Sendbird Chat SDK for the second test user) from npm into a temporary folder outside your project, then launches the app in a browser, a simulator, or an emulator, where two test users with generated IDs connect to your Sendbird application and exchange messages.
 
 None of them sends your project files or conversation to Sendbird. Claude Code itself sends your conversation, and the files it reads, to its model provider under your Claude Code terms; that is outside this plugin.
 

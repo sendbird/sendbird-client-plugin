@@ -9,14 +9,73 @@
 #   3. builds for a simulator it creates for this run (deleted afterwards), runs the UI test, and in
 #      parallel uses the Node peer as user B: waits for A's presence, opens a channel with A,
 #      checks A's reply on the server, then sends one more message for A to see live
+# With RT_RN=1 (hosts/react-native.sh) the app is a React Native app's ios/ project instead: pod install,
+# a Release build of its workspace (JavaScript bundled in), installed on the simulator, and the same UI
+# test from a separate project that drives the app by its bundle identifier. Steps 1 and 2 do not
+# apply: the sign-in hook is in the JavaScript entry, and an App ID read from the environment is
+# given to the build, where the JavaScript is bundled.
 # Exit 0 = driver finished (steps.jsonl says pass/fail), 1 = failed, 2 = skipped (prints SKIP: ...).
 set -uo pipefail
 HERE="$RT_HERE/hosts/ios"
 work="$RT_WORK"; out="$RT_OUT"; tools="$RT_TOOLS"
 step() { jq -nc --arg s "$1" --argjson ok "$2" --arg d "$3" '{step:$s, ok:$ok, detail:$d, screenshot:null}' >> "$out/steps.jsonl"; echo "step $1: $([ "$2" = true ] && echo ok || { [ "$2" = null ] && echo n/a || echo FAIL; }) — $3"; }
 peer() { ( cd "$tools" && node peer.mjs "$@" ); }
+# why a build failed, in one line: a compiler error, else a script's error (React Native's bundle
+# step prints Metro's "UnableToResolveError: ..."), else the build command that failed
+build_error() {
+  local l
+  l="$(grep -m1 -E 'error:' "$1" | sed 's/^.*error: //')"
+  [ -n "$l" ] || l="$(grep -m1 -E '^[A-Za-z]*Error: ' "$1")"
+  [ -n "$l" ] || l="$(grep -A1 'The following build commands failed:' "$1" | tail -1 | sed 's/^[[:space:]]*//')"
+  printf '%s' "$l" | sed -e "s|$work/||g" -e "s|${work#/private}/||g" | cut -c1-200
+}
 
-for t in xcodegen xcodebuild xcrun; do command -v "$t" >/dev/null || { echo "SKIP: $t not found"; exit 2; }; done
+rn="${RT_RN:-0}"
+for t in xcodegen xcodebuild xcrun $([ "$rn" = 1 ] && echo pod); do command -v "$t" >/dev/null || { echo "SKIP: $t not found"; exit 2; }; done
+
+if [ "$rn" = 1 ]; then
+# --- React Native (hosts/react-native.sh): the app's ios/ project and a UI test project of its own --
+# The app's project is left as it is (its CocoaPods workspace is built in the Release configuration,
+# JavaScript bundled in). The UI test lives in a separate XcodeGen project whose host app is a stub,
+# and drives the React Native app by its bundle identifier: XCUIApplication(bundleIdentifier:).
+xcproj="$(ls -d "$work"/ios/*.xcodeproj 2>/dev/null | head -1)"
+[ -n "$xcproj" ] || { step launch false "no ios/*.xcodeproj in the React Native project"; exit 1; }
+app_target="$(basename "$xcproj" .xcodeproj)"
+scheme_file="$(ls "$xcproj"/xcshareddata/xcschemes/*.xcscheme 2>/dev/null | head -1)"
+[ -n "$scheme_file" ] && app_target="$(basename "$scheme_file" .xcscheme)"
+call="$RT_RN_SIGNIN_TEXT"
+echo "pod install (the first run downloads React Native's pods; several minutes)"
+if ! ( cd "$work/ios" && pod install ) > "$out/pod-install.log.raw" 2>&1; then
+  step launch false "pod install failed: $(grep -m1 -E '^\[!\]' "$out/pod-install.log.raw" | cut -c1-200) (pod-install.log)"; exit 1
+fi
+ws="$(ls -d "$work"/ios/*.xcworkspace 2>/dev/null | head -1)"
+[ -n "$ws" ] || { step launch false "pod install made no ios/*.xcworkspace (pod-install.log)"; exit 1; }
+mkdir -p "$work/rt-uitests/RTUITests" "$work/rt-uitests/RTHost"
+cp "$HERE/RTUITests.swift" "$HERE/RTSignin.swift" "$work/rt-uitests/RTUITests/"
+cp "$HERE/RTHost.swift" "$work/rt-uitests/RTHost/"
+cat > "$work/rt-uitests/project.yml" <<'YML'
+name: RTUITests
+options: { deploymentTarget: { iOS: "15.0" }, bundleIdPrefix: rt.harness }
+targets:
+  RTHost:
+    type: application
+    platform: iOS
+    sources: [RTHost]
+    settings: { base: { GENERATE_INFOPLIST_FILE: YES, INFOPLIST_KEY_UILaunchScreen_Generation: YES, INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES } }
+  RTUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources: [RTUITests]
+    dependencies: [{ target: RTHost }]
+    settings: { base: { GENERATE_INFOPLIST_FILE: YES } }
+schemes:
+  RTRun:
+    build: { targets: { RTHost: all, RTUITests: [test] } }
+    test: { targets: [RTUITests] }
+YML
+( cd "$work/rt-uitests" && xcodegen generate ) > "$out/xcodegen.log" 2>&1 || { step launch false "xcodegen failed (xcodegen.log)"; exit 1; }
+proj="$work/rt-uitests/RTUITests.xcodeproj"
+else
 [ -f "$work/project.yml" ] || { step launch false "no project.yml: the iOS driver builds XcodeGen projects only"; exit 1; }
 
 # --- harness files -----------------------------------------------------------------------------
@@ -66,6 +125,7 @@ fi
 for n in $RT_BUILD_SETTINGS; do printf '%s = %s\n' "$n" "$RT_APP_ID" >> "$work/rt.xcconfig"; done
 ( cd "$work" && xcodegen generate --spec rt-project.yml ) > "$out/xcodegen.log" 2>&1 || { step launch false "xcodegen failed (xcodegen.log)"; exit 1; }
 proj="$(cd "$work" && ls -d ./*.xcodeproj | head -1)"
+fi
 
 # --- simulator for this run --------------------------------------------------------------------
 dtype="${RT_SIMULATOR:-iPhone 17 Pro}"
@@ -75,14 +135,33 @@ cleanup() { xcrun simctl shutdown "$udid" >/dev/null 2>&1; xcrun simctl delete "
 trap cleanup EXIT
 # an app with its own sign-in form is signed in through that form, the way a user does, and the hook
 # is left unused (lib/signin-form.sh says how a form is recognized)
-signin_form="$(bash "$RT_HERE/lib/signin-form.sh" ios "$work/Sources")"
+if [ "$rn" = 1 ]; then signin_form="$RT_RN_SIGNIN_FORM"; else signin_form="$(bash "$RT_HERE/lib/signin-form.sh" ios "$work/Sources")"; fi
 echo "simulator $udid ($dtype, $runtime) | app target $app_target | sign-in: $([ $signin_form = 1 ] && echo "the app's own form" || echo "hook $call")"
 
 dd="$work/DerivedData"; spm="$tools/spm-cache"; mkdir -p "$spm"
-xb=(xcodebuild -project "$proj" -scheme RTRun -destination "id=$udid" -derivedDataPath "$dd" -clonedSourcePackagesDirPath "$spm" -xcconfig "$work/rt.xcconfig")
-echo "building (first build resolves Swift packages; several minutes)"
+rn_bundle_id=""
+if [ "$rn" = 1 ]; then
+  # an App ID the app reads from the environment reaches it only when the JavaScript is bundled
+  # (a Babel plugin that inlines process.env runs then), so the build gets it, never the launch
+  genv=(); for n in $RT_ENV_NAMES; do genv+=("$n=$RT_APP_ID"); done
+  echo "building $app_target (Release, JavaScript bundled in; several minutes)"
+  if ! ( cd "$work/ios" && env ${genv[@]+"${genv[@]}"} xcodebuild -workspace "$ws" -scheme "$app_target" -configuration Release \
+         -destination "id=$udid" -derivedDataPath "$work/DerivedData-app" build ) > "$out/xcodebuild-app.log.raw" 2>&1; then
+    step launch false "build failed: $(build_error "$out/xcodebuild-app.log.raw") (xcodebuild-app.log)"
+    exit 1
+  fi
+  app_bundle="$(ls -d "$work"/DerivedData-app/Build/Products/Release-iphonesimulator/*.app 2>/dev/null | head -1)"
+  rn_bundle_id="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$app_bundle/Info.plist" 2>/dev/null)"
+  [ -n "$rn_bundle_id" ] || { step launch false "the build made no app with a bundle identifier (xcodebuild-app.log)"; exit 1; }
+  xcrun simctl boot "$udid" >/dev/null 2>&1; xcrun simctl bootstatus "$udid" -b >/dev/null 2>&1
+  xcrun simctl install "$udid" "$app_bundle" > "$out/install.log" 2>&1 || { step launch false "simctl install failed (install.log)"; exit 1; }
+  xb=(xcodebuild -project "$proj" -scheme RTRun -destination "id=$udid" -derivedDataPath "$dd")
+else
+  xb=(xcodebuild -project "$proj" -scheme RTRun -destination "id=$udid" -derivedDataPath "$dd" -clonedSourcePackagesDirPath "$spm" -xcconfig "$work/rt.xcconfig")
+fi
+echo "building$([ "$rn" = 1 ] && echo " the UI test" || echo " (first build resolves Swift packages; several minutes)")"
 if ! ( cd "$work" && "${xb[@]}" build-for-testing ) > "$out/xcodebuild-build.log.raw" 2>&1; then
-  step launch false "build failed: $(grep -E 'error:' "$out/xcodebuild-build.log.raw" | head -1 | sed 's/^.*error: //' | cut -c1-200)"
+  step launch false "build failed: $(build_error "$out/xcodebuild-build.log.raw")"
   exit 1
 fi
 
@@ -110,6 +189,7 @@ runner_env=(TEST_RUNNER_RT_USER_A="$RT_USER_A" TEST_RUNNER_RT_STEPS_FILE="$out/s
   TEST_RUNNER_RT_SHOTS="$out/screens" TEST_RUNNER_RT_CHAT_UI="$RT_CHAT_UI" TEST_RUNNER_RT_SIGNIN_FORM="$signin_form" TEST_RUNNER_RT_DIRECT="$RT_DIRECT" TEST_RUNNER_RT_CHANNEL="$RT_CHANNEL"
   TEST_RUNNER_RT_TEXT_B1="$RT_TEXT_B1" TEST_RUNNER_RT_TEXT_A1="$RT_TEXT_A1" TEST_RUNNER_RT_TEXT_B2="$RT_TEXT_B2"
   TEST_RUNNER_RT_EXPECT_TEXT="$RT_EXPECT_TEXT" TEST_RUNNER_RT_EXPECT_SELECTOR="$RT_EXPECT_SELECTOR"
+  TEST_RUNNER_RT_BUNDLE_ID="$rn_bundle_id" TEST_RUNNER_RT_SIGNIN_HOOK="$([ "$rn" = 1 ] && [ "$signin_form" != 1 ] && echo "A=$RT_USER_A via $call")"
   TEST_RUNNER_RT_RICH="$RT_RICH" TEST_RUNNER_RT_TEXT_A1_EDITED="${RT_TEXT_A1_EDITED:-}" TEST_RUNNER_RT_TEXT_A2="${RT_TEXT_A2:-}" TEST_RUNNER_RT_SEARCH="${RT_SEARCH:-}")
 [ "$RT_DIRECT" = 1 ] && peer touch "$RT_USER_B" >/dev/null
 ( cd "$work" && env "${runner_env[@]}" "${xb[@]}" test-without-building ) > "$out/xcodebuild-test.log.raw" 2>&1 &
