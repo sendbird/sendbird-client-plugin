@@ -172,6 +172,59 @@ Only these Calls steps need something outside the project, and each has a source
 
 None of these pages has a dashboard step that enables or activates Calls (checked 2026-10-17). Do not tell the customer to "enable Calls in the dashboard", and do not add any other dashboard step that no page cited here lists.
 
+## Error codes (1800xxx range)
+Calls errors reach your completion handlers as `SBCError?` (for example `AuthenticateHandler`, `DirectCallHandler`, `ErrorHandler`); read the number from `SBCError.errorCode`, a `SBCError.ErrorCode` (Objective-C `SBCErrorCode`) with raw value `Int`. (source: sendbird-calls-ios 1.12.2 `SendBirdCalls.xcframework/ios-arm64/SendBirdCalls.framework/Modules/SendBirdCalls.swiftmodule/arm64-apple-ios.swiftinterface` lines 442-452 and 577-647; the 1.12.3 interface is byte-identical to 1.12.2)
+
+The table lists every case in the 1800xxx range that `SBCError.ErrorCode` ships, with the case name read from that interface (verified 2026-10-19). Meanings come from the public iOS error-codes page; "No public description" means the page has no entry for that code. (source: https://sendbird.com/docs/calls/sdk/v1/ios/features/error-codes)
+
+| Code | `SBCError.ErrorCode` case | Meaning / typical cause |
+|------|---------------------------|--------------------------|
+| 1800100 | `dialCanceled` | The dialing has been canceled before receiving a callback. |
+| 1800101 | `myUserIdNotAllowed` | The caller can't call their own user ID. |
+| 1800200 | `requestFailed` | The request failed due to an error from the HTTP library. |
+| 1800201 | `websocketConnectionNotOpened` | No public description |
+| 1800202 | `websocketConnectionFailed` | No public description |
+| 1800203 | `noResponseDueToTimeout` | The request failed to receive a response due to timeout. |
+| 1800204 | `requestFailedDueToWebsocketConnectionLost` | The request failed because the websocket connection is lost. |
+| 1800205 | `wrongResponse` | The response contains an unexpected object type of data. |
+| 1800206 | `queryInProgress` | The previous query is still in progress. |
+| 1800207 | `internalServerError` | An internal server error has occurred. |
+| 1800208 | `malformedData` | The data format of the response is invalid. |
+| 1800300 | `invalidParameterValue` | The parameter specifies an invalid or empty value. |
+| 1800301 | `invalidParameterType` | The data type of the parameter is invalid. |
+| 1800302 | `instanceNotInitialized` | A SendBirdCall instance is not initialized. |
+| 1800303 | `notAuthenticated` | The user is not authenticated. |
+| 1800403 | `changingVideoDeviceNotSupported` | No public description |
+| 1800404 | `changingVideoDeviceInProgress` | No public description |
+| 1800405 | `changingVideoDeviceFailed` | No public description |
+| 1800600 | `captureNotAllowedOnAudioCall` | Capturing a video view isn't allowed while on audio call. |
+| 1800601 | `videoViewNotReady` | A video view isn't ready to be captured. |
+| 1800602 | `videoCallNotConnectedYet` | A video call isn't connected yet therefore can't capture a video view. |
+| 1800603 | `failedToGetImageFromVideoStream` | An error occurred while getting an image from the video stream. |
+| 1800610 | `callNotConnectedYet` | A call isn't connected yet therefore can't start media recording. |
+| 1800611 | `wrongRecordingTypeForAudioCall` | A wrong recording type is selected in an audio call. |
+| 1800612 | `recordingAlreadyInProgress` | An ongoing recording session is already in progress. |
+| 1800614 | `failedToStartRecording` | A recording session cannot be started due to an error. |
+| 1800615 | `failedToStopRecording` | A recording session cannot be stopped due to an error. |
+| 1800620 | `screenShareRestrictedFromAudioCall` | Screen share is restricted from audio calls. |
+| 1800621 | `screenShareRequestBeforeCallIsConnected` | A call isn't connected yet, but the request for screen share has been made. |
+| 1800622 | `screenShareAlreadyInProgress` | The user is trying to share the screen while the previous request is still in progress. |
+| 1800623 | `noScreenShareExists` | Screen share doesn't exist but the request to stop sharing the screen has been made. |
+| 1800632 | `callPutOnHold` | No public description |
+| 1800700 | `clientAlreadyEntered` | The participant is trying to enter the same room they're already in. (docs name: `ParticipantAlreadyInRoom`) |
+| 1800701 | `enteringRoomStillInProgress` | The participant is trying to enter the room while the previous request is still in progress. |
+| 1800702 | `participantNotInRoom` | The participant is not in the room and the request can't be processed. |
+| 1800706 | `localParticipantLostConnection` | The local participant exited the room due to lost connection. |
+| 1800707 | `localParticipantKickedOut` | No public description |
+| 1800801 | `callAlreadyOnHold` | No public description |
+| 1800802 | `callNotPutOnHoldByLocalUser` | No public description |
+| 1800803 | `anotherCallInProgress` | No public description |
+
+- The error-codes page also lists `FailedToOpenFile` as 1800613, but the 1.12.2 and 1.12.3 interface has no case for 1800613, so do not write iOS code against it. (source: the interface above; https://sendbird.com/docs/calls/sdk/v1/ios/features/error-codes)
+- The page names 1800700 `ParticipantAlreadyInRoom`; the SDK case is `clientAlreadyEntered`. Compare `errorCode` with the SDK case, not the page name.
+- The same number can mean something else on another platform. 1800802 is `callNotPutOnHoldByLocalUser` here and in the Android SDK, and `ERR_ACTIVE_CALL_IN_PROGRESS` in the JavaScript and React Native SDKs. Interpret a code with the enum of the platform that raised it.
+- The same page lists the server-side codes (for example 400100, 1400126, 500999) in a second table; those are outside the 1800xxx range and are not repeated here. (source: https://sendbird.com/docs/calls/sdk/v1/ios/features/error-codes)
+
 ## Pitfalls
 - SPM-only; the WebRTC dependency is required.
 - Add the delegate before expecting `didStartRinging`; delegates are cleared on app termination.

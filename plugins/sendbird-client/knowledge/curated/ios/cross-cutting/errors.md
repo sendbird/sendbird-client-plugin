@@ -9,6 +9,8 @@
 ## How errors surface
 SDK callbacks return an `SBError`; its `code` matches the enum below. `SBError` is also passed to `SessionDelegate.sessionDidHaveError(_:)`.
 
+**Calls errors (1800xxx) are a separate table.** Codes in the 1800xxx range come from the Calls SDK, not Chat, and are not in the table below. Look them up in the "Error codes (1800xxx range)" section of knowledge/curated/ios/products/calls.md.
+
 ## All codes (source: SendbirdChatSDK.swiftinterface ChatError/CoreError)
 The swiftinterface has no doc comments on these cases, so each meaning comes from the public error-codes pages cited under the table. "No public description" means the code and symbol are verified in the enum but neither page describes the code; do not guess its meaning.
 

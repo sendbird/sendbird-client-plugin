@@ -10,6 +10,8 @@
 
 Rejected promises / callbacks return a `SendbirdError` with a numeric `code` field matching `SendbirdErrorCode`.
 
+**Calls errors (1800xxx) are a separate table.** Codes in the 1800xxx range come from the Calls SDK, not Chat, and are not in the table below. Look them up in the "Error codes (1800xxx range)" section of knowledge/curated/js/products/calls.md.
+
 ## All codes (source: @sendbird/chat SendbirdErrorCode enum)
 
 Every member of the shipped enum is listed. The enum members carry no JSDoc. Meanings of the rows added on 2026-10-10 are quoted from the client-side and server-side tables on the JavaScript error codes page (source: https://sendbird.com/docs/chat/sdk/v4/javascript/error-codes). Where that page names the code differently from the enum, the row gives the page's name. "No public description" means neither that page nor the Platform API error codes page (source: https://sendbird.com/docs/chat/platform-api/v3/error-codes) describes the code; the code and symbol are still read from the enum.

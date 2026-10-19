@@ -9,6 +9,8 @@
 ## How errors surface
 SDK callbacks return a `SendbirdException` (`com.sendbird.android.exception.SendbirdException`); its code matches the shared Sendbird error codes. Constants are exposed as `SendbirdError.ERR_*`.
 
+**Calls errors (1800xxx) are a separate table.** Codes in the 1800xxx range come from the Calls SDK, not Chat, and are not in the table below. Look them up in the "Error codes (1800xxx range)" section of knowledge/curated/android/products/calls.md.
+
 ## All codes (code and name: javap of SendbirdError; meaning: public error-codes page)
 | Code | Android constant | Meaning / typical cause |
 |------|------------------|--------------------------|

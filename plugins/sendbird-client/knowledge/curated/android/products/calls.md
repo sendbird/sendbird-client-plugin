@@ -161,6 +161,62 @@ Only these Calls steps need something outside the project, and each has a source
 
 None of these pages has a dashboard step that enables or activates Calls (checked 2026-10-17). Do not tell the customer to "enable Calls in the dashboard", and do not add any other dashboard step that no page cited here lists.
 
+## Error codes (1800xxx range)
+Calls errors arrive as a `SendBirdException`; read the number with `getCode()` (Kotlin `code`) and compare it with the `SendBirdError.<CONSTANT>` ints. (source: `com.sendbird.calls.SendBirdException` and `com.sendbird.calls.SendBirdError` in `com.sendbird.sdk:sendbird-calls:1.12.5` (`https://repo.sendbird.com/public/maven/com/sendbird/sdk/sendbird-calls/1.12.5/sendbird-calls-1.12.5.aar`), read with `javap -p -constants` on 2026-10-19)
+
+The table lists every `SendBirdError` int in the 1800xxx range that 1.12.5 ships; constant names and values are verbatim from `javap`. Meanings come from the public Android error-codes page; "No public description" means the page has no entry for that code. (source: https://sendbird.com/docs/calls/sdk/v1/android/features/error-codes)
+
+| Code | Constant | Meaning / typical cause |
+|------|----------|--------------------------|
+| 1800100 | `SendBirdError.DIAL_CANCELED` | The dialing has been canceled before receiving a callback. |
+| 1800101 | `SendBirdError.MY_USER_ID_NOT_ALLOWED` | The caller can't call their own user ID. |
+| 1800200 | `SendBirdError.ERR_REQUEST_FAILED` | The request failed due to an error from the HTTP library. |
+| 1800203 | `SendBirdError.ERR_NO_RESPONSE_DUE_TO_TIMEOUT` | The request failed to receive a response due to timeout. |
+| 1800204 | `SendBirdError.ERR_REQUEST_FAILED_DUE_TO_WEBSOCKET_CONNECTION_LOST` | The request failed because the websocket connection is lost. |
+| 1800205 | `SendBirdError.ERR_WRONG_RESPONSE` | The response contains an unexpected object type of data. |
+| 1800206 | `SendBirdError.ERR_QUERY_IN_PROGRESS` | The previous query is still in progress. |
+| 1800207 | `SendBirdError.INTERNAL_SERVER_ERROR` | An internal server error has occurred. |
+| 1800208 | `SendBirdError.ERR_MALFORMED_DATA` | The data format of the response is invalid. |
+| 1800300 | `SendBirdError.INVALID_PARAMETER_VALUE` | The parameter specifies an invalid or empty value. |
+| 1800301 | `SendBirdError.INVALID_PARAMETER_TYPE` | The data type of the parameter is invalid. |
+| 1800302 | `SendBirdError.INSTANCE_NOT_INITIALIZED` | A SendBirdCall instance is not initialized. |
+| 1800303 | `SendBirdError.USER_NOT_AUTHENTICATED` | The user is not authenticated. |
+| 1800400 | `SendBirdError.CAMERA_ALREADY_SWITCHING` | No public description |
+| 1800401 | `SendBirdError.ERR_CAMERA_SWITCH` | No public description |
+| 1800402 | `SendBirdError.ERR_CHANGING_AUDIO_DEVICE` | No public description |
+| 1800600 | `SendBirdError.ERR_CAPTURE_NOT_ALLOWED_ON_AUDIO_CALL` | Capturing a video view isn't allowed while on an audio call. |
+| 1800601 | `SendBirdError.ERR_VIDEO_VIEW_NOT_READY` | A video view isn't ready to be captured. |
+| 1800602 | `SendBirdError.ERR_VIDEO_CALL_NOT_CONNECTED_YET` | A video call isn't connected yet therefore can't capture a video view. |
+| 1800603 | `SendBirdError.FAILED_TO_GET_IMAGE_FROM_THE_MEDIA_STREAM` | An error occurred while getting an image from the video stream. (docs name: `FAILED_TO_GET_IMAGE_FROM_MEDIA_STREAM`) |
+| 1800610 | `SendBirdError.ERR_CALL_NOT_CONNECTED_YET` | A call isn't connected yet therefore can't start media recording. |
+| 1800611 | `SendBirdError.ERR_WRONG_RECORDING_TYPE_FOR_AUDIO_CALL` | A wrong recording type is selected in an audio call. |
+| 1800612 | `SendBirdError.ERR_RECORDING_ALREADY_IN_PROGRESS` | An ongoing recording session is already in progress. |
+| 1800613 | `SendBirdError.ERR_FAILED_TO_OPEN_FILE` | A recording file cannot be opened due to an error. |
+| 1800614 | `SendBirdError.ERR_FAILED_TO_START_RECORDING` | A recording session cannot be started due to an error. |
+| 1800615 | `SendBirdError.ERR_FAILED_TO_STOP_RECORDING` | A recording session cannot be stopped due to an error. |
+| 1800616 | `SendBirdError.ERR_NOT_SUPPORTED_OS_VERSION_FOR_RECORDING` | No public description |
+| 1800620 | `SendBirdError.ERR_SCREEN_SHARE_RESTRICTED_FROM_AUDIO_CALL` | Screen share is restricted from audio calls. |
+| 1800621 | `SendBirdError.ERR_SCREEN_SHARE_REQUEST_BEFORE_CALL_IS_CONNECTED` | A call isn't connected yet, but the request for screen share has been made. |
+| 1800622 | `SendBirdError.ERR_SCREEN_SHARE_ALREADY_IN_PROGRESS` | The user is trying to share the screen while the previous request is still in progress. |
+| 1800623 | `SendBirdError.ERR_NO_SCREEN_SHARE_EXISTS` | Screen share doesn't exist but the request to stop sharing the screen has been made. |
+| 1800624 | `SendBirdError.ERR_NOT_SUPPORTED_OS_VERSION_FOR_SCREEN_SHARE` | The operating system version doesn't support screen share. |
+| 1800631 | `SendBirdError.ERR_MEDIA_STREAM_NOT_ALLOWED_ON_HOLD` | No public description |
+| 1800700 | `SendBirdError.ERR_PARTICIPANT_ALREADY_IN_ROOM` | The participant is trying to enter the same room they're already in. |
+| 1800701 | `SendBirdError.ERR_ENTERING_ROOM_STILL_IN_PROGRESS` | The participant is trying to enter the room while the previous request is still in progress. |
+| 1800702 | `SendBirdError.ERR_PARTICIPANT_NOT_IN_ROOM` | The participant is not in the room and the request can't be processed. |
+| 1800704 | `SendBirdError.ERR_FAILED_TO_ESTABLISH_CONNECTION_TO_SEND_STREAM` | No public description |
+| 1800705 | `SendBirdError.ERR_FAILED_TO_ESTABLISH_CONNECTION_TO_RECEIVE_STREAM` | No public description |
+| 1800706 | `SendBirdError.ERR_LOCAL_PARTICIPANT_LOST_CONNECTION` | The local participant exited the room due to lost connection. |
+| 1800707 | `SendBirdError.ERR_LOCAL_PARTICIPANT_KICKED_OUT` | No public description |
+| 1800801 | `SendBirdError.ERR_CALL_ALREADY_ON_HOLD` | No public description |
+| 1800802 | `SendBirdError.ERR_CALL_NOT_PUT_ON_HOLD_BY_LOCAL_USER` | No public description |
+| 1800803 | `SendBirdError.ERR_ANOTHER_CALL_IN_PROGRESS` | No public description |
+
+- The error-codes page lists `ERR_NOT_SUPPORTED_OS_VERSION_FOR_RECORDING` as 1800618, but the 1.12.5 AAR defines it as 1800616 and defines nothing at 1800618. Trust the shipped constant. (source: the AAR above; https://sendbird.com/docs/calls/sdk/v1/android/features/error-codes)
+- The page names 1800603 `FAILED_TO_GET_IMAGE_FROM_MEDIA_STREAM`; the shipped constant is `FAILED_TO_GET_IMAGE_FROM_THE_MEDIA_STREAM`.
+- The same number can mean something else on another platform. 1800802 is `ERR_CALL_NOT_PUT_ON_HOLD_BY_LOCAL_USER` here and `ERR_ACTIVE_CALL_IN_PROGRESS` in the JavaScript and React Native SDKs. Interpret a code with the enum of the platform that raised it.
+- The same page lists the server-side codes (for example 400100, 1400126, 500999) in a second table; those are outside the 1800xxx range and are not repeated here. (source: https://sendbird.com/docs/calls/sdk/v1/android/features/error-codes)
+
 ## Pitfalls
 - Add the listener before expecting `onRinging`.
 - App ID from BuildConfig/secret; access token is a secret — never hard-code. Incoming calls need a push token (FCM) registered, even in the foreground; dialing out does not.

@@ -555,6 +555,24 @@ fun customizeSettingsScreens() {
 - `SendbirdUIKit.setDefaultThemeMode(...)` for light/dark.
 - Push via `SendbirdPushHelper` (FCM). (source: sendbird-uikit-android uikit-samples BaseApplication.kt)
 
+## Right-to-left (RTL) languages
+UIKit for Android supports right-to-left languages from 3.19.0 on. (source: https://github.com/sendbird/sendbird-uikit-android/blob/main/CHANGELOG.md, entry `v3.19.0 (Aug 1, 2024)`: "Support Right-to-Left (RTL) languages.")
+
+The host app turns RTL on, not UIKit. The `<application>` element of the `uikit-3.26.3.aar` manifest has no `android:supportsRtl` attribute, and Android's default for that attribute is `false`, which keeps every layout left-to-right. Set it in the app manifest, with a `targetSdkVersion` of 17 or higher, then run the app with an RTL locale (for example Arabic or Hebrew). (source: `AndroidManifest.xml` inside https://repo.sendbird.com/public/maven/com/sendbird/sdk/uikit/3.26.3/uikit-3.26.3.aar, checked 2026-10-19; https://developer.android.com/guide/topics/manifest/application-element, entry `android:supportsRtl`)
+
+```xml
+<application
+    android:supportsRtl="true"
+    ... >
+```
+(source: the same attribute in the sample app manifest, https://github.com/sendbird/sendbird-uikit-android/blob/main/uikit-samples/src/main/AndroidManifest.xml line 16)
+
+- UIKit's own layouts are mostly written with start/end attributes: 62 of the 127 layout files in `uikit-3.26.3.aar` use `layout_marginStart`, `layout_marginEnd`, `paddingStart`, `paddingEnd`, `layout_alignParentStart`, `layout_alignParentEnd`, `layout_toStartOf`, or `layout_toEndOf`, so they mirror under an RTL locale. One layout, `res/layout/sb_view_channel_list_item.xml`, still sets `layout_marginLeft` and `layout_marginRight` (lines 18-19 and 35-36). (source: `res/layout` inside `uikit-3.26.3.aar`, counted 2026-10-19)
+- The message input handles mixed-direction text when a mention is inserted. `MentionEditText` picks a right-to-left mark (RLM, `\u200F`) or a left-to-right mark (LRM, `\u200E`) from the text direction at the cursor, so that typing "input" and then selecting a mention gives "input userId@" instead of "userIdinput@" in an RTL language. (source: https://github.com/sendbird/sendbird-uikit-android/blob/main/uikit/src/main/java/com/sendbird/uikit/widgets/MentionEditText.java lines 373-379; the `RLM` and `LRM` fields are present in `com.sendbird.uikit.widgets.MentionEditText` of `uikit-3.26.3.aar`, read with `javap`)
+- In custom views you add to UIKit (custom message views, header views, channel list items), use `start` and `end` attributes instead of `left` and `right`, so they mirror with the rest of the screen. This is general Android practice, not a UIKit API, and the UIKit layouts above follow it.
+
+Not verified: the public Sendbird docs (checked against `https://sendbird.com/llms-full.txt`, 2026-10-19) have no UIKit Android RTL page, and a code search of `sendbird/sendbird-uikit-android` for "rtl" (2026-10-19) returns only four files: the CHANGELOG, `MentionEditText`, the sample manifest, and `strings.xml` (where "rtl" is just part of the word "shortly"). No RTL-specific public API or setting turned up, so do not tell the customer to call an RTL option in `SendbirdUIKit`.
+
 ## Pitfalls
 - Provide a non-null `getUserInfo().getUserId()`; UIKit needs the current user.
 - App ID from BuildConfig/secret; access token is a secret — never hard-code.
