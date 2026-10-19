@@ -64,6 +64,17 @@
         ]
       }
     ],
+    "SubagentStop": [
+      {
+        "matcher": "^sendbird-client:sendbird-ios-agent$|^sendbird-client:sendbird-android-agent$|^sendbird-client:sendbird-js-agent$|^sendbird-client:sendbird-docs-agent$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/unsourced-claim-warn.sh\""
+          }
+        ]
+      }
+    ],
     "Stop": [
       {
         "hooks": [

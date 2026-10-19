@@ -13,3 +13,12 @@ body { font-family: system-ui, sans-serif; }
 .panes { flex: 1; display: grid; grid-template-columns: minmax(280px, 360px) 1fr; min-height: 0; }
 .panes > section { min-height: 0; height: 100%; overflow: hidden; }
 .empty, .waiting { padding: 16px; color: #555; }
+
+/* Phone: one pane at a time, the same width as UIKIT_BREAKPOINT (src/sendbird/uikit.ts).
+   The conversation header's back button clears the selection and shows the list again. */
+@media (max-width: 768px) {
+  .panes { grid-template-columns: 1fr; }
+  .panes .conversation { display: none; }
+  .panes.has-channel .list { display: none; }
+  .panes.has-channel .conversation { display: block; }
+}

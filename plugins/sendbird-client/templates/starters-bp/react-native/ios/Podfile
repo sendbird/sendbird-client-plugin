@@ -1,0 +1,69 @@
+# Resolve scripts with node to allow for hoisting
+def node_require(script)
+  require Pod::Executable.execute_command('node', ['-p',
+    "require.resolve(
+      '#{script}',
+      {paths: [process.argv[1]]},
+    )", __dir__]).strip
+end
+
+node_require('react-native/scripts/react_native_pods.rb')
+# react-native-permissions installs only the permission handlers named in setup_permissions:
+# camera, microphone, and photo library for UIKit's attachments and voice messages
+# (https://github.com/zoontek/react-native-permissions/blob/5.6.2/README.md).
+node_require('react-native-permissions/scripts/setup.rb')
+
+platform :ios, min_ios_version_supported
+prepare_react_native_project!
+
+setup_permissions([
+  'Camera',
+  'Microphone',
+  'PhotoLibrary',
+  'PhotoLibraryAddOnly',
+])
+
+linkage = ENV['USE_FRAMEWORKS']
+if linkage != nil
+  Pod::UI.puts "Configuring Pod with #{linkage}ally linked Frameworks".green
+  use_frameworks! :linkage => linkage.to_sym
+end
+
+target 'StarterReactNative' do
+  config = use_native_modules!
+
+  use_react_native!(
+    :path => config[:reactNativePath],
+    # An absolute path to your application root.
+    :app_path => "#{Pod::Config.instance.installation_root}/.."
+  )
+
+  # Firebase's Swift pods need module maps when they are built as static libraries, as in the
+  # UIKit for React Native sample (sample/ios/Podfile in sendbird/sendbird-uikit-react-native).
+  pod 'FirebaseCore', :modular_headers => true
+  pod 'FirebaseMessaging', :modular_headers => true
+  pod 'FirebaseInstallations', :modular_headers => true
+  pod 'FirebaseCoreExtension', :modular_headers => true
+  pod 'GoogleUtilities', :modular_headers => true
+  pod 'FirebaseCoreInternal', :modular_headers => true
+
+  post_install do |installer|
+    react_native_post_install(
+      installer,
+      config[:reactNativePath],
+      :mac_catalyst_enabled => false,
+      # :ccache_enabled => true
+    )
+
+    # Some pods' resource bundles (privacy manifests of Firebase, GoogleUtilities, camera roll,
+    # image picker, ...) declare iOS 9 to 12. Xcode 27 builds iOS 15.0 or later only and stops on
+    # them, so raise every pod target below the app's minimum to that minimum.
+    installer.pods_project.targets.each do |target|
+      target.build_configurations.each do |build_config|
+        if build_config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'].to_f < min_ios_version_supported.to_f
+          build_config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = min_ios_version_supported
+        end
+      end
+    end
+  end
+end

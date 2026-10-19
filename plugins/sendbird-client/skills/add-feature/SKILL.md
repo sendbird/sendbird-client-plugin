@@ -1,6 +1,6 @@
 ---
 name: add-feature
-description: Add a Sendbird feature to the project (channel, message, reaction, thread, typing, file, push, and more). Use when the customer wants to add a specific Sendbird capability to existing code.
+description: Add a Sendbird feature to the project (channel, message, reaction, thread, typing, file, push, call, and more). Use when the customer wants to add a specific Sendbird capability to existing code.
 argument-hint: "<feature> [--product <product>]"
 allowed-tools: Read, Edit, Write, Bash, Grep, Glob, WebFetch, Agent
 ---
@@ -22,7 +22,7 @@ Add one feature to an existing integration.
 
 ## Wired knowledge (populated and cited)
 - Plan-limited features: `knowledge/curated/common/plans.md` (data in `core/plans.json`).
-- Per-product API: `knowledge/curated/<platform>/products/<product>.md` — channel/message (chat), prebuilt screens (uikit).
+- Per-product API: `knowledge/curated/<platform>/products/<product>.md` — channel/message (chat), prebuilt screens (uikit), dial (calls).
 - Verified base templates exist for every product on ios/uikit, android/view, js/react, js/react-native (each dir's `_README.md` has splice steps + variations).
 - Chat message features have templates on all six hosts, under `templates/<platform>/<host>/chat/` (the `_README.md` there has per-feature splice steps):
 
@@ -33,6 +33,7 @@ Add one feature to an existing integration.
   | Unread counts (total badge, per channel, mark as read) | `UnreadCount` | `UnreadCountModel` | `UnreadCountViewModel` | `UnreadCount.ts` |
   | Typing indicator and read receipts | `TypingAndReadReceipts` | `ChannelActivityModel` | `ChannelActivityViewModel` | `TypingAndReadReceipts.ts` |
 
+- Calls (a voice or video call, accept or decline an incoming call, sign out of Calls): `templates/<platform>/<host>/calls/` on all six hosts; the folder's `_README.md` has the permissions and splice steps, and `templates/js/react/calls/DirectCallPanel.tsx` is a ready call screen for React. On iOS, Android, and React Native, incoming calls need push even while the app is open (the `calls-incoming` skill; a `manualSteps` entry for the dashboard credentials); dialing out does not.
 - If the specific feature isn't templated yet, derive it from the curated doc's cited sections or the customer-local SDK surface — never from memory.
 
 ## No-Fabrication

@@ -11,6 +11,7 @@
 //   - DialParams(calleeId).setVideoCall(true).setCallOptions(CallOptions)
 //   - CallOptions().setVideoEnabled(Boolean).setAudioEnabled(Boolean); AcceptParams().setCallOptions(...)
 //   - abstract DirectCallListener: onConnected(DirectCall), onEnded(DirectCall)
+//   - DirectCall.isVideoCall() (sendbird-calls 1.12.5 javap, verified 2026-10-17)
 // SendBirdCall.init + authenticate stay as in the View-host template (templates/android/view/calls/SetupCalls.java).
 // Needs CAMERA + RECORD_AUDIO runtime permissions before dialing or accepting a video call.
 // Gradle: implementation("com.sendbird.sdk:sendbird-calls:1.12.5")
@@ -43,14 +44,21 @@ import org.webrtc.RendererCommon
 
 private const val LISTENER_ID = "compose-direct-call"
 
-/** Exposes the active 1:1 call (incoming or outgoing) as a StateFlow; null when idle. */
+enum class CallState { IDLE, DIALING, RINGING, CONNECTED }
+
+/** Exposes the active 1:1 call (incoming or outgoing) and its state as StateFlows; null and IDLE when idle. */
 class DirectCallViewModel : ViewModel() {
     private val _call = MutableStateFlow<DirectCall?>(null)
     val call: StateFlow<DirectCall?> = _call.asStateFlow()
+    private val _state = MutableStateFlow(CallState.IDLE)
+    val state: StateFlow<CallState> = _state.asStateFlow()
 
     private val callListener = object : DirectCallListener() {
-        override fun onConnected(call: DirectCall) { }
-        override fun onEnded(call: DirectCall) { _call.value = null }
+        override fun onConnected(call: DirectCall) { _state.value = CallState.CONNECTED }
+        override fun onEnded(call: DirectCall) {
+            _call.value = null
+            _state.value = CallState.IDLE
+        }
     }
 
     init {
@@ -58,24 +66,33 @@ class DirectCallViewModel : ViewModel() {
             override fun onRinging(call: DirectCall) {
                 call.setListener(callListener)   // register before accepting
                 _call.value = call
+                _state.value = CallState.RINGING
             }
             override fun onInvitationReceived(invitation: RoomInvitation) { /* group-room invitation */ }
         })
     }
 
-    fun dialVideo(calleeId: String) {
+    fun dialVideo(calleeId: String) = dial(calleeId, video = true)
+
+    /** Places a 1:1 call; `video = false` makes a voice call. */
+    fun dial(calleeId: String, video: Boolean) {
         val params = DialParams(calleeId)
-            .setVideoCall(true)
-            .setCallOptions(videoOptions())
+            .setVideoCall(video)
+            .setCallOptions(callOptions(video))
         val call = SendBirdCall.dial(params) { _, e ->
-            if (e != null) _call.value = null
+            if (e != null) {
+                _call.value = null
+                _state.value = CallState.IDLE
+            }
         }
         call?.setListener(callListener)
         _call.value = call
+        _state.value = if (call != null) CallState.DIALING else CallState.IDLE
     }
 
+    /** Accepts the ringing call, with video when the caller placed a video call. */
     fun accept(call: DirectCall) {
-        call.accept(AcceptParams().setCallOptions(videoOptions()))
+        call.accept(AcceptParams().setCallOptions(callOptions(call.isVideoCall)))
     }
 
     fun end() {
@@ -86,7 +103,7 @@ class DirectCallViewModel : ViewModel() {
         SendBirdCall.removeListener(LISTENER_ID)
     }
 
-    private fun videoOptions() = CallOptions().setVideoEnabled(true).setAudioEnabled(true)
+    private fun callOptions(video: Boolean) = CallOptions().setVideoEnabled(video).setAudioEnabled(true)
 }
 
 /** Remote video full-screen with the local preview in the corner, both hosted via AndroidView. */

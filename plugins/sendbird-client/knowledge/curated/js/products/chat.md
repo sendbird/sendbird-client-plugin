@@ -92,10 +92,11 @@ The handler arguments are typed `BaseChannel[]`, so passing them straight into `
 const params = { message: TEXT_MESSAGE };          // UserMessageCreateParams
 channel.sendUserMessage(params)
   .onPending((m) => {})
-  .onFailed((err, m) => {})
+  .onFailed((err, m) => { if (m) { /* keep the failed message to offer a retry */ } })
   .onSucceeded((m) => {});
 ```
 `channel` from `sb.groupChannel.createChannel(params)` (group) or the open-channel API. (source: sendbird.com/docs chat v4 javascript getting-started)
+The failed message passed to `onFailed` can be `null`, so check it before adding it to a `BaseMessage[]` list. (source: `@sendbird/chat@4.22.13` lib/__definition.d.ts:1627 `FailedMessageHandler<T> = (err: Error, message: T | null) => void`, :2889 `MessageRequestHandler.onFailed`)
 
 ### Send a file message
 ```ts
@@ -120,6 +121,34 @@ await channel.deleteMessage(message);
 For a message list screen, use a message collection (handles both the initial page and live updates):
 ```ts
 import { MessageFilter, MessageCollectionInitPolicy } from '@sendbird/chat/groupChannel';
+import type { BaseMessage } from '@sendbird/chat/message';
+
+// reqId is on user, file, and multiple-files messages; the type guards narrow to them.
+function requestIdOf(m: BaseMessage): string {
+  return m.isUserMessage() || m.isFileMessage() || m.isMultipleFilesMessage() ? m.reqId : '';
+}
+
+// A pending message and its sent copy share reqId; other messages match by messageId.
+function sameMessage(a: BaseMessage, b: BaseMessage): boolean {
+  const ra = requestIdOf(a);
+  const rb = requestIdOf(b);
+  if (ra && rb) return ra === rb;
+  return a.messageId === b.messageId;
+}
+
+// A list key that stays the same while a pending message becomes the sent one.
+function messageKey(m: BaseMessage): string {
+  const reqId = requestIdOf(m);
+  return reqId ? `req-${reqId}` : `id-${m.messageId}`;
+}
+
+// Every batch goes through here: replace matching rows, then oldest first.
+function mergeMessages(current: BaseMessage[], incoming: BaseMessage[]): BaseMessage[] {
+  const kept = current.filter((m) => !incoming.some((n) => sameMessage(m, n)));
+  return [...kept, ...incoming].sort((a, b) => a.createdAt - b.createdAt);
+}
+
+let rows: BaseMessage[] = [];   // the list your view renders, oldest at the top
 
 const collection = channel.createMessageCollection({
   filter: new MessageFilter(),
@@ -129,20 +158,23 @@ const collection = channel.createMessageCollection({
 });
 
 collection.initialize(MessageCollectionInitPolicy.CACHE_AND_REPLACE_BY_API)
-  .onCacheResult((err, messages) => { /* render cached messages immediately */ })
-  .onApiResult((err, messages) => { /* replace with the server's authoritative page */ });
+  .onCacheResult((err, messages) => { if (messages) rows = mergeMessages([], messages); })   // cached page, shown immediately
+  .onApiResult((err, messages) => { if (messages) rows = mergeMessages([], messages); });    // replaces it with the server's page
 
 collection.setMessageCollectionHandler({
-  onMessagesAdded: (context, channel, messages) => { /* append incoming/sent messages */ },
-  onMessagesUpdated: (context, channel, messages) => { /* e.g. a pending message resolved */ },
-  onMessagesDeleted: (context, channel, messageIds, messages) => { /* remove rows */ },
+  onMessagesAdded: (context, channel, messages) => { rows = mergeMessages(rows, messages); },
+  onMessagesUpdated: (context, channel, messages) => { rows = mergeMessages(rows, messages); },   // e.g. a pending message resolved
+  onMessagesDeleted: (context, channel, messageIds, messages) => {
+    rows = rows.filter((m) => !messages.some((d) => sameMessage(m, d)));
+  },
 });
 
 // Pagination, driven by the collection's own cursors:
-if (collection.hasPrevious) await collection.loadPrevious();
-if (collection.hasNext) await collection.loadNext();
+if (collection.hasPrevious) rows = mergeMessages(rows, await collection.loadPrevious());
+if (collection.hasNext) rows = mergeMessages(rows, await collection.loadNext());
 // collection.dispose() when the screen unmounts
 ```
+Do not put the `onCacheResult` / `onApiResult` array into the view as it arrives. Neither the type declarations nor the message collection docs page state the order of that array (the docs page only says loading from `startingPoint: Date.now()` goes from the newest message back), so a view that renders it directly can show the newest message at the top, typically when a cached channel is reopened. Pass every batch (cache result, API result, added, updated, `loadPrevious()`, `loadNext()`) through one merge that sorts by `createdAt`, as above. The official React sample also reorders both arrays itself before rendering. In a React list, key each row with the key helper above: it follows the same match as the merge, so the key stays the same when the sent copy replaces the pending one. Read `reqId` only after `isUserMessage()`, `isFileMessage()`, or `isMultipleFilesMessage()`: it is declared on `SendableMessage`, which the package does not export, not on `BaseMessage`, so `'reqId' in m` leaves `m.reqId` typed `unknown` and a key built from it fails the type check. (source: `@sendbird/chat@4.22.13` lib/__definition.d.ts:2579-2596 `MessageCollectionInitHandler` (no order stated), :853 `BaseMessage.messageId`, :2823 `MessagePrototype.createdAt`, :2842 `isUserMessage(): this is UserMessage`, :2847 `isFileMessage`, :2852 `isMultipleFilesMessage`, :4215-4218 `declare class SendableMessage` `reqId: string` ; source: https://sendbird.com/docs/chat/sdk/v4/javascript/local-caching/using-message-collection/message-collection ; source: https://github.com/sendbird/sendbird-chat-sample-react/blob/main/src/samples/BasicGroupChannelSample.js `messages.reverse()` in `onCacheResult` / `onApiResult`)
 `channel.createMessageCollection(params?: MessageCollectionParams)`, `.initialize(policy)` returning `.onCacheResult(handler)` / `.onApiResult(handler)`, `.setMessageCollectionHandler(handler)`, `.hasPrevious` / `.hasNext`, `.loadPrevious()` / `.loadNext()` are all on `MessageCollection` (`GroupChannel.createMessageCollection` :1992). `onMessagesDeleted` takes a 4th `messages` arg alongside the (v4.3.1-deprecated) `messageIds`. (source: `@sendbird/chat@4.22.13` lib/__definition.d.ts:1992, :2559-2610 `MessageCollection`/`MessageCollectionInitHandler`, :963-983 `loadPrevious`/`loadNext`/`hasPrevious`/`hasNext`, :1026-1048 `onMessagesAdded`/`onMessagesUpdated`/`onMessagesDeleted`, :1057-1066 `BaseMessageCollectionParams` (`limit` deprecated since v4.10.5 in favor of `prevResultLimit`/`nextResultLimit`))
 
 ## Local caching and offline messages
@@ -283,7 +315,7 @@ sb.addUserEventHandler('unread-badge', new UserEventHandler({
 }));
 ```
 - Filters: `getTotalUnreadMessageCount(params?: TotalUnreadMessageCountParams)` (custom types, super-channel type). `channel.markAsRead()` (see Read status) resets a channel's count.
-- The per-custom-type counts in this event (`countByCustomTypes`) are turned off by default; the app owner must contact Sendbird to enable them. (source: https://sendbird.com/docs/chat/sdk/v4/javascript/event-handler/managing-user-event-handlers/add-or-remove-a-user-event-handler — reviewed 2026-10-06)
+- The per-custom-type counts in this event (`customTypeUnreadCount` on the `UnreadMessageCount` the handler receives; the docs page calls the attribute `countByCustomTypes`, a name the SDK does not have) are turned off by default; the app owner must contact Sendbird to enable them. (source: https://sendbird.com/docs/chat/sdk/v4/javascript/ref/classes/_sendbird_chat.UserEventHandler.html ; `@sendbird/chat@4.22.13` lib/__definition.d.ts:5115-5121 `customTypeUnreadCount` on `UnreadMessageCount`, :5249 `onTotalUnreadMessageCountChanged`) (source: https://sendbird.com/docs/chat/sdk/v4/javascript/event-handler/managing-user-event-handlers/add-or-remove-a-user-event-handler — reviewed 2026-10-06)
 - The JavaScript page names only the per-custom-type counts as off by default. The Android page differs and turns off its whole event by default, so the Android curated doc says so. (source: https://sendbird.com/docs/chat/sdk/v4/javascript/event-handler/managing-user-event-handlers/add-or-remove-a-user-event-handler ; https://sendbird.com/docs/chat/sdk/v4/android/event-handler/managing-user-event-handlers/add-or-remove-a-user-event-handler — reviewed 2026-10-16)
 - (source: `@sendbird/chat` 4.22.13 `lib/__definition.d.ts`: `GroupChannel` 1872 — `unreadMessageCount` 1903; `GroupChannelModule` 6149 — `getTotalUnreadMessageCount(params?)` 6275; `SendbirdChat` 4230 — `addUserEventHandler(key, handler)` 4414; `UserEventHandler` 5239, `UserEventHandlerParams` 5243 — `onTotalUnreadMessageCountChanged` 5249 — verified 2026-10-05)
 - The total counts unread messages in all group channels the user joined; it can be filtered by channel custom type or super-channel type. (source: https://sendbird.com/docs/chat/sdk/v4/javascript/message/retrieving-unread-counts-in-a-group-channel/unread-messages-in-all-channels — reviewed 2026-10-05)

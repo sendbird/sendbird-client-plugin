@@ -30,7 +30,7 @@ SDK callbacks return a `SendbirdException` (`com.sendbird.android.exception.Send
 | 400203 | `SendbirdError.ERR_MAX_ITEM_EXCEEDED` | `TOO_MANY_ITEMS_IN_PARAMETER`: the parameter specifies more items than allowed |
 | 400300 | `SendbirdError.ERR_USER_DEACTIVATED` | `DEACTIVATED_USER_NOT_ACCESSIBLE`: the request can't retrieve the deactivated user data |
 | 400301 | `SendbirdError.ERR_USER_NOT_EXIST` | `USER_NOT_FOUND`: the user identified with the request's USER_ID can't be found because the user doesn't exist or has been deleted |
-| 400302 | `SendbirdError.ERR_INVALID_TOKEN` | Access/session token invalid or expired — refresh via SessionHandler |
+| 400302 | `SendbirdError.ERR_INVALID_TOKEN` | `INVALID_ACCESS_TOKEN`: the access token provided for the request specifies an invalid value |
 | 400309 | `SendbirdError.ERR_SESSION_KEY_EXPIRED` | Constant name and value verified from the SDK (sendbird-common `SendbirdError`); the public error-codes page has no entry for 400309, so no meaning is documented |
 | 400310 | `SendbirdError.ERR_SESSION_TOKEN_REVOKED` | Session token revoked |
 | 400401 | `SendbirdError.ERR_API_TOKEN_NOT_VALID` | `INVALID_API_TOKEN`: the API token provided for the request specifies an invalid value |

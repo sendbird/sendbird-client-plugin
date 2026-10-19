@@ -1,7 +1,7 @@
 {
   "name": "sendbird-client",
-  "version": "0.1.53",
-  "description": "Sendbird integration helper for Chat (incl. auth/session) and UIKit across iOS, Android, and JS",
+  "version": "0.1.54",
+  "description": "Sendbird integration helper for Chat (incl. auth/session), UIKit, and Calls across iOS, Android, and JS",
   "author": {
     "name": "Sendbird",
     "url": "https://sendbird.com"
@@ -13,6 +13,7 @@
     "sendbird",
     "chat",
     "uikit",
+    "calls",
     "ios",
     "android",
     "javascript",
@@ -40,6 +41,6 @@
       "Verify this Sendbird integration."
     ],
     "displayName": "Sendbird Client",
-    "longDescription": "Sendbird integration helper for Chat (incl. auth/session) and UIKit across iOS, Android, and JS"
+    "longDescription": "Sendbird integration helper for Chat (incl. auth/session), UIKit, and Calls across iOS, Android, and JS"
   }
 }

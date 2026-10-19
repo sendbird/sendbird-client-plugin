@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "0.1.53",
+  "schemaVersion": "0.1.54",
   "knowledge": {
     "mode": "runtime-fetch",
     "_modes": [
@@ -104,9 +104,7 @@
       "chat",
       "uikit"
     ],
-    "notYetSupported": [
-      "calls"
-    ],
+    "notYetSupported": [],
     "_note": "The default scope is every product in .products except notYetSupported. `focus` marks where verification depth is highest. A customer narrows scope with SENDBIRD_PRODUCTS or .sendbird-client/profile.json enabledProducts. A notYetSupported product is never in scope: resolve-products.sh drops it from SENDBIRD_PRODUCTS or the profile, --check reports it as not supported yet, and the welcome hook tells the model to decline it. Its knowledge and templates stay shipped, so removing it from notYetSupported turns it back on."
   },
   "stateDir": ".sendbird-client"

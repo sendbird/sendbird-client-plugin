@@ -1,0 +1,29 @@
+// Runtime harness (added to a copy of the app, never to the project). The e2e fixtures have no
+// sign-in screen, so the harness makes the call a sign-in screen makes: the app's own
+// LoginService.onLoginSucceeded(userId:) with the user from RT_USER_ID, half a second after launch.
+// ios.sh fills in the call to match the project's signature.
+import Foundation
+
+@objc(RTHarness)
+final class RTHarness: NSObject {
+    @objc static func start() {
+        let env = ProcessInfo.processInfo.environment
+        guard let userId = env["RT_USER_ID"], !userId.isEmpty else { return }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            /*RT_CALL*/
+            record(step: "sign-in", ok: true, detail: "A=\(userId) via /*RT_CALL_TEXT*/ at launch (harness hook)")
+        }
+    }
+
+    static func record(step: String, ok: Bool, detail: String) {
+        guard let path = ProcessInfo.processInfo.environment["RT_STEPS_FILE"] else { return }
+        let line: [String: Any] = ["step": step, "ok": ok, "detail": detail, "screenshot": NSNull()]
+        guard var data = try? JSONSerialization.data(withJSONObject: line) else { return }
+        data.append(0x0A)
+        if let handle = FileHandle(forWritingAtPath: path) {
+            handle.seekToEndOfFile()
+            handle.write(data)
+            handle.closeFile()
+        }
+    }
+}

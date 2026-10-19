@@ -86,7 +86,7 @@ v2's smart components became modules, each with a provider, UI components, and a
 | `sendbird-uikit/dist/index.css` | `@sendbird/uikit-react/dist/index.css` |
 | `SendBirdProvider` | `SendbirdProvider` |
 | `sendBirdSelectors` from `sendbird-uikit` | default import `sendbirdSelectors` from `@sendbird/uikit-react/sendbirdSelectors` |
-| `withSendBird()` | `withSendbird()` |
+| `withSendBird()` | still `withSendBird`, exported from `@sendbird/uikit-react` and as the default export of `@sendbird/uikit-react/withSendbird`; the guide writes `withSendbird()`, which is only the import path's spelling, not an export. 3.19.1 marks it deprecated: use the `useSendbird` hook instead (source: `@sendbird/uikit-react@3.19.1` types/index.d.ts:10, :12, types/lib/Sendbird/withSendbird.d.ts:4-8) |
 | `import { ChannelList } from 'sendbird-uikit'` and the other smart components | import each module from its own path, for example `@sendbird/uikit-react/GroupChannelList`, `@sendbird/uikit-react/ChannelSettings`, or `@sendbird/uikit-react/OpenChannel` |
 
 ### Selectors

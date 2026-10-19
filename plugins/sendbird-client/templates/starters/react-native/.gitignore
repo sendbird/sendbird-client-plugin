@@ -1,2 +1,32 @@
 node_modules/
 dist/
+.DS_Store
+
+# Xcode
+build/
+xcuserdata
+DerivedData
+*.xcuserstate
+**/.xcode.env.local
+
+# Android
+.gradle
+.idea
+local.properties
+*.iml
+.cxx/
+*.keystore
+.kotlin/
+
+# Metro and bundles
+*.jsbundle
+.metro-health-check*
+
+# Ruby and CocoaPods
+**/Pods/
+/vendor/bundle/
+
+# Local env files: values set on this machine never go into git
+.env
+.env.local
+.env.*.local

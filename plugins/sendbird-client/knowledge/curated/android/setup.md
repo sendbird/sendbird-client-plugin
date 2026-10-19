@@ -6,6 +6,8 @@
 
 > Coordinates checked against public Maven metadata and the local pinned/latest Android template compile on 2026-09-22. Cite each coordinate; do not invent versions.
 
+> A plugin run does not build, compile, or type-check the project: do not run Gradle build tasks (such as `./gradlew assembleDebug`) or look for a JDK or Android SDK to build with unless the customer asks for a build (`docs/AGENT_CONTRACT.md` section 3). The compile above is the plugin's own test.
+
 ## Packaging (Gradle)
 - Repo in `settings.gradle`: `maven { setUrl("https://repo.sendbird.com/public/maven") }`.
 - Dependencies (pick what you need):

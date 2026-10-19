@@ -1,0 +1,498 @@
+// Runtime harness instrumented test (generated into a copy of the app by hosts/android.sh).
+// It runs inside the app's process, so it signs in by calling the app's own
+// LoginService.onLoginSucceeded(userId) — the call a sign-in screen makes; the e2e fixtures have
+// no sign-in screen. Then it drives the UI with UI Automator while android.sh drives user B (the
+// Node peer). Steps go to logcat (tag RTSTEP, one JSON object per line); screenshots and window
+// dumps go to the app's external files dir (rt/), which android.sh pulls afterwards.
+package rt.harness
+
+import android.content.Intent
+import android.util.Base64
+import android.util.Log
+import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.platform.app.InstrumentationRegistry
+import androidx.test.uiautomator.By
+import androidx.test.uiautomator.BySelector
+import androidx.test.uiautomator.UiDevice
+import androidx.test.uiautomator.UiObject2
+import androidx.test.uiautomator.Until
+import org.json.JSONObject
+import org.junit.Assert.fail
+import org.junit.Test
+import org.junit.runner.RunWith
+import java.io.File
+import java.util.regex.Pattern
+/*RT_IMPORT*/
+
+@RunWith(AndroidJUnit4::class)
+class RTRuntimeTest {
+    private val instr = InstrumentationRegistry.getInstrumentation()
+    private val args = InstrumentationRegistry.getArguments()
+    private val device = UiDevice.getInstance(instr)
+    private val ctx = instr.targetContext
+    private val pkg = ctx.packageName
+    private val dir = File(ctx.getExternalFilesDir(null), "rt").apply { mkdirs() }
+    private val failed = mutableListOf<String>()
+    private var shotN = 20
+
+    private fun arg(name: String) = args.getString(name) ?: ""
+    private fun lines(name: String) = arg(name).takeIf { it.isNotEmpty() }
+        ?.let { String(Base64.decode(it, Base64.DEFAULT)) }?.split("\n")?.filter { it.isNotEmpty() } ?: emptyList()
+
+    private fun record(step: String, ok: Boolean?, detail: String, shot: String? = null) {
+        val o = JSONObject().put("step", step).put("ok", ok ?: JSONObject.NULL).put("detail", detail)
+            .put("screenshot", shot ?: JSONObject.NULL)
+        Log.i("RTSTEP", o.toString())
+        if (ok == false) failed += "$step: $detail"
+    }
+
+    private fun shot(name: String): String {
+        shotN += 1
+        val file = String.format("%02d-android-%s.png", shotN, name)
+        device.takeScreenshot(File(dir, file))
+        return "screens/$file"
+    }
+
+    private fun dump(name: String) {
+        runCatching { device.dumpWindowHierarchy(File(dir, "window-$name.xml")) }
+    }
+
+    private fun flag(name: String) = File(dir, name).exists()
+
+    private fun waitUntil(timeoutMs: Long, cond: () -> Boolean): Boolean {
+        val end = System.currentTimeMillis() + timeoutMs
+        while (System.currentTimeMillis() < end) {
+            if (cond()) return true
+            dismissNotResponding()
+            if (flag("abort")) return false
+            Thread.sleep(1000)
+        }
+        return cond()
+    }
+
+    private fun find(sel: BySelector): UiObject2? = device.findObject(sel)
+
+    /** Text fields and buttons (clickable nodes) on screen, as RTSignin.kt reads them, with the objects to act on. */
+    private fun signinScreen(): Pair<List<RTSigninNode>, List<UiObject2>> {
+        val objs = mutableListOf<UiObject2>(); val nodes = mutableListOf<RTSigninNode>()
+        fun add(o: UiObject2, field: Boolean) = runCatching {
+            val b = o.visibleBounds
+            // a Compose Button is clickable on its container; its text is on a child
+            val label = o.text ?: o.contentDescription ?: o.children.firstNotNullOfOrNull { it.text ?: it.contentDescription } ?: ""
+            nodes += RTSigninNode(field, o.resourceName ?: "", label, o.hint ?: "", o.isEnabled, b.left, b.top, b.width(), b.height())
+            objs += o
+        }
+        // the app's own nodes: the status and navigation bars have clickable buttons too
+        device.findObjects(By.pkg(pkg).clazz("android.widget.EditText")).forEach { add(it, true) }
+        device.findObjects(By.pkg(pkg).clickable(true)).filter { it.className != "android.widget.EditText" }.forEach { add(it, false) }
+        return nodes to objs
+    }
+
+    /** The sign-in button is still on screen: an English "Sign in" / "Log in", or an enabled button with the label
+     *  of the one the form was submitted with (a screen that keeps it disabled once signed in is signed in). */
+    private fun signinShown(label: String?) = find(By.text(Pattern.compile("(?i)(sign|log) ?in")).clickable(true)) != null ||
+        (label != null && device.findObjects(By.clickable(true).enabled(true)).any { o -> runCatching { o.text == label || o.children.any { it.text == label } }.getOrDefault(false) })
+
+    /** A freshly booted emulator can be too busy for any app (system apps included); keep waiting. */
+    private var notRespondingSeen = 0
+    private fun dismissNotResponding() {
+        if (find(By.textContains("isn't responding")) != null) {
+            find(By.text("Wait"))?.let { it.click(); notRespondingSeen += 1 }
+        }
+    }
+
+    @Test
+    fun runtime() {
+        val userA = arg("rtUserA")
+        val tag = arg("rtTag")
+        val chatUI = arg("rtChatUI") == "1"
+        val channel = "rt-chan-$tag"
+        val b1 = "hello A from B $tag"; val a1 = "hello B from A $tag"; val b2 = "still there A $tag"
+
+        val launch = ctx.packageManager.getLaunchIntentForPackage(pkg)!!.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+        ctx.startActivity(launch)
+        val launched = waitUntil(90000) { device.hasObject(By.pkg(pkg).depth(0)) && find(By.textContains("isn't responding")) == null }
+        val busy = if (notRespondingSeen > 0) " (dismissed $notRespondingSeen \"isn't responding\" dialog(s) while the emulator settled)" else ""
+        record("launch", launched, (if (launched) "app is in the foreground" else "app did not reach the foreground") + busy, shot("launched"))
+
+        Thread.sleep(1000)
+        // the label of the button that signed in through the app's own form, if one did
+        var signinLabel: String? = null
+        if (arg("rtSigninForm") == "1") {
+            // the app's own sign-in form: the field and the button are found by where they are on screen
+            // (RTSignin.kt), not by the button's label, so a form in any language works
+            var screen = signinScreen()
+            var fieldPick: RTSigninPick? = null
+            if (waitUntil(30000) { screen = signinScreen(); fieldPick = rtPickSigninField(screen.first); fieldPick != null }) {
+                screen.second[fieldPick!!.index].text = userA
+                // the button is read after typing: a form may enable it only once the field has text
+                var buttonPick: RTSigninPick? = null
+                val ready = waitUntil(10000) {
+                    screen = signinScreen()
+                    val f = rtPickSigninField(screen.first) ?: return@waitUntil false
+                    buttonPick = rtPickSigninButton(screen.first, f.index)
+                    buttonPick?.let { screen.first[it.index].enabled } ?: false
+                }
+                if (ready) {
+                    val label = screen.first[buttonPick!!.index].label
+                    screen.second[buttonPick!!.index].click()
+                    signinLabel = label.ifEmpty { null }
+                    Thread.sleep(3000)
+                    record("sign-in", true, "A=$userA typed into the app's own form (${fieldPick!!.rule}) and tapped \"$label\" (${buttonPick!!.rule})", shot("signed-in"))
+                } else {
+                    dump("sign-in")
+                    val why = buttonPick?.let { "\"${screen.first[it.index].label}\" (${it.rule}) stayed disabled after typing" } ?: "no button to submit it"
+                    record("sign-in", false, "found the user ID field (${fieldPick!!.rule}) but $why", shot("no-sign-in-button"))
+                }
+            } else {
+                dump("sign-in")
+                record("sign-in", false, "the app's sign-in form did not appear (no user ID text field: ${screen.first.count { it.field }} text field(s) on screen)", shot("no-sign-in-form"))
+            }
+        } else {
+            instr.runOnMainSync { /*RT_CALL*/ }
+            record("sign-in", true, "A=$userA via /*RT_CALL_TEXT*/ (harness, in the app's process)")
+            Thread.sleep(2000)
+        }
+
+        if (chatUI) {
+            // a button that leads to chats, not one that creates something ("New channel", "Create chat")
+            val entryRe = Pattern.compile("(?i)(?!.*\\b(new|create|add|start)\\b).*(chat|channel|message|inbox).*")
+            val entrySel = By.text(entryRe).clickable(true)
+            val entryTextSel = By.text(entryRe)
+            var entry: UiObject2? = null
+            // some apps show the channel list right after sign-in (a "Channels" title)
+            // the title, not a Compose "Channels" button: its text is not clickable but its container is
+            val listShown = { device.findObjects(By.text(Pattern.compile("(?i)channels")).clickable(false)).any { t ->
+                runCatching { var n: UiObject2? = t.parent; while (n != null && !n.isClickable) n = n.parent; n == null }.getOrDefault(false)
+            } && !signinShown(signinLabel) }
+            // direct chat: the chat button may sit on a product screen one tap away from home
+            if (arg("rtDirect") == "1" && !waitUntil(10000) { find(entrySel) != null || find(entryTextSel) != null }) {
+                (find(By.text(Pattern.compile("(?i).*product.*")).clickable(true)) ?: find(By.text(Pattern.compile("(?i).*product.*"))))?.click()
+                Thread.sleep(2000)
+            }
+            // an app whose home screen is the channel list itself (no title, no chat button): B's channel
+            // shows up there. Look for it first, so a row's preview text that mentions "chat" is not
+            // taken for a chat button
+            val channelOnHome = arg("rtDirect") != "1" && waitUntil(20000) { find(By.textContains(channel)) != null }
+            var opened = channelOnHome || waitUntil(20000) { listShown() || run { entry = find(entrySel) ?: find(entryTextSel); entry != null && entry!!.isEnabled } }
+            // no title and no button, but signed in: look for the channel on the home screen
+            val homeList = channelOnHome || (!opened && arg("rtDirect") != "1" && !signinShown(signinLabel))
+            if (homeList) { entry = null; opened = true }
+            if (opened) {
+                val label = if (homeList) if (channelOnHome) "(B's channel is on the home screen)" else "(no chat button: looking for the channel on the home screen)" else if (entry == null || listShown()) "(the channel list was already on screen)" else entry!!.text
+                if (entry != null && !listShown()) entry!!.click()
+                Thread.sleep(4000)
+                record("chat-screen", true, "tapped \"$label\" on the home screen", shot("channel-list"))
+                var cell: UiObject2? = null
+                if (arg("rtDirect") == "1") {
+                    // the button opened a 1:1 conversation with B directly: send, then wait for B's reply
+                    val inputShown = waitUntil(30000) { find(By.clazz("android.widget.EditText")) != null }
+                    if (!inputShown) dump("direct-chat")
+                    record("channel", inputShown, if (inputShown) "\"$label\" opened a 1:1 conversation" else "\"$label\" did not open a conversation (no message input within 30 s)", shot("direct-chat"))
+                    sendMessage(a1)
+                    if (waitUntil(150000) { find(By.textContains(b2)) != null }) {
+                        record("message-a-live", true, "A sees B's reply \"$b2\"", shot("live"))
+                    } else {
+                        dump("message-a-live")
+                        record("message-a-live", false, "A never showed B's reply \"$b2\"", shot("no-live"))
+                    }
+                } else if (waitUntil(180000) { cell = find(By.textContains(channel)); cell != null }) {
+                    cell!!.click()
+                    // the conversation is open only when its message input is on screen; the list row alone
+                    // can already show B's message as a preview
+                    val convOpen = waitUntil(15000) { find(By.clazz("android.widget.EditText")) != null }
+                    if (!convOpen) dump("channel")
+                    record("channel", convOpen, if (convOpen) "\"$channel\" (opened by B) appeared in A's list and A opened it" else "\"$channel\" appeared in A's list, but tapping it did not open a conversation (no message input within 15 s)", shot(if (convOpen) "channel-open" else "not-opened"))
+                    if (convOpen) {
+                        if (waitUntil(30000) { find(By.textContains(b1)) != null }) {
+                            record("message-a-receives", true, "A sees \"$b1\"", shot("received"))
+                        } else {
+                            dump("message-a-receives")
+                            record("message-a-receives", false, "A never showed \"$b1\"", shot("not-received"))
+                        }
+                        sendMessage(a1)
+                        if (waitUntil(150000) { find(By.textContains(b2)) != null }) {
+                            record("message-a-live", true, "A sees B's next message \"$b2\" without reopening", shot("live"))
+                        } else {
+                            dump("message-a-live")
+                            record("message-a-live", false, "A never showed B's next message \"$b2\"", shot("no-live"))
+                        }
+                        if (arg("rtRich") == "1") richFeatures(b1, a1, tag)
+                    }
+                } else {
+                    dump("channel")
+                    record("channel", false, "A's list never showed \"$channel\"", shot("no-channel"))
+                }
+            } else {
+                dump("chat-screen")
+                record("chat-screen", false, "no chat or channel button on the home screen", shot("no-chat-entry"))
+            }
+            for (t in lines("rtExpectText")) {
+                val seen = waitUntil(10000) { find(By.textContains(t)) != null || find(By.descContains(t)) != null }
+                if (!seen) dump("custom")
+                record("custom", seen, if (seen) "text \"$t\" is on screen" else "text \"$t\" is not on screen", shot("custom"))
+            }
+            for (id in lines("rtExpectElement")) {
+                val sel = if (id.contains(":id/")) By.res(id) else By.res(pkg, id)
+                val seen = waitUntil(10000) { find(sel) != null || find(By.desc(id)) != null }
+                if (!seen) dump("custom")
+                record("custom", seen, if (seen) "element $id is on screen" else "element $id is not on screen", shot("custom"))
+            }
+        } else {
+            // No chat screen: keep the app running until android.sh has checked A's presence.
+            waitUntil(240000) { flag("release") }
+            shot("idle")
+        }
+        val alive = device.currentPackageName == pkg
+        record("no-crash", alive, if (alive) "app still in the foreground at the end" else "foreground app is ${device.currentPackageName}")
+        if (failed.isNotEmpty()) fail(failed.joinToString("; "))
+    }
+
+    /** Types into the chat screen's message input (the lowest text field) and taps send. */
+    private fun sendMessage(text: String, step: String = "message-a-types") {
+        val inputs = device.findObjects(By.clazz("android.widget.EditText"))
+        val input = inputs.maxByOrNull { it.visibleBounds.bottom }
+        if (input == null) {
+            dump("input"); record(step, false, "no message input on the chat screen", shot("no-input")); return
+        }
+        input.click()
+        input.text = text
+        Thread.sleep(800)
+        // only the app's own views: the keyboard's toolbar sits on the input's row while it is open
+        val sendSel = listOf(
+            By.res(Pattern.compile("(?i).*:id/.*send.*")).pkg(pkg),
+            By.desc(Pattern.compile("(?i)send( message)?")).pkg(pkg),
+            By.text(Pattern.compile("(?i)send")).pkg(pkg),
+        )
+        // A send button may carry no id or description (Compose): then take the clickable right of
+        // the input, on its row.
+        val row = input.visibleBounds
+        fun unlabeledSend(): UiObject2? = device.findObjects(By.clickable(true).pkg(pkg))
+            .filter { val b = it.visibleBounds; Math.abs(b.centerY() - row.centerY()) < row.height() && b.left >= row.right - 10 }
+            .maxByOrNull { it.visibleBounds.left }
+        var send: UiObject2? = null
+        waitUntil(5000) { send = sendSel.firstNotNullOfOrNull { find(it) } ?: unlabeledSend(); send != null }
+        if (send == null) {
+            dump("send"); record(step, false, "no send button after typing", shot("no-send")); return
+        }
+        val name = send!!.resourceName ?: send!!.contentDescription?.takeIf { it.isNotEmpty() } ?: send!!.text?.takeIf { it.isNotEmpty() }?.let { "\"$it\"" } ?: "the unlabeled button right of the input"
+        send!!.click()
+        record(step, true, "typed \"$text\" and tapped $name", shot("typed"))
+        // An app that pans its window for the keyboard pushes the message list above the screen, where
+        // it is drawn but not in the accessibility tree. When A's own message is not findable, close
+        // the keyboard (back) so the list is checked as a user sees it after sending.
+        if (!waitUntil(3000) { find(By.textContains(text)) != null }) {
+            device.pressBack()
+            Thread.sleep(1000)
+        }
+    }
+
+    // --- rich conversation features (rtRich=1) -------------------------------------------------
+    // After the two-way exchange: a reaction on B's message, an edit and a delete of A's own
+    // messages, an image attachment, and a message search. Each step only drives the screen and
+    // records what it saw; android.sh checks the server for what each action left there.
+
+    private fun richFeatures(b1: String, a1: String, tag: String) {
+        closeKeyboard()
+        reaction(b1)
+        edit(a1, "edited by A $tag")
+        deleteOwn("delete me $tag")
+        attachImage()
+        search(tag)
+    }
+
+    private fun closeKeyboard() {
+        if (device.executeShellCommand("dumpsys input_method").contains("mInputShown=true")) { device.pressBack(); Thread.sleep(1000) }
+    }
+
+    private fun clickableOf(o: UiObject2?): UiObject2? {
+        var node = o
+        while (node != null && !node.isClickable) node = node.parent
+        return node ?: o
+    }
+
+    /** A menu entry, button, or dialog action whose whole text (or description) is one of [names]. */
+    private fun menuItem(vararg names: String): UiObject2? {
+        val re = Pattern.compile("(?i)^(" + names.joinToString("|") { Pattern.quote(it) } + ")$")
+        return clickableOf(find(By.text(re)) ?: find(By.desc(re)))
+    }
+
+    private fun longPress(text: String, step: String): Boolean {
+        val target = device.findObjects(By.textContains(text)).firstOrNull { it.className != "android.widget.EditText" }
+        if (target == null) {
+            dump(step); record(step, false, "message \"$text\" is not on screen to long-press", shot("$step-no-message")); return false
+        }
+        target.longClick()
+        Thread.sleep(1500)
+        // a bubble may take the long press on its container rather than on its text
+        if (menuItem("Copy", "Edit", "Delete", "Reply") == null) {
+            var node = target.parent
+            while (node != null && !node.isLongClickable) node = node.parent
+            node?.longClick()
+            Thread.sleep(1500)
+        }
+        return true
+    }
+
+    private fun dismissMenu() { device.pressBack(); Thread.sleep(1000) }
+
+    private fun reaction(text: String) {
+        if (!longPress(text, "rich-reaction")) return
+        dump("rich-reaction-menu")
+        val menuShot = shot("rich-reaction-menu")
+        val anchor = menuItem("Copy", "Reply", "Edit", "Delete", "Reply in thread")
+        val named = find(By.desc(Pattern.compile("(?i).*(sendbird_emoji|emoji|reaction).*")).pkg(pkg))
+        val pick = named ?: anchor?.let { a ->
+            val top = a.visibleBounds.top
+            device.findObjects(By.clickable(true).pkg(pkg))
+                .filter { val b = it.visibleBounds; b.bottom <= top + 4 && b.top > top - 400 && b.width() < 250 && b.height() < 250 }
+                // the row right above the menu, its leftmost entry (a sheet's drag handle sits higher up)
+                .minWithOrNull(compareBy({ -it.visibleBounds.bottom }, { it.visibleBounds.left }))
+        }
+        if (pick == null) {
+            record("rich-reaction", false, "long-pressed \"$text\" but found no emoji to tap in the menu (menu item: ${anchor?.text ?: anchor?.contentDescription ?: "none"})", menuShot)
+            dismissMenu(); return
+        }
+        val name = pick.contentDescription?.takeIf { it.isNotEmpty() } ?: pick.resourceName ?: "the first emoji of the menu"
+        pick.click()
+        Thread.sleep(3000)
+        record("rich-reaction", true, "long-pressed B's \"$text\" and tapped $name", shot("rich-reaction-done"))
+    }
+
+    private fun edit(text: String, newText: String) {
+        if (!longPress(text, "rich-edit")) return
+        dump("rich-edit-menu")
+        val item = menuItem("Edit")
+        if (item == null) {
+            record("rich-edit", false, "long-pressed A's \"$text\" but the menu has no Edit", shot("rich-edit-no-item")); dismissMenu(); return
+        }
+        item.click()
+        Thread.sleep(1500)
+        val input = device.findObjects(By.clazz("android.widget.EditText")).maxByOrNull { it.visibleBounds.bottom }
+        if (input == null) {
+            dump("rich-edit-input"); record("rich-edit", false, "tapped Edit but no text input appeared", shot("rich-edit-no-input")); return
+        }
+        input.text = newText
+        Thread.sleep(800)
+        val editShot = shot("rich-edit-typing")
+        dump("rich-edit-typing")
+        val row = input.visibleBounds
+        val save = find(By.text(Pattern.compile("(?i)(save|done|update|edit|send|ok)")).clickable(true).pkg(pkg))
+            ?: clickableOf(find(By.text(Pattern.compile("(?i)(save|done|update)")).pkg(pkg)))
+            ?: find(By.desc(Pattern.compile("(?i)(save|done|update|edit|send)( message)?")).pkg(pkg))
+            ?: device.findObjects(By.clickable(true).pkg(pkg))
+                .filter { val b = it.visibleBounds; Math.abs(b.centerY() - row.centerY()) < row.height() && b.left >= row.right - 10 }
+                .maxByOrNull { it.visibleBounds.left }
+        if (save == null) {
+            record("rich-edit", false, "typed the new text but found no Save button", editShot); return
+        }
+        val name = save.text?.takeIf { it.isNotEmpty() } ?: save.contentDescription?.takeIf { it.isNotEmpty() } ?: save.resourceName ?: "the unlabeled button right of the input"
+        save.click()
+        Thread.sleep(3000)
+        closeKeyboard()
+        val shown = waitUntil(15000) { device.findObjects(By.textContains(newText)).any { it.className != "android.widget.EditText" } }
+        record("rich-edit", shown, if (shown) "changed A's \"$text\" to \"$newText\" (tapped $name); the new text is on screen" else "tapped $name after typing \"$newText\", but the new text is not on screen", shot("rich-edit-done"))
+    }
+
+    private fun deleteOwn(text: String) {
+        sendMessage(text, "rich-delete-send")
+        closeKeyboard()
+        if (!waitUntil(20000) { device.findObjects(By.textContains(text)).any { it.className != "android.widget.EditText" } }) {
+            record("rich-delete", false, "A's \"$text\" never showed on screen after sending", shot("rich-delete-not-sent")); return
+        }
+        // android.sh confirms the server has the message before A deletes it
+        if (!waitUntil(120000) { flag("a2-seen") }) {
+            record("rich-delete", false, "the server never had \"$text\" (B did not see it), so there is nothing to delete", shot("rich-delete-unseen")); return
+        }
+        if (!longPress(text, "rich-delete")) return
+        dump("rich-delete-menu")
+        val item = menuItem("Delete")
+        if (item == null) {
+            record("rich-delete", false, "long-pressed A's \"$text\" but the menu has no Delete", shot("rich-delete-no-item")); dismissMenu(); return
+        }
+        item.click()
+        Thread.sleep(1500)
+        val confirmShot = shot("rich-delete-confirm")
+        dump("rich-delete-confirm")
+        menuItem("Delete", "OK", "Yes", "Confirm")?.let { it.click(); Thread.sleep(3000) }
+        val gone = waitUntil(15000) { device.findObjects(By.textContains(text)).none { it.className != "android.widget.EditText" } }
+        record("rich-delete", gone, if (gone) "deleted A's \"$text\"; it is no longer on screen" else "tapped Delete, but \"$text\" is still on screen", if (gone) shot("rich-delete-done") else confirmShot)
+    }
+
+    private fun attachImage() {
+        closeKeyboard()
+        val input = device.findObjects(By.clazz("android.widget.EditText")).maxByOrNull { it.visibleBounds.bottom }
+        if (input == null) {
+            record("rich-attach", false, "no message input to find the attachment button by", shot("rich-attach-no-input")); return
+        }
+        val row = input.visibleBounds
+        val onRowLeft = { o: UiObject2 -> val b = o.visibleBounds; Math.abs(b.centerY() - row.centerY()) < row.height() && b.right <= row.left + 10 }
+        val labeled = (device.findObjects(By.desc(Pattern.compile("(?i).*(image|photo|attach|add|plus|file|more|gallery).*")).pkg(pkg)) +
+            device.findObjects(By.res(Pattern.compile("(?i).*:id/.*(image|photo|attach|add|plus|file|more|gallery).*")).pkg(pkg))).filter(onRowLeft)
+        val left = device.findObjects(By.clickable(true).pkg(pkg)).filter(onRowLeft).minByOrNull { it.visibleBounds.left }
+        val attach = clickableOf(labeled.firstOrNull { (it.contentDescription ?: it.resourceName ?: "").contains(Regex("(?i)image|photo|gallery")) } ?: labeled.firstOrNull()) ?: left
+        if (attach == null) {
+            dump("rich-attach"); record("rich-attach", false, "no attachment button left of the message input", shot("rich-attach-no-button")); return
+        }
+        val name = attach.contentDescription?.takeIf { it.isNotEmpty() } ?: attach.resourceName ?: "the unlabeled button left of the input"
+        attach.click()
+        Thread.sleep(2000)
+        dump("rich-attach-menu")
+        val menuShot = shot("rich-attach-menu")
+        // a chooser (Camera / Gallery / Files) may come first
+        menuItem("Gallery", "Photo", "Photos", "Image", "Images", "Album", "Photo library", "Choose photo", "Photo & video", "Photos & videos")?.let { it.click(); Thread.sleep(3000) }
+        dump("rich-attach-picker")
+        // the system photo picker or the files app: tap the photo android.sh put on the device
+        val photo = { find(By.textContains("rt-image")) ?: find(By.desc(Pattern.compile("(?i)^(photo|image).*"))) ?: find(By.res(Pattern.compile(".*:id/icon_thumbnail"))) }
+        // the system photo picker can take tens of seconds to draw on a busy emulator
+        if (!waitUntil(60000) { photo() != null }) {
+            record("rich-attach", false, "tapped $name but no photo showed up to pick", menuShot); dismissMenu(); return
+        }
+        clickableOf(photo())!!.click()
+        Thread.sleep(2000)
+        dump("rich-attach-picked")
+        // some pickers ask once more before handing the photo back (only while the picker is still up:
+        // the app's own "add" button would reopen the attachment menu)
+        if (device.currentPackageName != pkg) menuItem("Add", "Done", "Select", "Send", "OK")?.let { it.click(); Thread.sleep(2000) }
+        Thread.sleep(4000)
+        record("rich-attach", true, "tapped $name, picked the test photo", shot("rich-attach-done"))
+        // stay on the conversation until android.sh has seen the upload arrive (or given up)
+        waitUntil(450000) { flag("file-seen") }
+        shot("rich-attach-sent")
+    }
+
+    private fun search(keyword: String) {
+        closeKeyboard()
+        val names = arrayOf("Search", "Search in channel", "Search messages", "Message search")
+        var entry = menuItem(*names)
+        if (entry == null) {
+            // the channel header's right-hand button opens channel settings, where search lives
+            val header = device.findObjects(By.clickable(true).pkg(pkg)).filter { it.visibleBounds.top < device.displayHeight / 6 }
+            header.maxByOrNull { it.visibleBounds.right }?.let { it.click(); Thread.sleep(2500) }
+            dump("rich-search-settings")
+            if (waitUntil(10000) { menuItem(*names) != null }) entry = menuItem(*names)
+        }
+        if (entry == null) {
+            record("rich-search", false, "no Search entry in the channel header or its settings", shot("rich-search-no-entry")); return
+        }
+        val entryName = entry.text ?: entry.contentDescription ?: "Search"
+        entry.click()
+        Thread.sleep(2000)
+        dump("rich-search-screen")
+        val field = find(By.clazz("android.widget.EditText"))
+        if (field == null) {
+            record("rich-search", false, "opened \"$entryName\" but found no search field", shot("rich-search-no-field")); return
+        }
+        field.click()
+        field.text = keyword
+        Thread.sleep(500)
+        // run the search: a Search button of the screen, else the keyboard's search key
+        val go = device.findObjects(By.text(Pattern.compile("(?i)search")).pkg(pkg)).mapNotNull { clickableOf(it) }.firstOrNull { it.className != "android.widget.EditText" && it.visibleBounds.top > field.visibleBounds.top - 10 }
+        if (go != null) go.click() else device.pressEnter()
+        Thread.sleep(3000)
+        closeKeyboard()
+        val found = waitUntil(30000) { device.findObjects(By.textContains(keyword)).any { it.className != "android.widget.EditText" } }
+        dump("rich-search-results")
+        record("rich-search", found, if (found) "searched \"$keyword\" from \"$entryName\"; results list messages with it" else "searched \"$keyword\" from \"$entryName\", but no result showed", shot("rich-search-results"))
+    }
+}

@@ -35,8 +35,31 @@ SendBirdCall.addDelegate(self, identifier: UNIQUE_HANDLER_ID)   // SendBirdCallD
 ```
 (source: sendbird-calls-ios README §"device-specific event handler")
 
+## Receive a call while the app is open (accept or decline)
+Set the call's `DirectCallDelegate` in `didStartRinging(_:)`, then accept with `accept(with:)` or decline with `end()`.
+
+```swift
+import SendBirdCalls
+
+final class IncomingCallHandler: NSObject, SendBirdCallDelegate, DirectCallDelegate {
+    func didStartRinging(_ call: DirectCall) {
+        call.delegate = self
+        // Video when the caller placed a video call; call.end() declines instead.
+        let options = CallOptions(isAudioEnabled: true, isVideoEnabled: call.isVideoCall)
+        call.accept(with: AcceptParams(callOptions: options))
+    }
+
+    func didConnect(_ call: DirectCall) {}
+    func didEnd(_ call: DirectCall) {}
+}
+```
+
+(source: https://sendbird.com/docs/calls/sdk/v1/ios/features/direct-call) (SendBirdCalls.swiftinterface 1.12.3: `DirectCall.accept(with:)` 112, `end()` 113, `isVideoCall`, `delegate` 763, `SendBirdCallDelegate.didStartRinging(_:)` 650, `DirectCallDelegate` `didConnect(_:)` 656 and `didEnd(_:)` 661, `CallOptions` initializer 829, `AcceptParams(callOptions:)` 917)
+
+`templates/ios/uikit/calls/SetupCalls.swift` (a call controller class) and `templates/ios/swiftui/calls/CallsSession.swift` wrap dial, accept, end, and sign-out with a call state for the UI.
+
 ## Receive calls in the background or after the app was closed (PushKit + CallKit)
-The docs say `didStartRinging` alone delivers incoming calls only while the app is in the foreground: "if both CallKit and PushKit are implemented, the Calls SDK will be able to receive incoming calls even when the app is in the background or closed." The SDK receives these calls only through PushKit, so the app reports each one to CallKit from `didStartRinging`. (source: https://sendbird.com/docs/calls/sdk/v1/ios/features/voip-push-notifications)
+The VoIP notifications page says: "if both CallKit and PushKit are implemented, the Calls SDK will be able to receive incoming calls even when the app is in the background or closed." (source: https://sendbird.com/docs/calls/sdk/v1/ios/features/voip-push-notifications) The Authentication page adds that push is needed in the foreground too: "WebSocket connections with Sendbird server are made only when there is an ongoing direct call or group call, therefore authenticating won't create unnecessary WebSocket connections. Also, unless you have integrated push notifications to your application, new incoming calls won't be delivered through WebSocket." (source: https://sendbird.com/docs/calls/sdk/v1/ios/features/authentication — "WebSocket") On the iOS simulator (SendBirdCalls 1.12.3, no push, 2026-10-17), an authenticated app never got `didStartRinging` for a call from a browser, which matches the Authentication page. So an app that receives calls needs PushKit, and the app reports each call to CallKit from `didStartRinging`. Dialing out works without push.
 
 Wiring, as in Sendbird's public Direct Call QuickStart:
 - Turn on the Push Notifications capability and the Background Modes "Voice over IP" mode, and upload the VoIP credential in the dashboard by following the docs page above.
@@ -140,6 +163,14 @@ SendBirdCall.deauthenticate { error in
 ```
 
 `SendBirdCall.deauthenticate(completionHandler:)` is a static method; the handler is optional. (source: SendBirdCalls 1.12.3 `SendBirdCalls.swiftinterface:878`) If you registered a VoIP push token, `SendBirdCall.unregisterVoIPPush(token:completionHandler:)` removes it. (source: SendBirdCalls 1.12.3 `SendBirdCalls.swiftinterface:885`)
+
+## Manual steps (what a Calls hand-off may list)
+Only these Calls steps need something outside the project, and each has a source:
+- **App ID:** create a Sendbird application and copy its App ID from the dashboard; it is case-sensitive. (source: https://sendbird.com/docs/calls/sdk/v1/ios/getting-started/make-first-call)
+- **Token server, only when the app signs users in with tokens:** Calls authentication is separate from Chat, and access or session tokens come from the Chat Platform API. (source: https://sendbird.com/docs/calls/sdk/v1/ios/features/authentication)
+- **Push credentials, to receive calls:** register the APNs certificate in the dashboard and test on a real device. (source: https://sendbird.com/docs/calls/sdk/v1/ios/features/voip-push-notifications)
+
+None of these pages has a dashboard step that enables or activates Calls (checked 2026-10-17). Do not tell the customer to "enable Calls in the dashboard", and do not add any other dashboard step that no page cited here lists.
 
 ## Pitfalls
 - SPM-only; the WebRTC dependency is required.

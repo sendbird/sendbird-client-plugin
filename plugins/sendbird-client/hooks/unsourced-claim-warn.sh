@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
-# PostToolUse Agent (Claude Code) or SubagentStop (Codex): flag a subagent answer that contains API-shaped
-# identifiers / code / docs URLs but no citation marker. Enforces §6.4 for agent output.
-# Claude Code shows a warning. Codex shows systemMessage only to the user, so on SubagentStop the
+# SubagentStop (Claude Code: the plugin's own agents; Codex: every agent) or PostToolUse Agent (Claude
+# Code): flag a subagent answer that contains API-shaped identifiers / code / docs URLs but no citation
+# marker. Enforces §6.4 for agent output.
+# SubagentStop carries the answer in last_assistant_message, also for a background agent, and the
 # subagent is sent back once to cite (stop_hook_active lets the second stop pass; it cannot loop).
+# PostToolUse Agent only warns: it sees the answer of a foreground agent (tool_response.content), and
+# for a background agent only the launch notice (status async_launched, no content), so it is silent.
 set -uo pipefail
 HERE="$(cd "$(dirname "$0")" && pwd)"
 # shellcheck source=lib/hook-helpers.sh

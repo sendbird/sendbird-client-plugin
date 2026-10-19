@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Button, SafeAreaView, StyleSheet, Text, TextInput } from 'react-native';
+import { Button, StyleSheet, Text, TextInput } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { onLoginSucceeded } from '../auth/login';
 import { SENDBIRD_APP_ID } from '../sendbird/config';
 

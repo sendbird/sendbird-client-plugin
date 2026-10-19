@@ -23,7 +23,7 @@ The swiftinterface has no doc comments on these cases, so each meaning comes fro
 | 400106 | `invalidParameterValuePositive` | A parameter is a negative number; it should be a positive number |
 | 400107 | `invalidParameterValueNegative` | No public description |
 | 400108 | `nonAuthorized` | Not authorized for the request |
-| 400109 | `tokenExpired` | Auth token expired — refresh via SessionDelegate |
+| 400109 | `tokenExpired` | The value of the `token` parameter for pagination has expired. This is not a session-token error: the iOS error-codes page does not list 400109, and the Android, Flutter, .NET, and Unity error-codes pages all describe it this way (the last three under the same `tokenExpired` name) |
 | 400110 | `invalidChannelURL` | The parameter value is too long (the error-codes pages name 400110 `ParameterValueLengthExceeded`) |
 | 400111 | `invalidParameterValue` | Invalid parameter value |
 | 400151 | `unusableCharacterIncluded` | A value contains a special character, an empty string, or white space that isn't allowed |
@@ -120,12 +120,14 @@ The swiftinterface has no doc comments on these cases, so each meaning comes fro
 
 900010–900500 rows (source: SendbirdChatSDK.swiftinterface (4.39.11) lines 1571–1597; https://sendbird.com/docs/chat/sdk/v4/ios/error-codes)
 
+400109 row, pagination token (source: https://sendbird.com/docs/chat/sdk/v4/android/error-codes ; https://sendbird.com/docs/chat/sdk/v4/flutter/error-codes ; https://sendbird.com/docs/chat/sdk/v4/dotnet/error-codes ; https://sendbird.com/docs/chat/sdk/v4/unity/error-codes — reviewed 2026-10-16)
+
 900050 row, operator exception (source: https://sendbird.com/docs/chat/sdk/v4/ios/channel/moderating-a-channel/freeze-and-unfreeze-a-channel ; https://sendbird.com/docs/chat/platform-api/v3/moderation/moderation-overview — reviewed 2026-10-16)
 
 Neither page describes 400107, 400312, 400313, 403200, 409000, 800000, 800111, 800191, 800221, 800251, or 800800. Where a page names a code differently from the iOS symbol (400110, 400303, 900029), the meaning column follows the page and notes the page's name. The iOS page lists `timerWasExpired` under 800310, while the enum value is 800301; that row keeps the enum value.
 
 ## Handling tips
-- `tokenExpired` (400109) / `sessionKeyExpired` (400309) / `sessionTokenRevoked` (400310): refresh the token through `SessionDelegate` (see auth).
+- `sessionKeyExpired` (400309) / `sessionTokenRevoked` (400310): refresh the token through `SessionDelegate` (see auth). `tokenExpired` (400109) is an expired pagination token, not an expired session (see the table).
 - `connectionRequired` (800101): call `SendbirdChat.connect(...)` first.
 - `rateLimitExceeded` (500910): exponential backoff.
 

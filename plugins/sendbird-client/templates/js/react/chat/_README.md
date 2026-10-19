@@ -14,7 +14,8 @@ Sources: (source: knowledge/curated/js/products/chat.md) (source: https://sendbi
   (`createGroupChannelCollection` / `setGroupChannelCollectionHandler` / `loadMore`).
 - `GroupChannelMessages.tsx` — message list via `MessageCollection`
   (`createMessageCollection` / `initialize` / `setMessageCollectionHandler` /
-  `loadPrevious`), plus reaction, typing, and read-status helpers.
+  `loadPrevious`), row helpers for rendering (`messageRow`, `messageKey`), `sendText`, plus
+  reaction, typing, and read-status helpers.
 - `PushRegistration.ts` — register and unregister FCM and APNs tokens.
 - `FileMessageUpload.ts` — send a picked `File`, with an upload progress bar (`uploadFile` then `fileUrl`), cancel an upload, resend a failed file message.
 - `MessageEditing.ts` — edit and delete your own messages, and hear about other members' edits and deletes.
@@ -29,7 +30,18 @@ Sources: (source: knowledge/curated/js/products/chat.md) (source: https://sendbi
    (`GroupChannelList.tsx`). Call `dispose()` on unmount.
 4. For a message list screen: `createMessageListCollection(channel)` then
    `initializeMessageList(collection, { onCache, onApi, onAdded, onUpdated, onDeleted })`
-   (`GroupChannelMessages.tsx`). Call `dispose()` on unmount.
+   (`GroupChannelMessages.tsx`). `onCache` / `onApi` already get the page oldest first; set the
+   list to it. For `onAdded`, `onUpdated`, and `loadOlderMessages` results, update the list with
+   `mergeMessages(current, messages)`. Never render a callback array as it arrives: its order is
+   not documented. Call `dispose()` on unmount.
+   Render each row from `messageRow(message, sb.currentUser?.userId)`: it gives `key`, `text`,
+   `senderName`, `mine`, and `isAdmin`, read through the declared types. Do not write
+   `'reqId' in message`: `reqId` is not on `BaseMessage`, so that check leaves it typed `unknown`,
+   and a `key` built from it fails the type check (use `messageKey` or `requestIdOf`). `sender` is
+   on user, file, and multiple-files messages only, so read it after `message.isUserMessage()`,
+   `isFileMessage()`, or `isMultipleFilesMessage()`; `message.message` (the text) is on every message.
+   To send, call `sendText(channel, text, { onPending, onSucceeded, onFailed })` and merge each
+   message into the list with `mergeMessages`; `onFailed` can get `null` instead of a message.
 5. App ID read per the profile `tier2.appIdSource` (knowledge/curated/js/setup.md "App ID") — never ask the customer to add a bundler; tokens are secrets.
 
 The feature files below assume a connected `sb` and a loaded group channel. Copy only the files the app needs.

@@ -69,7 +69,7 @@ The docs index (`core/docs-index.json`) has no major-version migration guide for
 Other changes the guide lists:
 
 - `ConnectionDelegate` gains `didConnect(userId:)` and `didDisconnect(userId:)`.
-- The file upload `onProgress` callback gains a `requestId` argument.
+- The file upload progress handler gains a `requestId` argument: in v4 the `progressHandler` of `sendFileMessage(params:progressHandler:completionHandler:)` is a `MultiProgressHandler`, whose first argument is `requestId`. The guide words this item with Android's Kotlin interface and method names, which the iOS SDK does not have. (source: https://sendbird.com/docs/chat/sdk/v4/ios/ref/Classes/BaseChannel.html ; SendbirdChatSDK 4.39.11 `.swiftinterface` lines 517, 3604 ; https://sendbird.com/docs/chat/sdk/v4/ios/getting-started/migration-guide)
 - You can no longer create your own Sendbird instance.
 - Defaults changed: a group channel's `members` is `[]` instead of `nil`, and a user's `nickname` is `""` instead of `nil`. Code that checks for `nil` there no longer sees it.
 - Query classes lost their setters; each has a matching params class instead.

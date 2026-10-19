@@ -25,6 +25,19 @@
       "type": "array",
       "items": { "type": "string", "enum": ["chat", "uikit", "ai-agent", "desk", "calls", "live"] }
     },
+    "legacyMajors": {
+      "type": "array",
+      "description": "Sendbird SDKs on an older major version, as detection-result.schema.json describes. Optional: profiles written before this field existed do not have it.",
+      "items": {
+        "type": "object",
+        "required": ["product", "major", "package"],
+        "properties": {
+          "product": { "type": "string", "enum": ["chat", "uikit", "ai-agent", "desk", "calls", "live"] },
+          "major": { "type": "integer", "minimum": 0 },
+          "package": { "type": "string" }
+        }
+      }
+    },
     "region": { "type": "string" },
     "schemaVersion": { "type": "integer" },
     "detectedAt": { "type": "string", "format": "date-time" },

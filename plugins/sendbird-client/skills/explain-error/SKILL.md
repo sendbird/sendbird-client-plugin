@@ -21,4 +21,4 @@ Map an error to meaning + fix (Intent A — lookup).
 4. Report: code, platform symbol (e.g. 400302 = iOS `accessTokenNotValid` / JS `SESSION_TOKEN_EXPIRED`), meaning, common triggers, fix (codegen handed to the platform agent for in-scope products), related docs link — all cited. Session-expiry codes route to `products/auth.md` refresh patterns.
 
 ## No-Fabrication
-Only report error codes/meanings present in a verified source. If the code isn't found, say "not found in <searched sources>" and suggest the docs — never invent a meaning.
+Only report error codes/meanings present in a verified source. If the code isn't found, say "not found in <searched sources>" and suggest the docs — never invent a meaning. The same holds for a constant name: when it is not in the verified table, the next step you offer is a source check (`read-surface.sh` on the customer's installed SDK, or the place where they saw the name). Whether their compiler, IDE autocomplete, or a test call accepts the name is not a way to verify it.

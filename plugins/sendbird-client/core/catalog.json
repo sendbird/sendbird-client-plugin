@@ -48,8 +48,7 @@
       ]
     },
     {
-      "id": "calls",
-      "offered": false, "type": "multi", "required": false,
+      "id": "calls", "type": "multi", "required": false,
       "question": "Add calls?",
       "options": [
         { "id": "voice-call", "label": "1:1 voice call", "product": "calls" },
