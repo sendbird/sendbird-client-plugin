@@ -29,8 +29,10 @@
 #                     runtime.json messageSteps and the last lines of the output say so and name this
 #                     flag (with the file whose Chat SDK code sends messages, when there is one)
 #   --direct-chat     the app opens a 1:1 chat with USER from a button (no channel list): user B
-#                     is USER, A taps the button, sends, and must see B's reply. Not supported for
-#                     --host react or react-native (exit 64)
+#                     is USER, A taps the button (on a product screen one tap away, if need be), the
+#                     conversation must open by itself, A sends, B finds A's message in the channel
+#                     the app made, and A must see B's reply. Every host, React Native included. It
+#                     says the app has a chat screen, so it needs neither UIKit nor --chat-screens
 #   --b-custom-type   customType on user B's first message, for a customization that renders
 #                     such messages differently (the marker is then checked with --expect-*)
 #   --expect-text     text that must be on the chat screen (a customization), repeatable
@@ -82,11 +84,6 @@ case "$host" in
   "") echo "--host is required" >&2; usage ;;
   *) echo "unknown host: $host" >&2; usage ;;
 esac
-# The react driver always has B create a channel and A open it from the channel list; it has no
-# way to press a "chat with USER" button, so --direct-chat would silently run the wrong scenario.
-if [ -n "$direct_user" ] && [ "$host" = react ]; then
-  echo "--direct-chat is not supported for --host react (only ios-uikit, ios-swiftui, android-view, android-compose)" >&2; exit 64
-fi
 # A React Native app runs on one platform per run; every other host has its platform already.
 if [ "$host" = react-native ]; then
   case "$platform" in
@@ -94,13 +91,14 @@ if [ "$host" = react-native ]; then
     "") echo "--host react-native needs --platform ios or --platform android" >&2; exit 64 ;;
     *) echo "unknown --platform: $platform (ios or android)" >&2; exit 64 ;;
   esac
-  # neither has been run on React Native screens: refuse instead of running an unchecked scenario
-  [ -z "$direct_user" ] || { echo "--direct-chat is not supported for --host react-native (only ios-uikit, ios-swiftui, android-view, android-compose)" >&2; exit 64; }
+  # --rich has not been run on React Native screens: refuse instead of running an unchecked scenario
   [ "$rich" = 0 ] || { echo "--rich is not supported for --host react-native (only ios-uikit, ios-swiftui, android-view, android-compose)" >&2; exit 64; }
 elif [ -n "$platform" ]; then
   echo "--platform applies to --host react-native only" >&2; exit 64
 fi
 [[ -z "$app_id_env" || "$app_id_env" =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]] || { echo "bad --app-id-env name: $app_id_env" >&2; usage; }
+# user B signs in as this ID, and the drivers pass it on (a JavaScript string, an adb argument)
+[[ -z "$direct_user" || "$direct_user" =~ ^[A-Za-z0-9_.@-]+$ ]] || { echo "bad --direct-chat user ID: $direct_user (letters, digits, and _ . @ - only)" >&2; exit 64; }
 project="$(cd "$project" && pwd)"
 TOOLS_DIR="${RUNTIME_TOOLS_DIR:-${TMPDIR:-/tmp}/sendbird-runtime-tools}"
 
@@ -205,14 +203,17 @@ preflight() {
       notes+=("builds the app and an instrumented test in a copy; starts a read-only emulator of RT_AVD, or uses RT_ANDROID_SERIAL") ;;
   esac
   [ "$chat_screens" = 1 ] && chat_ui=1
+  [ -n "$direct_user" ] && chat_ui=1 && notes+=("direct chat: user B is $direct_user, connected once before the run so A's chat button can invite them; A's button must open the 1:1 conversation without a channel list")
   local msg_note; msg_note="$(message_steps_note "$chat_ui" "$([ "$chat_ui" = 1 ] || chat_sdk_send "$project")")"
   [ -z "$msg_note" ] || notes+=("$msg_note")
   jq -n --arg host "$host" --arg platform "$platform" --arg from "$([ -n "$RT_APP_ID" ] && echo "$app_id_from")" --arg how "$how" --arg signin "$signin" \
-    --argjson chat "$chat_ui" --arg msgnote "$msg_note" '
+    --argjson chat "$chat_ui" --arg msgnote "$msg_note" --arg direct "$direct_user" '
     ($ARGS.positional | map(select(startswith("M:")) | ltrimstr("M:"))) as $missing |
     {ready: ($missing | length == 0), host: $host} + (if $platform == "" then {} else {platform: $platform} end) + {
      appId: (if $from == "" then null else {from: $from} end), appIdHow: $how, signIn: $signin,
-     checks: (if $chat == 1 then ["connect", "channel", "message-a-receives", "message-a-sends"] else ["connect"] end),
+     checks: (if $direct != "" then ["connect", "channel", "message-a-sends", "message-a-live"]
+              elif $chat == 1 then ["connect", "channel", "message-a-receives", "message-a-sends"] else ["connect"] end),
+     directChat: (if $direct == "" then null else $direct end),
      messageSteps: (if $msgnote == "" then {run: true} else {run: false, why: $msgnote, enableWith: "--chat-screens"} end),
      missing: $missing,
      notes: ($ARGS.positional | map(select(startswith("N:")) | ltrimstr("N:")))}' \
@@ -292,6 +293,8 @@ grep -Eqs '"@sendbird/uikit-react(-native)?"' "$work/package.json" && chat_ui=1
 grep -Eqs 'sendbird-uikit-ios|sendbird-swiftui-ios|SendbirdUIKit|SendbirdSwiftUI' "$work/project.yml" && chat_ui=1
 grep -Eqs 'com\.sendbird\.sdk:uikit' "$work/app/build.gradle.kts" "$work/app/build.gradle" && chat_ui=1
 [ "$chat_screens" = 1 ] && chat_ui=1
+# --direct-chat says the app opens a conversation from a button: a chat screen to drive
+[ -n "$direct_user" ] && chat_ui=1
 # runtime.json messageSteps: "run", or why the channel and message steps are not run
 msg_state="$(message_steps_note "$chat_ui" "$([ "$chat_ui" = 1 ] || chat_sdk_send "$work")")"; msg_state="${msg_state:-run}"
 

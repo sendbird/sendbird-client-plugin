@@ -155,18 +155,25 @@ class RTRuntimeTest {
         }
 
         if (chatUI) {
-            // a button that leads to chats, not one that creates something ("New channel", "Create chat")
-            val entryRe = Pattern.compile("(?i)(?!.*\\b(new|create|add|start)\\b).*(chat|channel|message|inbox).*")
+            val direct = arg("rtDirect") == "1"
+            // a button that leads to chats, not one that creates something ("New channel", "Create chat").
+            // Direct chat: the button that opens the conversation ("Chat with seller", "Message seller"),
+            // never one to a list ("Channels", "Inbox"); a label with "with" or "seller" comes first
+            // (2026-10-19: a React Native home had "Channels" and "View product")
+            val entryRe = if (direct) Pattern.compile("(?i)(?!.*\\b(new|create|add|channels?|inbox)\\b).*(chat|message|contact).*")
+                else Pattern.compile("(?i)(?!.*\\b(new|create|add|start)\\b).*(chat|channel|message|inbox).*")
+            val preferredRe = Pattern.compile("(?i)(?!.*\\b(new|create|add|channels?|inbox)\\b)(?=.*(chat|message|contact)).*\\b(with|seller)\\b.*")
             val entrySel = By.text(entryRe).clickable(true)
             val entryTextSel = By.text(entryRe)
+            val findEntry = { (if (direct) find(By.text(preferredRe).clickable(true)) ?: find(By.text(preferredRe)) else null) ?: find(entrySel) ?: find(entryTextSel) }
             var entry: UiObject2? = null
             // some apps show the channel list right after sign-in (a "Channels" title)
             // the title, not a Compose "Channels" button: its text is not clickable but its container is
-            val listShown = { device.findObjects(By.text(Pattern.compile("(?i)channels")).clickable(false)).any { t ->
+            val listShown = { !direct && device.findObjects(By.text(Pattern.compile("(?i)channels")).clickable(false)).any { t ->
                 runCatching { var n: UiObject2? = t.parent; while (n != null && !n.isClickable) n = n.parent; n == null }.getOrDefault(false)
             } && !signinShown(signinLabel) }
             // direct chat: the chat button may sit on a product screen one tap away from home
-            if (arg("rtDirect") == "1" && !waitUntil(10000) { find(entrySel) != null || find(entryTextSel) != null }) {
+            if (direct && !waitUntil(10000) { findEntry() != null }) {
                 (find(By.text(Pattern.compile("(?i).*product.*")).clickable(true)) ?: find(By.text(Pattern.compile("(?i).*product.*"))))?.click()
                 Thread.sleep(2000)
             }
@@ -174,7 +181,7 @@ class RTRuntimeTest {
             // shows up there. Look for it first, so a row's preview text that mentions "chat" is not
             // taken for a chat button
             val channelOnHome = arg("rtDirect") != "1" && waitUntil(20000) { find(By.textContains(channel)) != null }
-            var opened = channelOnHome || waitUntil(20000) { listShown() || run { entry = find(entrySel) ?: find(entryTextSel); entry != null && entry!!.isEnabled } }
+            var opened = channelOnHome || waitUntil(20000) { listShown() || run { entry = findEntry(); entry != null && entry!!.isEnabled } }
             // no title and no button, but signed in: look for the channel on the home screen
             val homeList = channelOnHome || (!opened && arg("rtDirect") != "1" && !signinShown(signinLabel))
             if (homeList) { entry = null; opened = true }
@@ -266,10 +273,15 @@ class RTRuntimeTest {
         )
         // A send button may carry no id or description (Compose): then take the clickable right of
         // the input, on its row.
-        val row = input.visibleBounds
-        fun unlabeledSend(): UiObject2? = device.findObjects(By.clickable(true).pkg(pkg))
-            .filter { val b = it.visibleBounds; Math.abs(b.centerY() - row.centerY()) < row.height() && b.left >= row.right - 10 }
-            .maxByOrNull { it.visibleBounds.left }
+        // The input's row is read again on every try: the keyboard that opened on the tap moves the
+        // input up, and on a slow emulator it is still moving when typing ends (2026-10-19: a React
+        // Native conversation's send button was looked for on the input's old row, at the bottom).
+        fun unlabeledSend(): UiObject2? {
+            val row = device.findObjects(By.clazz("android.widget.EditText")).maxByOrNull { it.visibleBounds.bottom }?.visibleBounds ?: return null
+            return device.findObjects(By.clickable(true).pkg(pkg))
+                .filter { val b = it.visibleBounds; Math.abs(b.centerY() - row.centerY()) < row.height() && b.left >= row.right - 10 }
+                .maxByOrNull { it.visibleBounds.left }
+        }
         var send: UiObject2? = null
         waitUntil(5000) { send = sendSel.firstNotNullOfOrNull { find(it) } ?: unlabeledSend(); send != null }
         if (send == null) {
