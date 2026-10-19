@@ -25,6 +25,28 @@ const sb = SendbirdChat.init({
 ```
 Add `OpenChannelModule` from `@sendbird/chat/openChannel` for open channels. (source: sendbird.com/docs chat v4 javascript getting-started)
 
+## Import paths: which entry point exports which name
+`@sendbird/chat` has one entry point per module, and each name is exported from exactly one of them. The same paths apply to React and React Native.
+
+| Import from | Names it exports (the common ones) |
+|---|---|
+| `@sendbird/chat` | the default export `SendbirdChat`; `BaseChannel`, `ConnectionHandler`, `ConnectionState`, `SessionHandler`, `UserEventHandler`, `User`, `SendbirdError`, `SendbirdErrorCode`, `LocalCacheConfig`, `CachedDataClearOrder`, `Role`, `PushTokenType`, `LogLevel` |
+| `@sendbird/chat/groupChannel` | `GroupChannelModule`, `SendbirdGroupChat`, `GroupChannel`, `GroupChannelHandler`, `GroupChannelCollection`, `GroupChannelFilter`, `GroupChannelListOrder`, `GroupChannelCreateParams`, `MessageCollection`, `MessageFilter`, `MessageCollectionInitPolicy`, `Member`, `HiddenChannelFilter`, `HiddenState`, `MutedState` |
+| `@sendbird/chat/openChannel` | `OpenChannelModule`, `SendbirdOpenChat`, `OpenChannel`, `OpenChannelHandler` |
+| `@sendbird/chat/message` | `BaseMessage`, `UserMessage`, `FileMessage`, `AdminMessage`, `UserMessageCreateParams`, `FileMessageCreateParams`, `UserMessageUpdateParams`, `MessageType`, `SendingStatus`, `ReactionEvent` |
+
+The package also has `@sendbird/chat/poll`, `@sendbird/chat/feedChannel`, `@sendbird/chat/aiAgent`, and `@sendbird/chat/node`. `SendbirdChat` is only a default export; there is no named `SendbirdChat` export.
+
+```ts
+import SendbirdChat, { ConnectionState } from '@sendbird/chat';
+import { GroupChannelModule, type GroupChannel, type SendbirdGroupChat } from '@sendbird/chat/groupChannel';
+import type { UserMessage } from '@sendbird/chat/message';
+
+const sb = SendbirdChat.init({ appId: APP_ID, modules: [new GroupChannelModule()] }) as SendbirdGroupChat;
+```
+- Rule: never import a channel type or a module wrapper type (`SendbirdGroupChat`, `GroupChannel`, `GroupChannelModule`, `SendbirdOpenChat`) from the root `@sendbird/chat`. The root does not export them, so `import { SendbirdGroupChat } from '@sendbird/chat'` fails with TS2724 ("has no exported member named 'SendbirdGroupChat'"). Import them from `@sendbird/chat/groupChannel` or `@sendbird/chat/openChannel`, and message types from `@sendbird/chat/message`.
+- (source: https://sendbird.com/docs/chat/sdk/v4/javascript/application/authenticating-a-user/authentication — imports `SendbirdGroupChat` from `@sendbird/chat/groupChannel` and casts the `SendbirdChat.init` result to it) (source: `@sendbird/chat` 4.22.13 `package.json` `exports` (`.`, `./message`, `./groupChannel`, `./openChannel`, `./poll`, `./feedChannel`, `./aiAgent`, `./node`) and the export lists in `index.d.ts`, `groupChannel.d.ts`, `openChannel.d.ts`, `message.d.ts`; the four lists are identical in 4.22.11 and 4.22.14; `lib/__definition.d.ts`:6752 `SendbirdGroupChat = SendbirdChatWith<[GroupChannelModule]>` — verified 2026-10-19; also source: https://sendbird.com/docs/chat/sdk/v4/javascript/ref/modules/_sendbird_chat_groupChannel.html)
+
 ## Connect a user (auth)
 ```ts
 const user = await sb.connect(USER_ID);            // or sb.connect(USER_ID, ACCESS_TOKEN)
@@ -443,6 +465,7 @@ sb.groupChannel.addGroupChannelHandler('UNIQUE_HANDLER_ID', new GroupChannelHand
 - For full prebuilt UI use Sendbird UIKit (`@sendbird/uikit-react` / `@sendbird/uikit-react-native`) — see `knowledge/curated/js/products/uikit.md`.
 
 ## Pitfalls
+- Import `SendbirdGroupChat`, `GroupChannel`, and `GroupChannelModule` from `@sendbird/chat/groupChannel`, never from the root `@sendbird/chat` (TS2724). Check the "Import paths" table above before writing any Chat SDK import.
 - Initialize once and reuse the returned `sb` instance; do not re-init per render/component.
 - App ID read from env (e.g. `process.env.NEXT_PUBLIC_SENDBIRD_APP_ID`); access/session tokens are secrets — never hard-code or log.
 - Every collection (`GroupChannelCollection`, `MessageCollection`) and every `addGroupChannelHandler` call must be paired with `dispose()` / `removeGroupChannelHandler()` when the owning screen unmounts, or the SDK keeps delivering events to a dead view.
