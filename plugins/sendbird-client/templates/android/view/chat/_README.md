@@ -11,7 +11,7 @@ Sources: (source: knowledge/curated/android/products/chat.md) (source: https://s
 
 ## Files
 - `InitConnect.kt` — `ChatApplication` init + `connectUser(userId)` + `send(text, channel)`.
-- `PushRegistration.kt` — the FCM push handler.
+- `PushRegistration.kt` — the FCM push handler. Apply the `com.google.gms.google-services` Gradle plugin only when `app/google-services.json` exists (see `knowledge/curated/android/cross-cutting/push.md` "Setup checklist"); an unconditional apply fails the build when the file is missing. Never create a placeholder file. The customer downloads `google-services.json` from their Firebase project; list that in `manualSteps`.
 - `FileMessageSender.kt` — send an image or file with upload progress, cancel an upload, resend a failed file message.
 - `MessageEditing.kt` — edit and delete your own messages (`MessageEditor`), and hear about other members' edits and deletes (`MessageChangeListener`).
 - `UnreadCount.kt` — total unread count for a tab or launcher badge, live updates, per-channel count, mark as read (`UnreadCountTracker`).

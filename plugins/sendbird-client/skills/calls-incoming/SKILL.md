@@ -31,6 +31,8 @@ On iOS, Android, and React Native, new incoming calls arrive only through push, 
 
 In-call audio or video problems: check the platform's troubleshooting "Calls" entries first (Android runtime permissions; web media access; the iOS audio session handed over from CallKit). For a symptom none of them covers, search `${CLAUDE_PLUGIN_ROOT}/core/docs-index.json` for the Calls docs page and cite it, or say that no verified source covers it.
 
+On Android, apply the `com.google.gms.google-services` Gradle plugin only when `app/google-services.json` exists, and never create a placeholder file; an unconditional apply fails the build when the file is missing. When the file is absent, the customer downloads it from their Firebase project into `app/`, and that is a hand-off step (`knowledge/curated/android/products/calls.md` "Manual steps").
+
 On logout, the Calls user must be deauthenticated and the VoIP or FCM token unregistered inside the app's existing sign-out function (`products/calls.md` "Sign out"); that is part of the change, not a hand-off step.
 
 ## Wired knowledge (populated and cited)
