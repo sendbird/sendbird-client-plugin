@@ -60,7 +60,12 @@ final class RTUITests: XCTestCase {
 
     func testRuntime() throws {
         continueAfterFailure = true
-        app = XCUIApplication()
+        // a React Native app is built outside this test's project and found by its bundle identifier
+        if let bundleId = env["RT_BUNDLE_ID"], !bundleId.isEmpty {
+            app = XCUIApplication(bundleIdentifier: bundleId)
+        } else {
+            app = XCUIApplication()
+        }
         let viaForm = env["RT_SIGNIN_FORM"] == "1"
         // the launch hook signs in only when the app has no sign-in form of its own
         app.launchEnvironment["RT_USER_ID"] = viaForm ? "" : (env["RT_USER_A"] ?? "")
@@ -70,6 +75,8 @@ final class RTUITests: XCTestCase {
         Thread.sleep(forTimeInterval: 3)
         record("launch", launched, launched ? "app is in the foreground" : "app did not reach the foreground", shot: shot("launched"))
         if viaForm { signInThroughForm(env["RT_USER_A"] ?? "") }
+        // React Native: the harness entry in the app's JavaScript made the call (hosts/react-native.sh)
+        if !viaForm, let hook = env["RT_SIGNIN_HOOK"], !hook.isEmpty { record("sign-in", true, hook) }
 
         let chatUI = env["RT_CHAT_UI"] == "1"
         if chatUI {
@@ -260,11 +267,33 @@ final class RTUITests: XCTestCase {
                 .filter { $0.exists && $0.isHittable && abs($0.frame.midY - inputFrame.midY) < 30 && $0.frame.minX >= inputFrame.maxX - 4 }
                 .max(by: { $0.frame.minX < $1.frame.minX })
         }
+        // React Native UIKit's send button is a touchable without a button role, so it is no button to
+        // XCUITest: an unlabeled, icon-sized element right of the input, on its row. Read from one
+        // snapshot (asking each of a React Native screen's many elements one by one takes too long).
+        func touchableSend() -> CGRect? {
+            guard let root = try? app.snapshot() else { return nil }
+            var best: CGRect?
+            var stack: [XCUIElementSnapshot] = [root]
+            while let node = stack.popLast() {
+                stack.append(contentsOf: node.children)
+                let f = node.frame
+                guard node.elementType == .other, node.label.isEmpty, f.width > 0, f.width <= 64, f.height <= 64,
+                      abs(f.midY - inputFrame.midY) < 30, f.minX >= inputFrame.maxX - 4, f.maxX <= root.frame.maxX else { continue }
+                if best == nil || f.minX > best!.minX { best = f }
+            }
+            return best
+        }
         var found: XCUIElement?
-        if waitUntil(5, { found = (labeled.exists && labeled.isHittable) ? labeled : unlabeledSend(); return found != nil }), let send = found {
-            let name = send.label.isEmpty ? (send.identifier.isEmpty ? "the unlabeled button right of the input" : send.identifier) : send.label
-            send.tap()
-            record(step, true, "typed \"\(text)\" and tapped \"\(name)\"", shot: shot("typed"))
+        var touchable: CGRect?
+        if waitUntil(5, { found = (labeled.exists && labeled.isHittable) ? labeled : unlabeledSend(); if found == nil { touchable = touchableSend() }; return found != nil || touchable != nil }) {
+            if let send = found {
+                let name = send.label.isEmpty ? (send.identifier.isEmpty ? "the unlabeled button right of the input" : send.identifier) : send.label
+                send.tap()
+                record(step, true, "typed \"\(text)\" and tapped \"\(name)\"", shot: shot("typed"))
+            } else if let f = touchable {
+                app.coordinate(withNormalizedOffset: .zero).withOffset(CGVector(dx: f.midX, dy: f.midY)).tap()
+                record(step, true, "typed \"\(text)\" and tapped the unlabeled touchable right of the input", shot: shot("typed"))
+            }
         } else {
             dump("send")
             record(step, false, "no send button after typing", shot: shot("no-send"))

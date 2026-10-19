@@ -7,6 +7,10 @@
 #      (ORG_GRADLE_PROJECT_<name>) for the Gradle run
 #   3. builds both APKs, starts its own read-only emulator (RT_AVD, default the first AVD
 #      `emulator -list-avds` names; or uses RT_ANDROID_SERIAL), installs, runs the test, and in parallel drives user B with the Node peer
+# With RT_RN=1 (hosts/react-native.sh) the Gradle project is a React Native app's android/ folder
+# (Groovy or Kotlin DSL): the same test, built against the release build (JavaScript bundled in, no
+# Metro), for the device's ABI only. The test does not sign in itself: the harness entry in the
+# app's JavaScript does, or the test signs in through the app's own form.
 # Exit 0 = driver finished (steps.jsonl says pass/fail), 1 = failed, 2 = skipped (prints SKIP: ...).
 set -uo pipefail
 ROOT="$(cd "$RT_HERE/../.." && pwd)"
@@ -15,14 +19,59 @@ work="$RT_WORK"; out="$RT_OUT"; tools="$RT_TOOLS"
 step() { jq -nc --arg s "$1" --argjson ok "$2" --arg d "$3" '{step:$s, ok:$ok, detail:$d, screenshot:null}' >> "$out/steps.jsonl"; echo "step $1: $([ "$2" = true ] && echo ok || { [ "$2" = null ] && echo n/a || echo FAIL; }) — $3"; }
 peer() { ( cd "$tools" && node peer.mjs "$@" ); }
 
-eval "$(bash "$ROOT/tools/local-sdk/android-toolchain.sh" "$work")"
+# React Native (RT_RN=1, hosts/react-native.sh): the Gradle project is the app's android/ folder
+rn="${RT_RN:-0}"; adir="$work"; [ "$rn" = 1 ] && adir="$work/android"
+eval "$(bash "$ROOT/tools/local-sdk/android-toolchain.sh" "$adir")"
 [ -n "${ANDROID_HOME:-}" ] && [ -n "${JAVA_HOME:-}" ] || { echo "SKIP: no JDK 17 or Android SDK found (tools/local-sdk/android-toolchain.sh)"; exit 2; }
 adb="$ANDROID_HOME/platform-tools/adb"; emu="$ANDROID_HOME/emulator/emulator"
 gradle_file="$work/app/build.gradle.kts"
+if [ "$rn" = 1 ]; then
+  gradle_file="$adir/app/build.gradle"; [ -f "$gradle_file" ] || gradle_file="$adir/app/build.gradle.kts"
+  [ -f "$gradle_file" ] || { step launch false "no android/app/build.gradle in the React Native project"; exit 1; }
+fi
 [ -f "$gradle_file" ] || { step launch false "no app/build.gradle.kts: the Android driver handles Kotlin-DSL app modules only"; exit 1; }
 
 # --- harness test ------------------------------------------------------------------------------
-app_id="$(grep -Eo 'applicationId *= *"[^"]+"' "$gradle_file" | head -1 | sed -E 's/.*"([^"]+)"/\1/')"
+# applicationId = "x" (Kotlin DSL) or applicationId "x" (Groovy, the React Native template)
+app_id="$(grep -Eo 'applicationId *=? *"[^"]+"' "$gradle_file" | head -1 | sed -E 's/.*"([^"]+)"/\1/')"
+if [ "$rn" = 1 ]; then
+[ -n "$app_id" ] || { step launch false "no applicationId in ${gradle_file#"$work"/}"; exit 1; }
+# the sign-in hook is in the app's JavaScript entry; the test only records that it is there
+call="${RT_RN_SIGNIN_TEXT:-none, the app signs in through its own form}"
+mkdir -p "$adir/app/src/androidTest/java/rt/harness"
+sed -e "s|/\*RT_IMPORT\*/||" -e "s|/\*RT_CALL\*/|/* the harness entry in the app's JavaScript signs in */|" -e "s|/\*RT_CALL_TEXT\*/|$call|" \
+  "$HERE/RTRuntimeTest.kt.tmpl" > "$adir/app/src/androidTest/java/rt/harness/RTRuntimeTest.kt"
+cp "$HERE/RTSignin.kt" "$adir/app/src/androidTest/java/rt/harness/"
+# the release build (JavaScript bundled in, no Metro) is the one under test
+if [ "${gradle_file##*.}" = kts ]; then
+  cat >> "$gradle_file" <<'KTS'
+
+// --- runtime harness (tools/runtime): instrumented test support, added to a copy only ---
+android { defaultConfig { testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner" }; testBuildType = "release" }
+dependencies {
+    androidTestImplementation("androidx.test:runner:1.6.2")
+    androidTestImplementation("androidx.test:core:1.6.1")
+    androidTestImplementation("androidx.test.ext:junit:1.2.1")
+    androidTestImplementation("androidx.test.uiautomator:uiautomator:2.3.0")
+}
+KTS
+else
+  cat >> "$gradle_file" <<'GROOVY'
+
+// --- runtime harness (tools/runtime): instrumented test support, added to a copy only ---
+android {
+    defaultConfig { testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner" }
+    testBuildType "release"
+}
+dependencies {
+    androidTestImplementation "androidx.test:runner:1.6.2"
+    androidTestImplementation "androidx.test:core:1.6.1"
+    androidTestImplementation "androidx.test.ext:junit:1.2.1"
+    androidTestImplementation "androidx.test.uiautomator:uiautomator:2.3.0"
+}
+GROOVY
+fi
+else
 login_file="$(grep -rl --include='*.kt' 'fun onLoginSucceeded' "$work/app/src/main" 2>/dev/null | head -1)"
 [ -n "$app_id" ] && [ -n "$login_file" ] || { step sign-in false "no applicationId or onLoginSucceeded in the app module"; exit 1; }
 login_pkg="$(sed -nE 's/^package +([A-Za-z0-9_.]+).*/\1/p' "$login_file" | head -1)"
@@ -57,24 +106,38 @@ dependencies {
     androidTestImplementation("androidx.test.uiautomator:uiautomator:2.3.0")
 }
 KTS
+fi
 
 # --- build ---------------------------------------------------------------------------------------
 genv=()
 for n in $RT_ENV_NAMES; do genv+=("$n=$RT_APP_ID"); done
 for n in $RT_GRADLE_PROPS; do genv+=("ORG_GRADLE_PROJECT_$n=$RT_APP_ID"); done
 # the project's own Gradle wrapper first; RT_GRADLEW (the tests' wrapper for the e2e fixtures, which have none)
-if [ -x "$work/gradlew" ]; then gradlew="$work/gradlew"
+if [ -x "$adir/gradlew" ]; then gradlew="$adir/gradlew"
 elif [ -n "${RT_GRADLEW:-}" ] && [ -x "$RT_GRADLEW" ]; then gradlew="$RT_GRADLEW"
 elif command -v gradle >/dev/null; then gradlew=gradle
 else echo "SKIP: no Gradle wrapper (gradlew) in the project and no gradle on PATH"; exit 2; fi
-echo "building $app_id (sign-in hook: $call)"
-if ! env ${genv[@]+"${genv[@]}"} "$gradlew" -p "$work" --no-daemon -q :app:assembleDebug :app:assembleDebugAndroidTest \
+variant=debug; tasks=(:app:assembleDebug :app:assembleDebugAndroidTest)
+if [ "$rn" = 1 ]; then
+  variant=release; tasks=(:app:assembleRelease :app:assembleReleaseAndroidTest)
+  # React Native compiles native code for every ABI it lists (reactNativeArchitectures); build only
+  # the one of the device the run uses: the running device's, or the AVD's from its config.ini
+  if [ -n "${RT_ANDROID_SERIAL:-}" ]; then abi="$("$adb" -s "$RT_ANDROID_SERIAL" shell getprop ro.product.cpu.abi 2>/dev/null | tr -d '\r')"
+  else
+    avd_name="${RT_AVD:-$("$emu" -list-avds 2>/dev/null | head -1)}"
+    avd_dir="$(sed -n 's/^path=//p' "$HOME/.android/avd/$avd_name.ini" 2>/dev/null)"
+    abi="$(sed -n 's/^abi\.type *= *//p' "${avd_dir:-$HOME/.android/avd/$avd_name.avd}/config.ini" 2>/dev/null | head -1)"
+  fi
+  [ -n "${abi:-}" ] && tasks+=("-PreactNativeArchitectures=$abi")
+fi
+echo "building $app_id ($variant; sign-in hook: $call)"
+if ! env ${genv[@]+"${genv[@]}"} "$gradlew" -p "$adir" --no-daemon -q "${tasks[@]}" \
      > "$out/gradle.log.raw" 2>&1; then
   step launch false "build failed: $(grep -E '^e: |What went wrong' -A1 "$out/gradle.log.raw" | head -2 | tr '\n' ' ' | cut -c1-200)"
   exit 1
 fi
-apk="$(ls "$work"/app/build/outputs/apk/debug/*.apk | head -1)"
-tapk="$(ls "$work"/app/build/outputs/apk/androidTest/debug/*.apk | head -1)"
+apk="$(ls "$adir"/app/build/outputs/apk/$variant/*.apk | head -1)"
+tapk="$(ls "$adir"/app/build/outputs/apk/androidTest/$variant/*.apk | head -1)"
 
 # --- device --------------------------------------------------------------------------------------
 serial="${RT_ANDROID_SERIAL:-}"; emu_pid=""
@@ -118,7 +181,7 @@ errlog_pid=$!
 # adb joins arguments into one shell line, so an empty value would vanish: pass only non-empty ones
 # an app with its own sign-in form is signed in through that form, the way a user does, and the hook
 # is left unused (lib/signin-form.sh says how a form is recognized)
-signin_form="$(bash "$RT_HERE/lib/signin-form.sh" android "$work/app/src/main")"
+if [ "$rn" = 1 ]; then signin_form="$RT_RN_SIGNIN_FORM"; else signin_form="$(bash "$RT_HERE/lib/signin-form.sh" android "$work/app/src/main")"; fi
 iargs=(-e rtUserA "$RT_USER_A" -e rtTag "$tag" -e rtChatUI "$RT_CHAT_UI" -e rtSigninForm "$signin_form" -e rtDirect "$RT_DIRECT" -e rtRich "$RT_RICH")
 if [ "$RT_RICH" = 1 ]; then
   . "$RT_HERE/lib/rich.sh"

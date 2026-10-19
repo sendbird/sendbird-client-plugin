@@ -88,6 +88,14 @@ def detect(root):
         if rel.endswith(".xml"):
             for m in re.finditer(r"<string name=\"(" + APP_ID_NAME.lower() + r")\">(" + PLACEHOLDER + r")</string>", text, re.I):
                 found["literals"].append({"file": rel, "name": m.group(1), "line": text[:m.start()].count("\n") + 1})
+        # "sendbirdAppId": ""   (a JSON config the app imports, such as React Native's app.json). Only
+        # keys that name Sendbird: a JSON appId is often another service's (Firebase's mobilesdk_app_id)
+        if rel.endswith(".json"):
+            for m in re.finditer(r"\"(" + APP_ID_NAME + r")\"\s*:\s*\"([^\"\n]*)\"", text):
+                if "sendbird" not in m.group(1).lower():
+                    continue
+                kind = "literals" if re.fullmatch(PLACEHOLDER, m.group(2)) else "configured"
+                found[kind].append({"file": rel, "name": m.group(1), "line": text[:m.start()].count("\n") + 1})
     out = {k: sorted(v) if isinstance(v, set) else v for k, v in found.items()}
     # A Gradle property that is only defined (gradle.properties) but never read is still how the
     # build reads it when a build script uses findProperty; keep both lists.
@@ -111,6 +119,9 @@ def apply(root, info):
             i = lit["line"] - 1
             if lit["file"].endswith(".xml"):
                 new = re.sub(r"(<string name=\"" + re.escape(lit["name"]) + r"\">)[^<]*(</string>)", r"\g<1>" + value + r"\g<2>", lines[i])
+            elif lit["file"].endswith(".json"):
+                new = re.sub(r"(\"" + re.escape(lit["name"]) + r"\"\s*:\s*)\"[^\"]*\"",
+                             lambda m: m.group(1) + json.dumps(value), lines[i], count=1)
             else:
                 new = re.sub(r"(\b" + re.escape(lit["name"]) + r"\s*(?::\s*[A-Za-z?]+\s*)?=\s*)(['\"])[^'\"]*\2",
                              lambda m: m.group(1) + m.group(2) + value + m.group(2), lines[i], count=1)
@@ -126,7 +137,8 @@ def apply(root, info):
         same = []
         for c in info["configured"]:
             line = open(os.path.join(root, c["file"]), encoding="utf-8").read().split("\n")[c["line"] - 1]
-            m = re.search(r"(['\"])([^'\"\n]+)\1", line.split("=", 1)[1] if "=" in line else "")
+            sep = ":" if c["file"].endswith(".json") else "="
+            m = re.search(r"(['\"])([^'\"\n]+)\1", line.split(sep, 1)[1] if sep in line else "")
             if m and m.group(2) == value:
                 same.append(c)
         if not same:
