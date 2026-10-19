@@ -27,12 +27,24 @@ class MyFirebaseMessagingService : SendbirdPushHandler() {
 (source: sendbird-uikit-android sample MyFirebaseMessagingService.kt — `SendbirdPushHandler`, `onNewToken`, `onMessageReceived`)
 
 ## Register the handler
+
+Register the handler in your `Application` subclass's `onCreate()`, right after `SendbirdChat.init(...)`, and name that class in the manifest's `<application android:name=...>`. When the user has swiped the app away, FCM starts only the app process and the `Application`, not an Activity. If `SendbirdChat.init` and `SendbirdPushHelper.registerHandler(...)` run in a splash or main Activity, nothing handles that push, so it arrives in the background but never after the app is killed (see knowledge/curated/android/cross-cutting/troubleshooting.md — No chat push arrives when the app is killed). The public UIKit sample does this: its `BaseApplication.onCreate()` calls `SendbirdUIKit.init(...)` and then `SendbirdPushHelper.registerHandler(MyFirebaseMessagingService())`.
+
 ```kotlin
+import android.app.Application
+import com.sendbird.android.SendbirdChat
+import com.sendbird.android.params.InitParams
 import com.sendbird.android.push.SendbirdPushHelper
 
-SendbirdPushHelper.registerHandler(MyFirebaseMessagingService())
+class MyApplication : Application() {
+    override fun onCreate() {
+        super.onCreate()
+        SendbirdChat.init(InitParams(APP_ID, applicationContext, useCaching = true), initResultHandler)
+        SendbirdPushHelper.registerHandler(MyFirebaseMessagingService())
+    }
+}
 ```
-(source: sendbird-uikit-android sample BaseApplication.kt — `SendbirdPushHelper.registerHandler(...)`)
+(source: https://github.com/sendbird/sendbird-uikit-android/blob/07ffe8efc97e2d71dedc466ad868df817e5f433e/uikit-samples/src/main/java/com/sendbird/uikit/samples/BaseApplication.kt#L70-L77 — `SendbirdPushHelper.registerHandler(...)` after init, called from `onCreate()` at lines 128-133) (source: knowledge/curated/android/products/chat.md — Initialize (Application class)) (source: https://sendbird.com/docs/chat/sdk/v4/android/ref/-sendbird-chat/com.sendbird.android.push/-sendbird-push-helper/index.html)
 
 ## Handler-based vs manual token registration
 

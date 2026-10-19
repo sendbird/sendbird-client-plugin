@@ -23,6 +23,7 @@ Push end-to-end for the detected platform.
 
 ## Wired knowledge (populated and cited)
 - Token registration: `knowledge/curated/<platform>/cross-cutting/push.md` — iOS `registerDevicePushToken`/`unregisterPushToken`/`unregisterAllPushToken` (build-verified); Android `SendbirdPushHandler` subclass + `SendbirdPushHelper.registerHandler(...)`; JS `registerFCM/APNSPushTokenForCurrentUser` + unregister variants (type-checked).
+- Notifications not arriving: also read `knowledge/curated/<platform>/cross-cutting/troubleshooting.md` and answer with the API its matching entry names. For example, on Android a push that arrives in the background but never after the app is swiped away means init and handler registration run in an Activity instead of `Application.onCreate()`.
 - VoIP for Calls: registered via the Calls SDK (`SendBirdCall.registerVoIPPush`) — the Chat SDK's PushKit method was REMOVED; see `knowledge/curated/ios/products/calls.md`. Do not emit the removed API.
 
 ## No-Fabrication
