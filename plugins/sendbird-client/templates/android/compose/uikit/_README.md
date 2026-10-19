@@ -28,7 +28,7 @@ authentication), verified 2026-09-30. Compiled by `tools/templates/compile-check
 
 ## Notes
 - Push: register your `SendbirdPushHandler` after `init` and again after `connect()` on login
-  (`knowledge/curated/android/hosts/compose.md`, `templates/android/view/chat/PushRegistration.kt`).
+  (`knowledge/curated/android/hosts/compose.md`, `templates/android/view/chat/PushRegistration.kt`). Apply the `com.google.gms.google-services` Gradle plugin only when `app/google-services.json` exists (see `knowledge/curated/android/cross-cutting/push.md` "Setup checklist"); an unconditional apply fails the build when the file is missing. Never create a placeholder file.
 - Deep link to one channel: `navController.navigateToChannel(channelUrl)` (see `openSendbirdChannel`).
 - Logout: `SendbirdUikitCompose.disconnect()` (suspend) after unregistering the push handler.
 - Already on the View-based UIKit (`com.sendbird.sdk:uikit`)? It keeps its own init

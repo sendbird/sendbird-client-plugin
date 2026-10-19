@@ -38,3 +38,4 @@ Sendbird Calls (1:1 voice and video) on Android. Call shapes from the public "Ma
   browser that answered, but a call from the browser never rang (`onRinging` never ran). Wire FCM as in
   `knowledge/curated/android/products/calls.md` "Receive calls ... (FCM)"; the `calls-incoming` skill sets it up. It needs
   the customer's Firebase project and FCM credentials in the dashboard, so it is a manual step.
+  Apply the `com.google.gms.google-services` Gradle plugin only when `app/google-services.json` exists (see `knowledge/curated/android/cross-cutting/push.md` "Setup checklist"); an unconditional apply fails the build when the file is missing. Never create a placeholder file. The customer downloads `google-services.json` from the Firebase console into `app/` (a `manualSteps` entry, `knowledge/curated/android/products/calls.md` "Manual steps").

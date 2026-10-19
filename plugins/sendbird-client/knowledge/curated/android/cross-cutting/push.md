@@ -197,7 +197,8 @@ Sendbird delivers Android push as FCM data messages, and the `sendbird` payload 
 (source: https://firebase.google.com/docs/cloud-messaging/customize-messages/set-message-type; https://firebase.google.com/docs/cloud-messaging/error-codes; https://sendbird.com/docs/chat/sdk/v4/android/push-notifications/managing-push-notifications/set-up-push-notifications-for-fcm)
 
 ## Setup checklist
-- Add the Firebase config (`google-services.json`) + FCM dependency.
+- Add the FCM dependency. Apply the `com.google.gms.google-services` Gradle plugin only when `app/google-services.json` exists in the project. With the plugin applied and the file absent, the build fails with "File google-services.json is missing" (the plugin's default strategy is `ERROR`). Never apply it unconditionally and never invent a placeholder `google-services.json`. Without the file, leave the plugin out (or apply it inside `if (file("google-services.json").exists()) { ... }` in `app/build.gradle(.kts)`, so adding the file later is enough), and list "download `google-services.json` from your Firebase project in the Firebase console and put it in `app/`" in the customer's hand-off steps. For variants that really do not need it, the plugin's `WARN` strategy for a missing file (set in the plugin's Gradle configuration block; see its README) turns the failure into a warning, but a build without the file has no Firebase configuration at runtime, so push does not work until the file is added.
+  (source: https://github.com/google/play-services-plugins/blob/4bde1b858612402ae5452cbef107b141afd44ef5/google-services-plugin/src/main/kotlin/com/google/gms/googleservices/GoogleServicesTask.kt#L60-L82) (source: https://github.com/google/play-services-plugins/blob/4bde1b858612402ae5452cbef107b141afd44ef5/google-services-plugin/README.md)
 - Upload the FCM credentials by following the official dashboard push configuration guide. Do not guess the current dashboard path.
 - Register the handler after init; the SDK sends the token to Sendbird.
 
@@ -205,7 +206,7 @@ Sendbird delivers Android push as FCM data messages, and the `sendbird` payload 
 - Register the handler after `SendbirdChat.init`.
 - You do not declare a messaging service yourself: the Chat SDK's own manifest already declares `com.sendbird.android.push.SendbirdFirebaseMessagingService` and merges into the app, and `SendbirdPushHandler` is not a `Service`. (source: sendbird-chat 4.36.5 AAR `AndroidManifest.xml`)
 - On logout, unregister this device's token before `disconnect`; a disconnected user still receives push (see Logout: unregister this device before disconnecting).
-- Credentials are secrets — never hard-code or commit `google-services.json` secrets.
+- Credentials are secrets — never hard-code or commit `google-services.json` secrets, and never create the file yourself; it comes from the customer's Firebase project.
 
 ## Related
 - Chat: knowledge/curated/android/products/chat.md
