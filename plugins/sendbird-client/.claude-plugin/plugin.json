@@ -1,7 +1,7 @@
 {
   "name": "sendbird-client",
   "displayName": "Sendbird Client",
-  "version": "0.1.55",
+  "version": "0.1.56",
   "description": "Sendbird integration helper for Chat (incl. auth/session), UIKit, and Calls across iOS, Android, and JS",
   "author": {
     "name": "Sendbird",

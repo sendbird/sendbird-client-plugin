@@ -16,7 +16,13 @@
 #   --app-id-env      read the App ID from this environment variable only. Default: SENDBIRD_APP_ID,
 #                     then appId in the project's .sendbird-client/profile.json
 #   --chat-screens    the app has its own chat screens built on the Chat SDK (no UIKit dependency):
-#                     drive them like UIKit screens instead of stopping after connect
+#                     drive them like UIKit screens instead of stopping after connect. Not decided
+#                     automatically: the harness finds screens by their controls (a chat or channel
+#                     button, the channel's row, a message input), and code that sends a message
+#                     does not show that a screen with those controls exists. Without UIKit and
+#                     without this flag, the channel and message steps are recorded as not run, and
+#                     runtime.json messageSteps and the last lines of the output say so and name this
+#                     flag (with the file whose Chat SDK code sends messages, when there is one)
 #   --direct-chat     the app opens a 1:1 chat with USER from a button (no channel list): user B
 #                     is USER, A taps the button, sends, and must see B's reply. Not supported for
 #                     --host react (exit 64) or react-native (not supported at all yet)
@@ -94,6 +100,23 @@ fi
 is_placeholder "$RT_APP_ID" && RT_APP_ID=""
 export RT_APP_ID
 
+# chat_sdk_send <dir>: the first app source file (relative) that sends a message with the Chat SDK.
+# Dependency, build, and hidden folders (the plugin's SDK cache among them) and .d.ts files are skipped.
+# (source: knowledge/curated/ios/products/chat.md) (source: knowledge/curated/android/products/chat.md)
+# (source: knowledge/curated/js/products/chat.md) — channel.sendUserMessage on each platform
+chat_sdk_send() {
+  local f
+  f="$(find "$1" -mindepth 1 \( -name node_modules -o -name build -o -name Pods -o -name DerivedData -o -name dist -o -name '.*' \) -prune \
+    -o -type f \( -name '*.swift' -o -name '*.kt' -o -name '*.java' -o -name '*.ts' -o -name '*.tsx' -o -name '*.js' -o -name '*.jsx' \) ! -name '*.d.ts' -print 2>/dev/null \
+    | while IFS= read -r p; do grep -qE '\.sendUserMessage[[:space:]]*\(' "$p" && { echo "$p"; break; }; done)"
+  [ -n "$f" ] && echo "${f#"$1"/}"
+}
+# message_steps_note <chat-ui 0|1> <file from chat_sdk_send>: empty when the message steps run
+message_steps_note() {
+  [ "$1" = 1 ] && return 0
+  echo "the channel and message steps are not run: the app has no Sendbird UIKit dependency${2:+ (its Chat SDK code sends messages in $2)}. If it has its own chat screens, add --chat-screens to drive them"
+}
+
 # --- preflight: what a run needs, without copying, installing, building, or launching -----------
 # Package names: (source: knowledge/curated/ios/setup.md) (source: knowledge/curated/ios/hosts/swiftui.md)
 preflight() {
@@ -140,12 +163,16 @@ preflight() {
       notes+=("installs pinned tools into $TOOLS_DIR (outside the project): @sendbird/chat for user B")
       notes+=("builds the app and an instrumented test in a copy; starts a read-only emulator of RT_AVD, or uses RT_ANDROID_SERIAL") ;;
   esac
+  [ "$chat_screens" = 1 ] && chat_ui=1
+  local msg_note; msg_note="$(message_steps_note "$chat_ui" "$([ "$chat_ui" = 1 ] || chat_sdk_send "$project")")"
+  [ -z "$msg_note" ] || notes+=("$msg_note")
   jq -n --arg host "$host" --arg from "$([ -n "$RT_APP_ID" ] && echo "$app_id_from")" --arg how "$how" --arg signin "$signin" \
-    --argjson chat "$chat_ui" '
+    --argjson chat "$chat_ui" --arg msgnote "$msg_note" '
     ($ARGS.positional | map(select(startswith("M:")) | ltrimstr("M:"))) as $missing |
     {ready: ($missing | length == 0), host: $host,
      appId: (if $from == "" then null else {from: $from} end), appIdHow: $how, signIn: $signin,
      checks: (if $chat == 1 then ["connect", "channel", "message-a-receives", "message-a-sends"] else ["connect"] end),
+     messageSteps: (if $msgnote == "" then {run: true} else {run: false, why: $msgnote, enableWith: "--chat-screens"} end),
      missing: $missing,
      notes: ($ARGS.positional | map(select(startswith("N:")) | ltrimstr("N:")))}' \
     --args ${missing[@]+"${missing[@]/#/M:}"} ${notes[@]+"${notes[@]/#/N:}"}
@@ -163,13 +190,16 @@ finish() {  # finish <status> <reason> <exit>
   python3 -I "$HERE/lib/redact.py" "$out"
   jq -n --arg status "$1" --arg reason "$2" --arg host "$host" --arg project "$project" \
     --arg userA "${RT_USER_A:-}" --arg userB "${RT_USER_B:-}" --argjson appid "${appid_json:-null}" \
-    --slurpfile steps "$out/steps.jsonl" \
+    --slurpfile steps "$out/steps.jsonl" --arg msgstate "${msg_state:-}" \
     '{status:$status, reason:$reason, host:$host, project:$project, users:{a:$userA, b:$userB},
+      messageSteps:(if $msgstate == "" then null elif $msgstate == "run" then {run:true}
+        else {run:false, why:$msgstate, enableWith:"--chat-screens"} end),
       appIdSource:(if $appid then {how:$appid.how, env:$appid.env, buildSettings:$appid.buildSettings,
         gradleProperties:$appid.gradleProperties, replacedIn:($appid.replacedIn // [])} else null end),
       screenshots:"screens/", steps:$steps}' > "$out/runtime.json"
   python3 -I "$HERE/lib/redact.py" "$out"
   echo "runtime: $1${2:+ — $2}"
+  case "${msg_state:-}" in ""|run) ;; *) echo "note: $msg_state" ;; esac
   echo "result: $out/runtime.json"
   exit "$3"
 }
@@ -223,6 +253,8 @@ grep -Eqs '"@sendbird/uikit-react(-native)?"' "$work/package.json" && chat_ui=1
 grep -Eqs 'sendbird-uikit-ios|sendbird-swiftui-ios|SendbirdUIKit|SendbirdSwiftUI' "$work/project.yml" && chat_ui=1
 grep -Eqs 'com\.sendbird\.sdk:uikit' "$work/app/build.gradle.kts" "$work/app/build.gradle" && chat_ui=1
 [ "$chat_screens" = 1 ] && chat_ui=1
+# runtime.json messageSteps: "run", or why the channel and message steps are not run
+msg_state="$(message_steps_note "$chat_ui" "$([ "$chat_ui" = 1 ] || chat_sdk_send "$work")")"; msg_state="${msg_state:-run}"
 
 rand() { LC_ALL=C tr -dc 'a-z0-9' < /dev/urandom | head -c 6; }
 RT_USER_A="rt-${host}-a-$(rand)"; RT_USER_B="${direct_user:-rt-${host}-b-$(rand)}"; RT_DIRECT="$([ -n "$direct_user" ] && echo 1 || echo 0)"
@@ -245,6 +277,14 @@ case "$host" in
     bash "$HERE/hosts/android.sh" 2>&1 | tee "$out/driver.log.raw"; rc="${PIPESTATUS[0]}" ;;
 esac
 
+# Without chat screens the iOS and Android drivers stop after connect and record nothing for the
+# channel and message steps; record them as not run (ok null), as the react driver does.
+if [ "$chat_ui" = 0 ]; then
+  for s in channel message-a-receives message-a-sends; do
+    jq -e --arg s "$s" 'select(.step == $s)' "$out/steps.jsonl" >/dev/null 2>&1 \
+      || jq -nc --arg s "$s" '{step:$s, ok:null, detail:"not run: no Sendbird UIKit dependency and no --chat-screens", screenshot:null}' >> "$out/steps.jsonl"
+  done
+fi
 [ "$rc" -eq 2 ] && finish skip "$(grep '^SKIP: ' "$out/driver.log.raw" 2>/dev/null | tail -1 | sed 's/^SKIP: //')" 2
 first_fail="$(jq -r 'select(.ok == false) | "\(.step): \(.detail)"' "$out/steps.jsonl" | head -1)"
 if [ "$rc" -eq 0 ] && [ -z "$first_fail" ]; then finish pass "" 0; fi
