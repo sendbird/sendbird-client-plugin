@@ -376,6 +376,44 @@ function SettingsWithoutFreeze({ channelUrl }: { channelUrl: string }) {
 ```
 (source: https://sendbird.com/docs/chat/uikit/v3/react/tutorial/customize-channel-settings) (source: https://github.com/sendbird/sendbird-uikit-react/blob/v3.19.1/src/modules/ChannelSettings/components/ChannelSettingsUI/hooks/useMenuItems.tsx#L68-L120 — row keys ; https://github.com/sendbird/sendbird-uikit-react/blob/v3.19.1/src/modules/ChannelSettings/components/ChannelSettingsUI/MenuListByRole.tsx#L28 — `hideMenu` ; @sendbird/uikit-react 3.19.1 types/modules/ChannelSettings/components/ChannelSettingsUI/index.d.ts:6-14 ; types/modules/ChannelSettings/components/ChannelSettingsUI/MenuListByRole.d.ts)
 
+### Session tokens: `accessToken` and `configureSession`
+When your Sendbird application requires a token to connect, UIKit for React takes it from two `SendbirdProvider` props.
+
+1. Your server issues the access or session token for the user, and the app fetches it after its own sign-in. Never put the Platform API token or a fixed user token in the browser bundle.
+2. Pass the token as `accessToken`. The provider calls the Chat SDK's `connect(userId, accessToken)` with it.
+3. Pass `configureSession` for renewal. It is a function that receives the SDK instance and returns a Chat SDK `SessionHandler`; the provider sets that handler with `setSessionHandler` right before it connects. In `onSessionTokenRequired`, fetch a new token from your server and call `resolve(token)`, call `resolve(null)` to give up, or `reject(error)` on failure. In `onSessionClosed`, send the user back to your sign-in screen. See knowledge/curated/js/products/auth.md for when the SDK asks for a new token.
+4. The provider connects again only when `appId` or `userId` changes. A new `accessToken` value on its own does not reconnect, so renew tokens through `configureSession`, not by re-rendering with a new prop.
+5. The drop-in `App` takes `accessToken` but has no `configureSession` prop (3.19.1 and 3.20.0). If a token can expire while the page is open, use `SendbirdProvider` with `GroupChannelList` and `GroupChannel` instead (see "Compose your own UI" above).
+
+```tsx
+import { SessionHandler } from '@sendbird/chat';
+import { SendbirdProvider, type SendbirdProviderProps } from '@sendbird/uikit-react/SendbirdProvider';
+import { GroupChannelList } from '@sendbird/uikit-react/GroupChannelList';
+import '@sendbird/uikit-react/dist/index.css';
+
+// Your app's call to your own server, which issues the token with the Platform API.
+declare function fetchSessionToken(userId: string): Promise<string>;
+
+export function SignedInChat({ userId, accessToken }: { userId: string; accessToken: string }) {
+  const configureSession: SendbirdProviderProps['configureSession'] = () => {
+    const handler = new SessionHandler();
+    handler.onSessionTokenRequired = (resolve, reject) => {
+      fetchSessionToken(userId).then(resolve, reject);
+    };
+    handler.onSessionClosed = () => {
+      // route to your sign-in screen
+    };
+    return handler;
+  };
+  return (
+    <SendbirdProvider appId={APP_ID} userId={userId} accessToken={accessToken} configureSession={configureSession}>
+      <GroupChannelList onChannelSelect={() => {}} onChannelCreated={() => {}} />
+    </SendbirdProvider>
+  );
+}
+```
+`templates/starters-bp/react/src/screens/SignedInApp.tsx` wires the same two props to a sign-in flow. (source: https://sendbird.com/docs/chat/uikit/v3/react/essentials/handlers — "Session handlers": `configureSession` returns a `SessionHandler`, passed with `accessToken` to `SendbirdProvider`) (source: https://github.com/sendbird/sendbird-uikit-react/blob/v3.19.1/src/lib/Sendbird/types.ts#L47 — `ConfigureSessionTypes`; lines 205 and 208 `accessToken`, `configureSession` on `SendbirdProviderProps` ; https://github.com/sendbird/sendbird-uikit-react/blob/v3.19.1/src/lib/Sendbird/context/hooks/useSendbird.tsx#L234-L241 — `setupSDK` with `configureSession(sdk)`, then `sdk.connect(userId, accessToken)` ; https://github.com/sendbird/sendbird-uikit-react/blob/v3.19.1/src/lib/Sendbird/utils.ts#L93-L96 — `sdk.setSessionHandler` ; https://github.com/sendbird/sendbird-uikit-react/blob/v3.19.1/src/lib/Sendbird/context/SendbirdProvider.tsx#L105-L125 — the connect effect depends on `[appId, userId]` ; https://github.com/sendbird/sendbird-uikit-react/blob/v3.20.0/src/modules/App/index.tsx#L20 — `AppProps` forwards `accessToken` only; same at v3.19.1 line 20) (source: https://sendbird.com/docs/chat/sdk/v4/javascript/application/authenticating-a-user/authentication)
+
 ### After a reconnect: what `SendbirdProvider` and `GroupChannel` do
 This describes 3.19.1 as the public source shows it; it is not a documented contract.
 
@@ -419,6 +457,64 @@ const mmkv = createMMKV(); // react-native-mmkv v4; v2/v3 use `new MMKV()`
 </SendbirdUIKitContainer>
 ```
 `platformServices` (clipboard, notification, file, media, …) must be constructed per the quickstart; do not guess the factory calls. (source: sendbird-uikit-react-native sample/src/App.tsx + docs-validation SendbirdUIKitContainer.tsx)
+
+### Session tokens: `connect(userId, { accessToken })` and `onInitialized`
+`SendbirdUIKitContainer` initializes the Chat SDK but does not connect. Your app connects with the `connect` function of the `useConnection()` hook, from a component inside the container.
+
+1. Your server issues the access or session token for the user, and the app fetches it after its own sign-in. Never ship the Platform API token or a fixed user token in the app.
+2. Call `connect(userId, { accessToken })`. UIKit passes the token to the Chat SDK's `connect(userId, accessToken)`.
+3. For renewal, set a Chat SDK `SessionHandler` in `chatOptions.onInitialized`. The container calls `onInitialized` right after `SendbirdChat.init`, before any connect, and uses the instance it returns, so call `setSessionHandler` there and return the same instance. The container initializes again when `appId` changes and calls `onInitialized` again, and only then. The handler therefore lives across sign-in and sign-out, so it must read the signed-in user and your token call at call time (the example below asks your auth store for the user), not a React state value captured when `App` rendered: a captured value stays `null` after sign-in and the first renewal gives up the session. In `onSessionTokenRequired`, fetch a new token and call `resolve(token)`, call `resolve(null)` to give up, or `reject(error)` on failure. In `onSessionClosed`, send the user back to your sign-in screen. See knowledge/curated/js/products/auth.md for when the SDK asks for a new token.
+
+```tsx
+import { SessionHandler } from '@sendbird/chat';
+import { SendbirdUIKitContainer, useConnection } from '@sendbird/uikit-react-native';
+import { createMMKV } from 'react-native-mmkv';
+
+// Your app's call to your own server, which issues the token with the Platform API.
+declare function fetchSessionToken(userId: string): Promise<string>;
+// The user your app signed in, or null after sign-out.
+declare function getSignedInUserId(): string | null;
+
+const mmkv = createMMKV();
+
+function createSessionHandler() {
+  const handler = new SessionHandler();
+  handler.onSessionTokenRequired = (resolve, reject) => {
+    const userId = getSignedInUserId();
+    if (!userId) return resolve(null);
+    fetchSessionToken(userId).then(resolve, reject);
+  };
+  handler.onSessionClosed = () => {
+    // route to your sign-in screen
+  };
+  return handler;
+}
+
+export function App() {
+  return (
+    <SendbirdUIKitContainer
+      appId={APP_ID}
+      chatOptions={{
+        localCacheStorage: mmkv,
+        onInitialized: (sdk) => {
+          sdk.setSessionHandler(createSessionHandler()); // before any connect
+          return sdk;
+        },
+      }}
+      platformServices={platformServices}
+    >
+      {/* screens */}
+    </SendbirdUIKitContainer>
+  );
+}
+
+// In a component inside the container, after your own sign-in returned the user ID and a token.
+export function useSendbirdSignIn() {
+  const { connect } = useConnection();
+  return (userId: string, accessToken: string) => connect(userId, { accessToken });
+}
+```
+`templates/starters-bp/react-native` does the same in `App.tsx` and `src/sendbird/SessionBridge.tsx`. (source: https://sendbird.com/docs/chat/uikit/v3/react-native/essentials/authentication — `connect('USER_ID', { nickname, accessToken })` from `useConnection()`) (source: https://github.com/sendbird/sendbird-uikit-react-native/blob/v3.12.10/packages/uikit-react-native/src/hooks/useConnection.ts#L10 — `ConnectOptions` `{ nickname?, accessToken? }`; lines 32-36 pass `opts?.accessToken` to `sdk.connect` ; https://github.com/sendbird/sendbird-uikit-react-native/blob/v3.12.10/packages/uikit-react-native/src/containers/SendbirdUIKitContainer.tsx#L87-L91 — `chatOptions.onInitialized`; lines 296-314 call it right after `SendbirdChat.init` and keep the returned instance; lines 169 and 181 initialize on mount and again on an `appId` change) (source: https://sendbird.com/docs/chat/uikit/v3/react-native/core-components/sendbirduikitcontainer — `chatOptions` lists `onInitialized`) (source: https://sendbird.com/docs/chat/sdk/v4/javascript/application/authenticating-a-user/authentication — `SessionHandler` must be set before connecting; `setSessionHandler`)
 
 The customization sections below cite `@sendbird/uikit-react-native` 3.12.10 and `@sendbird/uikit-react-native-foundation` 3.12.10. Both packages ship their TypeScript `src/`, which is identical to `packages/*/src` in the public repo at tag `v3.12.10`, so the line numbers apply to either. Screens are built from fragments: `createGroupChannelFragment(modules?)` returns a component, and the optional `modules` object replaces parts of the screen (`Header`, `MessageList`, `Input`, `StatusEmpty`, `StatusLoading`, …). Call the factory once, outside your component.
 
@@ -707,7 +803,7 @@ The message input of the group channel fragment is wrapped in React Native's `Ke
 - React: pass `render*` props as functions that return an element, `renderMessageInput={() => <MyInput />}`, not the component itself (`renderMessageInput={MyInput}`). `GroupChannelUIView` calls them as plain functions (`renderMessageInput?.()`) and returns early for its loading and error states, so the hooks inside a component passed directly run as part of UIKit's render on some renders only, and React reports a change in the order of hooks. Wrap the arrow function in `useCallback` if you want a stable reference. (source: https://github.com/sendbird/sendbird-uikit-react/blob/v3.19.1/src/modules/GroupChannel/components/GroupChannelUI/GroupChannelUIView.tsx#L117-L152 — early returns, then `renderChannelHeader?.(...)` and `renderMessageInput?.()`; prop types `() => React.ReactElement` at line 43)
 - React Native: `platformServices` is required; follow the quickstart's factory setup exactly.
 - React Native: changing `channelListQueryParams` on a mounted channel list fragment does not reload the list (see "Channel list" above).
-- App ID from env; access/session tokens are secrets — never hard-code.
+- App ID from env; access/session tokens are secrets — never hard-code. Pass them as described in "Session tokens" (React: `accessToken` + `configureSession` on `SendbirdProvider`; React Native: `connect(userId, { accessToken })` + a `SessionHandler` set in `chatOptions.onInitialized`).
 
 ## Related
 - React repo: https://github.com/sendbird/sendbird-uikit-react
