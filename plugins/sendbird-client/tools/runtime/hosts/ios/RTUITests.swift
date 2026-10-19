@@ -80,20 +80,33 @@ final class RTUITests: XCTestCase {
 
         let chatUI = env["RT_CHAT_UI"] == "1"
         if chatUI {
-            let entry = app.buttons.matching(NSPredicate(format: "label MATCHES[c] %@", ".*(chat|channel|message|inbox).*")).firstMatch
+            let direct = env["RT_DIRECT"] == "1"
+            let listEntry = app.buttons.matching(NSPredicate(format: "label MATCHES[c] %@", ".*(chat|channel|message|inbox).*"))
+            // direct chat: the button that opens the conversation ("Chat with seller", "Message seller"),
+            // never one to a list ("Channels", "Inbox") or one that makes something new; a label with
+            // "with" or "seller" comes first (2026-10-19: a React Native home had "Channels" and "View product")
+            let directEntry = app.buttons.matching(NSPredicate(format: "label MATCHES[c] %@ AND NOT (label MATCHES[c] %@)",
+                                                               ".*(chat|message|contact).*", ".*\\b(channels?|inbox|new|create|add)\\b.*"))
+            let directPreferred = directEntry.matching(NSPredicate(format: "label MATCHES[c] %@", ".*\\b(with|seller)\\b.*"))
+            let currentEntry: () -> XCUIElement = {
+                direct ? (directPreferred.firstMatch.exists ? directPreferred.firstMatch : directEntry.firstMatch) : listEntry.firstMatch
+            }
+            let entryReady: () -> Bool = { let e = currentEntry(); return e.exists && e.isHittable && e.isEnabled }
             var opened = false
             var entryLabel = ""
             // some apps present the channel list right after sign-in: a "Channels" title with cells
-            let listShown = { self.app.staticTexts.matching(NSPredicate(format: "label ==[c] %@", "Channels")).firstMatch.exists && self.app.cells.count > 0 }
+            // (never in direct chat: the button, not a list, has to open the conversation)
+            let listShown = { !direct && self.app.staticTexts.matching(NSPredicate(format: "label ==[c] %@", "Channels")).firstMatch.exists && self.app.cells.count > 0 }
             // direct chat: the chat button may sit on a product screen one tap away from home
-            if env["RT_DIRECT"] == "1" && !waitUntil(10, { entry.exists && entry.isHittable && entry.isEnabled }) {
+            if direct && !waitUntil(10, entryReady) {
                 let product = app.buttons.matching(NSPredicate(format: "label MATCHES[c] %@", ".*product.*")).firstMatch
                 if product.exists && product.isHittable { product.tap(); Thread.sleep(forTimeInterval: 2) }
             }
-            if waitUntil(20, { listShown() || (entry.exists && entry.isHittable && entry.isEnabled) }) {
+            if waitUntil(20, { listShown() || entryReady() }) {
                 if listShown() {
                     entryLabel = "(the channel list was already on screen)"
                 } else {
+                    let entry = currentEntry()
                     entryLabel = entry.label  // read before the tap: the button is gone once the screen changes
                     entry.tap()
                 }

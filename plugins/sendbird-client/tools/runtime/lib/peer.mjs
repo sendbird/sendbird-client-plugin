@@ -93,6 +93,21 @@ export async function expectMessage(chat, channelUrl, senderId, text, timeoutSec
   return { ok: false };
 }
 
+// Direct chat: the app under test opened the 1:1 channel itself, so its URL is not known. Finds the
+// channel of the connected user (B) that has otherId (A) as a member, then waits for A's text there.
+export async function findExpect(chat, otherId, text, timeoutSec = 90) {
+  const end = Date.now() + timeoutSec * 1000;
+  let url = null;
+  while (!url && Date.now() < end) {
+    const list = await chat.groupChannel.createMyGroupChannelListQuery({ includeEmpty: true, limit: 50 }).next();
+    const hit = list.find((c) => c.members.some((m) => m.userId === otherId));
+    if (hit) url = hit.url; else await sleep(1500);
+  }
+  if (!url) return { ok: false, error: `no channel of ${chat.currentUser ? chat.currentUser.userId : 'user B'} has ${otherId} as a member` };
+  const r = await expectMessage(chat, url, otherId, text, Math.max(5, Math.round((end - Date.now()) / 1000)));
+  return { ...r, channelUrl: url };
+}
+
 async function main(argv) {
   const [cmd, ...a] = argv;
   const t0 = Date.now();
@@ -134,16 +149,8 @@ async function main(argv) {
       case 'find-expect': {
         // direct chat: the app opened the channel itself; find B's channel with A, then wait for A's text
         chat = await connectAs(a[0]);
-        const end = Date.now() + Number(a[3] || 90) * 1000;
-        let url = null;
-        while (!url && Date.now() < end) {
-          const list = await chat.groupChannel.createMyGroupChannelListQuery({ includeEmpty: true, limit: 50 }).next();
-          const hit = list.find((c) => c.members.some((m) => m.userId === a[1]));
-          if (hit) url = hit.url; else await new Promise((r) => setTimeout(r, 1500));
-        }
-        if (!url) { out({ cmd, ok: false, error: `no channel of ${a[0]} has ${a[1]} as a member` }); return 1; }
-        const r = await expectMessage(chat, url, a[1], a[2], Math.max(5, Math.round((end - Date.now()) / 1000)));
-        out({ cmd, ...r, channelUrl: url, ms: Date.now() - t0 });
+        const r = await findExpect(chat, a[1], a[2], Number(a[3] || 90));
+        out({ cmd, ...r, ms: Date.now() - t0 });
         return r.ok ? 0 : 1;
       }
       case 'inspect': {
