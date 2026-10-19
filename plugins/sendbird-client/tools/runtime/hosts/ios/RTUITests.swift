@@ -81,15 +81,25 @@ final class RTUITests: XCTestCase {
         let chatUI = env["RT_CHAT_UI"] == "1"
         if chatUI {
             let direct = env["RT_DIRECT"] == "1"
-            let listEntry = app.buttons.matching(NSPredicate(format: "label MATCHES[c] %@", ".*(chat|channel|message|inbox).*"))
+            let listPredicate = NSPredicate(format: "label MATCHES[c] %@", ".*(chat|channel|message|inbox).*")
             // direct chat: the button that opens the conversation ("Chat with seller", "Message seller"),
             // never one to a list ("Channels", "Inbox") or one that makes something new; a label with
             // "with" or "seller" comes first (2026-10-19: a React Native home had "Channels" and "View product")
-            let directEntry = app.buttons.matching(NSPredicate(format: "label MATCHES[c] %@ AND NOT (label MATCHES[c] %@)",
-                                                               ".*(chat|message|contact).*", ".*\\b(channels?|inbox|new|create|add)\\b.*"))
-            let directPreferred = directEntry.matching(NSPredicate(format: "label MATCHES[c] %@", ".*\\b(with|seller)\\b.*"))
+            let directPredicate = NSPredicate(format: "label MATCHES[c] %@ AND NOT (label MATCHES[c] %@)",
+                                              ".*(chat|message|contact).*", ".*\\b(channels?|inbox|new|create|add)\\b.*")
+            let preferredPredicate = NSPredicate(format: "label MATCHES[c] %@", ".*\\b(with|seller)\\b.*")
+            // A React Native Pressable or Touchable without accessibilityRole="button" is no button to
+            // XCUITest: it is an "other" element whose label is its text. Buttons are tried first; the
+            // touchable only when no button matches (2026-10-19: a RN app whose buttons had no role)
+            let firstEntry: ([NSPredicate]) -> XCUIElement = { preds in
+                let p = NSCompoundPredicate(andPredicateWithSubpredicates: preds)
+                let button = self.app.buttons.matching(p).firstMatch
+                return button.exists ? button : self.app.otherElements.matching(p).firstMatch
+            }
             let currentEntry: () -> XCUIElement = {
-                direct ? (directPreferred.firstMatch.exists ? directPreferred.firstMatch : directEntry.firstMatch) : listEntry.firstMatch
+                guard direct else { return firstEntry([listPredicate]) }
+                let preferred = firstEntry([directPredicate, preferredPredicate])
+                return preferred.exists ? preferred : firstEntry([directPredicate])
             }
             let entryReady: () -> Bool = { let e = currentEntry(); return e.exists && e.isHittable && e.isEnabled }
             var opened = false
@@ -99,7 +109,7 @@ final class RTUITests: XCTestCase {
             let listShown = { !direct && self.app.staticTexts.matching(NSPredicate(format: "label ==[c] %@", "Channels")).firstMatch.exists && self.app.cells.count > 0 }
             // direct chat: the chat button may sit on a product screen one tap away from home
             if direct && !waitUntil(10, entryReady) {
-                let product = app.buttons.matching(NSPredicate(format: "label MATCHES[c] %@", ".*product.*")).firstMatch
+                let product = firstEntry([NSPredicate(format: "label MATCHES[c] %@", ".*product.*")])
                 if product.exists && product.isHittable { product.tap(); Thread.sleep(forTimeInterval: 2) }
             }
             if waitUntil(20, { listShown() || entryReady() }) {
@@ -228,6 +238,10 @@ final class RTUITests: XCTestCase {
             switch node.elementType {
             case .textField: kind = .field
             case .button: kind = .button
+            // a React Native Pressable without accessibilityRole="button": a labelled "other" element
+            // with no children of its own (containers, the keyboard's among them, have children).
+            // Without this the nearest "button" below the field was a keyboard suggestion (2026-10-19)
+            case .other where !node.label.isEmpty && node.children.isEmpty: kind = .button
             default: continue
             }
             let f = node.frame
