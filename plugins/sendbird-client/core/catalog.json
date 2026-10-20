@@ -1,7 +1,23 @@
 {
   "version": 1,
-  "about": "Questions a caller shows before the plugin builds a new app. The setup skill asks them in this order (interactive), or reads the answers from the request (non-interactive). Each question has at most 4 options, the limit of Claude Code's question tool. Options with a product only appear when that product is in the plugin's scope. A question with \"offered\": false is a feature not offered in new-app setup for now: it is left out of the questions (set it to true or remove it to offer it again). A request that names that feature still gets it built, unless its product is not supported yet (config productScope.notYetSupported): that product is declined, never built. The plan answer is stored as `plan` in the project profile; core/plans.json says which features each plan includes. A non-interactive run can also return a `confirm-<feature-id>` question (options yes and no) for a feature the plan does not include; the caller passes the answer back as `confirm-<feature-id>=yes` or `confirm-<feature-id>=no` with the catalog answers.",
+  "about": "Questions a caller shows before the plugin builds a new app. The setup skill asks them in this order (interactive), or reads the answers from the request (non-interactive). Each question has at most 4 options, the limit of Claude Code's question tool. Options with a product only appear when that product is in the plugin's scope. A `required` question left with one option in scope is not asked: that option is its answer (for example `products` when the scope has Chat but not Calls). A question whose answer the request already gives is not asked either (skills/setup/SKILL.md, New app step 2). A question with \"offered\": false is a feature not offered in new-app setup for now: it is left out of the questions (set it to true or remove it to offer it again). A request that names that feature still gets it built, unless its product is not supported yet (config productScope.notYetSupported): that product is declined, never built. The plan answer is stored as `plan` in the project profile; core/plans.json says which features each plan includes. A non-interactive run can also return a `confirm-<feature-id>` question (options yes and no) for a feature the plan does not include; the caller passes the answer back as `confirm-<feature-id>=yes` or `confirm-<feature-id>=no` with the catalog answers.",
   "questions": [
+    {
+      "id": "products", "type": "multi", "required": true,
+      "question": "What should the app include?",
+      "options": [
+        { "id": "chat", "label": "Chat", "product": "chat" },
+        { "id": "calls", "label": "Voice and video calls", "product": "calls" }
+      ]
+    },
+    {
+      "id": "chat-ui", "type": "single", "required": true, "when": { "products": ["chat"] },
+      "question": "How should the chat screens be built?",
+      "options": [
+        { "id": "uikit", "label": "UIKit: ready-made screens you theme", "product": "uikit" },
+        { "id": "chat-sdk", "label": "Your own screens on the Chat SDK", "product": "chat" }
+      ]
+    },
     {
       "id": "platform", "type": "single", "required": true,
       "question": "Which platform should the app run on?",
@@ -39,7 +55,7 @@
       ]
     },
     {
-      "id": "chat", "type": "multi", "required": false,
+      "id": "chat", "type": "multi", "required": false, "when": { "products": ["chat"] },
       "question": "Which chat features should the app have? Sign-in and connect are always included.",
       "options": [
         { "id": "channel-list", "label": "Channel list", "product": "chat" },
@@ -48,8 +64,8 @@
       ]
     },
     {
-      "id": "calls", "type": "multi", "required": false,
-      "question": "Add calls?",
+      "id": "calls", "type": "multi", "required": true, "when": { "products": ["calls"] },
+      "question": "Which call types should the app have?",
       "options": [
         { "id": "voice-call", "label": "1:1 voice call", "product": "calls" },
         { "id": "video-call", "label": "1:1 video call", "product": "calls" }
