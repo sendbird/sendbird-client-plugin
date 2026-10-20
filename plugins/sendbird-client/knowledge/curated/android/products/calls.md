@@ -9,7 +9,8 @@
 Sendbird Calls adds voice/video calls. **Direct calls** are 1:1: dial a callee's user ID, their devices ring, accepting connects.
 
 ## Install (Gradle)
-- `implementation 'com.sendbird.sdk:sendbird-calls:1.12.5'` (or `1.+`).
+- Repo in `settings.gradle`: `maven { setUrl("https://repo.sendbird.com/public/maven") }`. `sendbird-calls` is not on Maven Central, so without this repository Gradle stops with "Could not find com.sendbird.sdk:sendbird-calls". (source: https://repo.sendbird.com/public/maven/com/sendbird/sdk/sendbird-calls/1.12.5/sendbird-calls-1.12.5.pom — HTTP 200; https://repo.maven.apache.org/maven2/com/sendbird/sdk/sendbird-calls/1.12.5/sendbird-calls-1.12.5.pom — HTTP 404, both checked 2026-10-21)
+- Dependency: `implementation 'com.sendbird.sdk:sendbird-calls:1.12.5'` (or `1.+`).
 
 ## Camera and microphone permissions
 The SDK's own manifest declares `CAMERA`, `RECORD_AUDIO`, `MODIFY_AUDIO_SETTINGS`, `BLUETOOTH`, `BLUETOOTH_CONNECT`, `INTERNET`, and `ACCESS_NETWORK_STATE` (sendbird-calls 1.12.5 AAR `AndroidManifest.xml`, read 2026-10-17), so the manifest merger adds them to the app; the docs list the same seven `uses-permission` lines for the app's `AndroidManifest.xml`. At runtime, Android 6.0 and later needs `CAMERA` and `RECORD_AUDIO`, and an app targeting Android 12 or later also needs `BLUETOOTH_CONNECT`. Ask for them before the first dial or accept. (source: https://sendbird.com/docs/calls/sdk/v1/android/getting-started/make-first-call — Step 3)

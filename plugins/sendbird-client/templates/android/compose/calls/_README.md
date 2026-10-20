@@ -16,7 +16,8 @@ shapes from the public `sendbird-calls-android` README and the public
   screen, local preview in the corner, both `SendBirdVideoView` in `AndroidView`.
 
 ## How to splice
-1. Gradle: `implementation("com.sendbird.sdk:sendbird-calls:1.12.5")`.
+1. Gradle: maven `https://repo.sendbird.com/public/maven` in `settings.gradle` (`sendbird-calls` is not on Maven Central;
+   see `knowledge/curated/android/products/calls.md` "Install (Gradle)"), then `implementation("com.sendbird.sdk:sendbird-calls:1.12.5")`.
 2. Keep `SendBirdCall.init(...)` + `authenticate(...)` as in `templates/android/view/calls/SetupCalls.java`. `authenticate(...)` goes in the app's sign-in code (`onLoginSucceeded`) and `deauthenticate()` in its sign-out code (`onLogout`).
 3. Copy `DirectCallVideo.kt`, adjust the package. Request `SetupCalls.callPermissions()` (`RECORD_AUDIO`,
    `CAMERA`, and `BLUETOOTH_CONNECT` on Android 12+) at runtime before `dial(...)` or `accept(...)`, for example

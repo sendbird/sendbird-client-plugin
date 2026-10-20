@@ -209,11 +209,18 @@ async function typeAndSend(page, text) {
   await page.keyboard.type(text);
   await page.keyboard.press('Enter');
   // Enter sends in UIKit and submits a form; an input that still holds the text after that has a
-  // send button of its own (not an attachment button)
+  // send button of its own (not an attachment button). UIKit in mobile mode (SendbirdProvider
+  // `breakpoint` matching the screen) does not send on Enter and shows an icon-only send button
+  // with no accessible name. (source: sendbird-uikit-react v3.20.0 src/ui/MessageInput/index.tsx
+  // lines 600-602 `!isMobile` in the Enter path, line 671 `sendbird-message-input--send` with
+  // testID `sendbird-message-input-send-button`; src/ui/IconButton/index.tsx line 44 `data-testid`)
   await page.waitForTimeout(1500);
   const left = await input.evaluate((el) => (el.isContentEditable ? el.textContent : el.value) || '').catch(() => '');
   if (left.includes(text)) {
-    const send = page.getByRole('button', { name: /send/i }).filter({ hasNotText: /image|file|photo|attach/i }).first();
+    const uikitSend = page.locator('[data-testid="sendbird-message-input-send-button"], .sendbird-message-input--send').first();
+    const send = (await uikitSend.isVisible().catch(() => false))
+      ? uikitSend
+      : page.getByRole('button', { name: /send/i }).filter({ hasNotText: /image|file|photo|attach/i }).first();
     await send.click({ timeout: 5000 });
   }
 }

@@ -24,6 +24,7 @@ CODE_EXT = (".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs", ".swift", ".kt", ".kts
 APP_ID_NAME = r"[A-Za-z_]*(?:APP_?ID|AppId|appId|app_id)[A-Za-z_]*"
 # A value a customer is told to replace: empty, all zeros, or a YOUR_/<...>/REPLACE marker.
 PLACEHOLDER = r"(?:|0{8}-0{4}-0{4}-0{4}-0{12}|YOUR[A-Z_ -]*|<[^>]*>|REPLACE[A-Z_ -]*|your[-_ ]?app[-_ ]?id)"
+JS_EXT = (".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs")
 
 
 def files(root):
@@ -85,6 +86,15 @@ def detect(root):
                              r")\s*(?::\s*[A-Za-z?]+\s*)?=\s*(['\"])([^'\"\n]+)\2", text):
             if not re.fullmatch(PLACEHOLDER, m.group(3)):
                 found["configured"].append({"file": rel, "name": m.group(1), "line": text[:m.start()].count("\n") + 1})
+        # export const sendbirdConfig = { appId: '' }   (an object exported from a config module). Only in a
+        # file whose path names Sendbird or under a key that does: an object's appId is often another
+        # service's (Firebase's web config has appId too).
+        if rel.endswith(JS_EXT):
+            for m in re.finditer(r"(?<![\w.$])(" + APP_ID_NAME + r")\s*:\s*(['\"])([^'\"\n]*)\2", text):
+                if "sendbird" not in m.group(1).lower() and "sendbird" not in rel.lower():
+                    continue
+                kind = "literals" if re.fullmatch(PLACEHOLDER, m.group(3)) else "configured"
+                found[kind].append({"file": rel, "name": m.group(1), "line": text[:m.start()].count("\n") + 1, "property": True})
         if rel.endswith(".xml"):
             for m in re.finditer(r"<string name=\"(" + APP_ID_NAME.lower() + r")\">(" + PLACEHOLDER + r")</string>", text, re.I):
                 found["literals"].append({"file": rel, "name": m.group(1), "line": text[:m.start()].count("\n") + 1})
@@ -119,6 +129,9 @@ def apply(root, info):
             i = lit["line"] - 1
             if lit["file"].endswith(".xml"):
                 new = re.sub(r"(<string name=\"" + re.escape(lit["name"]) + r"\">)[^<]*(</string>)", r"\g<1>" + value + r"\g<2>", lines[i])
+            elif lit.get("property"):
+                new = re.sub(r"(\b" + re.escape(lit["name"]) + r"\s*:\s*)(['\"])[^'\"]*\2",
+                             lambda m: m.group(1) + m.group(2) + value + m.group(2), lines[i], count=1)
             elif lit["file"].endswith(".json"):
                 new = re.sub(r"(\"" + re.escape(lit["name"]) + r"\"\s*:\s*)\"[^\"]*\"",
                              lambda m: m.group(1) + json.dumps(value), lines[i], count=1)
@@ -137,7 +150,7 @@ def apply(root, info):
         same = []
         for c in info["configured"]:
             line = open(os.path.join(root, c["file"]), encoding="utf-8").read().split("\n")[c["line"] - 1]
-            sep = ":" if c["file"].endswith(".json") else "="
+            sep = ":" if c["file"].endswith(".json") or c.get("property") else "="
             m = re.search(r"(['\"])([^'\"\n]+)\1", line.split(sep, 1)[1] if sep in line else "")
             if m and m.group(2) == value:
                 same.append(c)

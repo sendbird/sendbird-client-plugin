@@ -12,7 +12,8 @@ Sendbird Calls (1:1 voice and video) on Android. Call shapes from the public "Ma
   `authenticate(userId, accessToken, done)` reports the result through `CompletionHandler` (`null` means signed in).
 
 ## How to splice
-1. Gradle: `implementation 'com.sendbird.sdk:sendbird-calls:1.12.5'`.
+1. Gradle: maven `https://repo.sendbird.com/public/maven` in `settings.gradle` (`sendbird-calls` is not on Maven Central;
+   see `knowledge/curated/android/products/calls.md` "Install (Gradle)"), then `implementation 'com.sendbird.sdk:sendbird-calls:1.12.5'`.
 2. Permissions: the SDK's own manifest already declares `CAMERA`, `RECORD_AUDIO`, `MODIFY_AUDIO_SETTINGS`,
    `BLUETOOTH`, `BLUETOOTH_CONNECT`, `INTERNET`, and `ACCESS_NETWORK_STATE`, which the manifest merger adds to the
    app; the docs ("Make first call", Step 3) list the same seven `uses-permission` lines for the app's

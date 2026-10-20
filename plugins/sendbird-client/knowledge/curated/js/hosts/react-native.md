@@ -28,6 +28,8 @@ const subscription = AppState.addEventListener('change', (status) => {
 // On teardown (e.g. logout): subscription.remove();
 ```
 
+Run this only from the `'change'` listener. Do not pass `AppState.currentState` to a function typed `(status: AppStateStatus)`: in React Native 0.87.1 the types the package exports declare `currentState: null | undefined | string`, so tsc stops with TS2345 ("Argument of type 'string' is not assignable to parameter of type 'AppStateStatus'"). Right after `connect` resolves the app is in the foreground, so there is nothing to apply then. (source: https://unpkg.com/react-native@0.87.1/package.json — `exports["."].types` is `./types_generated/index.d.ts`; https://unpkg.com/react-native@0.87.1/types_generated/Libraries/AppState/AppState.d.ts line 69 `currentState: null | undefined | string`, line 28 `AppStateStatus`)
+
 To also react to connectivity, the docs combine this with `@react-native-community/netinfo` into a single "active AND reachable" state. (source: https://sendbird.com/docs/chat/sdk/v4/javascript/getting-started/environment-specific-implementation ; @sendbird/chat@4.22.13 lib/__definition.d.ts:4398,4403 ; @sendbird/uikit-react-native@3.12.9 src/contexts/SendbirdChatCtx.tsx:165-168)
 
 ## UIKit container: local cache storage

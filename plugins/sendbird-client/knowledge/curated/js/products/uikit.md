@@ -49,6 +49,8 @@ function ChatScreen() {
 ```
 `GroupChannelListProps` (required `onChannelSelect(channel: GroupChannel | null)`, `onChannelCreated(channel)`; optional `disableAutoSelect`, `allowProfileEdit`, `channelListQueryParams`) and `GroupChannelProviderProps` (required `channelUrl`; optional `isReactionEnabled`, `isMessageGroupingEnabled`, `replyType`, `onBackClick()`, `onChatHeaderActionClick(event)`, `onBeforeSendUserMessage`, `onBeforeSendFileMessage`, `startingPoint`) are the real prop surfaces — the shipped root `.d.ts` describes an older v2-style API (`ChannelList`, `withSendBird`) that the current runtime no longer exports at the package root; do not use those names. (source: `sendbird-uikit-react` src/modules/GroupChannelList/context/GroupChannelListProvider.tsx:29-30,37-38,44,55-57 `GroupChannelListProviderProps`; src/modules/GroupChannel/context/types.ts:77-120 `GroupChannelProviderProps`)
 
+A channel list screen opens the channel the user picks: store the selected URL from `onChannelSelect` (and `onChannelCreated`) and render `GroupChannel` for it, as above. Never pass a no-op such as `onChannelSelect={() => {}}`; the list then shows channels the user cannot open, and messages sent to them never appear. This holds even when the request names only a channel list.
+
 For a phone layout that shows one pane at a time: `GroupChannel` draws its header back button (the one that calls `onBackClick`) only in UIKit's mobile mode, which turns on when `SendbirdProvider`'s `breakpoint` matches the screen (for example `breakpoint="768px"`; `true` turns mobile mode on at every width). The default is `false`, so without it the button never appears and the user cannot get back to the list. Also pass `disableAutoSelect` to `GroupChannelList` on a phone: otherwise the list selects the first channel as soon as nothing is selected, which opens a conversation right after sign-in and again after every back tap. `templates/starters-bp/react` does both. (source: https://github.com/sendbird/sendbird-uikit-react/blob/v3.19.1/src/lib/MediaQueryContext.tsx#L4-L60 ; https://github.com/sendbird/sendbird-uikit-react/blob/v3.19.1/src/modules/GroupChannel/components/GroupChannelHeader/GroupChannelHeaderView.tsx#L38-L56 ; https://github.com/sendbird/sendbird-uikit-react/blob/v3.19.1/src/modules/GroupChannelList/context/GroupChannelListProvider.tsx#L141-L146 ; @sendbird/uikit-react 3.19.1 types/lib/Sendbird/types.d.ts:156 `breakpoint?: string | boolean`)
 
 Read SDK connection/store state for advanced cases with `useSendbirdStateContext()` (exported for backward-compat; prefer driving UI through props above where possible). (source: `sendbird-uikit-react` src/lib/Sendbird/context/hooks/useSendbirdStateContext.tsx)
@@ -388,13 +390,16 @@ When your Sendbird application requires a token to connect, UIKit for React take
 ```tsx
 import { SessionHandler } from '@sendbird/chat';
 import { SendbirdProvider, type SendbirdProviderProps } from '@sendbird/uikit-react/SendbirdProvider';
+import { useState } from 'react';
 import { GroupChannelList } from '@sendbird/uikit-react/GroupChannelList';
+import { GroupChannel } from '@sendbird/uikit-react/GroupChannel';
 import '@sendbird/uikit-react/dist/index.css';
 
 // Your app's call to your own server, which issues the token with the Platform API.
 declare function fetchSessionToken(userId: string): Promise<string>;
 
 export function SignedInChat({ userId, accessToken }: { userId: string; accessToken: string }) {
+  const [channelUrl, setChannelUrl] = useState<string | null>(null);
   const configureSession: SendbirdProviderProps['configureSession'] = () => {
     const handler = new SessionHandler();
     handler.onSessionTokenRequired = (resolve, reject) => {
@@ -407,7 +412,11 @@ export function SignedInChat({ userId, accessToken }: { userId: string; accessTo
   };
   return (
     <SendbirdProvider appId={APP_ID} userId={userId} accessToken={accessToken} configureSession={configureSession}>
-      <GroupChannelList onChannelSelect={() => {}} onChannelCreated={() => {}} />
+      <GroupChannelList
+        onChannelSelect={(channel) => setChannelUrl(channel?.url ?? null)}
+        onChannelCreated={(channel) => setChannelUrl(channel.url)}
+      />
+      {channelUrl && <GroupChannel channelUrl={channelUrl} onBackClick={() => setChannelUrl(null)} />}
     </SendbirdProvider>
   );
 }
