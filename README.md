@@ -90,6 +90,7 @@ This plugin runs inside Claude Code with your user account's permissions. Three 
 | When | Script | What it reads | What it can change | Network |
 |---|---|---|---|---|
 | Session start | `hooks/welcome.sh` | plugin files, and the names of the files in the session's folder (to tell whether it is empty) | adds the plugin's rules to the model's context, and in an empty folder says to start a new app with setup | none |
+| Session start, in Claude Code | `hooks/first-run-notice.sh` | the plugin manifest, and its own mark in the plugin data folder (`~/.claude/plugins/data/<plugin>/first-run-notice`) | shows you a short version of this section once, and again only when that notice changes; it is shown to you, not to the model, and a `SENDBIRD_NONINTERACTIVE` run shows it without marking it shown | none |
 | Before a file write or shell command | `hooks/credential-guard.sh` | the content or command about to run | blocks it if it contains a credential | none |
 | Before a shell command | `hooks/destructive-command-guard.sh` | the command about to run | asks you to approve a Sendbird CLI `delete`, `revoke`, or `deactivate` run with `--yes`; in a `-p` run it is denied | none |
 | Before a file write, or a shell command that writes a source file | `hooks/source-claim-guard.sh` | the content about to be written, local files it cites | blocks Sendbird API code without a verifiable source: a plugin file, an installed SDK file (`node_modules/@sendbird`, `Pods`, `.build`, Xcode `SourcePackages` or `DerivedData`, the Gradle cache), or a public page; a file the model wrote in your project does not count | fetches the cited page if it is on `sendbird.com/docs` or is a file in a `github.com/sendbird` repository (a `/blob/` or `/raw/` link); issues, discussions, and pull requests are not fetched |
@@ -115,7 +116,7 @@ The hooks read their input with `jq`. When `jq` is not on your `PATH`, the crede
 
 None of them sends your project files or conversation to Sendbird. Claude Code itself sends your conversation, and the files it reads, to its model provider under your Claude Code terms; that is outside this plugin.
 
-**Files it writes:** `.sendbird-client/profile.json` and `.sendbird-client/cache/` in your project, and `~/.claude/sendbird-client-telemetry.jsonl` only when telemetry is on.
+**Files it writes:** `.sendbird-client/profile.json` and `.sendbird-client/cache/` in your project, and `~/.claude/sendbird-client-telemetry.jsonl` only when telemetry is on, plus the one-line mark of the session-start notice in Claude Code's data folder for the plugin.
 
 **Updates replace all of the above.** When the plugin updates — by `claude plugin update` or through auto-update — the new version's hooks, scripts and instructions replace the old ones and run from your next session (or after `/reload-plugins`). With auto-update on, Claude Code installs new versions without asking for each one. Each release is a pull request in the plugin's repository that lists the changed paths; review them before turning auto-update on for `sendbird`.
 
