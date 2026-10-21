@@ -22,6 +22,18 @@ import '@sendbird/chat/node';
 import SendbirdChat from '@sendbird/chat';
 import { GroupChannelModule } from '@sendbird/chat/groupChannel';
 
+// Node 22 and later have a built-in WebSocket, and the SDK uses it instead of its bundled `ws`. That
+// WebSocket hands a binary (compressed) frame over as a Blob, and the SDK reads a Blob with
+// FileReader, which Node does not have: "ReferenceError: FileReader is not defined" ends the process.
+// Asking for ArrayBuffer frames sends them down the SDK's ArrayBuffer path instead. The SDK looks the
+// global up when it connects, so setting it here also covers react.mjs, which imports this file.
+const NativeWebSocket = globalThis.WebSocket;
+if (NativeWebSocket) {
+  globalThis.WebSocket = class extends NativeWebSocket {
+    constructor(...args) { super(...args); this.binaryType = 'arraybuffer'; }
+  };
+}
+
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const out = (o) => process.stdout.write(JSON.stringify(o) + '\n');
 
