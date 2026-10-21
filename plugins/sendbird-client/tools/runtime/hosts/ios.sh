@@ -20,6 +20,8 @@ HERE="$RT_HERE/hosts/ios"
 work="$RT_WORK"; out="$RT_OUT"; tools="$RT_TOOLS"
 step() { jq -nc --arg s "$1" --argjson ok "$2" --arg d "$3" '{step:$s, ok:$ok, detail:$d, screenshot:null}' >> "$out/steps.jsonl"; echo "step $1: $([ "$2" = true ] && echo ok || { [ "$2" = null ] && echo n/a || echo FAIL; }) — $3"; }
 peer() { ( cd "$tools" && node peer.mjs "$@" ); }
+# after B missed A's text in channel $1: why, when A's own view has it (peer.mjs HIDDEN_NOTE)
+hidden_note() { [ -n "$1" ] && peer sender-only "$RT_USER_A" "$1" "$2" 2>/dev/null | jq -r 'select(.ok) | .note' 2>/dev/null; }
 # why a build failed, in one line: a compiler error, else a script's error (React Native's bundle
 # step prints Metro's "UnableToResolveError: ..."), else the build command that failed
 build_error() {
@@ -205,7 +207,7 @@ if pres="$(peer presence "$RT_USER_A" online 240)"; then
         step message-a-sends true "$RT_USER_B received A's \"$RT_TEXT_A1\" in the 1:1 channel the app opened"
         peer send "$RT_USER_B" "$url" "$RT_TEXT_B2" >/dev/null || step message-b-sends false "peer could not send the reply"
       else
-        step message-a-sends false "$RT_USER_B never received \"$RT_TEXT_A1\": $(jq -r '.error // "no matching message"' <<<"$found")"; touch "$out/.rt-abort"
+        step message-a-sends false "$RT_USER_B never received \"$RT_TEXT_A1\": $(jq -r '.error // "no matching message"' <<<"$found")$(hidden_note "$url" "$RT_TEXT_A1")"; touch "$out/.rt-abort"
       fi
     else
       seeded="$(peer seed "$RT_USER_B" "$RT_USER_A" "$RT_CHANNEL" "$RT_TEXT_B1" ${RT_B_CUSTOM_TYPE:+"$RT_B_CUSTOM_TYPE"})"
@@ -218,7 +220,7 @@ if pres="$(peer presence "$RT_USER_A" online 240)"; then
           [ "$RT_RICH" = 1 ] && rich_wait_a2 "$url" && { a2_sent=1; touch "$out/.rt-a2-seen"; }
           [ "$RT_RICH" = 1 ] && kill -0 "$test_pid" 2>/dev/null && rich_wait_file "$url"; touch "$out/.rt-file-seen"
         else
-          step message-a-sends false "B never received \"$RT_TEXT_A1\""
+          step message-a-sends false "B never received \"$RT_TEXT_A1\"$(hidden_note "$url" "$RT_TEXT_A1")"
           touch "$out/.rt-abort"
         fi
       else

@@ -14,7 +14,7 @@ import path from 'node:path';
 import net from 'node:net';
 import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
-import { connectAs, presence, seed, expectMessage, findExpect, sendText } from './peer.mjs';
+import { connectAs, presence, seed, expectMessage, findExpect, sendText, hiddenNote } from './peer.mjs';
 import { describeButtons, pickSubmit } from './signin.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
@@ -338,7 +338,7 @@ async function main() {
       const peerB = await connectAs(userB);
       try {
         const found = await findExpect(peerB, userA, textA1, 60);
-        if (!found.ok) { fail('message-a-sends', `${userB} never received "${textA1}": ${found.error || 'no matching message'}`, await shot(a, 'a-not-sent')); return rc; }
+        if (!found.ok) { fail('message-a-sends', `${userB} never received "${textA1}": ${found.error || 'no matching message'}${await hiddenNote(userA, found.channelUrl, textA1)}`, await shot(a, 'a-not-sent')); return rc; }
         step('message-a-sends', true, `${userB} received A's "${textA1}" in the 1:1 channel the app opened`, await shot(a, 'a-sent'));
         const ch = await peerB.groupChannel.getChannel(found.channelUrl);
         if (ch.memberCount !== 2) fail('channel-members', `the channel the app opened has ${ch.memberCount} members (${ch.members.map((m) => m.userId).join(', ')}), not A and B alone`);
@@ -383,7 +383,7 @@ async function main() {
       await typeAndSend(a, textA1).catch((e) => fail('message-a-sends', `could not type in A's input (${e.message.split('\n')[0]})`));
       const got = rc ? { ok: false } : await expectMessage(peerB, seeded.channelUrl, userA, textA1, 45);
       if (got.ok) step('message-a-sends', true, `server has A's "${textA1}"`, await shot(a, 'a-sent'));
-      else if (!rc) fail('message-a-sends', `B never received "${textA1}"`, await shot(a, 'a-not-sent'));
+      else if (!rc) fail('message-a-sends', `B never received "${textA1}"${await hiddenNote(userA, seeded.channelUrl, textA1)}`, await shot(a, 'a-not-sent'));
     }
     if (!rc && signedB === 'ok') {
       try {

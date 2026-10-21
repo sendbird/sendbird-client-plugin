@@ -17,6 +17,8 @@
 //   node peer.mjs expect-file <userB> <channelUrl> <senderId> [timeoutSec]  wait until senderId's file message arrives
 //   node peer.mjs search <userB> <channelUrl> <keyword> [timeoutSec]  the server's message search in the channel
 //   node peer.mjs appinfo <userB>                                   reaction and search switches of the application
+//   node peer.mjs sender-only <senderId> <channelUrl> <text> [timeoutSec]  the sender's own view has the text
+//                                                                  (B missed it: the application hides it)
 // The App ID comes from RT_APP_ID only. Prints one JSON line; exit 0 = done, 1 = failed.
 import '@sendbird/chat/node';
 import SendbirdChat from '@sendbird/chat';
@@ -120,6 +122,28 @@ export async function findExpect(chat, otherId, text, timeoutSec = 90) {
   return { ...r, channelUrl: url };
 }
 
+// When B never gets a message, its sender's own view tells why. A message the application's message
+// filter catches is accepted (the sender gets success and a message ID) and shown to the sender
+// only; a test application did this to texts with long digit runs (2026-10-21). Called only after a
+// step has failed, so connecting as the sender does not touch a passing run.
+export const HIDDEN_NOTE = "; the sender's own view of the channel has it, so the server accepted it but does not show it to other users — check the application's message filters";
+
+export async function senderOnly(senderId, channelUrl, text, timeoutSec = 10) {
+  let chat;
+  try {
+    chat = await connectAs(senderId);
+    return (await expectMessage(chat, channelUrl, senderId, text, timeoutSec)).ok;
+  } catch {
+    return false;
+  } finally {
+    if (chat) await chat.disconnect().catch(() => {});
+  }
+}
+
+export async function hiddenNote(senderId, channelUrl, text) {
+  return channelUrl && (await senderOnly(senderId, channelUrl, text)) ? HIDDEN_NOTE : '';
+}
+
 async function main(argv) {
   const [cmd, ...a] = argv;
   const t0 = Date.now();
@@ -210,8 +234,14 @@ async function main(argv) {
           premiumFeatureList: info.premiumFeatureList, uploadSizeLimit: info.uploadSizeLimit, ms: Date.now() - t0 });
         return 0;
       }
+      case 'sender-only': {
+        // after B missed a message: the sender's own view has it (ok) or not
+        const ok = await senderOnly(a[0], a[1], a[2], Number(a[3] || 10));
+        out({ cmd, ok, ...(ok ? { note: HIDDEN_NOTE } : {}), ms: Date.now() - t0 });
+        return ok ? 0 : 1;
+      }
       default:
-        out({ cmd, ok: false, error: 'usage: peer.mjs presence|seed|send|expect|touch|find-expect|inspect|expect-file|search|appinfo ...' });
+        out({ cmd, ok: false, error: 'usage: peer.mjs presence|seed|send|expect|touch|find-expect|inspect|expect-file|search|appinfo|sender-only ...' });
         return 64;
     }
   } catch (e) {

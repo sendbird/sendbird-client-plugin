@@ -18,6 +18,8 @@ HERE="$RT_HERE/hosts/android"
 work="$RT_WORK"; out="$RT_OUT"; tools="$RT_TOOLS"
 step() { jq -nc --arg s "$1" --argjson ok "$2" --arg d "$3" '{step:$s, ok:$ok, detail:$d, screenshot:null}' >> "$out/steps.jsonl"; echo "step $1: $([ "$2" = true ] && echo ok || { [ "$2" = null ] && echo n/a || echo FAIL; }) — $3"; }
 peer() { ( cd "$tools" && node peer.mjs "$@" ); }
+# after B missed A's text in channel $1: why, when A's own view has it (peer.mjs HIDDEN_NOTE)
+hidden_note() { [ -n "$1" ] && peer sender-only "$RT_USER_A" "$1" "$2" 2>/dev/null | jq -r 'select(.ok) | .note' 2>/dev/null; }
 
 # React Native (RT_RN=1, hosts/react-native.sh): the Gradle project is the app's android/ folder
 rn="${RT_RN:-0}"; adir="$work"; [ "$rn" = 1 ] && adir="$work/android"
@@ -210,7 +212,7 @@ if pres="$(peer presence "$RT_USER_A" online 180)"; then
         step message-a-sends true "$RT_USER_B received A's \"$a1\" in the 1:1 channel the app opened"
         peer send "$RT_USER_B" "$url" "$b2" >/dev/null || step message-b-sends false "peer could not send the reply"
       else
-        step message-a-sends false "$RT_USER_B never received \"$a1\": $(jq -r '.error // "no matching message"' <<<"$found")"; signal abort
+        step message-a-sends false "$RT_USER_B never received \"$a1\": $(jq -r '.error // "no matching message"' <<<"$found")$(hidden_note "$url" "$a1")"; signal abort
       fi
     else
       seeded="$(peer seed "$RT_USER_B" "$RT_USER_A" "$channel" "$b1" ${RT_B_CUSTOM_TYPE:+"$RT_B_CUSTOM_TYPE"})"
@@ -223,7 +225,7 @@ if pres="$(peer presence "$RT_USER_A" online 180)"; then
           [ "$RT_RICH" = 1 ] && rich_wait_a2 "$url" && { a2_sent=1; signal a2-seen; }
           [ "$RT_RICH" = 1 ] && kill -0 "$test_pid" 2>/dev/null && rich_wait_file "$url"; signal file-seen
         else
-          step message-a-sends false "B never received \"$a1\""; signal abort
+          step message-a-sends false "B never received \"$a1\"$(hidden_note "$url" "$a1")"; signal abort
         fi
       else
         step channel-seed false "peer could not open a channel: $(jq -r '.error // "?"' <<<"$seeded")"; signal abort
