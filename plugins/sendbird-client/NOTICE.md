@@ -21,7 +21,9 @@ names the public sources it was verified against and the SDK version it matches.
 
 Some code templates reproduce short code examples from the READMEs, quickstarts, and sample
 apps in those public Sendbird repositories. Each of these templates names its source in a
-comment or in the `_README.md` next to it.
+comment or in the `_README.md` next to it. Any reproduced material remains subject to the
+licence applicable to its source repository, as identified in the relevant file or
+accompanying `_README.md`.
 
 Troubleshooting entries link to the public Sendbird community forum and GitHub discussions
 where a problem was reported. The entries themselves are written for this plugin.

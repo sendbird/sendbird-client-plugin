@@ -10,12 +10,31 @@
           },
           {
             "type": "command",
-            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/first-run-notice.sh\""
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/first-run-notice.sh\" start"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/first-run-notice.sh\" prompt"
           }
         ]
       }
     ],
     "PreToolUse": [
+      {
+        "matcher": "Agent|Write|Edit|MultiEdit|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/first-run-notice.sh\" tool"
+          }
+        ]
+      },
       {
         "matcher": "Agent",
         "hooks": [

@@ -1,7 +1,7 @@
 {
   "name": "sendbird-client",
-  "version": "0.1.72",
-  "description": "Sendbird integration helper for Chat (incl. auth/session), UIKit, and Calls across iOS, Android, and JS",
+  "version": "0.1.73",
+  "description": "Sendbird integration helper for Chat (incl. auth/session), UIKit, and Calls across iOS, Android, and JS. Runs local shell scripts as hooks; see README \"What runs on your machine\".",
   "author": {
     "name": "Sendbird",
     "url": "https://sendbird.com"
@@ -26,7 +26,7 @@
   ],
   "hooks": "./codex/hooks.json",
   "interface": {
-    "shortDescription": "Verified Sendbird client SDK integration",
+    "shortDescription": "Verified Sendbird SDK integration; runs local hook scripts",
     "developerName": "Sendbird",
     "category": "Developer Tools",
     "capabilities": [
@@ -41,6 +41,6 @@
       "Verify this Sendbird integration."
     ],
     "displayName": "Sendbird Client",
-    "longDescription": "Sendbird integration helper for Chat (incl. auth/session), UIKit, and Calls across iOS, Android, and JS"
+    "longDescription": "Sendbird integration helper for Chat (incl. auth/session), UIKit, and Calls across iOS, Android, and JS. Runs local shell scripts as hooks; see README \"What runs on your machine\"."
   }
 }
