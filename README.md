@@ -5,7 +5,17 @@
 ## Install
 
 ```bash
-claude plugin marketplace add sendbird/sendbird-client-plugin
+claude plugin marketplace add sendbird/sendbird-plugins
+claude plugin install sendbird-client@sendbird
+```
+
+The `sendbird` marketplace in [sendbird/sendbird-plugins](https://github.com/sendbird/sendbird-plugins) lists this plugin and the Sendbird CLI plugin (`sendbird-cli@sendbird`); install either or both. This repository holds the plugin itself.
+
+If you added the `sendbird` marketplace from this repository (`sendbird/sendbird-client-plugin`) before, remove it, add the new one, and install the plugin again:
+
+```bash
+claude plugin marketplace remove sendbird
+claude plugin marketplace add sendbird/sendbird-plugins
 claude plugin install sendbird-client@sendbird
 ```
 
@@ -29,12 +39,14 @@ Each release lists the zip's sha256. `--model` is optional; `claude-sonnet-5-5` 
 
 ## Use it in Codex
 
-The same plugin installs in Codex from the same repository:
+The same plugin installs in Codex from the same marketplace:
 
 ```bash
-codex plugin marketplace add sendbird/sendbird-client-plugin
+codex plugin marketplace add sendbird/sendbird-plugins
 codex plugin add sendbird-client@sendbird
 ```
+
+If you added it from `sendbird/sendbird-client-plugin` before, run `codex plugin marketplace remove sendbird` first.
 
 Codex runs the same skills; call them as `$sendbird-client:setup`, `$sendbird-client:add-feature`, and so on. Codex plugins have no agent definitions, so each agent is a skill with the agent's name that runs the agent's instructions, for example `$sendbird-client:sendbird-ios-agent`.
 
@@ -59,7 +71,7 @@ An installed plugin is a snapshot: Claude Code replaces it only when the plugin 
 {
   "extraKnownMarketplaces": {
     "sendbird": {
-      "source": { "source": "github", "repo": "sendbird/sendbird-client-plugin" },
+      "source": { "source": "github", "repo": "sendbird/sendbird-plugins" },
       "autoUpdate": true
     }
   }
@@ -124,7 +136,8 @@ None of them sends your project files or conversation to Sendbird. Claude Code i
 ## What is in this repository
 
 - `plugins/sendbird-client/` — the plugin (skills, agents, hooks, knowledge, templates)
-- `.claude-plugin/marketplace.json` — the `sendbird` marketplace
+
+The `sendbird` marketplace that lists the plugin is in [sendbird/sendbird-plugins](https://github.com/sendbird/sendbird-plugins).
 
 This repository is published automatically; every change arrives as a release pull request. Please open an issue for bugs or wrong answers — pull requests are not merged here.
 
