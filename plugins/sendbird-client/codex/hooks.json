@@ -8,11 +8,37 @@
             "type": "command",
             "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/welcome.sh\"",
             "statusMessage": "Sendbird plugin: session rules"
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/first-run-notice.sh\" start",
+            "statusMessage": "Sendbird plugin: one-time notice — its hooks run local scripts; nothing is sent to Sendbird"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/first-run-notice.sh\" prompt",
+            "statusMessage": "Sendbird plugin: one-time notice — its hooks run local scripts; nothing is sent to Sendbird"
           }
         ]
       }
     ],
     "PreToolUse": [
+      {
+        "matcher": "Bash|apply_patch",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/first-run-notice.sh\" tool",
+            "statusMessage": "Sendbird plugin: one-time notice — its hooks run local scripts; nothing is sent to Sendbird"
+          }
+        ]
+      },
       {
         "matcher": "Bash|apply_patch",
         "hooks": [
