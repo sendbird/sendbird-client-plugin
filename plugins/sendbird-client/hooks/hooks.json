@@ -1,4 +1,7 @@
 {
+  "modules": [
+    "./notice.js"
+  ],
   "hooks": {
     "SessionStart": [
       {
