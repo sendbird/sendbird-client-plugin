@@ -14,14 +14,14 @@
 ## Install
 
 ```bash
-claude plugin marketplace add sendbird/sendbird-client-plugin
+claude plugin marketplace add sendbird/sendbird-plugins
 claude plugin install sendbird-client@sendbird
 ```
 
 Codex:
 
 ```bash
-codex plugin marketplace add sendbird/sendbird-client-plugin
+codex plugin marketplace add sendbird/sendbird-plugins
 codex plugin add sendbird-client@sendbird
 ```
 
