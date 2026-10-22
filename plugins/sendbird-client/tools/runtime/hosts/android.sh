@@ -155,7 +155,18 @@ if [ -z "$serial" ]; then
 fi
 cleanup() { [ -n "$emu_pid" ] && { "$adb" -s "$serial" emu kill >/dev/null 2>&1; sleep 2; kill "$emu_pid" 2>/dev/null; }; }
 trap cleanup EXIT
-"$adb" -s "$serial" wait-for-device
+# `adb wait-for-device` alone waits forever: an emulator that cannot start its AVD (for example
+# "Broken AVD system path" when ANDROID_HOME is an SDK without the AVD's system image) exits at
+# once, and an RT_ANDROID_SERIAL that names no device never appears.
+for _ in $(seq 1 150); do
+  [ "$("$adb" -s "$serial" get-state 2>/dev/null)" = device ] && break
+  if [ -n "$emu_pid" ] && ! kill -0 "$emu_pid" 2>/dev/null; then
+    step launch false "the emulator for $avd exited before $serial came up: $(grep -m1 -E 'FATAL|ERROR' "$out/emulator.log" | cut -c1-200)"
+    exit 1
+  fi
+  sleep 2
+done
+[ "$("$adb" -s "$serial" get-state 2>/dev/null)" = device ] || { step launch false "device $serial did not come up within 300 seconds"; exit 1; }
 for _ in $(seq 1 180); do [ "$("$adb" -s "$serial" shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')" = 1 ] && break; sleep 2; done
 [ "$("$adb" -s "$serial" shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')" = 1 ] || { step launch false "emulator $serial did not boot"; exit 1; }
 # a cold-booted emulator keeps starting system apps for a while; an app launched right away can
