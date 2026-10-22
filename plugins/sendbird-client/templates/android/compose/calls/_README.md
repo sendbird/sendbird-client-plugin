@@ -33,7 +33,7 @@ shapes from the public `sendbird-calls-android` README and the public
    }
    ```
 5. App ID from BuildConfig/secret — never hard-code; the access token is a secret.
-   Hand-off (`manualSteps`) holds only the steps in `knowledge/curated/android/products/calls.md` "Manual steps" (App ID, a token server when the app uses tokens, push credentials). No Calls doc has a dashboard step that enables Calls, so never tell the customer to enable Calls.
+   Hand-off (`manualSteps`) holds only the steps in `knowledge/curated/android/products/calls.md` "Manual steps" (App ID, a token server when the app uses tokens, push credentials, and the `calls-incoming` skill as the next step when this run did not wire incoming-call push). No Calls doc has a dashboard step that enables Calls, so never tell the customer to enable Calls.
 
 ## Notes (see knowledge/curated/android/products/calls.md, all cited)
 - `onRinging` sets the call's `DirectCallListener` before `accept(...)`, as the README requires.

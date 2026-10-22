@@ -436,16 +436,14 @@ The header applies the appearance and then sets a fixed text size (`HeaderView.k
 **Long channel names are cut to one line.** This is the layout, not a bug: the channel list row title is `singleLine` with `ellipsize="end"` (`sb_view_channel_list_item.xml` line 32-40), and the channel header title is `maxLines="1"` with `ellipsize="end"` (`sb_view_header.xml` line 54-59). To show more of the name, render the row with a custom channel item (see "Channel list" above) or the header with a custom `ChannelHeaderComponent`. (source: https://github.com/sendbird/sendbird-uikit-android/blob/main/uikit/src/main/res/layout/sb_view_channel_list_item.xml#L32-L40) (source: https://github.com/sendbird/sendbird-uikit-android/blob/main/uikit/src/main/res/layout/sb_view_header.xml#L54-L59) (community context: https://github.com/sendbird/sendbird-uikit-android/discussions/28)
 
 ## Start a 1:1 chat from a button (no channel list)
-For a "Chat with seller" button: create the channel with `isDistinct = true`, which returns the existing 1:1 channel when one already has the same members, and start `ChannelActivity` for its URL. Back returns to your screen. To open the same channel from a notification tap, the public UIKit sample builds the notification's `PendingIntent` from a redirect intent; `ChannelListActivity.newRedirectToChannelIntent(context, channelUrl)` opens the list and moves into the channel, so back lands on the list.
+For a "Chat with seller" button: create the channel with `isDistinct = true`, which returns the existing 1:1 channel when one already has the same members, and start `ChannelActivity` for its URL. Back returns to your screen. To open the same channel from a notification tap, wrap the same `ChannelActivity.newIntent(context, channelUrl)` in the notification's `PendingIntent`, so the tap opens the channel with no list in between. The public UIKit sample wraps `ChannelListActivity.newRedirectToChannelIntent(context, channelUrl)` instead, which opens the list and moves into the channel, so back lands on the list; use that only when the customer wants the list behind the channel.
 
 ```kotlin
 import android.app.PendingIntent
 import android.content.Context
-import android.content.Intent
 import com.sendbird.android.channel.GroupChannel
 import com.sendbird.android.params.GroupChannelCreateParams
 import com.sendbird.uikit.activities.ChannelActivity
-import com.sendbird.uikit.activities.ChannelListActivity
 
 fun Activity.openChatWith(sellerUserId: String) {
     val params = GroupChannelCreateParams().apply {
@@ -459,13 +457,13 @@ fun Activity.openChatWith(sellerUserId: String) {
 }
 
 // In your push handler: data["sendbird"] is JSON whose channel object holds channel_url.
+// The tap opens the channel screen itself, the same screen the button opens.
 fun channelTapIntent(context: Context, channelUrl: String, requestCode: Int): PendingIntent {
-    val intent = ChannelListActivity.newRedirectToChannelIntent(context, channelUrl)
-        .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+    val intent = ChannelActivity.newIntent(context, channelUrl)
     return PendingIntent.getActivity(context, requestCode, intent, PendingIntent.FLAG_IMMUTABLE)
 }
 ```
-(source: knowledge/curated/android/products/chat.md — Create and list group channels) (source: https://github.com/sendbird/sendbird-uikit-android/blob/07ffe8efc97e2d71dedc466ad868df817e5f433e/uikit-samples/src/main/java/com/sendbird/uikit/samples/common/fcm/MyFirebaseMessagingService.kt#L54-L117 — reads `data["sendbird"]`, takes the channel URL, and builds the tap `PendingIntent` from a redirect intent with `FLAG_ACTIVITY_CLEAR_TOP`) (uikit 3.26.3 AAR `javap` on `com.sendbird.uikit.activities.ChannelActivity` and `com.sendbird.uikit.activities.ChannelListActivity`: `newIntent(Context, String)`, `newRedirectToChannelIntent(Context, String)`)
+(source: knowledge/curated/android/products/chat.md — Create and list group channels) (source: https://github.com/sendbird/sendbird-uikit-android/blob/07ffe8efc97e2d71dedc466ad868df817e5f433e/uikit-samples/src/main/java/com/sendbird/uikit/samples/common/fcm/MyFirebaseMessagingService.kt#L54-L117 — reads `data["sendbird"]`, takes the channel URL, and builds the tap `PendingIntent`; the sample uses a redirect intent through the list with `FLAG_ACTIVITY_CLEAR_TOP`) (uikit 3.26.3 AAR `javap` on `com.sendbird.uikit.activities.ChannelActivity` and `com.sendbird.uikit.activities.ChannelListActivity`: `newIntent(Context, String)`, `newRedirectToChannelIntent(Context, String)`)
 
 ## Message menu and message taps (View host)
 A long press on a message opens the message menu, which `makeMessageContextMenu(message)` builds as a list of `DialogListItem`s; each item is identified by its string resource key, such as `R.string.sb_text_channel_anchor_edit`. To change the menu, subclass `ChannelFragment`, filter or add items in `makeMessageContextMenu`, and handle your own items in `onMessageContextMenuItemClicked` (return `true` when you handled it). Install the subclass with `ChannelFragment.Builder(channelUrl).setCustomFragment(...)`, usually inside `FragmentProviders.channel`.

@@ -4,7 +4,7 @@
 <!-- status: populated -->
 # js — push
 
-> Push token APIs read from `@sendbird/chat`'s shipped types (`lib/__definition.d.ts`); the React Native tap-handling pattern follows Sendbird's public RN UIKit sample. Verified 2026-09-30; the logout section was added on 2026-10-11. Used by `/sendbird-client:push-setup`. Do not invent API.
+> Push token APIs read from `@sendbird/chat`'s shipped types (`lib/__definition.d.ts`); the React Native tap-handling pattern follows Sendbird's public RN UIKit sample. Verified 2026-09-30; the logout section was added on 2026-10-11, and the React Native UIKit automatic registration section on 2026-10-23 from the `sendbird-uikit-react-native` v3.12.9 source. Used by `/sendbird-client:push-setup`. Do not invent API.
 
 ## Overview
 
@@ -62,8 +62,14 @@ await sb.groupChannel.markAsDelivered(CHANNEL_URL);
 
 ## Setup checklist
 
-- React Native: obtain the FCM/APNs token via the native push module, then register it after connect.
+- React Native: obtain the FCM/APNs token via the native push module, then register it after connect. With React Native UIKit, connect does this for you (see "React Native UIKit: automatic token registration").
 - Upload FCM/APNs credentials by following the official dashboard push configuration guide. Do not guess the current dashboard path.
+
+## React Native UIKit: automatic token registration
+
+With React Native UIKit, the app usually writes no token registration code. `chatOptions.enableAutoPushTokenRegistration` on `SendbirdUIKitContainer` defaults to `true`. While it is on, UIKit's `useConnection().connect` asks for the push permission, gets the token from `platformServices.notification` (`getFCMToken` on Android, `getAPNSToken` on iOS), and registers it for the user after connect; `useConnection().disconnect` unregisters it before it disconnects. So an app that connects and disconnects through `useConnection` already registers and unregisters this device: do not add a second registration path with the register calls above, and do not set the option to `false` to replace it. What remains is native: a notification service that can return a token (the public sample builds it with `createNativeNotificationService` from `@react-native-firebase/messaging` and `react-native-permissions`), the Firebase files, and the dashboard credentials.
+
+(source: https://github.com/sendbird/sendbird-uikit-react-native/blob/v3.12.9/packages/uikit-react-native/src/containers/SendbirdUIKitContainer.tsx#L69 — `AUTO_PUSH_TOKEN_REGISTRATION: true` ; same file lines 232-233 — `chatOptions.enableAutoPushTokenRegistration ?? SendbirdUIKit.DEFAULT.AUTO_PUSH_TOKEN_REGISTRATION`) (source: https://github.com/sendbird/sendbird-uikit-react-native/blob/v3.12.9/packages/uikit-react-native/src/hooks/useConnection.ts#L48-L53 — register after `sdk.connect` ; lines 94-101 — unregister, then `sdk.disconnect()`) (source: https://github.com/sendbird/sendbird-uikit-react-native/blob/v3.12.9/packages/uikit-react-native/src/hooks/usePushTokenRegistration.ts — permission check, `getAPNSToken` / `getFCMToken`, `registerAPNSPushTokenForCurrentUser` / `registerFCMPushTokenForCurrentUser`) (source: https://github.com/sendbird/sendbird-uikit-react-native/blob/v3.12.9/sample/src/factory/index.ts#L35-L38 — `createNativeNotificationService({ messagingModule: RNFBMessaging, permissionModule: Permissions })`)
 
 ## React Native: opening a channel from a push tap
 

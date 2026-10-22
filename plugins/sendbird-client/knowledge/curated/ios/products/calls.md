@@ -165,10 +165,11 @@ SendBirdCall.deauthenticate { error in
 `SendBirdCall.deauthenticate(completionHandler:)` is a static method; the handler is optional. (source: SendBirdCalls 1.12.3 `SendBirdCalls.swiftinterface:878`) If you registered a VoIP push token, `SendBirdCall.unregisterVoIPPush(token:completionHandler:)` removes it. (source: SendBirdCalls 1.12.3 `SendBirdCalls.swiftinterface:885`)
 
 ## Manual steps (what a Calls hand-off may list)
-Only these Calls steps need something outside the project, and each has a source:
+Only these Calls steps go in a hand-off, and each has a source:
 - **App ID:** create a Sendbird application and copy its App ID from the dashboard; it is case-sensitive. (source: https://sendbird.com/docs/calls/sdk/v1/ios/getting-started/make-first-call)
 - **Token server, only when the app signs users in with tokens:** Calls authentication is separate from Chat, and access or session tokens come from the Chat Platform API. (source: https://sendbird.com/docs/calls/sdk/v1/ios/features/authentication)
 - **Push credentials, to receive calls:** register the APNs certificate in the dashboard and test on a real device. (source: https://sendbird.com/docs/calls/sdk/v1/ios/features/voip-push-notifications)
+- **Incoming-call push, when this run did not wire it:** new incoming calls arrive only through push, also while the app is open ("Receive calls in the background or after the app was closed (PushKit + CallKit)" above). Name the `calls-incoming` skill as the next step; it wires PushKit and CallKit. (source: https://sendbird.com/docs/calls/sdk/v1/ios/features/authentication — "WebSocket")
 
 None of these pages has a dashboard step that enables or activates Calls (checked 2026-10-17). Do not tell the customer to "enable Calls in the dashboard", and do not add any other dashboard step that no page cited here lists.
 

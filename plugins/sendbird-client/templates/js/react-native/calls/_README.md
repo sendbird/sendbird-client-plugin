@@ -29,7 +29,7 @@ the "Make first call" docs page, and the package's `lib/typescript` declarations
    covers the rest. Dialing out does not need push.
 6. App ID read per the profile `tier2.appIdSource` (knowledge/curated/js/setup.md "App ID") — never ask the
    customer to add a bundler; the access token is a secret.
-   Hand-off (`manualSteps`) holds only the steps in `knowledge/curated/js/products/calls.md` "Manual steps" (App ID, a token server when the app uses tokens, push credentials). No Calls doc has a dashboard step that enables Calls, so never tell the customer to enable Calls.
+   Hand-off (`manualSteps`) holds only the steps in `knowledge/curated/js/products/calls.md` "Manual steps" (App ID, a token server when the app uses tokens, push credentials, and the `calls-incoming` skill as the next step when this run did not wire incoming-call push). No Calls doc has a dashboard step that enables Calls, so never tell the customer to enable Calls.
 
 ## Variations (see knowledge/curated/js/products/calls.md, all cited)
 - Direct call dial + listeners follow the RN quickstart.

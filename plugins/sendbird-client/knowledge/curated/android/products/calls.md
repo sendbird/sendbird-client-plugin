@@ -157,11 +157,12 @@ SendBirdCall.deauthenticate(object : CompletionHandler {
 `SendBirdCall.deauthenticate(CompletionHandler)` is static; `CompletionHandler.onResult(SendBirdException)` reports the result. (source: sendbird-calls 1.12.5 `javap -public com.sendbird.calls.SendBirdCall` and `com.sendbird.calls.handler.CompletionHandler`)
 
 ## Manual steps (what a Calls hand-off may list)
-Only these Calls steps need something outside the project, and each has a source:
+Only these Calls steps go in a hand-off, and each has a source:
 - **App ID:** create a Sendbird application and copy its App ID from the dashboard; it is case-sensitive. (source: https://sendbird.com/docs/calls/sdk/v1/android/getting-started/make-first-call)
 - **Token server, only when the app signs users in with tokens:** access or session tokens are issued through the Chat Platform API, not the dashboard. (source: https://sendbird.com/docs/calls/sdk/v1/android/features/authentication)
 - **`google-services.json`, to receive calls:** download it from the customer's Firebase project in the Firebase console and put it in `app/`. Apply the `com.google.gms.google-services` Gradle plugin only when `app/google-services.json` exists (for example inside `if (file("google-services.json").exists()) { ... }`), because with the plugin applied and the file missing the build fails with "File google-services.json is missing". Do not apply it unconditionally and do not create a placeholder file. (source: https://github.com/google/play-services-plugins/blob/4bde1b858612402ae5452cbef107b141afd44ef5/google-services-plugin/src/main/kotlin/com/google/gms/googleservices/GoogleServicesTask.kt#L60-L82) (source: https://github.com/google/play-services-plugins/blob/4bde1b858612402ae5452cbef107b141afd44ef5/google-services-plugin/README.md)
 - **Push credentials, to receive calls:** turn on push notifications and add the FCM credential in the dashboard (Settings > Application > Push notifications), and test on a device with the customer's Firebase project. (source: https://sendbird.com/docs/calls/sdk/v1/android/features/push-notifications)
+- **Incoming-call push, when this run did not wire it:** new incoming calls arrive only through push, also while the app is open ("Incoming calls need push, also while the app is open" above). Name the `calls-incoming` skill as the next step; it wires FCM and the call notification. (source: https://sendbird.com/docs/calls/sdk/v1/android/features/authentication — "WebSocket")
 
 None of these pages has a dashboard step that enables or activates Calls (checked 2026-10-17). Do not tell the customer to "enable Calls in the dashboard", and do not add any other dashboard step that no page cited here lists.
 
