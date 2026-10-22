@@ -17,6 +17,7 @@ Scan for known anti-patterns (read-first; fixes confirmed).
 2. Hand the inspection to the platform agent once, as the top of this skill says, with step 3 as its brief, and wait for its result. Do not read the sources yourself instead, even in a small project.
 3. (The agent's brief.) Grep the project for the verified anti-patterns from `knowledge/curated/<platform>/cross-cutting/performance.md` + `pitfalls.md` (both populated): repeated init/connect, handler-leak pairs (iOS `addChannelDelegate` without `removeChannelDelegate`; Android `addChannelHandler` without `removeChannelHandler`; JS `addGroupChannelHandler` without `removeGroupChannelHandler` in effect cleanup), eager pagination without a `limit`, local caching disabled (`isLocalCachingEnabled`/`useCaching`), unoptimized images, plus product pitfalls from `products/<product>.md`.
 4. Report each finding from the agent's result with severity + file:line + a cited fix suggestion (apply via the platform agent on confirm).
+   - Non-interactive (`SENDBIRD_NONINTERACTIVE`): apply only when the request itself asks for the fix; otherwise change nothing and stop with `needs_input` and the `apply-fix` question (docs/AGENT_CONTRACT.md section 7).
 
 ## No-Fabrication
 Anti-patterns + fixes come from curated/verified sources, cited. Don't invent a "best practice" — if a pitfall isn't in a verified source, don't assert it.

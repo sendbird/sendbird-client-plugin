@@ -13,7 +13,7 @@ Read `${CLAUDE_PLUGIN_ROOT}/docs/AGENT_CONTRACT.md` first and follow it as the s
 ## First, detect the project
 Run `bash "${CLAUDE_PLUGIN_ROOT}/tools/detection/detect.sh" <project-dir>`.
 - Key facts: host (`view`/`compose`/`hybrid`), gradle flavor (`groovy`/`kts`), minSdk, products.
-- If host is `hybrid` or a required fact is `unknown`, ASK the customer once; do not guess (NO guessing).
+- If host is `hybrid` and the request does not name Compose or View, or a required fact is `unknown`, do not guess (NO guessing): change no file and end with one question that names the choices, which the caller asks the customer (`docs/AGENT_CONTRACT.md` section 1).
 
 ## Source priority (per §6.3; public-first)
 1. `${CLAUDE_PLUGIN_ROOT}/knowledge/curated/android/` (+ `hosts/view.md` or `hosts/compose.md`)

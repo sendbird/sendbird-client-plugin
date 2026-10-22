@@ -14,7 +14,7 @@ Check every product the request names with `bash "${CLAUDE_PLUGIN_ROOT}/tools/de
 Add one feature to an existing integration.
 
 ## Steps
-1. Run `bash "${CLAUDE_PLUGIN_ROOT}/tools/detection/detect.sh" <project-dir>` and resolve platform, host, product, and installed SDK versions. If an ambiguity changes the emitted code, ask one focused question.
+1. Run `bash "${CLAUDE_PLUGIN_ROOT}/tools/detection/detect.sh" <project-dir>` and resolve platform, host, product, and installed SDK versions. If an ambiguity changes the emitted code, ask one focused question before handing off, for example which UI to build with when the host is `hybrid` (docs/AGENT_CONTRACT.md section 1).
 2. Check the plan: if the feature is listed in `core/plans.json`, run `bash "${CLAUDE_PLUGIN_ROOT}/tools/detection/resolve-plan.sh" <project-dir> --check <feature-id>` and follow `knowledge/curated/common/plans.md` before any file is changed. On `confirm`, show the message and build only after the customer says yes; on `sales`, show the message and write no code. In a non-interactive run, the request answers with `confirm-<feature-id>=yes` (build it) or `confirm-<feature-id>=no` (leave it out); without that answer, change nothing and return `status: "needs_input"` with one question: id `confirm-<feature-id>`, the decision's `message` as `question`, options `["yes", "no"]`.
 3. This is a customization request: consult sources discussions-first per §6.3.2 (public discussions on the relevant UIKit mirror), then knowledge/curated (populated — see below), then the customer-local SDK / public source / docs.
 4. Hand off to the platform agent to splice the matching template under `templates/<platform>/<host>/<product>/` and wire imports/delegates/hooks.
