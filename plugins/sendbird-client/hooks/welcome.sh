@@ -69,6 +69,6 @@ NON-INTERACTIVE MODE (SENDBIRD_NONINTERACTIVE is on): nobody can answer a questi
 - A request to add a product's screen or feature includes installing it. Use a safe default instead of asking: the user ID from the app's sign-in code, user-ID-only connect (token server under manualSteps), existing navigation or a state switch, no push (under manualSteps).
 - A request for a product outside the scope or not supported yet: change nothing and stop with status declined and the reason.
 - If a value that changes the emitted code is still unknown (hybrid or unknown host, no App ID, a request that assumes an integration the project does not have), change nothing and stop with status needs_input and one entry in questions per missing value.
-- End the final answer with one fenced json block that validates against $ROOT/core/schemas/run-summary.schema.json.
+- End the final answer with one fenced json block that validates against $ROOT/core/schemas/run-summary.schema.json. The block follows the full answer and never replaces it; list the checks you report under checks and the skills you suggest next under nextSteps.
 EOF2
 fi

@@ -60,7 +60,7 @@ bash "${CLAUDE_PLUGIN_ROOT}/core/commands/search.sh" "<question>" --platform <pl
 - Preserve the template's `source:` comment when code is copied so the write-boundary guard can validate it.
 - Write files with the host's file-editing tool: Write and Edit in Claude Code, `apply_patch` in Codex. Do not write source files with shell redirection, heredocs, or `sed -i`.
 - Limit edits to the requested product and the lifecycle code required to support it.
-- Build with the SDK the request names. When it names the Chat SDK and not UIKit (for example "Chat SDK", "sendbirdChat", "SendbirdChat", "@sendbird/chat", `--product chat`, "without UIKit", or "UIKit 없이"), write the screens on the Chat SDK alone: do not install a UIKit package and do not start from `templates/starters-bp/`. When the request names UIKit, or names no SDK, the usual choices stay; in a new app, setup's `chat-ui` answer makes this choice.
+- Build with the SDK the request names. When it names the Chat SDK and not UIKit (for example "Chat SDK", "sendbirdChat", "SendbirdChat", "@sendbird/chat", `--product chat`, "without UIKit", or "UIKit 없이"), write the screens on the Chat SDK alone: do not install a UIKit package and do not start from `templates/starters-bp/`. When the request names UIKit, or names no SDK, the usual choices stay; in a new app, setup's `chat-ui` answer makes this choice. When an existing project's request names no SDK, say in the answer which one you built with (UIKit or the Chat SDK) and why.
 - Some Chat features work only on higher Sendbird plans (`core/plans.json`, `knowledge/curated/common/plans.md`). Do not add one the customer did not ask for, and before adding one they did ask for, check it with `tools/detection/resolve-plan.sh <project-dir> --check <feature-id>`: build on `ok`, ask first on `confirm`, and write no code on `sales`.
 - Install dependencies so the project's next clean install works. On JS, install with the project's package manager (`npm install <package>@<version>`, `yarn add`, or `pnpm add`) so `package.json` and the lockfile name the same version. Editing `package.json` alone is not an install, and an install is never a `manualSteps` entry. Never pass `--legacy-peer-deps` or `--force` to npm (or `--ignore-engines` to yarn): they hide a version conflict that breaks the next `npm install`. When a package's peer range rejects the project's versions, install the newest version whose `peerDependencies` accept them; check with `npm view <package>@<range> peerDependencies`.
 - Do not install tools or write files outside the project for your own checks (for example `npm i playwright` in `/tmp`). Use what the project and the machine already have, and report a check you could not run as not run.
@@ -91,7 +91,7 @@ Check the edited path by reading the project. These checks need no build:
 - the logout path: when the project has a sign-out or logout function (for example `onLogout`), it now disconnects, removes the handlers you added, and, when you set up push, unregisters the push token (`knowledge/curated/<platform>/cross-cutting/push.md`). Do this in the project; it is never a `manualSteps` entry
 - host-specific requirements are present
 
-Report each check as pass, fail, or not run. Never describe a skipped check as passed. A build or type check is not one of these checks; the answer text may say once that this run did not build the project, but that note is never a `manualSteps` entry.
+Report each check on its own line by name (`dependency`, `evidence`, `init-once`, `handlers-before-connect`, `cleanup`, `logout`, `host`, in the order above), together with any check the skill lists, as pass, fail, or not run with the file:line that shows it. Never group several checks into one line, and never describe a skipped check as passed. A build or type check is not one of these checks; the answer text may say once that this run did not build the project, but that note is never a `manualSteps` entry.
 
 ## 5. Delegate once
 
@@ -99,13 +99,15 @@ A platform agent may ask the docs agent one factual question. The docs agent may
 
 ## 6. Return a complete result
 
-Return:
+An agent returns this to the skill, and the skill's final answer carries it to the customer, also when the skill made the change itself without an agent:
 
 1. detected task envelope
 2. changed files and why each changed
 3. the checks from section 4 and their results
-4. symbol-to-source evidence
+4. symbol-to-source evidence: a table with one row per symbol and the columns symbol, source (path:line or URL), source version, and verification method (section 2). When the installed SDK version differs from the curated file's `last-verified-against` version, say so in one line. A related page is not a source.
 5. anything not verified and the exact next action; only steps that "Finish what the project allows" (section 3) could not complete
+
+When the run changed app code, suggest once in the answer text that `/sendbird-client:run-check` builds and launches the app against the customer's application. Only suggest it: do not run it, and never put it in `manualSteps`.
 
 ## 7. Non-interactive runs
 
@@ -121,7 +123,7 @@ When `SENDBIRD_NONINTERACTIVE` is `1`, `true`, or `yes` in any case (for example
   - push: leave it out, and list it under `manualSteps`
 - A request for a product outside the active scope or not supported yet (section 1) changes nothing and ends with `status: "declined"` and the reason.
 - If a value that changes the emitted code is still unknown, change nothing and stop with `status: "needs_input"` and one `questions` entry per missing value. Examples: the host is `hybrid` or `unknown`; there is no App ID for setup; the request assumes an integration the project does not have, such as theming UIKit screens in an app without UIKit.
-- End the final answer with one fenced `json` block that validates against `core/schemas/run-summary.schema.json`. Paths in `changes` are relative to the project root.
+- End the final answer with one fenced `json` block that validates against `core/schemas/run-summary.schema.json`. Paths in `changes` are relative to the project root. The block follows the full answer (section 6 and the skill's own report), never replaces it. List the section 4 checks and the skill's own under `checks`, and the skills the answer suggests next (such as verify-integration or run-check) under `nextSteps`.
 
 The caller answers by running again with the value in the environment or in the prompt (for example `host: swiftui`).
 

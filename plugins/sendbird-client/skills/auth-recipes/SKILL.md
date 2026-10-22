@@ -14,8 +14,8 @@ Resolve the platform agent with `bash "${CLAUDE_PLUGIN_ROOT}/tools/routing/route
 Resolve the active product scope with `bash "${CLAUDE_PLUGIN_ROOT}/tools/detection/resolve-products.sh" <project-dir>` and decline out-of-scope products.
 
 ## Steps
-1. Run `bash "${CLAUDE_PLUGIN_ROOT}/tools/detection/detect.sh" <project-dir>`, then inspect the customer code and installed SDK surface for direct-connect or session-token handling. Ask once if the code does not establish the current auth posture.
-2. For the requested flow, hand off to the platform agent to produce the verified pattern (session delegate/handler, token refresh, safe disconnect) from the wired sources below.
+1. Run `bash "${CLAUDE_PLUGIN_ROOT}/tools/detection/detect.sh" <project-dir>` and `bash "${CLAUDE_PLUGIN_ROOT}/tools/detection/resolve-products.sh" <project-dir>`, then inspect the customer code and installed SDK surface for direct-connect or session-token handling. Ask once if the code does not establish the current auth posture.
+2. Read `knowledge/curated/<platform>/products/auth.md` for the requested flow and the session-expiry codes in `knowledge/curated/<platform>/cross-cutting/errors.md` before handing off. Then hand off to the platform agent to produce the verified pattern (session delegate/handler, token refresh, safe disconnect) from the wired sources below, passing the sections and codes you read.
 3. Note Dashboard config requirements (link docs, don't invent paths).
 
 ## Wired knowledge (populated and cited)
