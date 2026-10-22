@@ -2,6 +2,7 @@
 # Resolve the customer's Sendbird plan for one project, and decide what to do with a plan-limited feature.
 # Usage: resolve-plan.sh <project-dir>                     -> starter | pro | enterprise | unsure
 #        resolve-plan.sh <project-dir> --check <feature-id> -> one JSON decision (see core/plans.json)
+#        resolve-plan.sh <project-dir> --save <plan>        -> stores the plan in profile.json, prints it
 # Order: SENDBIRD_PLAN > .sendbird-client/profile.json plan > unsure (both read in any case; "free trial" is unsure).
 # Decisions: ok (the plan includes it), confirm (ask the customer before building it),
 # sales (Enterprise only, not built).
@@ -10,7 +11,7 @@ set -euo pipefail
 # skill can run this before the plugin's hooks are trusted.
 first_run_notice="$(cd "$(dirname "$0")" && pwd)/../../hooks/first-run-notice.sh"
 [ ! -f "$first_run_notice" ] || bash "$first_run_notice" script || true
-dir="${1:?usage: resolve-plan.sh <project-dir> [--check <feature-id>]}"
+dir="${1:?usage: resolve-plan.sh <project-dir> [--check <feature-id> | --save <plan>]}"
 HERE="$(cd "$(dirname "$0")" && pwd)"
 ROOT="$(cd "$HERE/../.." && pwd)"
 P="$ROOT/core/plans.json"
@@ -23,6 +24,22 @@ normalize() {
   case "$p" in freetrial) p="unsure" ;; esac
   printf '%s' "$p"
 }
+# --save <plan>: store the plan the customer named as `plan` in the project's profile.json (other
+# fields kept; detect.sh keeps it too), so it is asked only once. Prints the stored plan.
+if [ "${2:-}" = "--save" ]; then
+  plan="$(normalize "${3:?usage: resolve-plan.sh <project-dir> --save <plan>}")"
+  jq -e --arg p "$plan" '(.plans + [.unsure]) | index($p)' "$P" >/dev/null || {
+    echo "unknown plan: $plan (expected one of: $(jq -r '(.plans + [.unsure]) | join(", ")' "$P"))" >&2
+    exit 1
+  }
+  mkdir -p "$dir/.sendbird-client"
+  profile="$dir/.sendbird-client/profile.json"
+  stored="$(cat "$profile" 2>/dev/null || echo '{}')"
+  printf '%s' "$stored" | jq -e 'type == "object"' >/dev/null 2>&1 || stored='{}'
+  jq -n --argjson stored "$stored" --arg p "$plan" '$stored + {plan: $p}' > "$profile.tmp" && mv "$profile.tmp" "$profile"
+  printf '%s\n' "$plan"
+  exit 0
+fi
 plan=""
 if [ -n "${SENDBIRD_PLAN:-}" ]; then
   plan="$(normalize "$SENDBIRD_PLAN")"

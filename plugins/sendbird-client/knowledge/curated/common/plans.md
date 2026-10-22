@@ -9,7 +9,7 @@ Some Chat features work only on higher plans. The plugin builds what the custome
 `bash "${CLAUDE_PLUGIN_ROOT}/tools/detection/resolve-plan.sh" <project-dir>` prints the plan: `SENDBIRD_PLAN` first, then `plan` in `.sendbird-client/profile.json`, otherwise `unsure`. The plan is one of `starter`, `pro`, `enterprise`, or `unsure` (a free trial, a plan not decided yet, or one the customer did not give). Both sources are read in any case with spaces ignored, and `free trial` reads as `unsure`.
 
 - New app: setup asks the `plan` question in `core/catalog.json` and saves the answer as `plan` in the profile.
-- Existing project: when the plan is `unsure` and the customer names their plan, save it the same way so it is asked only once.
+- Existing project: when the plan is `unsure` and the customer names their plan (for example while answering a confirmation), store it with `bash "${CLAUDE_PLUGIN_ROOT}/tools/detection/resolve-plan.sh" <project-dir> --save <plan>`, so later checks use it and the plan is asked only once.
 - The free trial includes every Pro feature ("All pro features" on the pricing page), but the plan the app moves to afterwards decides what keeps working, so a free trial counts as `unsure`.
 
 ## Before adding a feature
