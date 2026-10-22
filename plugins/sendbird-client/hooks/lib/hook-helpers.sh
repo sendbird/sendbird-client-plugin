@@ -98,6 +98,9 @@ resolve_cited_sources() {
   local cwd="$1" source tmp_source local_path root="${CLAUDE_PLUGIN_ROOT:-.}"
   RESOLVED_SOURCES=(); TMP_SOURCES=()
   while IFS= read -r source; do
+    source="${source//\`/}"   # a path written in backticks
+    # a line or range after the file (chat.md:42, chat.md:42-60) still names that file
+    [[ "$source" =~ ^(.*[^0-9:]):[0-9]+(-[0-9]+)?$ ]] && source="${BASH_REMATCH[1]}"
     [ -n "$source" ] || continue
     case "$source" in *..*) continue ;; esac
     case "$source" in
@@ -132,7 +135,7 @@ source_supports_symbol() {
 
 # all_symbols_sourced <symbols> : 0 when every symbol (one per line) is in one of
 # RESOLVED_SOURCES. Removes the fetched copies either way.
-all_symbols_sourced() {
+all_symbols_sourced() {   # sets UNSOURCED_SYMBOL to the first symbol no source contains
   local symbol supported source_file valid=1
   while IFS= read -r symbol; do
     [ -n "$symbol" ] || continue
@@ -140,7 +143,7 @@ all_symbols_sourced() {
     for source_file in ${RESOLVED_SOURCES[@]+"${RESOLVED_SOURCES[@]}"}; do
       if source_supports_symbol "$source_file" "$symbol"; then supported=1; break; fi
     done
-    [ "$supported" -eq 1 ] || { valid=0; break; }
+    [ "$supported" -eq 1 ] || { valid=0; UNSOURCED_SYMBOL="$symbol"; break; }
   done <<< "$1"
   for source_file in ${TMP_SOURCES[@]+"${TMP_SOURCES[@]}"}; do rm -f "$source_file"; done
   [ "$valid" -eq 1 ]

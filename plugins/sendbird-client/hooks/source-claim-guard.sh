@@ -14,14 +14,16 @@ cwd="$(jget '.cwd')"
 body_is_sourced() {
 local body="$1" existing="$2" context symbols instance_methods sources
 context="${existing}${existing:+$'\n'}${body}"
-symbols="$(printf '%s' "$body" | grep -Eo '(SendbirdChat|SendBirdCall|SendbirdCalls|AIAgentMessenger|SendbirdUIKit|SendbirdLive|SendbirdDesk|SendBirdDesk|MessengerLauncher|GroupChannel|BaseMessage|SBU[A-Z][A-Za-z0-9_]*|SBA[A-Z][A-Za-z0-9_]*|SBDSK[A-Za-z0-9_]*)(\.[A-Za-z_][A-Za-z0-9_]*)?' | sort -u || true)"
+# A source comment names files, not API: its path (e.g. a framework folder) is not a symbol.
+code="$(printf '%s' "$body" | grep -v 'source:' || true)"
+symbols="$(printf '%s' "$code" | grep -Eo '(SendbirdChat|SendBirdCall|SendbirdCalls|AIAgentMessenger|SendbirdUIKit|SendbirdLive|SendbirdDesk|SendBirdDesk|MessengerLauncher|GroupChannel|BaseMessage|SBU[A-Z][A-Za-z0-9_]*|SBA[A-Z][A-Za-z0-9_]*|SBDSK[A-Za-z0-9_]*)(\.[A-Za-z_][A-Za-z0-9_]*)?' | grep -Ev '\.(xcframework|framework|swiftmodule|swiftinterface|swiftdoc|bundle)$' | sort -u || true)"
 if printf '%s' "$context" | grep -Eq '@sendbird/|sendbird-(calls|desk)|Sendbird(Chat|UIKit|Calls|Live|Desk)|AIAgentMessenger'; then
-  instance_methods="$(printf '%s' "$body" | grep -Eo '(sb|channel|messengerLauncher)\.[A-Za-z_][A-Za-z0-9_]*' | sed 's/.*\.//' | sort -u || true)"
+  instance_methods="$(printf '%s' "$code" | grep -Eo '(sb|channel|messengerLauncher)\.[A-Za-z_][A-Za-z0-9_]*' | sed 's/.*\.//' | sort -u || true)"
   symbols="$(printf '%s\n%s\n' "$symbols" "$instance_methods" | sed '/^$/d' | sort -u)"
 fi
 [ -n "$symbols" ] || return 0
 
-sources="$(printf '%s' "$context" | grep -Eo 'source:[[:space:]]*[^)`[:space:]]+' | sed -E 's/^source:[[:space:]]*//' | sort -u || true)"
+sources="$(printf '%s' "$context" | grep -Eo 'source:[[:space:]]*`?[^)`[:space:]]+' | sed -E 's/^source:[[:space:]]*`?//' | sort -u || true)"
 # Plugin files, the plugin's SDK cache, installed SDK interfaces, and public Sendbird pages
 # (hooks/lib/hook-helpers.sh resolve_cited_sources); a file the model wrote in the app does not count.
 resolve_cited_sources "$cwd" <<< "$sources"
@@ -37,10 +39,10 @@ existing_text() {
 }
 
 deny() {
-  jq -n '{hookSpecificOutput:{
+  jq -n --arg sym "${UNSOURCED_SYMBOL:-}" '{hookSpecificOutput:{
     hookEventName:"PreToolUse",
     permissionDecision:"deny",
-    permissionDecisionReason:"Sendbird API code requires a concrete source comment whose file or public URL contains the emitted symbol. Preserve the template source comment or cite knowledge/curated, the customer SDK cache or installed SDK files (node_modules/@sendbird, Pods, .build, SourcePackages, DerivedData), a version-matched sendbird.com/docs page or a file in a public sendbird/* repo (a /blob/ or /raw/ link, not an issue or discussion), or stop if unverifiable."
+    permissionDecisionReason:((if $sym != "" then "No cited source contains \($sym). " else "" end) + "Sendbird API code requires a concrete source comment whose file or public URL contains the emitted symbol. Preserve the template source comment or cite knowledge/curated, the customer SDK cache or installed SDK files (node_modules/@sendbird, Pods, .build, SourcePackages, DerivedData), a version-matched sendbird.com/docs page or a file in a public sendbird/* repo (a /blob/ or /raw/ link, not an issue or discussion), or stop if unverifiable.")
   }}'
   exit 0
 }
