@@ -112,6 +112,10 @@ extension CallsSession: SendBirdCallDelegate, DirectCallDelegate {
     nonisolated func didStartRinging(_ call: DirectCall) {
         call.delegate = self   // register before accepting (README "Receive a call")
         Task { @MainActor in
+            if self.activeCall != nil {
+                call.end()   // already in a call: decline the second one
+                return
+            }
             self.activeCall = call
             self.state = .ringing
         }
@@ -123,6 +127,8 @@ extension CallsSession: SendBirdCallDelegate, DirectCallDelegate {
 
     nonisolated func didEnd(_ call: DirectCall) {
         Task { @MainActor in
+            // A declined second call ends too; it must not end the call in progress.
+            guard self.activeCall == nil || self.activeCall?.callId == call.callId else { return }
             self.state = .ended
             self.activeCall = nil
         }

@@ -64,6 +64,10 @@ class DirectCallViewModel : ViewModel() {
     init {
         SendBirdCall.addListener(LISTENER_ID, object : SendBirdCallListener() {
             override fun onRinging(call: DirectCall) {
+                if (_call.value != null) {
+                    call.end()   // already in a call: decline the second one
+                    return
+                }
                 call.setListener(callListener)   // register before accepting
                 _call.value = call
                 _state.value = CallState.RINGING

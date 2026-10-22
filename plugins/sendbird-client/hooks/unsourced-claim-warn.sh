@@ -22,7 +22,8 @@ printf '%s' "$text" | grep -Eq '\b[A-Z][A-Za-z0-9]*(Channel|Message|Manager|Dele
 printf '%s' "$text" | grep -Eq 'https?://[A-Za-z0-9./_-]+' && needs_cite=1
 [ "$needs_cite" -eq 0 ] && exit 0
 
-if printf '%s' "$text" | grep -Eq '(source:|verified against|from sendbird/|#discussions/|:[0-9]+\b|knowledge/(imports|curated)/)'; then
+# A file:line citation needs a file name with an extension, so a time such as 10:30 does not count.
+if printf '%s' "$text" | grep -Eiq '(source:|verified against|from sendbird/|#discussions/|[A-Za-z0-9_-]\.[A-Za-z0-9]+:[0-9]+\b|knowledge/(imports|curated)/)'; then
   exit 0
 fi
 msg="⚠️ This answer names Sendbird APIs / code / a docs URL but includes no citation. Per the No-Fabrication policy, re-emit with a verifiable source for each symbol (source: <knowledge/imports path | public mirror | sendbird.com/docs URL>), or state 'I don't know — here's what I checked'."
