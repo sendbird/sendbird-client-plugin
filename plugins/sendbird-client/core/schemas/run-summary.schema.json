@@ -68,6 +68,25 @@
         }
       }
     },
+    "checks": {
+      "description": "The checks the answer reports (docs/AGENT_CONTRACT.md section 4, plus the skill's own checks), each with its result. A check that was skipped is not_run, never pass. A completed run that changed app files lists them.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "result"],
+        "additionalProperties": false,
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "result": { "enum": ["pass", "warn", "fail", "not_run", "not_verified"] },
+          "detail": { "description": "Evidence, such as file:line, or why the check was not run.", "type": "string" }
+        }
+      }
+    },
+    "nextSteps": {
+      "description": "Skills the answer suggests next, such as verify-integration or run-check. Never hand-off work; that goes in manualSteps.",
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
     "manualSteps": {
       "description": "Steps the customer still has to do because they need something the project does not contain (a token server, a dashboard setting, a signing key, a device run, a value nobody supplied). Each says what is missing. Work the plugin could do inside the project never goes here, and neither does a build, a type check, or a note that this run did not build. Empty when nothing is left.",
       "type": "array",

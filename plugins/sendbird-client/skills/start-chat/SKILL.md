@@ -17,7 +17,16 @@ Resolve the active product scope with `bash "${CLAUDE_PLUGIN_ROOT}/tools/detecti
 3. Find or create the channel: create a group channel with only the other user's ID and `isDistinct` set to true. With distinct on, the server returns the existing channel that has the same members instead of creating a second one. Do not query for an existing channel first and do not create a non-distinct channel. Create only after connect has completed (`products/chat.md` "Call APIs only after connect completes").
 4. Open the channel screen by the URL of the returned channel, with no channel list in between, using the host's section below. Keep the app's navigation: push onto the existing stack or route, so the back action returns to the screen that had the button.
 5. Push tap (only when asked, or when the app already handles Sendbird push): read the channel URL from the Sendbird payload and open the same screen. Use only the host sections below; where a host has no verified section, say so and leave push out.
-6. Hand the splice to the platform agent once, with the host section and the files and lines from step 2. Check the result by reading the project (docs/AGENT_CONTRACT.md section 4; this run does not build, contract section 3) and report each check as pass, fail, or not run.
+6. Hand the splice to the platform agent once, with the host section and the files and lines from step 2. Check the result by reading the project (docs/AGENT_CONTRACT.md section 4; this run does not build, contract section 3).
+7. Report, whether the agent or you made the change: the step 2 findings with file:line (the screen and control, the source of the other user's ID, the navigation, the existing initialize and connect code), the changed files, and a table with one row per check below plus the section 4 checks, each pass, fail, or not run with file:line. In a non-interactive run, put the same rows under the run summary's `checks`.
+   - `distinct-create`: one create call, with only the other user's ID and `isDistinct` true, and no channel query before it
+   - `after-connect`: the create call runs only after connect has completed
+   - `open-by-url`: the channel screen opens by the returned channel's URL, with no channel list in between
+   - `back-returns`: the screen is pushed onto the existing stack or route, so back returns to the screen with the button
+   - `no-new-navigation`: no navigation library was added
+   - `host-section`: the host section from the table below that the code follows, cited
+   - `push-tap`: done, or left out with the reason
+   - `build`: not run (this run does not build)
 
 | Host | Open a channel by URL (and push tap) |
 | --- | --- |

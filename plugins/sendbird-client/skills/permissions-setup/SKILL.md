@@ -13,12 +13,12 @@ Resolve the active product scope with `bash "${CLAUDE_PLUGIN_ROOT}/tools/detecti
 
 ## Steps
 1. Run `bash "${CLAUDE_PLUGIN_ROOT}/tools/detection/detect.sh" <project-dir>` and resolve platform, host, products, and installed versions. Note whether the screens are UIKit or the app's own Chat SDK code.
-2. Split the request into single requirements. Put each into exactly one layer, using the rules below, and show the table to the customer before writing code.
+2. Split the request into single requirements. Put each into exactly one layer, using the rules below. Before any Edit or Write, show the customer a table with one row per requirement: the requirement, its layer (application setting, server, or client), and the source. Say in the answer what each matching rule below states, with its source: blocked channel creation fails with 400108; UIKit moderation starts from the host's UIKit moderation page in `core/docs-index.json`, linked before any custom code; promoting a member to operator is a client call.
 3. Application setting: name the setting, link the official docs page (find it in `${CLAUDE_PLUGIN_ROOT}/core/docs-index.json`), and never describe dashboard click paths. If no docs page names the setting and a curated entry says Sendbird support changes it, say that.
 4. Server or Platform API: say that this plugin writes client code only and does not generate server or Platform API code, name what the server must do in one sentence, and link the Platform API overview (https://sendbird.com/docs/chat/platform-api/v3/overview) or a more specific page you have opened and checked.
 5. Client: write the code through the platform agent, from the curated sections below. A client check only changes what the UI offers; it is not a security boundary. Say so whenever a requirement is really about preventing an action, and pair it with the setting or server item that enforces it.
 6. Before you finish, follow each screen that used a control you removed or hid, and make sure a member can still reach it the way the requirement allows. Removing the only path into a channel screen leaves the app unusable even though every rule is met.
-7. Check the result by reading the project (docs/AGENT_CONTRACT.md section 4; this run does not build, contract section 3) and report each requirement as done in code, handed to settings, or handed to the server.
+7. Check the result by reading the project (docs/AGENT_CONTRACT.md section 4; this run does not build, contract section 3) and end the answer with one line per requirement: done in code (with file:line), handed to settings, or handed to the server.
 
 | Requirement | Layer | Source |
 | --- | --- | --- |
