@@ -46,7 +46,8 @@
 # The project directory is never modified: the harness works on a copy, gives it the App ID the
 # way the project reads it (lib/appid.py), and adds only harness files to the copy.
 # Writes <out>/runtime.json ({status: pass|fail|skip, reason, steps[]}), steps.jsonl, screens/*.png,
-# and logs with the App ID removed (lib/redact.py). The App ID is never printed.
+# and logs with the App ID removed (lib/redact.py). The App ID is never printed: the host driver's
+# output and the result lines pass through lib/redact.py before they reach the terminal.
 #
 # Environment: RUNTIME_TOOLS_DIR (default $TMPDIR/sendbird-runtime-tools) holds the pinned npm
 # tools (Playwright, Vite, @sendbird/chat for user B) and Chromium; nothing is installed into the
@@ -232,6 +233,9 @@ fi
 mkdir -p "$out"; out="$(cd "$out" && pwd)"
 : > "$out/steps.jsonl"
 
+# say: standard output without the App ID (a driver's step detail can quote a Sendbird host name)
+say() { python3 -I -u "$HERE/lib/redact.py" -; }
+
 finish() {  # finish <status> <reason> <exit>
   python3 -I "$HERE/lib/redact.py" "$out"
   jq -n --arg status "$1" --arg reason "$2" --arg host "$host" --arg platform "$platform" --arg project "$project" \
@@ -244,9 +248,11 @@ finish() {  # finish <status> <reason> <exit>
         gradleProperties:$appid.gradleProperties, replacedIn:($appid.replacedIn // [])} else null end),
       screenshots:"screens/", steps:$steps}' > "$out/runtime.json"
   python3 -I "$HERE/lib/redact.py" "$out"
-  echo "runtime: $1${2:+ — $2}"
-  case "${msg_state:-}" in ""|run) ;; *) echo "note: $msg_state" ;; esac
-  echo "result: $out/runtime.json"
+  {
+    echo "runtime: $1${2:+ — $2}"
+    case "${msg_state:-}" in ""|run) ;; *) echo "note: $msg_state" ;; esac
+    echo "result: $out/runtime.json"
+  } | say
   exit "$3"
 }
 
@@ -315,14 +321,14 @@ case "$host" in
       ( cd "$TOOLS" && npx --no-install playwright install chromium ) >> "$out/tools-install.log" 2>&1 || finish fail "could not install Chromium (tools-install.log)" 1
     fi
     ( cd "$work" && npm install --no-audit --no-fund ) > "$out/npm-install.log.raw" 2>&1 || finish fail "npm install failed in the project (npm-install.log)" 1
-    ( cd "$TOOLS" && node react.mjs ) 2>&1 | tee "$out/driver.log.raw"
+    ( cd "$TOOLS" && node react.mjs ) 2>&1 | say | tee "$out/driver.log.raw"
     rc="${PIPESTATUS[0]}" ;;
   ios-uikit|ios-swiftui)
-    bash "$HERE/hosts/ios.sh" 2>&1 | tee "$out/driver.log.raw"; rc="${PIPESTATUS[0]}" ;;
+    bash "$HERE/hosts/ios.sh" 2>&1 | say | tee "$out/driver.log.raw"; rc="${PIPESTATUS[0]}" ;;
   android-view|android-compose)
-    bash "$HERE/hosts/android.sh" 2>&1 | tee "$out/driver.log.raw"; rc="${PIPESTATUS[0]}" ;;
+    bash "$HERE/hosts/android.sh" 2>&1 | say | tee "$out/driver.log.raw"; rc="${PIPESTATUS[0]}" ;;
   react-native)
-    bash "$HERE/hosts/react-native.sh" 2>&1 | tee "$out/driver.log.raw"; rc="${PIPESTATUS[0]}" ;;
+    bash "$HERE/hosts/react-native.sh" 2>&1 | say | tee "$out/driver.log.raw"; rc="${PIPESTATUS[0]}" ;;
 esac
 
 # Without chat screens the iOS and Android drivers stop after connect and record nothing for the

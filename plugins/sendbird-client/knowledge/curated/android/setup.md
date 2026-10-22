@@ -55,6 +55,7 @@ SendbirdChat.init(params, initResultHandler)
 ## Pitfalls
 - App ID from BuildConfig/secret; tokens are secrets.
 - One App ID per app run. The authentication docs say the initialization method "must be called once across your client app", and they describe no way to switch to another App ID at runtime; keep development and production App IDs in separate build types or flavors. (source: https://sendbird.com/docs/chat/sdk/v4/android/application/authenticating-a-user/authentication)
+  - When the customer asks to switch App IDs inside the app (a settings switch, a debug menu), do not build a runtime switch. Say why (the rule above), give each build type (debug and release) or flavor its own `SENDBIRD_APP_ID` value in the app's Gradle build file, passed on the way "App ID in Gradle" above describes, and finish the run with that change instead of asking or declining. A value the customer did not give stays empty and goes under the run's manual steps.
 - Match Chat/UIKit min versions required by AI Agent (see products/ai-agent.md).
 
 ## Related

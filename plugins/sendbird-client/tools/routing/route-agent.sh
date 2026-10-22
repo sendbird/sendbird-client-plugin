@@ -18,7 +18,8 @@ case "$kind" in
 esac
 
 bash "$ROOT/tools/detection/detect.sh" "$dir" >/dev/null
-platform="$(jq -r '.platform // "unknown"' "$dir/.sendbird-client/profile.json")"
+# an empty folder gets no profile (detect.sh): its platform is unknown
+platform="$(jq -r '.platform // "unknown"' "$dir/.sendbird-client/profile.json" 2>/dev/null || echo unknown)"
 agent="$(jq -r --arg platform "$platform" '.routing.code[$platform] // empty' "$config")"
 [ -n "$agent" ] || { echo "no code agent for detected platform: $platform" >&2; exit 1; }
 printf '%s\n' "$agent"

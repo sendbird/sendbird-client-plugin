@@ -71,6 +71,7 @@ If the project already supplies the App ID another way, such as an existing conf
 - Binary frameworks (Calls/Live/AI Agent Core) may need a device build (simulator slice arch limits).
 - App ID from the Info.plist build setting (see "App ID" above); tokens are secrets — never hard-code.
 - One App ID per app run. The authentication docs say the initialize method "must be called once across your client app", and they describe no way to switch to another App ID at runtime; keep development and production App IDs in separate build configurations. (source: https://sendbird.com/docs/chat/sdk/v4/ios/application/authenticating-a-user/authentication)
+  - When the customer asks to switch App IDs inside the app (a settings switch, a debug menu), do not build a runtime switch. Say why (the rule above), give the `SENDBIRD_APP_ID` build setting one value per build configuration (Debug and Release, in the `project.yml` configuration settings or the xcconfig file each configuration uses), and finish the run with that change instead of asking or declining. A value the customer did not give keeps the placeholder and goes under the run's manual steps.
 
 ## Related
 - Architecture: knowledge/curated/ios/architecture.md

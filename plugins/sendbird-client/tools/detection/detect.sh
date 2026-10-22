@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Tier-1 detection orchestrator. Writes <project>/.sendbird-client/profile.json (spec §11.3).
+# Tier-1 detection orchestrator. Writes <project>/.sendbird-client/profile.json (spec §11.3),
+# except in an empty folder that has no profile yet.
 #
 # Thin plugin-side wrapper around core/commands/detect.sh (the pure, side-effect-free
 # detector). This script owns the ONE thing the core command deliberately doesn't:
@@ -17,9 +18,17 @@ HERE="$(cd "$(dirname "$0")" && pwd)"
 CORE="$(cd "$HERE/../../core/commands" && pwd)"
 
 fresh="$(bash "$CORE/detect.sh" "$dir")"
+prof="$dir/.sendbird-client/profile.json"
+
+# An empty folder (only hidden entries such as .git) with no profile yet, as before new-app setup, has
+# nothing to store: creating a profile there would be a change in a run that must change nothing
+# (a needs_input stop, docs/AGENT_CONTRACT.md section 7). New-app setup writes it once it has files.
+if [ ! -f "$prof" ] && [ -z "$(find "$dir" -mindepth 1 -maxdepth 1 ! -name '.*' 2>/dev/null | head -1)" ]; then
+  echo "empty folder $dir: no project detected, profile not written"
+  exit 0
+fi
 
 mkdir -p "$dir/.sendbird-client"
-prof="$dir/.sendbird-client/profile.json"
 stored="$(cat "$prof" 2>/dev/null || echo '{}')"
 printf '%s' "$stored" | jq -e . >/dev/null 2>&1 || stored='{}'
 
