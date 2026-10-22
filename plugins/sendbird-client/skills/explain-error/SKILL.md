@@ -1,6 +1,6 @@
 ---
 name: explain-error
-description: Explain a Sendbird error code or message — its meaning, common triggers, and a fix — across any product/platform, citing the verified error table. Use when the customer hits a Sendbird error code or exception.
+description: Explain a Sendbird error code or message — its meaning, common triggers, and a fix — across any product/platform, citing the verified error table. Use when the customer hits a Sendbird error code or exception. When opening or loading a channel fails with 400201 or 400108, use diagnose-channel instead; for a build, bundler, or package-install error, or an error from two copies of a Sendbird package, use fix-build.
 argument-hint: "<code-or-message>"
 allowed-tools: Read, Bash, Grep, Glob, WebFetch, Agent
 ---
@@ -8,7 +8,7 @@ allowed-tools: Read, Bash, Grep, Glob, WebFetch, Agent
 # /sendbird-client:explain-error
 
 Resolve every plugin-owned path below from `${CLAUDE_PLUGIN_ROOT}`. Where that variable is empty (Codex does not set it for shell commands), the plugin root is the folder two levels above this SKILL.md.
-Resolve the platform agent with `bash "${CLAUDE_PLUGIN_ROOT}/tools/routing/route-agent.sh" <project-dir> code` when code inspection or a fix is required.
+A look-up (what a code means, its triggers, the documented fix) needs no agent and changes no file. When the customer asks for code inspection or a code change, resolve the platform agent with `bash "${CLAUDE_PLUGIN_ROOT}/tools/routing/route-agent.sh" <project-dir> code`. Hand work to that agent by calling the `Agent` tool once with the agent as Claude Code lists it: this plugin's name, a colon, then the name the router printed (for example `sendbird-client:sendbird-ios-agent`). In Codex, which has no `Agent` tool, run that agent's launcher skill instead (for example `$sendbird-client:sendbird-ios-agent`) and start the agent only as that skill says; it sets the model and settings the agent needs. Do not do the agent's part yourself, even in a small project: write or edit no project source file in this session, before or after the hand-off, also when the customer confirms a change in a later turn. If the hand-off fails, say that this part was not done.
 
 Detect the customer's platform and installed SDK version before interpreting a numeric code. Never carry a symbol or description from one platform's error enum to another platform.
 
@@ -18,7 +18,7 @@ Map an error to meaning + fix (Intent A — lookup).
 1. Look up the code in the verified table `knowledge/curated/<platform>/cross-cutting/errors.md`. Interpret it only with the detected platform and resolved SDK version because the same number can map to a different symbol or description on another platform.
 2. For triggers and fixes, and for a symptom with no code ("push never arrives", "channel missing from the list"), check `knowledge/curated/<platform>/cross-cutting/troubleshooting.md`: symptom, cause, and fix from solved public cases, each fix re-checked against the pinned SDK. Entries marked community were resolved by users, not Sendbird staff; say so when you use one.
 3. If the code isn't in the curated table: check `${CLAUDE_PLUGIN_ROOT}/knowledge/imports/<platform>/<product>/error-codes.md` when present, else read the customer-local SDK error enum via `bash "${CLAUDE_PLUGIN_ROOT}/tools/local-sdk/read-surface.sh" <project> <product> [resolved-version]`, else search version-matched official docs.
-4. Report: code, platform symbol (e.g. 400302 = iOS `accessTokenNotValid` / JS `SESSION_TOKEN_EXPIRED`), meaning, common triggers, fix (codegen handed to the platform agent for in-scope products), related docs link — all cited. Session-expiry codes route to `products/auth.md` refresh patterns.
+4. Report: code, platform symbol (e.g. 400302 = iOS `accessTokenNotValid` / JS `SESSION_TOKEN_EXPIRED`), meaning, common triggers, fix (codegen handed to the platform agent for in-scope products), related docs link — all cited. Change no file in this step: write the fix only when the customer asks for it or confirms it, through the platform agent as the top of this skill says. Session-expiry codes route to `products/auth.md` refresh patterns.
 
 ## No-Fabrication
 Only report error codes/meanings present in a verified source. If the code isn't found, say "not found in <searched sources>" and suggest the docs — never invent a meaning. The same holds for a constant name: when it is not in the verified table, the next step you offer is a source check (`read-surface.sh` on the customer's installed SDK, or the place where they saw the name). Whether their compiler, IDE autocomplete, or a test call accepts the name is not a way to verify it.

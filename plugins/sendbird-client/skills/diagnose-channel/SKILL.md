@@ -1,6 +1,6 @@
 ---
 name: diagnose-channel
-description: Diagnose a Sendbird channel that misbehaves without an error code — a channel created by API or dashboard does not show in the list, every "message" tap creates a new 1:1 channel with the same user, a channel disappeared after members left, or a user shown in the channel gets 400108. Reads the customer's code, names the cause with file:line, and offers the fix. Use when a channel is missing, duplicated, or gone and there is no error code to look up.
+description: Diagnose a Sendbird channel that misbehaves — a channel created by API or dashboard does not show in the list, every "message" tap creates a new 1:1 channel with the same user, a channel disappeared after members left or fetching it fails with 400201, or a user shown in the channel gets 400108. Reads the customer's code, names the cause with file:line, and offers the fix. Use when a channel is missing, duplicated, or gone, also when opening or loading it fails with 400201 or 400108.
 argument-hint: "[symptom]"
 allowed-tools: Read, Bash, Grep, Glob, WebFetch, Agent
 ---
@@ -8,7 +8,7 @@ allowed-tools: Read, Bash, Grep, Glob, WebFetch, Agent
 # /sendbird-client:diagnose-channel
 
 Resolve every plugin-owned path below from `${CLAUDE_PLUGIN_ROOT}`. Where that variable is empty (Codex does not set it for shell commands), the plugin root is the folder two levels above this SKILL.md.
-Resolve the platform agent with `bash "${CLAUDE_PLUGIN_ROOT}/tools/routing/route-agent.sh" <project-dir> code` before delegating a fix.
+Resolve the platform agent with `bash "${CLAUDE_PLUGIN_ROOT}/tools/routing/route-agent.sh" <project-dir> code`. Hand work to that agent by calling the `Agent` tool once with the agent as Claude Code lists it: this plugin's name, a colon, then the name the router printed (for example `sendbird-client:sendbird-ios-agent`). In Codex, which has no `Agent` tool, run that agent's launcher skill instead (for example `$sendbird-client:sendbird-ios-agent`) and start the agent only as that skill says; it sets the model and settings the agent needs. Do not do the agent's part yourself, even in a small project: write or edit no project source file in this session, before or after the hand-off, also when the customer confirms a change in a later turn. If the hand-off fails, say that this part was not done.
 
 Read-first diagnosis. The skill finds the cause in the customer's code; it changes code only after the customer confirms, through the platform agent.
 
