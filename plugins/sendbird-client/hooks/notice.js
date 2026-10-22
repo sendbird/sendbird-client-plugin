@@ -22,11 +22,12 @@ async function show($) {
   const sum = lines[0].trim()
   const text = lines.slice(1).join('\n').trim()
   if (out.exitCode !== 0 || !sum || !text) return
-  await $.env.set('SENDBIRD_NOTICE_BY_MOD', '1')
   if ((await $.store.get('first-run-notice')) !== sum) {
     $.ui.log(text)
     await $.store.set('first-run-notice', sum)
   }
+  // Set last: if the store or the log throws, the shell hook still shows the notice.
+  await $.env.set('SENDBIRD_NOTICE_BY_MOD', '1')
 }
 
 async function handle($, e, next) {
