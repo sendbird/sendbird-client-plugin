@@ -8,6 +8,10 @@
 # produce (appId today; any future customer-set field) survives re-detection instead
 # of being silently discarded. See core/README.md.
 set -euo pipefail
+# Until it is marked shown, the first-run notice (hooks/first-run-notice.sh) goes to stderr: in Codex a
+# skill can run this before the plugin's hooks are trusted.
+first_run_notice="$(cd "$(dirname "$0")" && pwd)/../../hooks/first-run-notice.sh"
+[ ! -f "$first_run_notice" ] || bash "$first_run_notice" script || true
 dir="${1:?usage: detect.sh <project-dir>}"
 HERE="$(cd "$(dirname "$0")" && pwd)"
 CORE="$(cd "$HERE/../../core/commands" && pwd)"

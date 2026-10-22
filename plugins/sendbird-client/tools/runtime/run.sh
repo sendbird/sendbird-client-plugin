@@ -54,6 +54,10 @@
 # AVD, default the first one `emulator -list-avds` names) or RT_ANDROID_SERIAL (a running device).
 # RT_GRADLEW: a Gradle wrapper for an Android project that has none of its own.
 set -uo pipefail
+# Until it is marked shown, the first-run notice (hooks/first-run-notice.sh) goes to stderr: in Codex a
+# skill can run this before the plugin's hooks are trusted.
+first_run_notice="$(cd "$(dirname "$0")" && pwd)/../../hooks/first-run-notice.sh"
+[ ! -f "$first_run_notice" ] || bash "$first_run_notice" script || true
 HERE="$(cd "$(dirname "$0")" && pwd)"
 usage() { echo "usage: run.sh <project-dir> --host <react|react-native|ios-uikit|ios-swiftui|android-view|android-compose> [--platform ios|android] [--check] [--out DIR] [--app-id-env NAME] [--expect-text TEXT]... [--expect-element ID]... [--b-custom-type TYPE] [--direct-chat USER] [--chat-screens] [--rich] [--keep]" >&2; exit 64; }
 

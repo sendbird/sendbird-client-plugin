@@ -15,6 +15,10 @@
 #   Android  members marked Deprecated in the AAR (javap -v), matched by name in .kt and .java files
 # A by-name match is a candidate: lines marked "(overloaded: check the call)" need the call's signature.
 set -uo pipefail
+# Until it is marked shown, the first-run notice (hooks/first-run-notice.sh) goes to stderr: in Codex a
+# skill can run this before the plugin's hooks are trusted.
+first_run_notice="$(cd "$(dirname "$0")" && pwd)/../../hooks/first-run-notice.sh"
+[ ! -f "$first_run_notice" ] || bash "$first_run_notice" script || true
 HERE="$(cd "$(dirname "$0")" && pwd)"
 ROOT="$(cd "$HERE/../.." && pwd)"
 usage() { echo "usage: deprecated-usage.sh <project-dir> <product> [version] [--download]" >&2; exit 64; }
