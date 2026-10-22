@@ -51,8 +51,10 @@ installed_data() {
   p="${p%/*}"; plugin="${p##*/}"; p="${p%/*}"; mkt="${p##*/}"; p="${p%/*}"
   case "$p" in */plugins/cache) printf '%s/data/%s-%s\n' "${p%/cache}" "$plugin" "$mkt" ;; esac
 }
-data="${CLAUDE_PLUGIN_DATA:-$(installed_data)}"
-[ "$event" = script ] && [ -z "$data" ] && exit 0
+# A skill's command can inherit CLAUDE_PLUGIN_DATA from the customer's shell, set there for another
+# plugin, so script mode trusts only the install path.
+if [ "$event" = script ]; then data="$(installed_data)"; [ -z "$data" ] && exit 0
+else data="${CLAUDE_PLUGIN_DATA:-$(installed_data)}"; fi
 data="${data:-$HOME/.claude/plugins/data/$name}"
 mark="$data/first-run-notice"
 sum="$(printf '%s' "$msg" | cksum | cut -d' ' -f1)"
