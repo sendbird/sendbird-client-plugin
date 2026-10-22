@@ -46,7 +46,8 @@ done
 case "$url" in https://sendbird.com/docs/*) ;; *) die "not a sendbird.com/docs URL: $url" ;; esac
 case "$url" in *[!A-Za-z0-9/:._-]*) die "unexpected characters in the URL: $url" ;; esac
 [ -f "$INDEX" ] || die "missing $INDEX"
-grep -qF "\"url\":\"$url\"" "$INDEX" || die "not in core/docs-index.json (never construct a docs URL; use a search.sh result): $url"
+# The edition build pretty-prints this index ("url": "..."), the root keeps it compact ("url":"...").
+{ grep -qF "\"url\":\"$url\"" "$INDEX" || grep -qF "\"url\": \"$url\"" "$INDEX"; } || die "not in core/docs-index.json (never construct a docs URL; use a search.sh result): $url"
 
 fallback() { echo "fetch-doc.sh: $1; open $url with a web fetch tool instead (it shows the prose but may drop code samples)" >&2; exit 3; }
 command -v curl >/dev/null 2>&1 || fallback "curl is not available"
