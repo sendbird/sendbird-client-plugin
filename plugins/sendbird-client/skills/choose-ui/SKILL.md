@@ -14,7 +14,7 @@ A recommendation, not a code change. Read only; write no files.
 
 ## Steps
 1. **Project.** Run `bash "${CLAUDE_PLUGIN_ROOT}/tools/detection/detect.sh" <project-dir>` (skip it when there is no project yet) and note platform, host, and whether UIKit or the Chat SDK is already installed.
-2. **Requirements.** Take them from the request: how custom the design is (theme and colors only; restyled or replaced parts such as message bubbles, the input bar, the channel list item, or the header; or a design unlike a standard chat screen), the timeline, the features needed, and the platform and host. Ask once for what is missing and changes the answer.
+2. **Requirements.** Take them from the request: how custom the design is (theme and colors only; restyled or replaced parts such as message bubbles, the input bar, the channel list item, or the header; or a design unlike a standard chat screen), the timeline, and the features needed. The platform and host come from step 1; do not ask for them. Ask once, in one question, for what is missing and changes the answer, and stop there: no comparison or recommendation until the customer answers.
    - Non-interactive (`SENDBIRD_NONINTERACTIVE`): do not ask. Use what the request says and state each assumption in the answer.
 3. **Compare from curated knowledge only.** Read these files for the detected platform and host and cite the section (file and heading) behind every point:
    - UIKit and how it is customized: `knowledge/curated/<platform>/products/uikit.md` — iOS "How customization is wired", Android "Customization model (View host)", JS "Compose your own UI: channel list + conversation" and the render-prop sections; theming in `knowledge/curated/<platform>/cross-cutting/theme.md`.
