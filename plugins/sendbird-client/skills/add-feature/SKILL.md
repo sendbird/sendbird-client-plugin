@@ -33,7 +33,7 @@ Add one feature to an existing integration.
   | Unread counts (total badge, per channel, mark as read) | `UnreadCount` | `UnreadCountModel` | `UnreadCountViewModel` | `UnreadCount.ts` |
   | Typing indicator and read receipts | `TypingAndReadReceipts` | `ChannelActivityModel` | `ChannelActivityViewModel` | `TypingAndReadReceipts.ts` |
 
-- Calls (a voice or video call, accept or decline an incoming call, sign out of Calls): `templates/<platform>/<host>/calls/` on all six hosts; the folder's `_README.md` has the permissions and splice steps, and `templates/js/react/calls/DirectCallPanel.tsx` is a ready call screen for React. On iOS, Android, and React Native, incoming calls need push even while the app is open (the `calls-incoming` skill; a `manualSteps` entry for the dashboard credentials); dialing out does not.
+- Calls (a voice or video call, accept or decline an incoming call, sign out of Calls): `templates/<platform>/<host>/calls/` on all six hosts; the folder's `_README.md` has the permissions and splice steps, and `templates/js/react/calls/DirectCallPanel.tsx` is a ready call screen for React. On iOS, Android, and React Native, incoming calls need push even while the app is open; dialing out does not. When this run does not wire that push, `manualSteps` lists the push credentials and names the `calls-incoming` skill as the next step (`knowledge/curated/<platform>/products/calls.md` "Manual steps").
 - If the specific feature isn't templated yet, derive it from the curated doc's cited sections or the customer-local SDK surface — never from memory.
 
 ## No-Fabrication

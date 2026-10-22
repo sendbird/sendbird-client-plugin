@@ -123,10 +123,11 @@ await SendbirdCalls.deauthenticate();
 (source: @sendbird/calls-react-native 1.2.0 `lib/typescript/libs/SendbirdCallsModule.d.ts:146`)
 
 ## Manual steps (what a Calls hand-off may list)
-Only these Calls steps need something outside the project, and each has a source:
+Only these Calls steps go in a hand-off, and each has a source:
 - **App ID:** create a Sendbird application and copy its App ID from the dashboard; it is case-sensitive. (source: https://sendbird.com/docs/calls/sdk/v1/javascript/getting-started/make-first-call , https://sendbird.com/docs/calls/sdk/v1/react-native/getting-started/make-first-call)
 - **Token server, only when the app signs users in with tokens:** access or session tokens are issued through the Chat Platform API, not the dashboard. (source: https://sendbird.com/docs/calls/sdk/v1/javascript/features/authentication)
 - **Push credentials, React Native only, to receive calls:** the APNs certificate (iOS) and the FCM credential (Android) in the dashboard under Settings > Calls > Push notifications > Add credential, tested on real devices. (source: https://sendbird.com/docs/calls/sdk/v1/react-native/getting-started/make-first-call , https://sendbird.com/docs/calls/sdk/v1/react-native/direct-call/adding-push-notifications/add-push-notifications) The web SDK needs no push to receive calls while its WebSocket is connected.
+- **Incoming-call push, React Native only, when this run did not wire it:** new incoming calls arrive only through push, also while the app is open, because the iOS and Android SDKs underneath deliver them that way ("Pitfalls" below). Name the `calls-incoming` skill as the next step; it wires the native push. (source: https://sendbird.com/docs/calls/sdk/v1/ios/features/authentication — "WebSocket" ; https://sendbird.com/docs/calls/sdk/v1/android/features/authentication — "WebSocket")
 
 None of these pages, nor the Authentication pages, has a dashboard step that enables or activates Calls (checked 2026-10-17). Do not tell the customer to "enable Calls in the dashboard", and do not add any other dashboard step that no page cited here lists.
 

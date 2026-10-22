@@ -26,7 +26,7 @@ app with the UIKit Calls template built and ran on the arm64 iOS simulator, whil
 4. Drive the UI from `state`: on `.ringing` show accept/decline buttons that call `accept()` / `end()`;
    for video calls place `CallVideoView(call: call, source: .remote)` and `.local` in your layout.
 5. App ID from the `SENDBIRD_APP_ID` Info.plist key, filled by the `SENDBIRD_APP_ID` build setting (see `knowledge/curated/ios/setup.md` "App ID") — never hard-code; access token is a secret. Add `NSMicrophoneUsageDescription` and, for video calls,
-   Hand-off (`manualSteps`) holds only the steps in `knowledge/curated/ios/products/calls.md` "Manual steps" (App ID, a token server when the app uses tokens, push credentials). No Calls doc has a dashboard step that enables Calls, so never tell the customer to enable Calls.
+   Hand-off (`manualSteps`) holds only the steps in `knowledge/curated/ios/products/calls.md` "Manual steps" (App ID, a token server when the app uses tokens, push credentials, and the `calls-incoming` skill as the next step when this run did not wire incoming-call push). No Calls doc has a dashboard step that enables Calls, so never tell the customer to enable Calls.
    `NSCameraUsageDescription` to Info.plist (docs "Make first call", Step 3), and ask for access before the
    first call with AVFoundation's `AVCaptureDevice.requestAccess(for:)`, as `requestPermissions(video:completion:)` in
    `templates/ios/uikit/calls/SetupCalls.swift` does.

@@ -1,6 +1,6 @@
 ---
 name: push-setup
-description: Set up push notifications for Sendbird — APNS (cert or .p8) on iOS, FCM/HMS on Android, Web Push / RN on JS — including dashboard upload steps, token registration, payload, and deeplink handling. Use when the customer asks about push or notifications are not arriving.
+description: Set up push notifications for Sendbird — APNS (cert or .p8) on iOS, FCM/HMS on Android, React Native on JS — including dashboard upload steps, token registration, payload, and deeplink handling, and diagnose push that already exists (not arriving, arriving twice). Browser apps get no Chat SDK push; this skill explains that and changes nothing. Use when the customer asks about push or notifications are not arriving.
 argument-hint: "[--product chat,calls]"
 allowed-tools: Read, Edit, Write, Bash, Grep, Glob, WebFetch, Agent
 ---
@@ -14,12 +14,22 @@ Before anything else, check every product the request names (AI Agent, its messe
 Push end-to-end for the detected platform.
 
 ## Steps
-1. Detect platform + push provider (Tier-2 detector) + products. Ask once if unknown.
-2. Walk the provider path (APNS cert vs .p8 / FCM / Web Push / RN), cite the dashboard-config docs (do NOT invent dashboard click-paths), then hand off to the platform agent for token-registration + payload + deeplink code from the wired sources below.
+1. Detect platform + push provider (Tier-2 detector) + products. Ask once if unknown. When the app already registers Sendbird push and the customer reports a symptom (no push, push twice, no push after the app is closed), follow "Diagnose a push symptom" below instead of these steps.
+2. React in a browser: stop here. Quote `knowledge/curated/js/cross-cutting/push.md` "Overview" (the Chat SDK has no browser push; a web app builds its own notifications from Sendbird webhooks) and change no files. Do not write a service worker, browser notification code, or web push registration. Alerts while a tab is open are a separate feature, handled by `add-feature` only when the customer asks for them.
+3. Walk the provider path (APNS cert vs .p8 / FCM / React Native), cite the dashboard-config docs (do NOT invent dashboard click-paths), then hand off to the platform agent for token-registration + payload + deeplink code from the wired sources below.
    On Android, apply the `com.google.gms.google-services` Gradle plugin only when `app/google-services.json` exists, and never create a placeholder file. An unconditional apply fails the build when the file is missing. When the file is absent, leave the plugin out (or apply it conditionally) and list "download `google-services.json` from your Firebase project into `app/`" as a customer hand-off step (`knowledge/curated/android/cross-cutting/push.md` "Setup checklist").
-3. Cover foreground/background, Android 13+ POST_NOTIFICATIONS, VoIP push when Calls is present.
+   An app started from `templates/starters-bp/` already has one registration point: register at the `BP10` comment and unregister at the `BP09` comment (search the project for them; its `_README.md` lists both when present), and add no second registration path. On React Native UIKit, connect already registers the token and disconnect unregisters it (`knowledge/curated/js/cross-cutting/push.md` "React Native UIKit: automatic token registration"): add no registration code, do not turn the automatic registration off, and leave only the Firebase files and credentials as hand-off steps.
+   Android with the Compose UIKit (`uikit-compose`): register the push handler after init and again after connect, as `knowledge/curated/android/hosts/compose.md` "UIKit for Jetpack Compose — init, then push" shows.
+4. Cover foreground/background, Android 13+ POST_NOTIFICATIONS, VoIP push when Calls is present.
    On logout, unregister the token before disconnecting, inside the app's existing sign-out or logout function; use the unregister call in `knowledge/curated/<platform>/cross-cutting/push.md`. A token left registered keeps sending the previous user's notifications to this device.
-4. End with a test-message checklist.
+5. End with a test-message checklist.
+
+## Diagnose a push symptom
+For an app whose push is already set up, find the cause instead of setting push up again.
+1. Pick the matching entry from the push section of `knowledge/curated/<platform>/cross-cutting/troubleshooting.md` ("Push" on iOS and JS, "Push notifications" on Android).
+2. Read the app's token registration, handler registration, and notification code. For each cause the entry names, record the evidence as file:line with the code, or "not found", and say whether it is the cause.
+3. Report the entry by its title, the cause with file:line, and only that entry's fix. Do not add setup the customer did not ask for (permission prompts, notification display code, logout unregistration).
+4. Do not offer a cause that no entry names (for example battery optimization), even labeled as general knowledge. When no entry matches the evidence, say which entries you ruled out and with what evidence.
 
 ## Wired knowledge (populated and cited)
 - Token registration: `knowledge/curated/<platform>/cross-cutting/push.md` — iOS `registerDevicePushToken`/`unregisterPushToken`/`unregisterAllPushToken` (build-verified); Android `SendbirdPushHandler` subclass + `SendbirdPushHelper.registerHandler(...)`; JS `registerFCM/APNSPushTokenForCurrentUser` + unregister variants (type-checked).
@@ -27,4 +37,4 @@ Push end-to-end for the detected platform.
 - VoIP for Calls: registered via the Calls SDK (`SendBirdCall.registerVoIPPush`) — the Chat SDK's PushKit method was REMOVED; see `knowledge/curated/ios/products/calls.md`. Do not emit the removed API.
 
 ## No-Fabrication
-Token-registration APIs and payload keys must be verified + cited. Dashboard navigation is linked to docs, never reproduced from memory. Unverified -> say so.
+Token-registration APIs and payload keys must be verified + cited. Dashboard navigation is linked to docs, never reproduced from memory. A fact you cannot verify is left out and named as unverified; never add it with a label.

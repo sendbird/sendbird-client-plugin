@@ -28,7 +28,7 @@ for generic/platform=iOS; an app with this file also built for and ran on the ar
    while dialing or connected show "End" (`end()`). For video, give the controller two `SendBirdVideoView`s.
 6. App ID from the `SENDBIRD_APP_ID` Info.plist key, filled by the `SENDBIRD_APP_ID` build setting (see
    `knowledge/curated/ios/setup.md` "App ID") — never hard-code; the access token is a secret.
-   Hand-off (`manualSteps`) holds only the steps in `knowledge/curated/ios/products/calls.md` "Manual steps" (App ID, a token server when the app uses tokens, push credentials). No Calls doc has a dashboard step that enables Calls, so never tell the customer to enable Calls.
+   Hand-off (`manualSteps`) holds only the steps in `knowledge/curated/ios/products/calls.md` "Manual steps" (App ID, a token server when the app uses tokens, push credentials, and the `calls-incoming` skill as the next step when this run did not wire incoming-call push). No Calls doc has a dashboard step that enables Calls, so never tell the customer to enable Calls.
 
 ## Notes (see knowledge/curated/ios/products/calls.md, all cited)
 - Checked on the arm64 iOS simulator (2026-10-17): sign-in worked and a dial reached a browser, which rang and

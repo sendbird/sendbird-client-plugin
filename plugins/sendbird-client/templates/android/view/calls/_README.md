@@ -7,7 +7,8 @@ Sendbird Calls (1:1 voice and video) on Android. Call shapes from the public "Ma
 
 ## Files
 - `SetupCalls.java` — `callPermissions()`, `init`, `authenticate`, `deauthenticate`,
-  `addIncomingCallListener(handlerId, CallEvents)`, `dial(calleeId, video, CallEvents)`, `accept(call)`, `end(call)`.
+  `addIncomingCallListener(handlerId, CallEvents)`, `removeIncomingCallListener(handlerId)`,
+  `dial(calleeId, video, CallEvents)`, `accept(call)`, `end(call)`.
   `CallEvents` reports `onRinging`, `onConnected`, `onEnded`, and `onDialFailed` for the call;
   `authenticate(userId, accessToken, done)` reports the result through `CompletionHandler` (`null` means signed in).
 
@@ -20,7 +21,9 @@ Sendbird Calls (1:1 voice and video) on Android. Call shapes from the public "Ma
    `AndroidManifest.xml`. Request `SetupCalls.callPermissions()` at runtime before the first dial or accept
    (for example with `ActivityResultContracts.RequestMultiplePermissions`); `BLUETOOTH_CONNECT` is included on
    Android 12 and later.
-3. `SetupCalls.init(context, appId)` and `addIncomingCallListener(...)` in `Application.onCreate`.
+3. `SetupCalls.init(context, appId)` and `addIncomingCallListener(...)` in `Application.onCreate`. A listener added
+   there lives as long as the process; when the app adds it from a screen or at sign-in instead, call
+   `removeIncomingCallListener(handlerId)` where that owner ends (on destroy, or in `onLogout`).
 4. `authenticate(...)` in the app's sign-in code (`onLoginSucceeded`), after the Chat connect when the app uses
    Chat; `deauthenticate()` in its sign-out code (`onLogout`).
 5. A call screen: a field for the callee's user ID and "Voice call" / "Video call" buttons that call
@@ -29,7 +32,7 @@ Sendbird Calls (1:1 voice and video) on Android. Call shapes from the public "Ma
    updates to the main thread. For video views see `templates/android/compose/calls/DirectCallVideo.kt`
    (`SendBirdVideoView`, a View).
 6. App ID from BuildConfig/secret — never hard-code; the access token is a secret.
-   Hand-off (`manualSteps`) holds only the steps in `knowledge/curated/android/products/calls.md` "Manual steps" (App ID, a token server when the app uses tokens, push credentials). No Calls doc has a dashboard step that enables Calls, so never tell the customer to enable Calls.
+   Hand-off (`manualSteps`) holds only the steps in `knowledge/curated/android/products/calls.md` "Manual steps" (App ID, a token server when the app uses tokens, push credentials, and the `calls-incoming` skill as the next step when this run did not wire incoming-call push). No Calls doc has a dashboard step that enables Calls, so never tell the customer to enable Calls.
 
 ## Notes (see knowledge/curated/android/products/calls.md, all cited)
 - The callee must be authenticated to Calls before a dial reaches them.

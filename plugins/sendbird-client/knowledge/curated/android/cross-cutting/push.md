@@ -99,7 +99,7 @@ The handler-based guide shows the same order (unregister in a completion, then `
 
 ## Open the channel from a notification tap
 
-Sendbird sends Android push as FCM data messages, so your handler builds the notification itself and decides what a tap opens. The `sendbird` entry of `remoteMessage.data` is a JSON string whose `channel.channel_url` names the channel. With UIKit, `ChannelListActivity.newRedirectToChannelIntent(context, channelUrl)` opens the channel list and moves straight into that channel. The UIKit sample also wraps a redirect intent for the channel in the notification's `PendingIntent`.
+Sendbird sends Android push as FCM data messages, so your handler builds the notification itself and decides what a tap opens. The `sendbird` entry of `remoteMessage.data` is a JSON string whose `channel.channel_url` names the channel. With UIKit, wrap `ChannelActivity.newIntent(context, channelUrl)` in the notification's `PendingIntent`: the tap opens that channel screen directly, the same screen a "Chat with seller" button opens (knowledge/curated/android/products/uikit.md, "Start a 1:1 chat from a button (no channel list)"). The UIKit sample wraps `ChannelListActivity.newRedirectToChannelIntent(context, channelUrl)` instead, which opens the channel list and moves into the channel, so back lands on the list; use it only when the customer wants the list behind the channel.
 
 ## Delivery receipts for offline members
 
@@ -111,7 +111,7 @@ import android.content.Context
 import com.google.firebase.messaging.RemoteMessage
 import com.sendbird.android.SendbirdChat
 import com.sendbird.android.push.SendbirdPushHandler
-import com.sendbird.uikit.activities.ChannelListActivity
+import com.sendbird.uikit.activities.ChannelActivity
 import org.json.JSONObject
 
 class TapToChannelPushHandler : SendbirdPushHandler() {
@@ -122,7 +122,7 @@ class TapToChannelPushHandler : SendbirdPushHandler() {
         val payload = remoteMessage.data["sendbird"] ?: return
         SendbirdChat.markAsDelivered(remoteMessage.data)   // delivery receipt for this offline member
         val channelUrl = JSONObject(payload).getJSONObject("channel").getString("channel_url")
-        val openChannel = ChannelListActivity.newRedirectToChannelIntent(context, channelUrl)
+        val openChannel = ChannelActivity.newIntent(context, channelUrl)   // the channel screen, no list
         val tap = PendingIntent.getActivity(
             context, channelUrl.hashCode(), openChannel,
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
@@ -132,7 +132,7 @@ class TapToChannelPushHandler : SendbirdPushHandler() {
 }
 ```
 
-(source: https://sendbird.com/docs/chat/sdk/v4/android/push-notifications/multi-device-support/set-up-push-notifications-for-fcm — parsing `sendbird` and `channel_url`) (source: https://sendbird.com/docs/chat/sdk/v4/android/message/marking-messages-as-delivered-in-a-group-channel/mark-messages-as-delivered) (source: https://github.com/sendbird/sendbird-uikit-android/blob/07ffe8efc97e2d71dedc466ad868df817e5f433e/uikit-samples/src/main/java/com/sendbird/uikit/samples/common/fcm/MyFirebaseMessagingService.kt#L45-L67 — `markAsDelivered` and the tap intent at lines 103-117) (source: https://github.com/sendbird/sendbird-uikit-android/blob/07ffe8efc97e2d71dedc466ad868df817e5f433e/uikit/src/main/java/com/sendbird/uikit/activities/ChannelListActivity.java#L62) (source: sendbird-chat 4.36.5 AAR, `javap` on `com.sendbird.android.SendbirdChat` — `markAsDelivered(Map)`)
+(source: https://sendbird.com/docs/chat/sdk/v4/android/push-notifications/multi-device-support/set-up-push-notifications-for-fcm — parsing `sendbird` and `channel_url`) (source: https://sendbird.com/docs/chat/sdk/v4/android/message/marking-messages-as-delivered-in-a-group-channel/mark-messages-as-delivered) (source: https://github.com/sendbird/sendbird-uikit-android/blob/07ffe8efc97e2d71dedc466ad868df817e5f433e/uikit-samples/src/main/java/com/sendbird/uikit/samples/common/fcm/MyFirebaseMessagingService.kt#L45-L67 — `markAsDelivered` and the tap intent at lines 103-117) (source: https://github.com/sendbird/sendbird-uikit-android/blob/07ffe8efc97e2d71dedc466ad868df817e5f433e/uikit/src/main/java/com/sendbird/uikit/activities/ChannelListActivity.java#L62) (source: uikit 3.26.3 AAR `javap` on `com.sendbird.uikit.activities.ChannelActivity` — `newIntent(Context, String)`, as cited in knowledge/curated/android/products/uikit.md "Start a 1:1 chat from a button (no channel list)") (source: sendbird-chat 4.36.5 AAR, `javap` on `com.sendbird.android.SendbirdChat` — `markAsDelivered(Map)`)
 
 ## Android 13 and later: the notification permission
 

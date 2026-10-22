@@ -4,7 +4,8 @@
 // source: https://github.com/sendbird/sendbird-calls-android/blob/v1.12.5/README.md (README implementation guide)
 // sendbird-calls 1.12.5 — verified via javap of the published AAR (2026-10-17):
 //   SendBirdCall.init(Context, String) / authenticate(AuthenticateParams, AuthenticateHandler) /
-//   deauthenticate(CompletionHandler) / addListener(String, SendBirdCallListener) / dial(DialParams, DialHandler);
+//   deauthenticate(CompletionHandler) / addListener(String, SendBirdCallListener) / removeListener(String) /
+//   dial(DialParams, DialHandler);
 //   abstract SendBirdCallListener: onRinging(DirectCall) + onInvitationReceived(RoomInvitation), both required;
 //   abstract DirectCallListener: onConnected(DirectCall) + onEnded(DirectCall); onEstablished(DirectCall) optional;
 //   DirectCall.isVideoCall() / getCallId() / setListener(DirectCallListener) / accept(AcceptParams) / end();
@@ -75,6 +76,13 @@ public final class SetupCalls {
             }
             @Override public void onInvitationReceived(RoomInvitation invitation) { /* incoming group-room invitation */ }
         });
+    }
+
+    // Remove the listener with the same id when its owner goes away. A listener added in
+    // Application.onCreate lives as long as the process; one added from a screen or at sign-in is
+    // removed there (on destroy, or in onLogout).
+    public static void removeIncomingCallListener(String handlerId) {
+        SendBirdCall.removeListener(handlerId);
     }
 
     // Make a 1:1 direct call; video == false makes a voice call.
