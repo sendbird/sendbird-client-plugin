@@ -3,6 +3,10 @@
 # Usage: read-surface.sh <project-dir> <product> [resolved-version]
 # Writes <project-dir>/.sendbird-client/cache/<product>/api-surface.md (gitignored; never committed).
 set -euo pipefail
+# Until it is marked shown, the first-run notice (hooks/first-run-notice.sh) goes to stderr: in Codex a
+# skill can run this before the plugin's hooks are trusted.
+first_run_notice="$(cd "$(dirname "$0")" && pwd)/../../hooks/first-run-notice.sh"
+[ ! -f "$first_run_notice" ] || bash "$first_run_notice" script || true
 dir="${1:?usage: read-surface.sh <project-dir> <product> [resolved-version]}"; product="${2:?product}"; version="${3:-}"
 HERE="$(cd "$(dirname "$0")" && pwd)"
 ROOT="$(cd "$HERE/../.." && pwd)"

@@ -9,6 +9,10 @@
 # Only stable versions (x.y.z, optional leading v) count; prereleases (-beta, -rc) are skipped.
 # Exit 0 found, 1 the registry could not be read (JSON with "error"), 64 bad arguments.
 set -uo pipefail
+# Until it is marked shown, the first-run notice (hooks/first-run-notice.sh) goes to stderr: in Codex a
+# skill can run this before the plugin's hooks are trusted.
+first_run_notice="$(cd "$(dirname "$0")" && pwd)/../../hooks/first-run-notice.sh"
+[ ! -f "$first_run_notice" ] || bash "$first_run_notice" script || true
 usage() { echo "usage: latest-version.sh <npm|spm|maven> <name> [--major N] [--repo URL]" >&2; exit 64; }
 kind="${1:-}"; name="${2:-}"; [ -n "$kind" ] && [ -n "$name" ] || usage; shift 2
 major=""; repo="https://repo.sendbird.com/public/maven"
