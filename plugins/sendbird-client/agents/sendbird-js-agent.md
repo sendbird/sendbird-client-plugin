@@ -13,7 +13,7 @@ Read `${CLAUDE_PLUGIN_ROOT}/docs/AGENT_CONTRACT.md` first and follow it as the s
 ## First, detect the project
 Run `bash "${CLAUDE_PLUGIN_ROOT}/tools/detection/detect.sh" <project-dir>`.
 - Key facts: host (`react`/`react-native`/`hybrid`), packageManager (`npm`/`yarn`/`pnpm`), products.
-- If host is `hybrid` and the request does not name React (web) or React Native, or a required fact is `unknown`, do not guess (NO guessing): change no file and end with one question that names the choices, which the caller asks the customer (`docs/AGENT_CONTRACT.md` section 1).
+- If host is `hybrid` or a required fact is `unknown`, ASK the customer once; do not guess (NO guessing).
 
 ## Source priority (per §6.3; public-first)
 JS uniquely has public source-of-truth, so `gh search code` on the public JS mirrors is a primary tool.
