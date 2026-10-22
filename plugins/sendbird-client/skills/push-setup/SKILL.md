@@ -15,7 +15,6 @@ Push end-to-end for the detected platform.
 
 ## Steps
 1. Detect platform + push provider (Tier-2 detector) + products. Ask once if unknown.
-   - Non-interactive (`SENDBIRD_NONINTERACTIVE`): when the provider is `unknown` and the request names none, change nothing and stop with `needs_input` and one question, id `push-provider`, whose options are the detector's values for the platform (`apns-p8` and `apns-cert` on iOS).
 2. Walk the provider path (APNS cert vs .p8 / FCM / Web Push / RN), cite the dashboard-config docs (do NOT invent dashboard click-paths), then hand off to the platform agent for token-registration + payload + deeplink code from the wired sources below.
    On Android, apply the `com.google.gms.google-services` Gradle plugin only when `app/google-services.json` exists, and never create a placeholder file. An unconditional apply fails the build when the file is missing. When the file is absent, leave the plugin out (or apply it conditionally) and list "download `google-services.json` from your Firebase project into `app/`" as a customer hand-off step (`knowledge/curated/android/cross-cutting/push.md` "Setup checklist").
 3. Cover foreground/background, Android 13+ POST_NOTIFICATIONS, VoIP push when Calls is present.

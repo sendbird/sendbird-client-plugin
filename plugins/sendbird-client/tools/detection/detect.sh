@@ -26,5 +26,3 @@ printf '%s' "$stored" | jq -e . >/dev/null 2>&1 || stored='{}'
 # Stored fields survive; fresh detection overwrites only the keys it actually produces.
 jq -n --argjson stored "$stored" --argjson fresh "$fresh" '$stored + $fresh' > "$prof"
 echo "wrote $prof"
-# The facts a caller decides on, so a session sees host=hybrid without reading the file.
-jq -r '"detected: platform=\(.platform // "unknown") host=\(.host // "unknown") products=\((.products // []) | join(","))"' "$prof"
