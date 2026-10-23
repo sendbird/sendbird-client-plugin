@@ -1,10 +1,14 @@
 #!/usr/bin/env bash
 # PreToolUse Write/Edit/MultiEdit (Claude Code), apply_patch (Codex), and Bash commands that write
-# a source file: block Sendbird API code unless its cited source exists and contains the emitted symbol.
+# a source file: block Sendbird API code unless its cited source exists and contains the emitted symbol,
+# and block a JS/TS named import from a @sendbird path that the project's cached API surface says does
+# not export that name (hooks/lib/js-import-paths.sh).
 set -uo pipefail
 HERE="$(cd "$(dirname "$0")" && pwd)"
 # shellcheck source=lib/hook-helpers.sh
 source "$HERE/lib/hook-helpers.sh"
+# shellcheck source=lib/js-import-paths.sh
+source "$HERE/lib/js-import-paths.sh"
 read_stdin_json guard
 
 cwd="$(jget '.cwd')"
@@ -47,20 +51,34 @@ deny() {
   exit 0
 }
 
+# check_import_paths <file path> <code> : deny when a named import in <code> uses a path the
+# installed SDK does not export that name from
+check_import_paths() {
+  local reason
+  reason="$(js_import_path_problem "$1" "$2" "$cwd")"
+  [ -z "$reason" ] && return 0
+  jq -n --arg r "$reason" '{hookSpecificOutput:{
+    hookEventName:"PreToolUse", permissionDecision:"deny", permissionDecisionReason:$r}}'
+  exit 0
+}
+
 tool="$(jget .tool_name)"
 case "$tool" in
   Write)
     body="$(jget .tool_input.content)"
+    check_import_paths "$(jget .tool_input.file_path)" "$body"
     if [ -n "$body" ] && ! body_is_sourced "$body" ""; then deny; fi ;;
   Edit|MultiEdit)
     if [ "$tool" = Edit ]; then body="$(jget .tool_input.new_string)"
     else body="$(printf '%s' "$HOOK_JSON" | jq -r '[.tool_input.edits[]?.new_string // empty] | join("\n")' 2>/dev/null)"; fi
+    check_import_paths "$(jget .tool_input.file_path)" "$body"
     if [ -n "$body" ] && ! body_is_sourced "$body" "$(existing_text "$(jget .tool_input.file_path)")"; then deny; fi ;;
   apply_patch)
     while IFS= read -r path; do
       [ -n "$path" ] || continue
       body="$(patch_added "$path")"
       [ -n "$body" ] || continue
+      check_import_paths "$path" "$body"
       if patch_is_new "$path"; then existing=""; else existing="$(existing_text "$path")"; fi
       body_is_sourced "$body" "$existing" || deny
     done < <(patch_paths) ;;
@@ -77,6 +95,7 @@ case "$tool" in
       targets="$(printf '%s\n%s\n' "$targets" "$named" | sed '/^$/d' | sort -u)"
     fi
     [ -n "$targets" ] || exit 0
+    while IFS= read -r path; do check_import_paths "$path" "$cmd"; done <<< "$targets"
     existing=""
     while IFS= read -r path; do existing="${existing}$(existing_text "$path")"$'\n'; done <<< "$targets"
     body_is_sourced "$cmd" "$existing" || deny ;;
