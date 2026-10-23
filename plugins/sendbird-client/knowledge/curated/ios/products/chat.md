@@ -221,6 +221,8 @@ extension MyViewController: MessageCollectionDelegate {
 ```
 `SendbirdChat.createMessageCollection(channel:startingPoint:params:)`, `.delegate`, `.startCollection(initPolicy:cacheResultHandler:apiResultHandler:)`, `.hasPrevious` / `.hasNext`, `.loadPrevious(completionHandler:)` / `.loadNext(completionHandler:)`, and `.dispose()` are all on `MessageCollection`. (source: `SendbirdChatSDK.swiftinterface` (4.39.10) line 6587 `createMessageCollection`, lines 4011-4050 `MessageCollection`, lines 4055-4066 `MessageCollectionDelegate`)
 
+To draw a row, read the text from `message.message` (`String`), the sender from `message.sender` (`Sender?`, a `User` with `userId`, `nickname`, and `profileURL`), and the time from `message.createdAt` (`Int64`). `SendbirdChat.getCurrentUser()` returns the connected `User?`; compare its `userId` with `message.sender?.userId` to tell your own messages from others'. Unwrap `sender` instead of force-unwrapping it (see Pitfalls). (source: `SendbirdChatSDK.swiftinterface` (4.39.11): `BaseMessage` 982 — `message` 990, `sender` 1005, `createdAt` 1028; `SendbirdChat.getCurrentUser()` 6564; `Sender` 6771; `User` 7043 — `userId` 7047, `nickname` 7050, `profileURL` 7060 — verified 2026-10-23)
+
 ## Local caching and offline messages
 Local caching keeps group channels and messages on the device, so the channel list and chat view built with the collections above also work offline. Turn it on or off once, in `InitParams`:
 ```swift

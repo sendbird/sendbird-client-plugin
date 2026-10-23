@@ -21,7 +21,7 @@ Run `bash "${CLAUDE_PLUGIN_ROOT}/tools/detection/detect.sh" <project-dir>`.
 2. Customer-local — Gradle cache `~/.gradle/caches/modules-2/files-2.1/com.sendbird/*/`, exploded aar under the module build dir
   - Run `bash "${CLAUDE_PLUGIN_ROOT}/tools/local-sdk/read-surface.sh" <project> <product> [resolved-version]` and cite the generated `.sendbird-client/cache/<product>/api-surface.md`. If the Gradle cache contains multiple versions, resolve the project's dependency version first and pass it explicitly.
 3. `${CLAUDE_PLUGIN_ROOT}/knowledge/imports/android/{chat,uikit,auth,calls}/` only when imported knowledge exists
-4. For customization questions, consult public discussions first (gh api .../discussions on the Android public UIKit mirror)
+4. For customization questions, consult public discussions first on the Android public UIKit mirror with `bash "${CLAUDE_PLUGIN_ROOT}/core/commands/search-discussions.sh" <owner/repo> <English keywords>` (a repository from `config/plugin-config.json` `.repos`); label what they say as community signal, and when it prints `NOT RUN: <reason>`, say that discussions were not searched and why
 5. Find the page in `${CLAUDE_PLUGIN_ROOT}/core/docs-index.json` (one entry per line: `url`, `title`, `product`, `platform`, `docsPlatform`, `section`) — e.g. `jq -c '.entries[] | select(.product=="chat" and .platform=="android")' "${CLAUDE_PLUGIN_ROOT}/core/docs-index.json"` or `grep -i <topic>` on it — then read that exact `url` with `bash "${CLAUDE_PLUGIN_ROOT}/core/commands/fetch-doc.sh" <url>` (the page Markdown with its code samples); WebFetch it only when that exits 3, since WebFetch may drop code samples. Never construct, edit, or guess a docs URL; if no entry fits, say the docs page was not found.
 
 ## Old major versions

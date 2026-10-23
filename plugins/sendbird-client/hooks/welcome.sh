@@ -44,7 +44,7 @@ ALWAYS-ON rules for ANY Sendbird answer (even without a skill):
 - Error codes: $ROOT/knowledge/curated/<platform>/cross-cutting/errors.md is the verified table (e.g. 400302 = iOS accessTokenNotValid; connect is SendbirdChat.connect(userId:authToken:) on iOS v4).
 - When writing Sendbird code, do not build, compile, or type-check the customer's project (no xcodebuild, xcodegen, Gradle tasks, tsc, or build/typecheck scripts) unless the customer explicitly asks for a build, and do not list a build, or a note that this run did not build, under manualSteps — that includes any Gradle task or sync offered as a check (./gradlew :app:dependencies, checkDebugAarMetadata, an Android Studio sync), since the plugin's tests run those. The plugin's own test suites build the code it emits.
 - iOS packaging is SPM-first: never introduce CocoaPods into a fresh/SPM project; sendbird-chat-ios-spm is legacy v3 — v4 lives in sendbird-chat-sdk-ios.
-- Never state pricing/quota figures or "latest" version numbers from memory; tokens are secrets — never hard-code or log them.
+- Never state pricing or quota figures, even from a page you opened (link the pricing page instead), or "latest" version numbers from memory; tokens are secrets — never hard-code or log them.
 - Running the app: only /sendbird-client:run-check builds and launches the customer's app against their Sendbird application, and only when the customer asks for it; other skills suggest it instead of running it.
 EOF
 # An empty project folder (the hook runs in the session's folder): a request to make an app here

@@ -64,3 +64,4 @@ await sb.disconnectWebSocket(); // keep local cache
 ## Related
 
 - Underlying Chat: knowledge/curated/js/products/chat.md
+- UIKit apps pass the token and the `SessionHandler` through UIKit: knowledge/curated/js/products/uikit.md "Session tokens: `accessToken` and `configureSession`" (React; the drop-in `App` cannot renew a token) and "Session tokens: `connect(userId, { accessToken })` and `onInitialized`" (React Native).

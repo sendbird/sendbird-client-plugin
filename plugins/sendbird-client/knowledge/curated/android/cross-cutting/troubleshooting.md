@@ -41,6 +41,11 @@
 
 ## Messages and channels
 
+### A group channel disappears after every member leaves
+- **Cause:** By default the server deletes a group channel when its last member leaves or is removed. Channels do not expire from inactivity. Opening a stored URL for such a channel then fails with 400201 (see the 400201 entry above).
+- **Fix:** No client change keeps the channel. Ask Sendbird support to change the application setting so empty channels are kept; staff answers say it can't be changed from the SDK. (staff answers in the cases below)
+- **Cases:** https://community.sendbird.com/t/group-channel-is-automatically-deleted-when-the-number-of-users-reaches-0/10161, https://community.sendbird.com/t/channel-with-0-member/8138, https://community.sendbird.com/t/all-channels-deleted/7299
+
 ### `getMessagesByTimestamp` returns messages you already have (duplicates)
 - **Cause:** `getMessagesByTimestamp(ts, params, handler)` on a channel returns `previousResultSize` messages before the timestamp and `nextResultSize` messages after it. When `nextResultSize` is not 0, each backward page also returns messages newer than the timestamp, which are already on screen.
 - **Fix:** When paging backwards, set `nextResultSize = 0` on the `MessageListParams` and set only `previousResultSize`. (source: https://sendbird.com/docs/chat/sdk/v4/android/message/retrieving-messages/retrieve-a-list-of-messages) (source: https://sendbird.com/docs/chat/sdk/v4/android/ref/-sendbird-chat/com.sendbird.android.channel/-base-channel/index.html) (source: https://sendbird.com/docs/chat/sdk/v4/android/ref/-sendbird-chat/com.sendbird.android.params/-message-list-params/index.html)
@@ -72,7 +77,7 @@
 - **Cases:** https://community.sendbird.com/t/message-appears-to-get-deleted-right-after-sending-it/1902 (an iOS app; the cause is the channel type, not the platform)
 
 ### Messages sent before a user joined are missing
-- **Cause:** By default, a member sees only the messages sent after they joined the group channel. This is an application setting (chat history), not an SDK option. The cases below come from JavaScript apps; the setting belongs to the application and applies to every platform.
+- **Cause:** The application's chat history setting is off. With it on, a member who joins sees the messages sent before they joined; with it off, a new member sees only messages sent after they were invited. The docs say the setting is on by default, so an application whose members miss earlier messages has it turned off. It is an application setting, not an SDK option, so no client code changes it. (source: https://sendbird.com/docs/chat/sdk/v4/android/channel/inviting-users-to-a-group-channel/invite-users-as-members) The cases below come from JavaScript apps; the setting belongs to the application and applies to every platform.
 - **Fix:** Turn on chat history for group channels in the dashboard's channel settings. Per the cases, it applies to users who join after it is turned on.
 - **Cases:** https://community.sendbird.com/t/error-calling-get-message-by-id-for-message-sent-before-user-joins-a-group-channel/9451, https://community.sendbird.com/t/getting-first-message-of-channel/9507, https://community.sendbird.com/t/chat-history-when-joining-private-group-channel/2237
 
