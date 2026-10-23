@@ -17,6 +17,7 @@ Read-first diagnosis. The skill finds the cause in the customer's code; it chang
 2. Match the symptom to one row below. Read every curated section that row names, the troubleshooting entry and the `products/chat.md` sections alike, before searching the project, and nothing else. The troubleshooting section is "Channels" on iOS, "Messages and channels" on Android, and "Channel list and channel creation" on JS, all in `knowledge/curated/<platform>/cross-cutting/troubleshooting.md`.
 3. Walk that row's checks in order. For each check, search the project and record either the evidence (file:line and the code) or "not found". Stop at the first check that explains the symptom, but finish the row when evidence is ambiguous.
 4. Report: the symptom; each check you walked, with its evidence and verdict (cause / ruled out / not verifiable from code); each check after the one that explained the symptom as one line, "not checked: stopped at the cause"; the cause with file:line; and the fix from the curated entry with its citation, the curated entry first (`docs/AGENT_CONTRACT.md` section 2, "Cite the curated entry"). Do not add causes from checks you did not walk. Offer the fix; on confirmation, delegate once to the platform agent with the file:line and the cited fix.
+   - Non-interactive (`SENDBIRD_NONINTERACTIVE`): apply only when the request itself asks for the fix; otherwise change nothing and stop with `needs_input` and the `apply-fix` question (docs/AGENT_CONTRACT.md section 7).
 
 | Symptom | Checks, in order | Curated source |
 | --- | --- | --- |
