@@ -145,3 +145,5 @@ This repository is published automatically; every change arrives as a release pu
 
 Apache-2.0; see `LICENSE`. Third-party files, and how the plugin's license relates to the Sendbird SDKs it installs, are
 described in [`plugins/sendbird-client/NOTICE.md`](plugins/sendbird-client/NOTICE.md).
+
+Terms of use: [Sendbird Terms of Service](https://sendbird.com/terms-of-service)
