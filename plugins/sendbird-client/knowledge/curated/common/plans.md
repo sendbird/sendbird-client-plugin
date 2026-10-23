@@ -22,7 +22,7 @@ When a request needs a feature listed in `core/plans.json`, run `resolve-plan.sh
 | `confirm` | Show `message` and wait for the customer's answer. Interactive: AskUserQuestion with "Add it" and "Leave it out". Non-interactive (`SENDBIRD_NONINTERACTIVE`): the caller answers with `confirm-<feature-id>=yes` (build it) or `confirm-<feature-id>=no` (leave it out). Without that answer, the run changes nothing at all, so check before writing any file, and ends with `status: "needs_input"` and one question per such feature, with id `confirm-<feature-id>` and options `yes` and `no` (a `needs_input` run summary lists no changes). If the customer says yes, build it and list it in the run summary's manual steps as needing the plan named in `requiredPlan`. |
 | `sales` | Enterprise only. Do not write code for it. Show `message`. |
 
-Translate `message` into the customer's language; keep plan and feature names as written.
+In an interactive answer, translate `message` into the customer's language; keep plan and feature names as written. In a non-interactive run summary, the question keeps `message` and the labels "Add it" and "Leave it out" as written, unless `SENDBIRD_LOCALE` is set (skills/setup/SKILL.md).
 
 Do not add a plan-limited feature the customer did not ask for, for example by choosing a Supergroup channel or adding message search on your own. A customer request that only works with such a feature counts as asking for it: check it first.
 
