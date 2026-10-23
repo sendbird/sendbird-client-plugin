@@ -43,7 +43,7 @@ SDK callbacks return a `SendbirdException` (`com.sendbird.android.exception.Send
 | 403200 | `SendbirdError.ERR_STAT_UPLOAD_NOT_ALLOWED` | No public description |
 | 409000 | `SendbirdError.ERR_CONFLICT` | No public description |
 | 500901 | `SendbirdError.ERR_INTERNAL_SERVER_ERROR` | `INTERNAL_ERROR`: the server encounters an unexpected exception while trying to process the request |
-| 500910 | `SendbirdError.ERR_RATE_LIMIT_EXCEEDED` | Rate limit exceeded — back off |
+| 500910 | `SendbirdError.ERR_RATE_LIMIT_EXCEEDED` | Rate limit exceeded — back off; for plan limits, point to the pricing page and the dashboard (knowledge/curated/common/pricing-quotas.md) |
 | 800100 | `SendbirdError.ERR_INVALID_INITIALIZATION` | SDK not initialized |
 | 800101 | `SendbirdError.ERR_CONNECTION_REQUIRED` | The request failed because the device wasn't connected to the server |
 | 800102 | `SendbirdError.ERR_CONNECTION_CANCELED` | The connection was canceled, or disconnect was called while the SDK was still connecting |

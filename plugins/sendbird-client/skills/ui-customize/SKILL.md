@@ -15,9 +15,20 @@ Theme / override Sendbird UI for the detected platform + host + product.
 
 ## Steps
 1. Detect platform/host and confirm the UI product is UIKit. Ask once if ambiguous.
-2. Customization request -> discussions-first (§6.3.2) on the relevant UIKit / SwiftUI mirror, then the wired curated docs below, then the customer-local SDK surface.
-3. Hand off to the platform agent to generate the override (theme/colorset/fontset or component/slot replacement) from a verified pattern, host-correct.
-4. Quick-menu the 5 most-asked tweaks; offer the advanced subclass/slot path.
+2. Read the wired curated docs below for the request, then search public discussions on the relevant UIKit / SwiftUI mirror with `bash "${CLAUDE_PLUGIN_ROOT}/core/commands/search-discussions.sh" <owner/repo> <English keywords>` (the repository from `config/plugin-config.json` `.repos`). Label what a discussion says as community signal; when the command prints `NOT RUN: <reason>`, say in the answer that discussions were not searched and why.
+3. Check every theme, component, or slot name in the installed SDK before it is used: `bash "${CLAUDE_PLUGIN_ROOT}/tools/local-sdk/read-surface.sh" <project-dir> uikit [resolved-version]`. When the SDK is not installed, say so and use only names a curated section states, with that section's SDK version. Do not download an SDK yourself to use as evidence.
+4. Hand off to the platform agent to generate the override (theme/colorset/fontset or component/slot replacement) from a verified pattern, host-correct.
+5. Report the change, then list the common tweaks below for the detected host with their curated sections, and name the deeper replacement path (React render props, iOS subclass or slot, Android custom view or Compose slot).
+
+| Tweak | iOS | Android | JS |
+| --- | --- | --- | --- |
+| Dark mode | `cross-cutting/theme.md` "Light / dark"; SwiftUI `hosts/swiftui.md` "Theme, dark mode, strings" | `cross-cutting/theme.md` "Light / dark (View host)"; Compose `hosts/compose.md` "Theme, fonts, and strings" | `cross-cutting/theme.md` "Light / dark" (React), "Light / dark and custom colors" (React Native) |
+| Brand colors | `cross-cutting/theme.md` "Fonts and colors" | `cross-cutting/theme.md` "Custom colors (View host)"; Compose as above | `cross-cutting/theme.md` "Brand colors (`colorSet`) and strings (`stringSet`)" (React), "Light / dark and custom colors" (React Native) |
+| Fonts | `cross-cutting/theme.md` "Fonts and colors" | `cross-cutting/theme.md` "Fonts (View host)"; Compose as above | no curated section: say so |
+| Message bubble | `products/uikit.md` "Custom message cells"; SwiftUI `hosts/swiftui.md` "Custom message views, including file messages and reply thumbnails" | `products/uikit.md` "Custom message views, including file messages (View host)"; Compose `hosts/compose.md` "Custom message items, including file messages" | `products/uikit.md` "Customize how messages render" |
+| Header | `products/uikit.md` "Header (navigation bar)"; SwiftUI `hosts/swiftui.md` "Header" | `products/uikit.md` "Header (View host)"; Compose `hosts/compose.md` "Header (top bar)" | `products/uikit.md` "Channel header" |
+
+Paths in the table are under `knowledge/curated/<platform>/`.
 
 ## Wired knowledge (populated and cited)
 - UIKit theming: `knowledge/curated/<platform>/cross-cutting/theme.md` — iOS `SBUTheme.set(colorScheme:)` + per-component themes; Android `SendbirdUIKit.setDefaultThemeMode(...)`; JS `<App theme="light|dark">` + `--sendbird-*` CSS vars; RN foundation themes.

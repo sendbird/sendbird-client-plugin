@@ -16,7 +16,7 @@ Works from the error text the customer pasted (or a log file they point to). It 
 1. Run `bash "${CLAUDE_PLUGIN_ROOT}/tools/detection/detect.sh" <project-dir>` and resolve platform, host, package manager, and the installed Sendbird versions (lockfile, Gradle files, `Package.resolved`, `Podfile.lock`).
 2. Read the error. Note the failing tool (Next.js, webpack, Vite, Create React App, Metro or Expo, Gradle, manifest merger, Xcode, SPM, CocoaPods), the first error line, and every path or package name it prints. When the message points at a file outside `node_modules/@sendbird/`, `com.sendbird.sdk`, or a Sendbird Swift package, say that another dependency causes it and stop. A peer dependency conflict reported while installing a Sendbird package is not that case: it has its own row below.
 3. Classify it with the table below and read only the cited section. Compare the installed version with the version the section names.
-4. Report: the class, the evidence line from the log, the cause, and the fix with its citation. Apply the fix only after the customer confirms, through the platform agent; keep the project's package manager and do not add `--legacy-peer-deps`, `--force`, or `--ignore-engines` (docs/AGENT_CONTRACT.md section 3).
+4. Report: the class, the evidence line from the log, the cause, and the fix with its citation: the curated section first (`docs/AGENT_CONTRACT.md` section 2, "Cite the curated entry"). Apply the fix only after the customer confirms, through the platform agent; keep the project's package manager and do not add `--legacy-peer-deps`, `--force`, or `--ignore-engines` (docs/AGENT_CONTRACT.md section 3).
 5. Verification: if the customer asked for a build, run their own build command once and report its result. Otherwise list the exact command for them to run and mark the build "not run".
 
 | Class (what the log shows) | Curated section |
@@ -44,4 +44,4 @@ When the error fits none of these rows, look for it in `knowledge/curated/<platf
 - `knowledge/curated/<platform>/setup.md` — coordinates, repositories, and version pairing; `knowledge/curated/js/hosts/react-native.md` — React Native version checklist.
 
 ## No-Fabrication
-Every cause and fix must cite one of the sections above, a published package file, or official docs. Never invent a config key, a plugin, a polyfill package, or a version number. If the installed version cannot be read, say so and ask for the lockfile line instead of assuming one.
+Every cause and fix must cite one of the sections above. A published package file or official docs may add to that citation, and stand alone only when no section covers the case. Never invent a config key, a plugin, a polyfill package, or a version number. If the installed version cannot be read, say so and ask for the lockfile line instead of assuming one.

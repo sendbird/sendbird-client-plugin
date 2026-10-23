@@ -80,7 +80,7 @@ Every member of the shipped enum is listed. The enum members carry no JSDoc. Mea
 
 - `SESSION_TOKEN_EXPIRED` (400302) / `SESSION_KEY_EXPIRED` (400309) / `SESSION_REVOKED` (400310): handle through `SessionHandler` (see auth). With local caching enabled, 400300, 400301, 400302, and 400310 on `connect()` mean you should clear the user's cached data before reconnecting. (source: @sendbird/chat@4.22.13 lib/__definition.d.ts:4844-4847 ; https://sendbird.com/docs/chat/sdk/v4/javascript/application/authenticating-a-user/authentication)
 - `CONNECTION_REQUIRED` (800101): `await sb.connect(...)` first.
-- `RATE_LIMIT_EXCEEDED` (500910): exponential backoff.
+- `RATE_LIMIT_EXCEEDED` (500910): exponential backoff. Plan limits are not stated here; point to the pricing page and the dashboard (knowledge/curated/common/pricing-quotas.md).
 
 ## Connection failures
 

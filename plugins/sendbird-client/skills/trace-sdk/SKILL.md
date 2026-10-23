@@ -13,10 +13,11 @@ Resolve the platform agent with `bash "${CLAUDE_PLUGIN_ROOT}/tools/routing/route
 Surface + docstrings for a public API (Intent A).
 
 ## Steps
-1. Run `bash "${CLAUDE_PLUGIN_ROOT}/tools/detection/detect.sh" <project-dir>`, then hand off once to the platform agent as the top of this skill says, with steps 2 and 3 as its brief; do not trace the symbol yourself before it responds.
+1. Run `bash "${CLAUDE_PLUGIN_ROOT}/tools/detection/detect.sh" <project-dir>`, then hand off once to the platform agent as the top of this skill says, with steps 2 to 4 as its brief; do not trace the symbol yourself before it responds.
 2. (The agent's brief.) Run `bash "${CLAUDE_PLUGIN_ROOT}/tools/local-sdk/read-surface.sh" <project> <product> [resolved-version]` to extract the available public surface into `.sendbird-client/cache/<product>/api-surface.md`, then search it for the keyword. If multiple Android AAR versions are installed, pass the version the project's build file declares.
-3. Also check `knowledge/curated/<platform>/products/<product>.md` (populated, cited) for the symbol's documented usage, and `knowledge/imports/<platform>/<product>/api-surface.md` when present (bundled mode). Narrow by flags or context.
-4. Return the agent's public signature(s), public docstrings, and a call-flow summary with file references (customer-local cache path, public mirror name, or ROLE-TOKEN + line).
+3. Also check `knowledge/curated/<platform>/products/<product>.md` (populated, cited) for the symbol's documented usage, and `knowledge/imports/<platform>/<product>/api-surface.md` when present (bundled mode). Read only the platform and product that `--platform` and `--product` (or the detected project) name: the generated `api-surface.md`, that `products/<product>.md`, and that product's imports. Do not grep `knowledge/` as a whole or another platform's or product's folder.
+4. JS: when the SDK is not installed or its surface lacks the symbol, search the public source mirror: `gh search code --repo <owner/repo> <symbol>`, with the repository from `config/plugin-config.json` `.repos.js` for that product, and cite the file and line it returns. When gh is missing or not signed in, say so; do not answer "not in the SDK" from the installed package alone.
+5. Return the agent's public signature(s), public docstrings, and a call-flow summary with file references (customer-local cache path, public mirror name, or ROLE-TOKEN + line).
 
 ## No-Fabrication
 Return only public API surface + public docstrings that exist in a verified source. No private implementation, no invented signatures. If not found, say so.

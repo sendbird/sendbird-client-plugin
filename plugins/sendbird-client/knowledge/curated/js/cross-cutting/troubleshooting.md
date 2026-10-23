@@ -78,6 +78,12 @@
 - **Fix — React Native:** Pass `channelListQueryParams={{ includeEmpty: true }}` to `GroupChannelListFragment`. `collectionCreator` still works but is deprecated. (source: @sendbird/uikit-react-native 3.12.9 lib/typescript/src/domain/groupChannelList/types.d.ts:21-26)
 - **Cases:** https://community.sendbird.com/t/my-sendbird-ui-kit-is-not-showing-channels-that-are-created-by-api/6811, https://community.sendbird.com/t/channels-are-not-appearing-the-channellist-once-the-reset-the-history/8927, https://community.sendbird.com/t/how-to-includeempty-for-react-native-groupchannellistfragment/8384 — community
 
+### A group channel disappears after every member leaves
+
+- **Cause:** By default the server deletes a group channel when its member count reaches zero. Channels do not expire from inactivity.
+- **Fix:** No client change keeps the channel. Ask Sendbird support to change the application setting so empty channels are kept. (staff answers in the cases below)
+- **Cases:** https://community.sendbird.com/t/group-channel-is-automatically-deleted-when-the-number-of-users-reaches-0/10161, https://community.sendbird.com/t/channel-with-0-member/8138, https://community.sendbird.com/t/all-channels-deleted/7299
+
 ### Web UIKit: with a custom channel list query, the list keeps reloading, or selecting a channel always opens the first one
 
 - **Cause:** By default the channel list selects the first channel whenever no channel is selected, and that fights with your own selection logic (source: https://github.com/sendbird/sendbird-uikit-react/blob/v3.19.1/src/modules/GroupChannelList/context/GroupChannelListProvider.tsx#L141-L146).
@@ -104,7 +110,7 @@
 
 ### Messages sent before a user joined are missing, or fetching or reacting to one fails with "chat history is disabled"
 
-- **Cause:** By default, members see only messages sent after they joined. This is an application setting, not an SDK option.
+- **Cause:** The application's chat history setting is off. With it on, a member who joins sees the messages sent before they joined; with it off, a new member sees only messages sent after they were invited. The docs say the setting is on by default, so an application whose members miss earlier messages has it turned off. It is an application setting, not an SDK option, so no client code changes it. (source: https://sendbird.com/docs/chat/sdk/v4/javascript/channel/inviting-users-to-a-group-channel/invite-users-as-members)
 - **Fix:** Turn on chat history for group channels in the dashboard's channel settings. The change applies only to users who join after it is turned on. Earlier joins are not backfilled.
 - **Cases:** https://community.sendbird.com/t/error-calling-get-message-by-id-for-message-sent-before-user-joins-a-group-channel/9451, https://community.sendbird.com/t/getting-first-message-of-channel/9507, https://community.sendbird.com/t/chat-history-when-joining-private-group-channel/2237
 

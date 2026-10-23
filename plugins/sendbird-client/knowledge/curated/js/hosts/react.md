@@ -43,7 +43,7 @@ UIKit's own Storybook page turns this zoom off with a viewport meta tag whose co
 
 (source: https://github.com/sendbird/sendbird-uikit-react/blob/v3.19.1/.storybook/preview-head.html#L2-L3)
 
-## Tall incoming messages (`autoscrollMessageOverflowToTop`)
+## Long or tall incoming messages: show the top of the message (`autoscrollMessageOverflowToTop`)
 
 By default, a newly received message scrolls the list to the bottom. With `autoscrollMessageOverflowToTop`, when a newly received message is taller than the message list viewport, UIKit scrolls to the top of that message instead, so its beginning stays visible. It only acts when the user was already at the bottom of the list. Set it as a `SendbirdProvider` (or `App`) prop; a `GroupChannel` prop overrides it per channel. Use the prop, not `uikitOptions.groupChannel`, which has no such field in 3.19.1.
 

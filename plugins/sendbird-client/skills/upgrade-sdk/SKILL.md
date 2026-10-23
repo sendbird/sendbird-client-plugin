@@ -1,6 +1,6 @@
 ---
 name: upgrade-sdk
-description: Upgrade the Sendbird SDKs a project already uses to the newest release of the same major version. Reads the installed versions, looks up the newest published version in the registry, lists the deprecated APIs the project calls with the replacement the SDK names, and applies the version bump and the replacements only after the customer confirms. Use when the customer asks to update or upgrade their Sendbird SDKs.
+description: Upgrade the Sendbird SDKs a project already uses to the newest release of the same major version. Reads the installed versions, looks up the newest published version in the registry, lists the deprecated APIs the project calls with the replacement the SDK names, and applies the version bump and the replacements only after the customer confirms. When the customer asks to move to a newer major version (for example Chat SDK v3 to v4), plans that move from the public migration guide, Chat SDK first. Use when the customer asks to update or upgrade their Sendbird SDKs.
 argument-hint: "[product] [--apply]"
 allowed-tools: Read, Edit, Write, Bash, Grep, Glob, WebFetch, Agent, AskUserQuestion
 ---
@@ -11,7 +11,7 @@ Resolve every plugin-owned path below from `${CLAUDE_PLUGIN_ROOT}`. Where that v
 Resolve the platform agent with `bash "${CLAUDE_PLUGIN_ROOT}/tools/routing/route-agent.sh" <project-dir> code`. Hand work to that agent by calling the `Agent` tool once with the agent as Claude Code lists it: this plugin's name, a colon, then the name the router printed (for example `sendbird-client:sendbird-ios-agent`). In Codex, which has no `Agent` tool, run that agent's launcher skill instead (for example `$sendbird-client:sendbird-ios-agent`) and start the agent only as that skill says; it sets the model and settings the agent needs. Do not do the agent's part yourself, even in a small project: write or edit no project source file in this session, before or after the hand-off, also when the customer confirms a change in a later turn. If the hand-off fails, say that this part was not done.
 Resolve the active product scope with `bash "${CLAUDE_PLUGIN_ROOT}/tools/detection/resolve-products.sh" <project-dir>` and leave out products outside it.
 
-Upgrade within a major version: read first, change files only after the customer says yes.
+Upgrade within a major version, or to a newer major when the customer asks for one: read first, change files only after the customer says yes.
 
 ## Steps
 1. **Installed versions.** Run `bash "${CLAUDE_PLUGIN_ROOT}/tools/detection/detect.sh" <project-dir>` and `bash "${CLAUDE_PLUGIN_ROOT}/tools/detection/resolve-products.sh" <project-dir>`. For each Sendbird package the project declares, record the declared version and the resolved one:
@@ -20,7 +20,10 @@ Upgrade within a major version: read first, change files only after the customer
    - Android: `app/build.gradle(.kts)` and `gradle/libs.versions.toml` when present. Coordinates and repositories: `knowledge/curated/android/setup.md`.
    If the project has no Sendbird package, say so and suggest `/sendbird-client:setup` instead.
 2. **Newest published version.** For each package run `bash "${CLAUDE_PLUGIN_ROOT}/tools/local-sdk/latest-version.sh" <npm|spm|maven> <package> --major <installed major>` (`spm` takes the package's GitHub URL; `maven` takes the artifact, plus `--repo <url>` when `settings.gradle` declares a repository other than the default). Quote `latestInMajor`, `latest`, and `source` from its output. Never state a version from memory; if the lookup fails, report the error for that package and leave it out of the plan.
-3. **Major versions are out of scope.** When `latest` is a newer major than the installed one (for example Chat v3 to v4), say that a newer major exists, that moving to it is a migration this skill does not perform, and point to the migration guide on sendbird.com/docs for that SDK. Continue with `latestInMajor` only. When `latestInMajor` equals the installed version for every package, say the project is already on the newest release of its major version and stop.
+3. **Newer major.** When `latest` is a newer major than the installed one (for example Chat v3 to v4), read `knowledge/curated/<platform>/cross-cutting/migration.md` and quote the public guide it names for each package, with its URL, and its order of work. For a product it lists without a guide, say that no public migration guide exists.
+   - The customer did not ask to change major: say that a newer major exists, that this run stays in the installed major, and name that guide. Continue with `latestInMajor` only.
+   - The customer asked for the newer major (for example "v3에서 v4로 올려 줘", "move to the latest major"): do not decline. Plan the move from `migration.md`: Chat SDK first and UIKit after it, the package change it describes with the project's own package manager (a CocoaPods project stays on CocoaPods), and the renames it lists. Steps 4 and 5 do not apply across majors. Confirm as in step 6, then hand the plan to the platform agent once as in step 7; its "Old major versions" section does the change in the same order.
+   When `latestInMajor` equals the installed version for every package and no major move was asked for, say the project is already on the newest release of its major version and stop.
 4. **Platform rules for the target versions.** First read `knowledge/curated/<platform>/setup.md`, `knowledge/curated/<platform>/hosts/<host>.md`, and, when UIKit is installed, `knowledge/curated/<platform>/products/uikit.md`. Cite each rule you apply:
    - Android: UIKit pins the Chat SDK it was built with, and an explicit newer Chat SDK declaration in the app module overrides it (`knowledge/curated/android/setup.md` "Getting a newer Chat SDK under UIKit"). When UIKit moves, read the Chat version the target UIKit POM declares (`<repo>/com/sendbird/sdk/uikit/<version>/uikit-<version>.pom`) and keep any explicit Chat declaration at or above it.
    - JS: read what the target UIKit package declares for `@sendbird/chat` with `npm view <uikit package>@<target> dependencies peerDependencies`. React Native UIKit declares it as a peer dependency, so the app installs a matching `@sendbird/chat` itself (`knowledge/curated/js/hosts/react-native.md` "Version compatibility checklist"). Keep the app's own `@sendbird/chat` inside that range so one copy is installed. Never pass `--legacy-peer-deps` or `--force` (`docs/AGENT_CONTRACT.md` section 3).
@@ -37,10 +40,11 @@ Upgrade within a major version: read first, change files only after the customer
 
 ## Wired knowledge
 - Package names, coordinates, repositories: `knowledge/curated/<platform>/setup.md`.
+- Major-version moves: `knowledge/curated/<platform>/cross-cutting/migration.md` — the public guide for each SDK, the order of work (Chat SDK first, then UIKit), the package change, and the renames.
 - Android Chat under UIKit: `knowledge/curated/android/setup.md` "Getting a newer Chat SDK under UIKit".
 - JS UIKit and Chat versions: `knowledge/curated/js/products/uikit.md`, `knowledge/curated/js/hosts/react-native.md` "Version compatibility checklist".
 - iOS shared-dependency minimums: `knowledge/curated/ios/setup.md`.
 - Tools: `tools/local-sdk/latest-version.sh` (registry lookup), `tools/local-sdk/deprecated-usage.sh` (deprecated calls, read from the SDK files; JS uses the TypeScript language service, iOS the installed `.swiftinterface`, Android the AAR), `tools/local-sdk/read-surface.sh` (target surface).
 
 ## No-Fabrication
-Every version comes from the registry output of this run, cited with its source. Every replacement API comes from the SDK's own deprecation text or the target version's surface, cited; never invent a replacement or a migration step. If a fact cannot be verified, say "I don't know — here's what I checked" and leave that change out.
+Every version comes from the registry output of this run, cited with its source. Every replacement API comes from the SDK's own deprecation text, the target version's surface, or `migration.md`, cited; never invent a replacement or a migration step. If a fact cannot be verified, say "I don't know — here's what I checked" and leave that change out.

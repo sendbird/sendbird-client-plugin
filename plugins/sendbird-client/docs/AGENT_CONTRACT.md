@@ -37,6 +37,10 @@ Accepted sources, in order:
 
 The source must contain the symbol or exact signature. A related page is not evidence. If a symbol cannot be verified, do not emit it. Report what was checked.
 
+### Cite the curated entry
+
+When a curated entry or section matches the case, cite it in the answer as `<curated path>` "<heading>" (or `<curated path>:<line>`). Links that the entry itself cites (a public source file, a community case, an installed package file) may follow it, but never replace it.
+
 ### Offline docs search
 
 After reading the curated knowledge, and before fetching any docs page, find the right page or section with the plugin's search:

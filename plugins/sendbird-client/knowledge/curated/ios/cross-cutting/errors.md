@@ -131,7 +131,7 @@ Neither page describes 400107, 400312, 400313, 403200, 409000, 800000, 800111, 8
 ## Handling tips
 - `sessionKeyExpired` (400309) / `sessionTokenRevoked` (400310): refresh the token through `SessionDelegate` (see auth). `tokenExpired` (400109) is an expired pagination token, not an expired session (see the table).
 - `connectionRequired` (800101): call `SendbirdChat.connect(...)` first.
-- `rateLimitExceeded` (500910): exponential backoff.
+- `rateLimitExceeded` (500910): exponential backoff. Plan limits are not stated here; point to the pricing page and the dashboard (knowledge/curated/common/pricing-quotas.md).
 
 ## Diagnosing connection failures
 
