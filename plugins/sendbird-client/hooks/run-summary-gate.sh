@@ -3,11 +3,18 @@
 # script, decides what to do next from the run summary the answer ends with, so its shape is
 # checked before the run ends. A follow-up request sent with --resume does not get the
 # session-start instructions again, and such a run once ended with "status": "ok" and no
-# schemaVersion/skill. On a problem, block once and say what is wrong; the documented
-# stop_hook_active guard lets the second stop pass, so this cannot loop. Interactive
+# schemaVersion/skill. On a problem, block and say what is wrong. A stop that follows a block
+# (stop_hook_active) is checked again, but blocks only for a kind of problem this stop chain has not
+# sent back yet, and at most twice in all: a rewrite once moved an env loader step into manualSteps
+# after a block for a missing summary, and the plain stop_hook_active guard let it through. The kinds
+# sent back are kept per session_id (Claude and Codex both send it) in the plugin data folder or the
+# temp folder; with no session_id or no record, a stop after a block passes as before, so this cannot
+# loop. Interactive
 # sessions are not checked. Fail open when the schema or the answer cannot be read.
 # A completed run that changed app files must also list its checks (docs/AGENT_CONTRACT.md sections 4
 # and 6); the block asks for the whole answer again, since a run once re-sent only the json block.
+# On a JS project, a manualSteps or nextSteps entry that asks for a bundler or env loader to read the App ID
+# is sent back too (docs/AGENT_CONTRACT.md section 3).
 set -uo pipefail
 HERE="$(cd "$(dirname "$0")" && pwd)"
 # shellcheck source=lib/hook-helpers.sh
@@ -15,7 +22,13 @@ source "$HERE/lib/hook-helpers.sh"
 read_stdin_json
 
 is_noninteractive || exit 0
-[ "$(jget '.stop_hook_active')" = "true" ] && exit 0
+active="$(jget '.stop_hook_active')"
+sid="$(jget '.session_id' | tr -c 'A-Za-z0-9_-' _)"
+[ "$active" = "true" ] && [ -z "$sid" ] && exit 0
+# the record of the kinds of problem this stop chain sent back (see sent_kind below)
+mark=""
+[ -n "$sid" ] && mark="${CLAUDE_PLUGIN_DATA:-${PLUGIN_DATA:-${TMPDIR:-/tmp}}}/run-summary-gate-$sid"
+[ "$active" = "true" ] && { [ -r "$mark" ] || exit 0; }
 SCHEMA="${CLAUDE_PLUGIN_ROOT:-$HERE/..}/core/schemas/run-summary.schema.json"
 [ -r "$SCHEMA" ] || exit 0
 # the plugin's own folder in the project (profile, SDK cache); a run that wrote only there changed no app file
@@ -30,6 +43,23 @@ text="$(final_answer_text)"
 # The same rule as tests/e2e/lib/run-summary.py "hands the build or type check off to the customer".
 build_step='^(?!.*\b(device|simulator|emulator|browser|token|server|backend|endpoint|dashboard|signing|certificate)\b).*(\b(xcodebuild|gradlew|assemble(debug|release)|tsc)\b|\b(npm|yarn|pnpm) (run )?(build|typecheck|type-check)\b|\b(build|compile|type-?check)\w*\s+(the\s+|your\s+)?(project|app|module|scheme|target|code)\b)'
 
+# A manualSteps or nextSteps entry on a JS project that asks for a bundler, an env loader, or another
+# config mechanism to read the App ID, or to switch its read to import.meta.env or process.env. With no
+# env loader, the config module already reads the App ID from configuration, and the plugin never asks
+# for a bundler or env loader (docs/AGENT_CONTRACT.md section 3, knowledge/curated/js/setup.md "App ID").
+# Only steps that name the App ID match: a token server URL or a placeholder to replace stays allowed.
+# The same rule as tests/e2e/lib/run-summary.py "asks for a bundler or env loader to read the App ID".
+appid_loader_step='^(?=.*(\b|_)app[ _-]?id\b).*(\b((install|add|set ?up|configure|ensure|use|need|choose|pick|adopt|introduce|wire|point|move|ask)\w*|load(s|ed|ing)?)\b.{0,120}\b(vite|webpack|parcel|bundler|dotenv|react-native-config|env(ironment)?[ -]?(loader|mechanism|variable|file|config(uration)?)|env-(based|driven)|config(uration)? (mechanism|loader|library)|loader)\b|\b(bundler|loader|config(uration)? mechanism)\b.{0,40}\b(add|install|set ?up|choose|pick|introduce|adopt)\w* (one|it|that)\b|\b(switch|change|point|move|have|make|update)\w*\b.{0,80}(import\.meta\.env|process\.env))'
+# JS only: the project profile's platform when detection wrote one, else a package.json in the project
+cwd="$(jget '.cwd')"; cwd="${cwd:-$PWD}"
+platform=""
+[ -n "$state_dir" ] && platform="$(jq -r '.platform // empty' "$cwd/$state_dir/profile.json" 2>/dev/null || true)"
+case "$platform" in
+  js) is_js=true ;;
+  ios|android) is_js=false ;;
+  *) if [ -f "$cwd/package.json" ]; then is_js=true; else is_js=false; fi ;;
+esac
+
 # the last ```json fenced block of the answer
 block="$(printf '%s\n' "$text" | awk '/^[[:space:]]*```json[[:space:]]*$/ {on=1; buf=""; next}
   on && /^[[:space:]]*```[[:space:]]*$/ {on=0; last=buf; next} on {buf = buf $0 "\n"} END {printf "%s", last}')"
@@ -39,7 +69,8 @@ if [ -z "$block" ]; then
 elif ! printf '%s' "$block" | jq -e 'type == "object"' >/dev/null 2>&1; then
   problems="the last json block is not a JSON object"
 else
-  problems="$(printf '%s' "$block" | jq -r --slurpfile s "$SCHEMA" --arg build "$build_step" --arg sd "$state_dir" '
+  problems="$(printf '%s' "$block" | jq -r --slurpfile s "$SCHEMA" --arg build "$build_step" --arg sd "$state_dir" \
+    --arg loader "$appid_loader_step" --argjson js "$is_js" '
     ($s[0]) as $S | . as $d
     | ($S.properties.status.enum) as $st
     | ($S.properties.checks.items.properties.result.enum) as $cr
@@ -55,6 +86,8 @@ else
         (if ($d.manualSteps | type) != "array" and ($d | has("manualSteps")) then "manualSteps must be an array of strings" else empty end),
         (if ($d.manualSteps | type) == "array" then ($d.manualSteps[] | strings | select(test($build; "i"))
           | "manualSteps entry \(tojson) is about building or type-checking the project, which is not a hand-off (docs/AGENT_CONTRACT.md section 3): remove it, and at most say once in the answer text, outside the json block, that this run did not build the project") else empty end),
+        (if $js then ("manualSteps", "nextSteps") as $f | ($d[$f] | if type == "array" then .[] else empty end) | strings | select(test($loader; "i"))
+          | "\($f) entry \(tojson) asks for a bundler, env loader, or other config mechanism to read the App ID. On a JS project without an env loader, the config module (for example src/sendbird/config.ts) already reads the App ID from configuration, and the plugin never asks for a bundler or env loader (docs/AGENT_CONTRACT.md section 3, knowledge/curated/js/setup.md \"App ID\"): drop that step, do not move the suggestion to nextSteps, checks, or the answer text, and when the App ID is still a placeholder keep only a step such as \"Replace the placeholder App ID in src/sendbird/config.ts with your real Sendbird App ID\"" else empty end),
         (if $d.status == "needs_input" and (($d.questions // []) | length) == 0 then "needs_input needs at least one questions entry" else empty end),
         (if $d.status == "needs_input" and (($d.changes // []) | length) > 0 then "needs_input must not list changes" else empty end),
         (if ($d.status | IN("failed","declined")) and ((($d.reason // "") | type) != "string" or ($d.reason // "") == "") then "\($d.status) needs a reason" else empty end),
@@ -68,9 +101,42 @@ else
         (if $d.status == "completed" and (($d.checks // []) | length) == 0
             and any(($d.changes // [])[]; (.path | type) == "string" and ($sd == "" or (.path | startswith($sd + "/") | not)))
          then "the run changed app files but lists no checks: put each check from docs/AGENT_CONTRACT.md section 4 and the skill'"'"'s own checks under checks, as pass, fail, or not_run" else empty end)
-      ] | unique | join("; ")' 2>/dev/null)" || exit 0
+      ] | unique | .[]' 2>/dev/null)" || exit 0
 fi
-[ -n "$problems" ] || exit 0
+# a clean answer ends the chain, so its record goes
+[ -n "$problems" ] || { [ -n "$mark" ] && rm -f "$mark"; exit 0; }
+
+# problem_kind <problem> : the kind a problem counts as when deciding whether it was sent back already
+problem_kind() {
+  case "$1" in
+    *"asks for a bundler, env loader"*) echo appid-env-step ;;
+    *"about building or type-checking"*) echo build-step ;;
+    *"lists no checks"*) echo no-checks ;;
+    "the answer does not end with"*|"the last json block is not"*) echo no-summary ;;
+    *) echo schema ;;
+  esac
+}
+# sent_kind <kind> : 0 when a block in this stop chain already sent that kind back. The record keeps
+# one line per block, each listing that block's kinds separated by commas.
+sent_kind() { tr ',' '\n' < "$mark" 2>/dev/null | grep -Fxq "$1"; }
+if [ "$active" = "true" ]; then
+  [ "$(wc -l < "$mark" | tr -d ' ')" -ge 2 ] && exit 0
+  fresh=""
+  while IFS= read -r p; do
+    [ -n "$p" ] && ! sent_kind "$(problem_kind "$p")" && fresh="$fresh$p"$'\n'
+  done <<< "$problems"
+  problems="$fresh"
+  [ -n "$problems" ] || exit 0
+fi
+kinds="$(while IFS= read -r p; do [ -n "$p" ] && problem_kind "$p"; done <<< "$problems" | sort -u | paste -sd , -)"
+if [ "$active" = "true" ]; then
+  # fail open: a stop after a block that cannot be recorded passes, so it cannot loop
+  printf '%s\n' "$kinds" >> "$mark" 2>/dev/null || exit 0
+elif [ -n "$mark" ]; then
+  # a stop that does not follow a block starts a new chain
+  { printf '%s\n' "$kinds" > "$mark"; } 2>/dev/null
+fi
+problems="$(printf '%s' "$problems" | awk 'NF { printf "%s%s", (n++ ? "; " : ""), $0 }')"
 
 jq -n --arg p "$problems" '{decision: "block",
   reason: ("Run summary check (Sendbird plugin, non-interactive run): " + $p + ". Write the whole answer again as the reply itself (the caller may see only this reply, so do not say it is repeated or mention this check), and end it with one fenced json block that validates against core/schemas/run-summary.schema.json: schemaVersion \"1\", skill (the skill name), status (completed, needs_input, failed, or declined), changes ([{path, action: created|modified|deleted, summary?}]), manualSteps (strings), plus questions for needs_input or reason for failed/declined, and optionally project, steps, apis, checks ([{name, result: pass|warn|fail|not_run|not_verified, detail?}]), and nextSteps (strings). No other fields.")}'
