@@ -17,7 +17,6 @@ Works from the error text the customer pasted (or a log file they point to). It 
 2. Read the error. Note the failing tool (Next.js, webpack, Vite, Create React App, Metro or Expo, Gradle, manifest merger, Xcode, SPM, CocoaPods), the first error line, and every path or package name it prints. When the message points at a file outside `node_modules/@sendbird/`, `com.sendbird.sdk`, or a Sendbird Swift package, say that another dependency causes it and stop. A peer dependency conflict reported while installing a Sendbird package is not that case: it has its own row below.
 3. Classify it with the table below and read only the cited section. Compare the installed version with the version the section names.
 4. Report: the class, the evidence line from the log, the cause, and the fix with its citation: the curated section first (`docs/AGENT_CONTRACT.md` section 2, "Cite the curated entry"). Apply the fix only after the customer confirms, through the platform agent; keep the project's package manager and do not add `--legacy-peer-deps`, `--force`, or `--ignore-engines` (docs/AGENT_CONTRACT.md section 3).
-   - Non-interactive (`SENDBIRD_NONINTERACTIVE`): apply only when the request itself asks for the fix; otherwise change nothing and stop with `needs_input` and the `apply-fix` question (docs/AGENT_CONTRACT.md section 7).
 5. Verification: if the customer asked for a build, run their own build command once and report its result. Otherwise list the exact command for them to run and mark the build "not run".
 
 | Class (what the log shows) | Curated section |
