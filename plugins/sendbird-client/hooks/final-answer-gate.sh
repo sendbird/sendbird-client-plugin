@@ -105,6 +105,18 @@ if trace_has "skill upgrade-sdk" && trace_lines | grep -q '^latest ' && ! agent_
   fi
 fi
 
+# docs/AGENT_CONTRACT.md section 3: whether the App ID is set comes only from tools/detection/resolve-app-id.sh,
+# and only setup stops to ask for it (run-check too, whose preflight needs it to run the app). In a 2026-10
+# Codex TC run, push-setup read an empty SENDBIRD_APP_ID in project.yml, asked for the App ID, and stopped
+# with no change and no platform agent. A turn that ran another skill and ends with that question is sent
+# back once.
+skills_run="$(trace_lines | sed -n 's/^skill //p' | grep -v -- '-agent$' | awk '!seen[$0]++')"
+if [ -n "$skills_run" ] && ! printf '%s\n' "$skills_run" | grep -Eqx 'setup|run-check' && answer_asks_app_id "$text"; then
+  jq -n --arg s "$(printf '%s' "$skills_run" | paste -sd ',' - | sed 's/,/, /g')" '{decision: "block",
+    reason: ("App ID check (Sendbird plugin): this turn ran " + $s + ", which does not need the App ID, and only setup stops to ask for it (docs/AGENT_CONTRACT.md section 3: whether it is set comes only from the from value of tools/detection/resolve-app-id.sh, never from reading project.yml, profile.json, or the environment). Do not ask for it and do not stop on it: continue the skill and hand the code to the platform agent as the skill says (in Codex, its launcher skill), so the app reads the App ID from its configuration at run time. When resolve-app-id.sh reports from missing, put setting the App ID under manualSteps. Then write the whole answer again as the reply itself (the user may see only this reply, so do not mention this check).")}'
+  exit 0
+fi
+
 # docs/AGENT_CONTRACT.md "Cite the curated entry": when this turn read a curated file and the answer
 # cites a link but no curated path, the link stands in for the entry (often a community or source
 # link the entry itself cites). Send it back once to cite the curated entry first.
@@ -132,7 +144,7 @@ printf '%s' "$text" | grep -Eq '```|[A-Za-z]\([A-Za-z]*:' \
 
 # Pass only when a concrete source marker resolves to a shipped local file or an
 # allowed public URL. Vague words such as "verified" are not citations.
-sources="$(printf '%s' "$text" | grep -Eo '(source:|출처:[[:space:]])[[:space:]]*[^)`[:space:]]+' | sed -E 's/^(source:|출처:)[[:space:]]*//' || true)"
+sources="$(cited_sources "$text" || true)"
 symbols="$(printf '%s' "$text" | grep -Eo '(SendbirdChat|SendBirdCall|SendbirdCalls|AIAgentMessenger|SendbirdUIKit|SendbirdLive|SendbirdDesk|SendBirdDesk|MessengerLauncher|GroupChannel|BaseMessage|SBU[A-Z][A-Za-z0-9_]*|SBA[A-Z][A-Za-z0-9_]*|SBDSK[A-Za-z0-9_]*)(\.[A-Za-z_][A-Za-z0-9_]*)?' | sort -u || true)"
 instance_methods="$(printf '%s' "$text" | grep -Eo '(sb|channel|messengerLauncher)\.[A-Za-z_][A-Za-z0-9_]*' | sed 's/.*\.//' | sort -u || true)"
 error_codes="$(printf '%s' "$text" | grep -Eo "$code_ctx" | grep -Eo '[0-9]{6}' | sort -u || true)"
