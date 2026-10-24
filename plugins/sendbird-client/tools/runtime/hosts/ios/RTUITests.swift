@@ -268,10 +268,45 @@ final class RTUITests: XCTestCase {
             record("sign-in", false, "found the user ID field (\(fieldPick.rule)) but \(why)", shot: shot("no-sign-in-button"))
             return
         }
-        let label = nodes[buttonPick.index].label  // read before the tap: the button may be gone afterwards
-        tap(nodes[buttonPick.index])
+        var pick = buttonPick
+        // Close the keyboard before the tap: it can cover the button, and the tap then lands on the keyboard
+        // and sign-in never happens (2026-10-25: a React Native form whose button sat 5 pt above the frame
+        // XCUITest reports for the iOS 27 keyboard, which draws its top bar above that frame). The return key
+        // ends editing in a single-line field (a tap outside does not blur a React Native field); then the
+        // form is read again, since it moves once the keyboard is gone.
+        if app.keyboards.count > 0 {
+            let typedInto = nodes[fieldPick.index]
+            app.typeText("\n")
+            Thread.sleep(forTimeInterval: 2)
+            if app.keyboards.count > 0 { closeKeyboard() }
+            nodes = signinNodes()
+            // the return key may have submitted the form itself: the field typed into is gone (another
+            // screen's field, such as a message input, is not the form)
+            let sameField = { (n: RTSigninNode) in n.kind == .field && n.identifier == typedInto.identifier && n.placeholder == typedInto.placeholder }
+            guard nodes.contains(where: sameField), let field = rtPickSigninField(nodes) else {
+                record("sign-in", true, "A=\(user) typed into the app's own form (\(fieldPick.rule)) and submitted it with the return key", shot: shot("signed-in"))
+                return
+            }
+            guard let again = rtPickSigninButton(nodes, field: field.index), !coveredByKeyboard(nodes[again.index]) else {
+                dump("sign-in")
+                record("sign-in", false, "the keyboard covers the sign-in button and the return key did not close it", shot: shot("sign-in-covered"))
+                return
+            }
+            pick = again
+        }
+        let label = nodes[pick.index].label  // read before the tap: the button may be gone afterwards
+        tap(nodes[pick.index])
         Thread.sleep(forTimeInterval: 3)
-        record("sign-in", true, "A=\(user) typed into the app's own form (\(fieldPick.rule)) and tapped \"\(label)\" (\(buttonPick.rule))", shot: shot("signed-in"))
+        record("sign-in", true, "A=\(user) typed into the app's own form (\(fieldPick.rule)) and tapped \"\(label)\" (\(pick.rule))", shot: shot("signed-in"))
+    }
+
+    /// Whether a keyboard is still on screen near the node: the iOS 27 keyboard draws its top bar about
+    /// 45 pt above the frame XCUITest reports, so a node that ends within 60 pt of that frame counts.
+    private func coveredByKeyboard(_ node: RTSigninNode) -> Bool {
+        let keyboard = app.keyboards.firstMatch
+        guard keyboard.exists else { return false }
+        let k = keyboard.frame
+        return k.height > 0 && k.minY.isFinite && node.y + node.h > Double(k.minY) - 60
     }
 
     /// Text fields and buttons on screen, read from one snapshot (a screen that changes mid-read
@@ -343,16 +378,21 @@ final class RTUITests: XCTestCase {
                 .max(by: { $0.frame.minX < $1.frame.minX })
         }
         // React Native UIKit's send button is a touchable without a button role, so it is no button to
-        // XCUITest: an unlabeled, icon-sized element right of the input, on its row. Read from one
-        // snapshot (asking each of a React Native screen's many elements one by one takes too long).
+        // XCUITest: an unlabeled, icon-sized element right of the input, on its row. A Chat SDK screen's
+        // Pressable without accessibilityRole is the same kind of element with its text as the label
+        // ("Send"; 2026-10-24: a React Native demo's composer). Read from one snapshot (asking each of a
+        // React Native screen's many elements one by one takes too long).
         func touchableSend() -> CGRect? {
             guard let root = try? app.snapshot() else { return nil }
             var best: CGRect?
             var stack: [XCUIElementSnapshot] = [root]
+            let sendLabel = NSPredicate(format: "SELF MATCHES[c] %@ AND NOT (SELF MATCHES[c] %@)", ".*send.*", ".*(image|file|photo|attach|camera|voice|video).*")
             while let node = stack.popLast() {
                 stack.append(contentsOf: node.children)
                 let f = node.frame
-                guard node.elementType == .other, node.label.isEmpty, f.width > 0, f.width <= 64, f.height <= 64,
+                let unlabeledIcon = node.label.isEmpty && f.width <= 64
+                let labeledSend = !node.label.isEmpty && node.label.count <= 20 && node.children.isEmpty && sendLabel.evaluate(with: node.label) && f.width <= 160
+                guard node.elementType == .other, unlabeledIcon || labeledSend, f.width > 0, f.height <= 64,
                       abs(f.midY - inputFrame.midY) < 30, f.minX >= inputFrame.maxX - 4, f.maxX <= root.frame.maxX else { continue }
                 if best == nil || f.minX > best!.minX { best = f }
             }
@@ -367,7 +407,7 @@ final class RTUITests: XCTestCase {
                 record(step, true, "typed \"\(text)\" and tapped \"\(name)\"", shot: shot("typed"))
             } else if let f = touchable {
                 app.coordinate(withNormalizedOffset: .zero).withOffset(CGVector(dx: f.midX, dy: f.midY)).tap()
-                record(step, true, "typed \"\(text)\" and tapped the unlabeled touchable right of the input", shot: shot("typed"))
+                record(step, true, "typed \"\(text)\" and tapped the touchable right of the input", shot: shot("typed"))
             }
         } else {
             dump("send")

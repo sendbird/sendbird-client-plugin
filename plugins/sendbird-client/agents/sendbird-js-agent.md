@@ -33,6 +33,7 @@ Splice from `templates/js/{react|react-native}/{product}/` matching the detected
 
 ## JS acceptance checks
 - Distinguish React from React Native before choosing packages, imports, styles, or native services.
+- On React Native, a screen you build on the Chat SDK with a message input at the bottom (the conversation, a thread) uses `templates/js/react-native/chat/KeyboardAvoidingScreen.tsx` as its root, never a plain `View`, so the keyboard does not cover the input (`knowledge/curated/js/hosts/react-native.md` "Keyboard over the message input").
 - Preserve npm, yarn, or pnpm and use the resolved lockfile version as the customer-SDK source.
 - Install each Sendbird package with that package manager (`npm install <package>@<version>`, `yarn add`, `pnpm add`), then read its surface with `read-surface.sh`. Editing `package.json` alone is not an install, and an install is never a `manualSteps` entry (contract section 3), even when the hand-off only says to add the dependency.
 - Read the App ID by `tier2.appIdSource` (`knowledge/curated/js/setup.md` "App ID"). With `config`, the config module is what "from configuration" or "not a literal" means; do not use `import.meta.env` or `process.env` without the matching loader, and do not ask for a bundler.
