@@ -266,8 +266,12 @@ class RTRuntimeTest {
         input.text = text
         Thread.sleep(800)
         // only the app's own views: the keyboard's toolbar sits on the input's row while it is open
+        // An id names a send button only when "send" is a word of it (send_button, btn_send, sb_send_button):
+        // a bare ".*send.*" took a message row's sender name, id message_sender, and B never got A's text (2026-10-24)
         val sendSel = listOf(
-            By.res(Pattern.compile("(?i).*:id/.*send.*")).pkg(pkg),
+            By.res(Pattern.compile(".*:id/sb_send_button")).pkg(pkg),
+            By.res(Pattern.compile("(?i).*:id/(?:[a-z0-9_]*_)?send(?:_(?:button|btn|message|msg|icon|image))?")).clickable(true).pkg(pkg),
+            By.res(Pattern.compile(".*:id/(?:[a-z][a-zA-Z0-9]*)?(?:Send|send)(?:Button|Btn|Message|Icon|Image)?")).clickable(true).pkg(pkg),
             By.desc(Pattern.compile("(?i)send( message)?")).pkg(pkg),
             By.text(Pattern.compile("(?i)send")).pkg(pkg),
         )
@@ -336,17 +340,29 @@ class RTRuntimeTest {
         }
         target.longClick()
         Thread.sleep(1500)
-        // a bubble may take the long press on its container rather than on its text
+        // a bubble may take the long press on its container rather than on its text. The first long press
+        // may redraw the list, so the text's node can be gone (StaleObjectException ended a whole run,
+        // 2026-10-24): look the text up again and skip the second try when it is not there.
         if (menuItem("Copy", "Edit", "Delete", "Reply") == null) {
-            var node = target.parent
-            while (node != null && !node.isLongClickable) node = node.parent
-            node?.longClick()
+            runCatching {
+                val again = device.findObjects(By.textContains(text)).firstOrNull { it.className != "android.widget.EditText" }
+                var node = again?.parent
+                while (node != null && !node.isLongClickable) node = node.parent
+                node?.longClick()
+            }
             Thread.sleep(1500)
         }
         return true
     }
 
-    private fun dismissMenu() { device.pressBack(); Thread.sleep(1000) }
+    // Back closes an open menu, but with no menu open it leaves the conversation (2026-10-24: an app's own
+    // Chat SDK screen had no long-press menu, and two Backs ended on the launcher before the attachment and
+    // search steps). A menu, dialog, or sheet is a window of its own over the conversation, and UiAutomator
+    // reads the window in front, so the conversation's text input is not found while one is open.
+    private fun dismissMenu() {
+        if (device.findObjects(By.clazz("android.widget.EditText").pkg(pkg)).isNotEmpty()) return
+        device.pressBack(); Thread.sleep(1000)
+    }
 
     private fun reaction(text: String) {
         if (!longPress(text, "rich-reaction")) return

@@ -145,6 +145,8 @@ final class IncomingCallCoordinator: NSObject, PKPushRegistryDelegate, SendBirdC
 The QuickStart registers with `unique: true`, which keeps only this device's token. Use `unique: false` when the same user should ring on several devices (see "Only the most recently used device gets push notifications" in knowledge/curated/ios/cross-cutting/troubleshooting.md).
 
 ## Make a call
+To place a 1:1 call, dial the callee's user ID. `isVideoCall: false` makes it a voice call and `true` a video call.
+
 ```swift
 let dialParams = DialParams(calleeId: CALLEE_ID, isVideoCall: false, callOptions: CallOptions(), customItems: [:])
 let directCall = SendBirdCall.dial(with: dialParams) { directCall, error in

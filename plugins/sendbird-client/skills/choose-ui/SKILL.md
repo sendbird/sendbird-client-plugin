@@ -25,7 +25,16 @@ A recommendation, not a code change. Read only; write no files.
    - nothing installed yet → `/sendbird-client:setup` with `--product uikit` or `--product chat`;
    - UIKit already installed and the design needs changes → `/sendbird-client:ui-customize`;
    - the Chat SDK already installed and a screen or feature is next → `/sendbird-client:add-feature`.
-5. **Report.** A short comparison table (design freedom, work for the app, features the request needs, host notes) with a citation in each row, the recommendation, and the next skill. In a non-interactive run, end with the run summary (`core/schemas/run-summary.schema.json`, `skill: "choose-ui"`, `status: "completed"`, empty `changes`).
+5. **Report.** A short comparison table with exactly these four rows, in this order, each with its own citation, then the recommendation and the next skill:
+
+   | | UIKit | Chat SDK with your own UI | Source |
+   |---|---|---|---|
+   | Design freedom | ... | ... | file and heading |
+   | Work for the app | ... | ... | file and heading |
+   | Features the request needs | ... | ... | file and heading |
+   | Host notes | ... | ... | file and heading |
+
+   The "Features the request needs" row names each feature from step 2 and whether each option has it, citing the section that says so; it is never left out, also when the request names no feature (then it says the request names none). In a non-interactive run, end with the run summary (`core/schemas/run-summary.schema.json`, `skill: "choose-ui"`, `status: "completed"`, empty `changes`).
 
 ## Wired knowledge
 - `knowledge/curated/<platform>/products/uikit.md`, `knowledge/curated/<platform>/cross-cutting/theme.md`

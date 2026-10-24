@@ -18,6 +18,7 @@ Sources: (source: knowledge/curated/android/products/chat.md) (source: https://s
 - `MessageActionsViewModel.kt` — edit and delete your own messages, and receive other members' edits and deletes as a `SharedFlow` (`MessageEditing.kt`).
 - `UnreadCountViewModel.kt` — total unread count for a tab badge, live updates, per-channel count, mark as read; `UnreadCountBadge` composable (`UnreadCount.kt`).
 - `ChannelActivityViewModel.kt` — typing indicator and read receipts for one conversation; `TypingIndicator` composable (`TypingAndReadReceipts.kt`).
+- `ThreadViewModel.kt` — thread replies of a root message, send a reply, new replies as they arrive (`MessageThreads.kt`).
 
 ## Splice steps
 1. Add the Chat SDK: `settings.gradle` maven `https://repo.sendbird.com/public/maven`,
@@ -65,6 +66,11 @@ removed, when the user leaves it.
 3. Put `TypingIndicator(vm)` above the input. Call `vm.markRead(channel)` when a new message arrives on screen.
 4. For your own messages, show a read mark when `vm.unreadMemberCount(channel, message) == 0`, and collect
    `vm.readReceiptsVersion` in the same composable so it recomposes when someone reads.
+
+### Thread replies (`ThreadViewModel.kt`)
+1. Navigate to the thread screen with the root message (`parentMessageId == 0`) and call `LaunchedEffect(root.messageId) { vm.open(channel, root) }`.
+2. Show `vm.replies.collectAsState()`; send with `vm.reply(channel, text)`. The handler is removed in `onCleared`.
+3. Code that calls `getThreadedMessagesByTimestamp` itself gets `List<BaseMessage>?` in Kotlin: use `orEmpty()`.
 
 ## Notes
 - Message UI: Chat SDK is headless. For prebuilt Compose chat screens use the Compose-native UIKit

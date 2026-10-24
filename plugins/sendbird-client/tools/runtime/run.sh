@@ -8,6 +8,12 @@
 # Usage: run.sh <project-dir> --host <react|react-native|ios-uikit|ios-swiftui|android-view|android-compose>
 #               [--platform ios|android] [--check] [--out DIR] [--app-id-env NAME] [--expect-text TEXT]...
 #               [--expect-element ID]... [--b-custom-type TYPE] [--direct-chat USER] [--chat-screens] [--rich] [--keep]
+#               [--go-ahead]
+#   --go-ahead        the customer agreed to this run: copying the project, installing, building, and
+#                     launching the app, with test users in their application. The run-check skill
+#                     passes it only after the customer said yes (or the request itself allowed the
+#                     build and the run). Without it a run that has an App ID copies and builds nothing
+#                     and exits 64; --check needs no go-ahead
 #   --platform        react-native only, and required there: run the app's ios/ project on an iOS
 #                     simulator or its android/ project on an Android emulator, one platform per run.
 #                     The app is a release build with its JavaScript bundled in, so no Metro server
@@ -23,11 +29,13 @@
 #   --chat-screens    the app has its own chat screens built on the Chat SDK (no UIKit dependency):
 #                     drive them like UIKit screens instead of stopping after connect. Not decided
 #                     automatically: the harness finds screens by their controls (a chat or channel
-#                     button, the channel's row, a message input), and code that sends a message
-#                     does not show that a screen with those controls exists. Without UIKit and
-#                     without this flag, the channel and message steps are recorded as not run, and
-#                     runtime.json messageSteps and the last lines of the output say so and name this
-#                     flag (with the file whose Chat SDK code sends messages, when there is one)
+#                     button, the channel's row, a message input; on React, lib/screens.mjs reads
+#                     the sb_channel_list and sb_message_input test ids, else any list on screen),
+#                     and code that sends a message does not show that a screen with those controls
+#                     exists. Without UIKit and without this flag, the channel and message steps are
+#                     recorded as not run, and runtime.json messageSteps and the last lines of the
+#                     output say so and name this flag (with the file whose Chat SDK code sends
+#                     messages, when there is one)
 #   --direct-chat     the app opens a 1:1 chat with USER from a button (no channel list): user B
 #                     is USER, A taps the button (on a product screen one tap away, if need be), the
 #                     conversation must open by itself, A sends, B finds A's message in the channel
@@ -41,8 +49,8 @@
 #   --keep            keep the working copy (it holds the App ID; delete it yourself)
 #
 # The application must allow connecting with a user ID only: users A and B are new test users with
-# generated IDs (rt-<host>-a-xxxxxx) and no access token. Without an App ID the run is skipped:
-# prints "SKIP: ..." and exits 2. Exit codes: 0 pass, 1 fail, 2 skip, 64 bad arguments.
+# generated IDs (rt-<host>-a-xxxxxx) and no access token. Without an App ID, or inside the Codex sandbox
+# (CODEX_SANDBOX=seatbelt), the run is skipped: prints "SKIP: ..." and exits 2. Exit codes: 0 pass, 1 fail, 2 skip, 64 bad arguments.
 # The project directory is never modified: the harness works on a copy, gives it the App ID the
 # way the project reads it (lib/appid.py), and adds only harness files to the copy.
 # Writes <out>/runtime.json ({status: pass|fail|skip, reason, steps[]}), steps.jsonl, screens/*.png,
@@ -60,9 +68,9 @@ set -uo pipefail
 first_run_notice="$(cd "$(dirname "$0")" && pwd)/../../hooks/first-run-notice.sh"
 [ ! -f "$first_run_notice" ] || bash "$first_run_notice" script || true
 HERE="$(cd "$(dirname "$0")" && pwd)"
-usage() { echo "usage: run.sh <project-dir> --host <react|react-native|ios-uikit|ios-swiftui|android-view|android-compose> [--platform ios|android] [--check] [--out DIR] [--app-id-env NAME] [--expect-text TEXT]... [--expect-element ID]... [--b-custom-type TYPE] [--direct-chat USER] [--chat-screens] [--rich] [--keep]" >&2; exit 64; }
+usage() { echo "usage: run.sh <project-dir> --host <react|react-native|ios-uikit|ios-swiftui|android-view|android-compose> [--platform ios|android] [--check] [--out DIR] [--app-id-env NAME] [--expect-text TEXT]... [--expect-element ID]... [--b-custom-type TYPE] [--direct-chat USER] [--chat-screens] [--rich] [--keep] [--go-ahead]" >&2; exit 64; }
 
-project=""; host=""; platform=""; out=""; keep=0; check=0; app_id_env=""; expect_text=""; expect_element=""; b_custom_type=""; direct_user=""; chat_screens=0; rich=0
+project=""; host=""; platform=""; out=""; keep=0; check=0; app_id_env=""; expect_text=""; expect_element=""; b_custom_type=""; direct_user=""; chat_screens=0; rich=0; go_ahead=0
 while [ $# -gt 0 ]; do
   case "$1" in
     --host) [ $# -ge 2 ] || usage; host="$2"; shift 2 ;;
@@ -77,6 +85,7 @@ while [ $# -gt 0 ]; do
     --rich) rich=1; shift ;;
     --check) check=1; shift ;;
     --keep) keep=1; shift ;;
+    --go-ahead) go_ahead=1; shift ;;
     -h|--help) usage ;;
     -*) echo "unknown option: $1" >&2; usage ;;
     *) [ -z "$project" ] || { echo "more than one project dir: $1" >&2; usage; }; project="$1"; shift ;;
@@ -106,6 +115,13 @@ fi
 [[ -z "$direct_user" || "$direct_user" =~ ^[A-Za-z0-9_.@-]+$ ]] || { echo "bad --direct-chat user ID: $direct_user (letters, digits, and _ . @ - only)" >&2; exit 64; }
 project="$(cd "$project" && pwd)"
 TOOLS_DIR="${RUNTIME_TOOLS_DIR:-${TMPDIR:-/tmp}/sendbird-runtime-tools}"
+# Codex runs shell commands in its macOS seatbelt sandbox (workspace-write) with CODEX_SANDBOX=seatbelt.
+# There the browser, simulator, and emulator cannot start: in a 2026-10 TC round Chromium died with
+# signal 6 right after launch, after the copy, install, and build had finished. The real run stops
+# before all that (exit 2, skipped); --check still runs and reports it under missing (ready false), so
+# the run-check skill stops at the preflight instead of asking for a go-ahead that cannot work.
+in_codex_sandbox() { [ "${CODEX_SANDBOX:-}" = seatbelt ]; }
+SANDBOX_REASON="the Codex sandbox (CODEX_SANDBOX=seatbelt) does not let the browser, simulator, or emulator start, so nothing was copied, installed, or built. Run this command from a terminal, or in a Codex session started with --sandbox danger-full-access, or approve running it outside the sandbox"
 
 # --- App ID: the run prints where it came from, never the value ---------------------------------
 # All zeros, YOUR_..., REPLACE..., <...>: the placeholder a generated config or a test run carries.
@@ -209,6 +225,7 @@ preflight() {
   esac
   [ "$chat_screens" = 1 ] && chat_ui=1
   [ -n "$direct_user" ] && chat_ui=1 && notes+=("direct chat: user B is $direct_user, connected once before the run so A's chat button can invite them; A's button must open the 1:1 conversation without a channel list")
+  in_codex_sandbox && missing+=("the real run cannot work here: $SANDBOX_REASON")
   local msg_note; msg_note="$(message_steps_note "$chat_ui" "$([ "$chat_ui" = 1 ] || chat_sdk_send "$project")")"
   [ -z "$msg_note" ] || notes+=("$msg_note")
   jq -n --arg host "$host" --arg platform "$platform" --arg from "$([ -n "$RT_APP_ID" ] && echo "$app_id_from")" --arg how "$how" --arg signin "$signin" \
@@ -227,6 +244,12 @@ preflight() {
 }
 if [ "$check" -eq 1 ]; then
   if preflight; then exit 0; else exit 2; fi
+fi
+# The customer's go-ahead, checked before anything is copied, installed, or built (no results folder
+# either). Without an App ID the run is only skipped below, so that path needs none.
+if [ -n "$RT_APP_ID" ] && [ "$go_ahead" != 1 ]; then
+  echo "not run: the real run needs the customer's go-ahead. Tell them what the preflight notes say will happen, ask once, and run again with --go-ahead only after they say yes (or when the request itself allowed building and running the app). Nothing was copied, installed, or built." >&2
+  exit 64
 fi
 
 [ -n "$out" ] || out="$(mktemp -d "${TMPDIR:-/tmp}/runtime.XXXXXX")"
@@ -260,6 +283,7 @@ if [ -z "$RT_APP_ID" ]; then
   echo "SKIP: $app_id_missing (an application that allows user-ID-only connect)"
   finish skip "$app_id_missing" 2
 fi
+in_codex_sandbox && finish skip "$SANDBOX_REASON" 2
 [ "$rich" = 1 ] && [ "$host" = react ] && echo "note: --rich is not implemented for react yet; running the basic checks"
 command -v node >/dev/null && command -v npm >/dev/null && command -v jq >/dev/null || finish skip "node, npm, and jq are required" 2
 
@@ -274,7 +298,7 @@ if [ ! -f "$TOOLS/.ready-2" ]; then
     > "$out/tools-install.log" 2>&1 || finish fail "could not install harness tools (tools-install.log)" 1
   touch "$TOOLS/.ready-2"
 fi
-cp "$HERE/lib/peer.mjs" "$HERE/lib/signin.mjs" "$HERE/hosts/react.mjs" "$HERE/hosts/vite.harness.config.mjs" "$TOOLS/"
+cp "$HERE/lib/peer.mjs" "$HERE/lib/signin.mjs" "$HERE/lib/screens.mjs" "$HERE/hosts/react.mjs" "$HERE/hosts/vite.harness.config.mjs" "$TOOLS/"
 
 # --- the working copy ----------------------------------------------------------------------------
 # physical path: Vite will not transform modules under a symlinked root (/var -> /private/var on macOS)
@@ -310,7 +334,7 @@ msg_state="$(message_steps_note "$chat_ui" "$([ "$chat_ui" = 1 ] || chat_sdk_sen
 
 rand() { LC_ALL=C tr -dc 'a-z0-9' < /dev/urandom | head -c 6; }
 RT_USER_A="rt-${host}-a-$(rand)"; RT_USER_B="${direct_user:-rt-${host}-b-$(rand)}"; RT_DIRECT="$([ -n "$direct_user" ] && echo 1 || echo 0)"
-export RT_DIRECT RT_RICH="$rich"
+export RT_DIRECT RT_RICH="$rich" RT_CHAT_SCREENS="$chat_screens"
 export RT_USER_A RT_USER_B RT_WORK="$work" RT_OUT="$out" RT_CHAT_UI="$chat_ui" RT_EXPECT_TEXT="$expect_text" RT_EXPECT_SELECTOR="$expect_element" RT_B_CUSTOM_TYPE="$b_custom_type"
 export RT_ENV_NAMES="$env_names" RT_BUILD_SETTINGS="$build_settings" RT_GRADLE_PROPS="$gradle_props" RT_TOOLS="$TOOLS" RT_HERE="$HERE" RT_PLATFORM="$platform"
 echo "runtime: $host${platform:+ ($platform)} | A=$RT_USER_A B=$RT_USER_B | chat screens: $([ "$chat_ui" = 1 ] && echo yes || echo no) | App ID via $(jq -r '.how | join(", ")' <<<"$appid_json") | out $out"

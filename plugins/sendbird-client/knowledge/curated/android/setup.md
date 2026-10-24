@@ -35,6 +35,33 @@ dependencies {
 ## App ID in Gradle
 The App ID is not a secret, so a fresh clone and CI should build without extra setup. Put it in `gradle.properties` (`SENDBIRD_APP_ID=...`), let `-PSENDBIRD_APP_ID=...` or an environment variable override it, and pass it on with `buildConfigField`. Do not throw from the build script when it is missing: an exception there fails every build, including CI and a teammate's first checkout. Check for an empty value at init time instead.
 
+Use this block as it is; do not write other Gradle script code for the App ID. It reads the values at the top level of `app/build.gradle.kts`, with `import java.util.Properties` as the file's first line after any comment. Never read them inside `android { }` or `defaultConfig { }`: there `java` is the Gradle Java extension, so `java.util.Properties()` fails with "Unresolved reference: util" and the build stops (seen in a generated app).
+
+```kotlin
+import java.util.Properties
+
+val localProperties = Properties().apply {
+    val file = rootProject.file("local.properties")
+    if (file.isFile) file.inputStream().use { load(it) }
+}
+val sendbirdAppId: String = listOf(
+    project.findProperty("SENDBIRD_APP_ID") as String?,
+    System.getenv("SENDBIRD_APP_ID"),
+    localProperties.getProperty("SENDBIRD_APP_ID"),
+).firstOrNull { !it.isNullOrBlank() }?.trim() ?: ""
+
+android {
+    defaultConfig {
+        buildConfigField("String", "SENDBIRD_APP_ID", "\"$sendbirdAppId\"")
+    }
+    buildFeatures {
+        buildConfig = true
+    }
+}
+```
+
+Merge the `android { }` lines into the existing block, and read the value in code as `BuildConfig.SENDBIRD_APP_ID`. (source: templates/starters-bp/android-view/app/build.gradle.kts lines 2 and 13-35, built by the starters-build workflow)
+
 ## Init
 - Initialize once in `Application.onCreate` (Chat: `SendbirdChat.init`; UIKit: `SendbirdUIKit.init(adapter, context)`; AI Agent: `AIAgentMessenger.initialize(...)`).
 - Register your `Application` in `AndroidManifest.xml`.

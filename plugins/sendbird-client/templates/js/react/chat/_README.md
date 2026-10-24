@@ -42,7 +42,12 @@ Sources: (source: knowledge/curated/js/products/chat.md) (source: https://sendbi
    `isFileMessage()`, or `isMultipleFilesMessage()`; `message.message` (the text) is on every message.
    To send, call `sendText(channel, text, { onPending, onSucceeded, onFailed })` and merge each
    message into the list with `mergeMessages`; `onFailed` can get `null` instead of a message.
-5. App ID read per the profile `tier2.appIdSource` (knowledge/curated/js/setup.md "App ID") — never ask the customer to add a bundler; tokens are secrets.
+5. Give the screens the stable test ids of `templates/starters-bp/BEST_PRACTICES.md` ("Stable identifiers"):
+   `data-testid="sb_open_channels"` on the button that opens the list (when there is one),
+   `sb_channel_list` on the channel list container, `sb_message_input` on the message input, and
+   `sb_send_button` on its send button. The run check (`/sendbird-client:run-check` with
+   `--chat-screens`) finds the screens by these ids first (`tools/runtime/lib/screens.mjs`).
+6. App ID read per the profile `tier2.appIdSource` (knowledge/curated/js/setup.md "App ID") — never ask the customer to add a bundler; tokens are secrets.
 
 The feature files below assume a connected `sb` and a loaded group channel. Copy only the files the app needs.
 

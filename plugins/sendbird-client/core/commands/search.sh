@@ -10,7 +10,7 @@
 #   search.sh "<query>" [--platform ios|android|js] [--product <product>] [--version <major>]
 #             [--project <dir>] [--k 5] [--per-page 2] [--kind all|docs|curated]
 #
-#   --platform   keep results for this platform and platform-neutral ones
+#   --platform   keep results for this platform and platform-neutral ones (no platform, or "common")
 #   --product    keep results for this product and product-neutral ones (chat, uikit, ai-agent,
 #                desk, calls, live; auth is part of chat)
 #   --version    SDK major version of --product (needs --product): a page or section written for
@@ -20,13 +20,16 @@
 #                product) and apply the major of every detected product the same way;
 #                --version overrides --product's
 #   --k          number of results (1-50, default 5)
-#   --per-page   at most this many results from one docs page or curated file (default 2)
+#   --per-page   at most this many results from one docs page or curated file (default 2); when a
+#                curated file has more, a section whose heading names a query word that the file
+#                title does not is kept over the others
 #   --kind       docs, curated, or all (default)
 #
 # Ranking: BM25 (k1 1.2, b 0.75) with lower-cased words, camelCase names split into their parts,
-# and plural/-ing/-ed endings folded. A curated section counts its title and heading three times
-# and its body once; a docs page counts its title three times, its headings and description twice,
-# and its API names and keywords once. Curated files are cut at their `## ` headings when the
+# and plural/-ing/-ed endings folded. A curated section counts its file title and its heading three
+# times and its body once; only the body sets the section length, so a short section does not win on
+# the file title alone (every section of the file carries it). A docs page counts its title three
+# times, its headings and description twice, and its API names and keywords once. Curated files are cut at their `## ` headings when the
 # search runs, so they are never stale; docs pages come from core/docs-pages.tsv
 # (tools/curated/build-docs-pages.py).
 #
@@ -51,7 +54,7 @@ ROOT="$(cd "$HERE/../.." && pwd)"
 DOCS="$ROOT/core/docs-pages.tsv"
 CURATED="$ROOT/knowledge/curated"
 
-usage() { sed -n '7,22p' "$0" | sed 's/^# \{0,1\}//' >&2; exit 2; }
+usage() { sed -n '9,26p' "$0" | sed 's/^# \{0,1\}//' >&2; exit 2; }
 die() { echo "search.sh: $*" >&2; exit 2; }
 
 query=""; platform=""; product=""; version=""; project=""; k=5; per_page=2; kind=all
@@ -255,6 +258,18 @@ function count(s, wt,   n, i, w, st) {
     if (st in Q) TFR[st] += wt
   }
 }
+# countshort <text> <weight> <array>: the term frequency of a short curated field (the file title or
+# the section heading) into <array>. It does not add to the section length: every section of a file
+# carries the same title, and a heading is a few words, so neither should favor a short body.
+function countshort(s, wt, A,   n, i, w, st) {
+  n = split(s, W, /[^a-z0-9]+/)
+  for (i = 1; i <= n; i++) {
+    w = W[i]
+    if (length(w) < 2) continue
+    st = (w in SC) ? SC[w] : stem(w)
+    if (st in Q) A[st] += wt
+  }
+}
 BEGIN {
   FS = "\t"; k1 = 1.2; b = 0.75
   ns = split("a an and are as at be but by can could do does doing for from get gets got has have how i if in into is it its me my need needs not of on or our please should so some than that the their them then there these they this to use uses using want wants was we what when where which while who why will with would you your sendbird sdk", SWL, " ")
@@ -270,7 +285,9 @@ BEGIN {
 }
 $1 != "docs" && $1 != "curated" { next }
 kind != "all" && $1 != kind { next }
-platform != "" && $4 != "" && $4 != platform { next }
+# A row for every platform: empty (curated files under common/) or "common" (docs-pages.tsv, from
+# core/docs-index.json, such as the AI Agent guide overview).
+platform != "" && $4 != "" && $4 != "common" && $4 != platform { next }
 product != "" && $3 != "" && $3 != product { next }
 {
   if (nv > 0 && $5 != "") {
@@ -278,13 +295,14 @@ product != "" && $3 != "" && $3 != product { next }
     for (i = 1; i <= m; i++) { split(TG[i], kv, "="); if ((kv[1] in V) && V[kv[1]] != kv[2]) next }
   }
   N++
-  dl = 0; split("", TFR)
+  dl = 0; split("", TFR); split("", TTR); split("", THR)
   if ($1 == "docs") {
     count(tolower($6), 3)
     count(tolower($7 " " $10), 2)
     count($9, 1)
   } else {
-    count(tolower($6 " " $7), 3)
+    countshort(tolower($6), 3, TTR)
+    countshort(tolower($7), 3, THR)
     body = tolower($9 " " $10)
     gsub(/\\[nt]/, " ", body)
     count(body, 1)
@@ -292,9 +310,14 @@ product != "" && $3 != "" && $3 != product { next }
   sumdl += dl
   hit = 0
   for (t in TFR) { hit = 1; break }
+  if (!hit) for (t in TTR) { hit = 1; break }
+  if (!hit) for (t in THR) { hit = 1; break }
   if (!hit) next
   C++; ROW[C] = $0; DL[C] = dl
   for (t in TFR) { TF[C, t] = TFR[t]; DF[t]++ }
+  for (t in TTR) { TT[C, t] = TTR[t]; if (!(t in TFR)) DF[t]++ }
+  # HM: the section heading names a query word that the file title does not (see the per-file cap)
+  for (t in THR) { TT[C, t] += THR[t]; if (!(t in TFR) && !(t in TTR)) DF[t]++; if (!(t in TTR)) HM[C] = 1 }
 }
 END {
   printf "{\"query\":%s,\"filters\":{\"platform\":%s,\"product\":%s,\"versions\":%s},\"searched\":%d,", jstr(query), jnull(platform), jnull(product), jnull(vmap), N
@@ -304,20 +327,41 @@ END {
     for (t in Q) if (t in DF) IDF[t] = log(1 + (N - DF[t] + 0.5) / (DF[t] + 0.5))
     for (c = 1; c <= C; c++) {
       s = 0
-      for (t in Q) if ((c, t) in TF) { f = TF[c, t]; s += IDF[t] * f * (k1 + 1) / (f + k1 * (1 - b + b * DL[c] / avg)) }
+      for (t in Q) if (((c, t) in TF) || ((c, t) in TT)) {
+        f = (((c, t) in TF) ? TF[c, t] / (1 - b + b * DL[c] / avg) : 0) + (((c, t) in TT) ? TT[c, t] : 0)
+        s += IDF[t] * f * (k1 + 1) / (f + k1)
+      }
       SCORE[c] = s
     }
-    out = 0
+    # Pick the results first. At most per_page come from one docs page or curated file. When a file
+    # is full and its next section has a heading that names a query word the file title does not
+    # (HM), that section takes the place of the lowest-scored section of the file without such a
+    # heading: the broad sections of a file (an overview, a long first section) must not crowd out
+    # the section the question names.
+    n = 0; out = 0
     while (out < k) {
       best = 0
       for (c = 1; c <= C; c++) if (!(c in USED) && (best == 0 || SCORE[c] > SCORE[best])) best = c
       if (best == 0) break
       USED[best] = 1
       split(ROW[best], F, "\t")
-      if (PER[F[2]] >= per_page) continue
       key = F[2] SUBSEP ((F[1] == "docs") ? "" : F[7])
       if (key in SEEN) continue
+      if (PER[F[2]] >= per_page) {
+        if (!HM[best]) continue
+        drop = 0
+        for (i = n; i >= 1; i--) if (!(i in GONE) && FILE[i] == F[2] && !HM[SEL[i]]) { drop = i; break }
+        if (!drop) continue
+        GONE[drop] = 1; PER[F[2]]--; out--
+      }
       SEEN[key] = 1; PER[F[2]]++
+      SEL[++n] = best; FILE[n] = F[2]; out++
+    }
+    out = 0
+    for (i = 1; i <= n; i++) {
+      if (i in GONE) continue
+      best = SEL[i]
+      split(ROW[best], F, "\t")
       out++
       printf "%s{\"rank\":%d,\"score\":%.3f,\"kind\":%s,", (out > 1 ? "," : ""), out, SCORE[best], jstr(F[1])
       if (F[1] == "docs") {

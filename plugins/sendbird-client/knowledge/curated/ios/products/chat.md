@@ -271,7 +271,9 @@ let threadParams = ThreadedMessageListParams()
 threadParams.previousResultSize = 0
 threadParams.nextResultSize = 30
 threadParams.includeParentMessageInfo = true
-message.getThreadedMessages(timestamp: message.createdAt, params: threadParams) { parent, replies, error in }
+message.getThreadedMessages(timestamp: message.createdAt, params: threadParams) { parentMessage, replies, error in
+    let list = replies ?? []  // the handler's array is optional
+}
 ```
 ```swift
 // Keep the parent's reply count current (register with SendbirdChat.addChannelDelegate(_:identifier:)).
@@ -283,6 +285,7 @@ final class ThreadObserver: NSObject, GroupChannelDelegate {
 }
 ```
 - Only user and file messages can be threaded: a reply to a reply is rejected, and admin messages can't be replies or have replies. A message that is not a reply has `parentMessageId == 0`. When a reply is created, `channel(_:didReceive:)` and `channel(_:didUpdateThreadInfo:)` fire; when a reply is deleted, only `channel(_:didUpdateThreadInfo:)` does. (source: https://sendbird.com/docs/chat/sdk/v4/ios/message/using-message-threading/create-a-message-thread, https://sendbird.com/docs/chat/sdk/v4/ios/message/using-message-threading/list-replies-in-a-message-thread — reviewed 2026-10-11)
+- In a thread screen that is a `UIViewController`, name the root message property `rootMessage` (or anything but `parent`): `UIViewController` already has `parent`, and a stored `parent` of another type fails with "overriding property must be as accessible as its enclosing type". A thread screen on the UIKit or SwiftUI host can start from `templates/ios/uikit/chat/MessageThreads.swift` or `templates/ios/swiftui/chat/ThreadModel.swift`, which the template compile check builds. The handler's parameters are `parentMessage`, `messages`, and `error`, and the array is optional (`ThreadedMessageListHandler` 3629 in the source list below).
 - `message.threadInfo` has `replyCount`, `mostRepliedUsers`, and `lastRepliedAt`. `MessageListParams` has `replyType` (`.none`, `.all`, `.onlyReplyToChannel`) and `includeThreadInfo`; when replies also show in the main list, see "Thread replies also show up in the main message list" in knowledge/curated/ios/cross-cutting/troubleshooting.md.
 - (source: `SendbirdChatSDK.swiftinterface` (4.39.11): `BaseMessageCreateParams.parentMessageId` 1226, `isReplyToChannel` 1227; `UserMessageCreateParams.init(message:)` 7205; `BaseChannel.sendUserMessage(params:completionHandler:)` 495; `BaseMessage` 982 — `messageId` 989, `createdAt` 1028, `parentMessageId` 1036, `threadInfo` 1039; `extension BaseMessage` 934 — `apply(_: ThreadInfoUpdateEvent)` 947, `getThreadedMessages(timestamp:params:completionHandler:)` 952; `ThreadedMessageListHandler` 3629; `ThreadedMessageListParams` 6858 — `previousResultSize` 6859, `nextResultSize` 6860, `includeParentMessageInfo` 6868; `ThreadInfo` 6841; `ThreadInfoUpdateEvent.targetMessageId` 6851; `BaseChannelDelegate.channel(_:didUpdateThreadInfo:)` 900; `MessageListParams.includeThreadInfo` 4191, `replyType` 4193; `ReplyType` 4559 — verified 2026-10-11; also source: https://sendbird.com/docs/chat/sdk/v4/ios/ref/Classes/BaseMessage.html)
 
@@ -338,6 +341,8 @@ channel.addReaction(with: message, key: ":+1:") { reactionEvent, error in }
 channel.deleteReaction(with: message, key: ":+1:") { reactionEvent, error in }
 ```
 Both are on `BaseChannel`, so they work for group and open channels identically. (source: `SendbirdChatSDK.swiftinterface` (4.39.10) line 693 `addReaction(with:key:completionHandler:)`, line 696 `deleteReaction(with:key:completionHandler:)`)
+
+To show who reacted, read each `Reaction`'s `key`, `count`, and `sampledUserIds` (or `sampledUserInfoList`). Do not use `userIds` or `getUserIds`: both are deprecated and renamed to `sampledUserIds`. (source: `SendbirdChatSDK.swiftinterface` (4.39.11 release xcframework, arm64 simulator) `final public class Reaction` line 6158: `key` 6159, `@available(*, deprecated, renamed: "sampledUserIds")` on `userIds` 6160-6161 and `getUserIds` 6164-6165, `sampledUserIds` 6171, `sampledUserInfoList` 6174, `count` 6177 — verified 2026-10-24)
 
 ## Typing indicator (group channels)
 ```swift

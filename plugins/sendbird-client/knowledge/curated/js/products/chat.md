@@ -307,6 +307,8 @@ await channel.deleteReaction(message, ':+1:');
 ```
 Both are on `BaseChannel`, so they work for group and open channels identically; each returns a `ReactionEvent`. (source: `@sendbird/chat@4.22.13` lib/__definition.d.ts:169 `BaseChannel`, :552 `addReaction`, :559 `deleteReaction`)
 
+To show reactions, read `message.reactions` (a `Reaction[]`): each `Reaction` has `key`, `count`, and `sampledUserIds` (a sample of who reacted). Do not use `Reaction.userIds`: it is deprecated since 4.15.0 in favor of `sampledUserIds`. (source: `@sendbird/chat@4.22.0` lib/__definition.d.ts:844 `reactions` on `BaseMessage`, :3981 `Reaction`, :3986 `userIds` "@deprecated Since v4.15.0 Use sampledUserIds instead", :3989 `sampledUserIds`, :3993 `count` — verified 2026-10-24)
+
 ## Typing indicator (group channels)
 ```ts
 await channel.startTyping();

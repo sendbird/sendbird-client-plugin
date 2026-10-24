@@ -13,11 +13,68 @@ HERE="$(cd "$(dirname "$0")" && pwd)"
 source "$HERE/lib/hook-helpers.sh"
 read_stdin_json
 
+# The reports of this session's agents that hooks/session-state.sh kept for the relay check below
+reports="$(session_state_file agent-reports)"
+
 # Documented loop guard: if we already blocked once this stop, let it pass.
-[ "$(jget '.stop_hook_active')" = "true" ] && exit 0
+if [ "$(jget '.stop_hook_active')" = "true" ]; then
+  [ -z "$reports" ] || agent_pending || rm -f "$reports"
+  exit 0
+fi
 
 text="$(final_answer_text)"
 [ -n "$text" ] || exit 0
+
+# A token the customer pasted in the request is a secret: the answer refers to it, never repeats it
+# (docs/AGENT_CONTRACT.md section 3, hooks/welcome.sh). In a 2026-10 TC round the main session wrote a
+# pasted test session token into its answer, which a non-interactive caller prints. The tokens are
+# those of the latest request in the transcript and, because `claude -p --no-session-persistence`
+# writes no transcript, those hooks/session-state.sh saved as hashes from this session's requests
+# (hooks/lib/hook-helpers.sh request_tokens, text_repeats_request_token). A UUID (an App ID) is not a
+# secret and does not count.
+if text_repeats_request_token "$text"; then
+  jq -n '{decision: "block",
+    reason: "Final-answer secret check (Sendbird plugin): this answer repeats a token value the customer pasted in the request. Write the whole answer again as the reply itself (the user may see only this reply, so do not say it is repeated or mention this check), and refer to that value only as \"the token you provided\" (in Korean, \"주신 토큰\"); never write the value or part of it, in the text, in code, or in a run summary."}'
+  exit 0
+fi
+
+# docs/AGENT_CONTRACT.md section 6: when the answer relays an agent's result, it keeps the agent's check
+# lines and its symbol/source table. In a 2026-10 TC round the main session turned a background agent's
+# seven check lines and five-row source table into "the checks passed and the agent listed its sources".
+# The agent's report comes from SubagentStop (hooks/session-state.sh); an answer that leaves out a check
+# name or a source file of it is sent back once. An interim answer while an agent still runs is not
+# checked; a relayed report is forgotten once an answer passes or after the one send-back.
+if [ -n "$reports" ] && [ -s "$reports" ] && ! agent_pending; then
+  missing_checks=""; missing_sources=""
+  while IFS= read -r name; do
+    [ -n "$name" ] || continue
+    printf '%s' "$text" | grep -Fqi -- "$name" || missing_checks="${missing_checks}${missing_checks:+, }$name"
+  done < <(report_check_names < "$reports")
+  while IFS= read -r file; do
+    [ -n "$file" ] || continue
+    printf '%s' "$text" | grep -Fq -- "$file" || missing_sources="${missing_sources}${missing_sources:+, }$file"
+  done < <(report_source_files < "$reports")
+  if [ -n "$missing_checks$missing_sources" ]; then
+    jq -n --arg c "$missing_checks" --arg s "$missing_sources" '{decision: "block",
+      reason: ("Final-answer relay check (Sendbird plugin): the agent'\''s report has "
+        + ([ (if $c != "" then "check lines this answer leaves out (" + $c + ")" else empty end),
+             (if $s != "" then "symbol/source table rows whose sources this answer leaves out (" + $s + ")" else empty end) ] | join(" and "))
+        + ". Write the whole answer again as the reply itself (the user may see only this reply, so do not say it is repeated or mention this check), and carry the agent'\''s Checks and Evidence sections as it wrote them: each check on its own line by its name with the result and file:line, and the symbol, source, version, and verification table with every row (docs/AGENT_CONTRACT.md section 6). Translate the wording if you answer in another language, but keep the check names, symbols, paths, lines, and versions exactly.")}'
+    exit 0
+  fi
+  rm -f "$reports"
+fi
+
+# docs/AGENT_CONTRACT.md "Cite the curated entry": when this turn read a curated file and the answer
+# cites a link but no curated path, the link stands in for the entry (often a community or source
+# link the entry itself cites). Send it back once to cite the curated entry first.
+if printf '%s' "$text" | grep -Eq 'https?://' \
+  && ! printf '%s' "$text" | grep -Eq 'knowledge/curated/|(common|cross-cutting|products|hosts)/[A-Za-z0-9._-]+\.md' \
+  && turn_tool_inputs | grep -Fq 'knowledge/curated/'; then
+  jq -n '{decision: "block",
+    reason: "Final-answer citation gate (Sendbird plugin): this turn read knowledge/curated files, but the answer cites only links. Write the whole answer again as the reply itself (the user may see only this reply, so do not say it is repeated or mention this check): cite the curated entry you used as knowledge/curated/<platform>/<path> with its heading or line, next to the fact it supports. A link that the entry cites (a public source file, a community case) may follow it but never replaces it, and cite a page only if you read it in this turn. Do not invent symbols."}'
+  exit 0
+fi
 
 # A six-digit number counts as an error code only next to an error word on the same
 # line; otherwise PR numbers, dates and IDs would gate unrelated answers.

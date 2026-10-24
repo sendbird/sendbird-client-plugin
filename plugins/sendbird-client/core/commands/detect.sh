@@ -28,10 +28,14 @@ case "$platform" in
   android)
     host="$(bash "$DETECT/android/detect-host.sh" "$dir")"
     pm="$(bash "$DETECT/android/detect-gradle.sh" "$dir")"
-    dep="$(bash "$DETECT/android/detect-min-sdk.sh" "$dir")" ;;
+    dep="$(bash "$DETECT/android/detect-min-sdk.sh" "$dir")"
+    life="$(bash "$DETECT/android/detect-lifecycle.sh" "$dir")" ;;
   js)
     host="$(bash "$DETECT/js/detect-host.sh" "$dir")"
-    pm="$(bash "$DETECT/js/detect-pm.sh" "$dir")" ;;
+    pm="$(bash "$DETECT/js/detect-pm.sh" "$dir")"
+    # A JS app has no platform lifecycle object to pick: Sendbird is initialized once in a module the
+    # app root imports (knowledge/curated/js/setup.md "Init"), so this is never a question to ask.
+    life="app-root" ;;
 esac
 existing="$(bash "$DETECT/common/detect-existing-integration.sh" "$dir")"
 present="$(printf '%s' "$existing" | sed -nE 's/.*present=([a-z]+).*/\1/p')"

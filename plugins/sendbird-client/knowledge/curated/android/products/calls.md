@@ -98,6 +98,8 @@ On sign-out, remove the device's token with the matching overload: `SendBirdCall
 - Its manifest declares `FOREGROUND_SERVICE`, `FOREGROUND_SERVICE_PHONE_CALL`, `FOREGROUND_SERVICE_MICROPHONE`, `POST_NOTIFICATIONS`, `USE_FULL_SCREEN_INTENT`, `WAKE_LOCK` and `MANAGE_OWN_CALLS`, and registers the service with `android:foregroundServiceType="phoneCall|microphone"`. (source: https://github.com/sendbird/quickstart-calls-directcall-android/blob/1e8cf929f0a891b93bc31ed9b394525a209520ac/directcall-kotlin/app/src/main/AndroidManifest.xml#L7-L93)
 
 ## Make a call
+To start a 1:1 call, dial the callee's user ID. `setVideoCall(true)` on the `DialParams` makes it a video call and `false` a voice call; `templates/android/view/calls/SetupCalls.java` dials both ways (`DialParams(String).setVideoCall(boolean)`, sendbird-calls 1.12.5 javap).
+
 ```java
 DialParams params = new DialParams(CALLEE_ID);
 DirectCall call = SendBirdCall.dial(params, (directCall, e) -> {

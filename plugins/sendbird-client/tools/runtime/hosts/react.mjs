@@ -7,7 +7,8 @@
 // RT_CHAT_UI (1 when the project has a Sendbird UIKit dependency), RT_EXPECT_TEXT /
 // RT_EXPECT_SELECTOR (customization markers, newline-separated), RT_ENV_NAMES (env var names
 // that receive the App ID), RT_APP_ID, RT_DIRECT (1 with --direct-chat: the app opens a 1:1 chat
-// with RT_USER_B from a button, and there is no channel list).
+// with RT_USER_B from a button, and there is no channel list), RT_CHAT_SCREENS (1 with --chat-screens:
+// the app's own chat screens, built on the Chat SDK, found by lib/screens.mjs without UIKit classes).
 import { spawn } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -16,6 +17,7 @@ import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
 import { connectAs, presence, seed, expectMessage, findExpect, sendText, hiddenNote } from './peer.mjs';
 import { describeButtons, pickSubmit } from './signin.mjs';
+import { openChatScreen, waitInConversation, MESSAGE_INPUT, typeAndSend } from './screens.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const work = process.env.RT_WORK;
@@ -24,6 +26,7 @@ const userA = process.env.RT_USER_A;
 const userB = process.env.RT_USER_B;
 const chatUI = process.env.RT_CHAT_UI === '1';
 const direct = process.env.RT_DIRECT === '1';
+const chatScreens = process.env.RT_CHAT_SCREENS === '1';
 const expectTexts = (process.env.RT_EXPECT_TEXT || '').split('\n').filter(Boolean);
 const expectSelectors = (process.env.RT_EXPECT_SELECTOR || '').split('\n').filter(Boolean);
 // digits only: a letter tag hit the test app's profanity filter (server stored asterisks, 2026-10-14)
@@ -170,59 +173,18 @@ async function signIn(page, user, pageMode) {
 // autofill token), so a generated form that renamed the input is still found. Document order decides.
 const USER_FIELD = '#user, [data-testid="sb_login_user_id"], input[autocomplete="username"]';
 
-// The prebuilt screens sit behind a button on the app's home screen in most outputs.
-async function openChatScreen(page) {
-  const list = page.locator('.sendbird-channel-list, [class*="sendbird-channel-list"]');
-  if (await list.first().isVisible().catch(() => false)) return true;
-  const entry = page.getByRole('button', { name: /chat|channel|message|inbox/i }).first();
-  if (await entry.isVisible().catch(() => false)) await entry.click();
-  else {
-    const link = page.getByRole('link', { name: /chat|channel|message|inbox/i }).first();
-    if (await link.isVisible().catch(() => false)) await link.click();
-  }
-  await list.first().waitFor({ timeout: 30000 });
-  return true;
-}
-
-// Message text inside the open conversation. The channel list on the left shows the last message
-// of each channel as a preview, so a page-wide text search can find a message there while the
-// conversation never shows it.
+// Message text inside the open conversation. The channel list shows the last message of each
+// channel as a preview, so a page-wide text search can find a message there while the conversation
+// never shows it: UIKit's conversation pane, or on own screens anything outside the channel's row
+// (lib/screens.mjs messageShown).
 function inConversation(page, text) {
-  return page.locator('.sendbird-conversation__messages').getByText(text, { exact: false }).first();
+  return waitInConversation(page, text, { chatScreens, rowText: channelName });
 }
 
 async function openChannel(page, name) {
   const item = page.getByText(name, { exact: false }).first();
   await item.waitFor({ timeout: 60000 });
   await item.click();
-}
-
-// The message input of an open conversation: UIKit's text area, a contenteditable or textarea, or a
-// text input the app names as a message field (an app's own Chat SDK screen).
-const MESSAGE_INPUT = '.sendbird-message-input--textarea, [contenteditable="true"], textarea, '
-  + 'input[aria-label*="message" i], input[placeholder*="message" i], input[name*="message" i], input[id*="message" i]';
-
-async function typeAndSend(page, text) {
-  const input = page.locator(MESSAGE_INPUT).first();
-  await input.waitFor({ timeout: 30000 });
-  await input.click();
-  await page.keyboard.type(text);
-  await page.keyboard.press('Enter');
-  // Enter sends in UIKit and submits a form; an input that still holds the text after that has a
-  // send button of its own (not an attachment button). UIKit in mobile mode (SendbirdProvider
-  // `breakpoint` matching the screen) does not send on Enter and shows an icon-only send button
-  // with no accessible name. (source: sendbird-uikit-react v3.20.0 src/ui/MessageInput/index.tsx
-  // lines 600-602 `!isMobile` in the Enter path, line 671 `sendbird-message-input--send` with
-  // testID `sendbird-message-input-send-button`; src/ui/IconButton/index.tsx line 44 `data-testid`)
-  await page.waitForTimeout(1500);
-  const left = await input.evaluate((el) => (el.isContentEditable ? el.textContent : el.value) || '').catch(() => '');
-  if (left.includes(text)) {
-    const uikitSend = page.locator('[data-testid="sendbird-message-input-send-button"], .sendbird-message-input--send').first();
-    const send = (await uikitSend.isVisible().catch(() => false))
-      ? uikitSend
-      : page.getByRole('button', { name: /send/i }).filter({ hasNotText: /image|file|photo|attach/i }).first();
-    await send.click({ timeout: 5000 });
-  }
 }
 
 // --- direct chat (--direct-chat) -------------------------------------------------------------
@@ -310,7 +272,7 @@ async function main() {
     if (direct) {
       // the chat screen is the 1:1 conversation itself; it is opened after the connect check
     } else if (chatUI) {
-      try { await openChatScreen(a); step('chat-screen', true, 'A reached the channel list', await shot(a, 'a-channel-list')); }
+      try { const via = await openChatScreen(a, chatScreens); step('chat-screen', true, `A reached the channel list (${via})`, await shot(a, 'a-channel-list')); }
       catch (e) { fail('chat-screen', `A: no channel list (${e.message.split('\n')[0]})`, await shot(a, 'a-no-channel-list')); }
     } else step('chat-screen', null, 'no Sendbird UIKit dependency: the app has no chat screen to open');
 
@@ -365,7 +327,7 @@ async function main() {
     const b = await ctxB.newPage();
     watchErrors(b, 'B', errors);
     const signedB = await signIn(b, userB, page0.mode).catch((e) => `error: ${e.message}`);
-    if (signedB === 'ok') await openChatScreen(b).catch(() => {});
+    if (signedB === 'ok') await openChatScreen(b, chatScreens).catch(() => {});
 
     const peerB = await connectAs(userB);
     const seeded = await seed(peerB, userA, channelName, textB1, process.env.RT_B_CUSTOM_TYPE || undefined);
@@ -375,7 +337,7 @@ async function main() {
     } catch (e) { fail('channel', `A's list never showed "${channelName}" (${e.message.split('\n')[0]})`, await shot(a, 'a-no-channel')); }
     if (!rc) {
       try {
-        await inConversation(a, textB1).waitFor({ timeout: 30000 });
+        await inConversation(a, textB1);
         step('message-a-receives', true, `A sees "${textB1}"`, await shot(a, 'a-received'));
       } catch (e) { fail('message-a-receives', `A never showed "${textB1}"`, await shot(a, 'a-not-received')); }
     }
@@ -388,7 +350,7 @@ async function main() {
     if (!rc && signedB === 'ok') {
       try {
         await openChannel(b, channelName);
-        await inConversation(b, textA1).waitFor({ timeout: 30000 });
+        await inConversation(b, textA1);
         step('message-b-screen', true, `B's screen shows "${textA1}"`, await shot(b, 'b-received'));
       } catch (e) { step('message-b-screen', false, `B's screen did not show "${textA1}" (${e.message.split('\n')[0]})`, await shot(b, 'b-not-received')); rc = 1; }
     }

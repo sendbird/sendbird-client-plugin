@@ -44,7 +44,9 @@ func rtPickSigninField(_ nodes: [RTSigninNode]) -> RTSigninPick? {
 /// The button that submits the form, read after the user ID is typed. Rules, in order:
 /// 1. the button whose id is a starter convention (sb_login_button, login_button, signin_button)
 /// 2. the button nearest the field at or below its top (beside it, then under it), enabled or not:
-///    a sign-in button that is still disabled is waited for, not passed over for the next one down
+///    a sign-in button that is still disabled is waited for, not passed over for the next one down;
+///    a cancel or close button never counts here (a sign-in alert puts "Cancel" left of "Sign in" on
+///    the same row, and the left one won the tie: a 2026-10 TC run)
 /// 3. the only enabled button on screen
 /// 4. a button labelled sign in / log in / login, then 로그인 / 시작 (the label is the last resort)
 /// Buttons inside the field (a clear button) never count.
@@ -53,7 +55,7 @@ func rtPickSigninButton(_ nodes: [RTSigninNode], field: Int) -> RTSigninPick? {
     let buttons = nodes.indices.filter { nodes[$0].kind == .button && nodes[$0].visible && !f.contains(nodes[$0]) }
     let ids: Set<String> = ["sb_login_button", "login_button", "signin_button"]
     if let i = buttons.first(where: { ids.contains(rtIdName(nodes[$0].identifier)) }) { return RTSigninPick(index: i, rule: "id \(nodes[i].identifier)") }
-    let below = buttons.filter { nodes[$0].y >= f.y }
+    let below = buttons.filter { nodes[$0].y >= f.y && !rtMatches(nodes[$0].label, "^(cancel|close|dismiss|취소|닫기)$") }
     let gap = { (b: RTSigninNode) in max(0, b.y - (f.y + f.h)) }
     let dx = { (b: RTSigninNode) in abs((b.x + b.w / 2) - (f.x + f.w / 2)) }
     // nearest first; at the same distance the one more centered under the field, then the left one

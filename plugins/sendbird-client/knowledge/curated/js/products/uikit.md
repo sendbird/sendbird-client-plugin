@@ -805,6 +805,35 @@ function SettingsScreen({ go }: { go: (route: 'back' | 'moderation' | 'members' 
 ### Keyboard covering the input
 The message input of the group channel fragment is wrapped in React Native's `KeyboardAvoidingView`. When something sits above the fragment, such as a navigator header, pass its height as `keyboardAvoidOffset` so the input ends up directly above the keyboard; the docs describe the value as the adjusted y position of the keyboard. The thread fragment takes the same prop. (source: https://sendbird.com/docs/chat/uikit/v3/react-native/group-channel-screens/chat-in-a-group-channel) (source: https://github.com/sendbird/sendbird-uikit-react-native/blob/v3.12.9/packages/uikit-react-native/src/domain/groupChannel/types.ts#L49 ; https://github.com/sendbird/sendbird-uikit-react-native/blob/v3.12.9/packages/uikit-react-native/src/components/ChannelInput/index.tsx#L3 ; https://github.com/sendbird/sendbird-uikit-react-native/blob/v3.12.9/packages/uikit-react-native/src/domain/groupChannelThread/types.ts#L43)
 
+Anything rendered above the fragment on the same screen counts, not only a navigator header: a button row such as "Invite users", a banner, or a safe-area wrapper that pads the top. On iOS the input's `KeyboardAvoidingView` uses the `'padding'` behavior with a vertical offset of `keyboardAvoidOffset` minus the bottom safe-area inset, and React Native measures that view's position from `onLayout`, which is relative to its parent inside the fragment rather than to the screen. So without the offset the input and the newest messages stay behind the keyboard by the height of what sits above the fragment: the user cannot see what they type, and messages that arrive while the keyboard is open look as if they never came. Keep the fragment at the top of its screen and put the extra action in the fragment's header (`onPressHeaderRight`, or a custom `Header`), or measure the element above it and pass that height:
+
+```tsx
+import { useState } from 'react';
+import { Button, View } from 'react-native';
+import { createGroupChannelFragment } from '@sendbird/uikit-react-native';
+
+const GroupChannelFragment = createGroupChannelFragment();
+
+function ChannelScreen({ onBack, openInvite }: { onBack: () => void; openInvite: () => void }) {
+  const [barHeight, setBarHeight] = useState(0);
+  return (
+    <View style={{ flex: 1 }}>
+      <View onLayout={(e) => setBarHeight(e.nativeEvent.layout.height)}>
+        <Button title="Invite users" onPress={openInvite} />
+      </View>
+      <GroupChannelFragment
+        channel={channel}
+        onChannelDeleted={onBack}
+        onPressHeaderLeft={onBack}
+        onPressHeaderRight={openInvite}
+        keyboardAvoidOffset={barHeight}
+      />
+    </View>
+  );
+}
+```
+(source: https://github.com/sendbird/sendbird-uikit-react-native/blob/v3.12.10/packages/uikit-react-native/src/components/ChannelInput/index.tsx#L102 ; https://github.com/sendbird/sendbird-uikit-react-native/blob/v3.12.10/packages/uikit-react-native/src/components/ChannelInput/index.tsx#L159-L161 ; https://github.com/sendbird/sendbird-uikit-react-native/blob/v3.12.10/packages/uikit-react-native/src/domain/groupChannel/types.ts#L49) (source: https://github.com/facebook/react-native/blob/v0.87.1/packages/react-native/Libraries/Components/Keyboard/KeyboardAvoidingView.js#L116 ; https://github.com/facebook/react-native/blob/v0.87.1/packages/react-native/Libraries/Components/Keyboard/KeyboardAvoidingView.js#L135)
+
 ## Pitfalls
 - React: import `@sendbird/uikit-react/dist/index.css` or the UI renders unstyled.
 - React: don't mix the drop-in `App` component with the granular `GroupChannelList`/`GroupChannel` components in the same tree — pick one composition style per screen.

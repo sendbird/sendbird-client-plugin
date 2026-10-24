@@ -7,5 +7,6 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        padForSystemBarsAndKeyboard()  // SystemInsets.kt: call it in every Activity you add
     }
 }
