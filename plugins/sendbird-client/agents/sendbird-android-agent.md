@@ -34,7 +34,7 @@ Splice from `templates/android/{view|compose}/{product}/` matching the detected 
 - Preserve Groovy versus Kotlin DSL and read the exact dependency version from the module's build file or the version catalog (`gradle/libs.versions.toml`).
 - Confirm the `Application`, `Activity`, `Fragment`, or Compose owner responsible for initialization and cleanup.
 - Treat View-based UIKit surfaces as interop inside Compose unless a verified Compose API exists.
-- Do not run Gradle tasks (such as `./gradlew :app:assembleDebug`) or look for a JDK or an Android SDK; this run does not build (contract section 3). Never write SDK or JDK paths into the project (`local.properties`, `gradle.properties`).
+- Do not run Gradle tasks (such as `./gradlew :app:assembleDebug`) or look for a JDK or an Android SDK; this run does not build (contract section 3). When you wrote or changed chat screens on the Chat SDK without UIKit, run `bash "${CLAUDE_PLUGIN_ROOT}/tools/verify/check-written.sh" <project-dir> <the files you wrote>` instead, fix the errors it lists in those files, and run it again (up to three runs; contract section 3, "Type-check the Chat SDK screens you wrote"). Report its JSON result as the check `typecheck`. Never write SDK or JDK paths into the project (`local.properties`, `gradle.properties`).
 
 ## No-Fabrication Policy (non-negotiable)
 - Never invent an API name, signature, parameter, error code, enum case, or docs URL. Every emitted symbol must be verifiable in the sources listed under Source priority above.

@@ -10,7 +10,10 @@
 #   names the plugin's folder (its tools, scripts, or a SKILL.md it reads, which is how Codex runs a
 #   skill) also marks the session, and the parts of it that name that folder are always allowed (each part
 #   between ; && || | is checked on its own): the plugin's own scripts, the run-check runner
-#   tools/runtime/run.sh among them, build only when the customer agreed. Any other command is denied
+#   tools/runtime/run.sh among them, build only when the customer agreed. One of them type-checks without
+#   asking: tools/verify/check-written.sh, which the chat-ui=chat-sdk path runs on the screens it wrote
+#   (contract section 3, "Type-check the Chat SDK screens you wrote"); it is the only way that path
+#   type-checks, so a direct tsc, Gradle, or swiftc command stays denied. Any other command is denied
 #   when the session is plugin work, the latest request did not ask for a build (hooks/session-state.sh
 #   prompt writes build-asked-<session_id> then), and a part of the command is a build (below).
 # Without a session_id there is no state to read, and the guard allows everything.
@@ -48,6 +51,11 @@ names_plugin() {
     || { [ -n "$ROOT" ] && printf '%s' "$1" | grep -qF "$ROOT"; } \
     || { [ -n "${CLAUDE_PLUGIN_ROOT:-}" ] && printf '%s' "$1" | grep -qF "$CLAUDE_PLUGIN_ROOT"; }
 }
+# is_written_check <part> : 0 when the part runs the plugin's own tools/verify/check-written.sh, the one
+# type check a run makes without a build request (contract section 3); a same-named script elsewhere is not it
+is_written_check() {
+  printf '%s' "$1" | grep -Eq '(^|[[:space:]/])tools/verify/check-written\.sh([[:space:]]|$)' && names_plugin "$1"
+}
 # A command that names the plugin's folder makes the session plugin work from here on. Only the parts
 # of the command that name it (the plugin's own scripts) are exempt below; another part of the same
 # command is checked like any command ("cd <plugin>/x && npm run typecheck" ran in a 2026-10 TC run
@@ -69,6 +77,7 @@ build_part() {
     { print; if (match($0, /<<-?[[:space:]]*["\047]?[A-Za-z_][A-Za-z0-9_]*/)) { w = substr($0, RSTART, RLENGTH); gsub(/^<<-?[[:space:]]*["\047]?/, "", w); end = w } }' \
   | tr "\"'\`()" '     ' | sed -E 's/\$/ /g; s/(&&|\|\||;|\|)/\n/g' \
   | while IFS= read -r part; do
+      is_written_check "$part" && continue
       names_plugin "$part" && continue
       p="$(printf '%s' "$part" | sed -E 's/^[[:space:]]+//; s/^(([A-Za-z_][A-Za-z0-9_]*=[^[:space:]]*|env|time|exec|command|nohup|sudo|npx|bunx|pnpm dlx|--no-install|-y|--yes|bash|sh|zsh|-[a-z]*c)[[:space:]]+)+//')"
       case "$p" in
