@@ -5,7 +5,7 @@
 > Verified against the public mirrors `sendbird/sendbird-calls-javascript` + `sendbird/sendbird-calls-sdk-react-native` (README implementation guides, verified 2026-06-09). Web init + authenticate type-checked against `sendbird-calls`. React Native quoted from the RN README. Cite each symbol; do not add API from memory.
 > Sources: https://github.com/sendbird/sendbird-calls-javascript , https://github.com/sendbird/sendbird-calls-sdk-react-native
 
-## Web (`sendbird-calls`)
+## Web (`sendbird-calls`): install, initialize, and authenticate
 Install: `npm install sendbird-calls`.
 ```ts
 import SendBirdCall from 'sendbird-calls';   // needs esModuleInterop; else: import * as SendBirdCall from 'sendbird-calls'
@@ -20,13 +20,24 @@ SendBirdCall.authenticate(authOption, (res, error) => {
 SendBirdCall.addListener(UNIQUE_HANDLER_ID, {
   onRinging: (call) => { /* incoming */ },
 });
+```
+(source: sendbird-calls-javascript README §authenticate/dial; init + authenticate type-checked)
+
+## Web: make a call
+To make a 1:1 call from a web page, dial the callee's user ID. `isVideoCall: false` makes it a voice call and `true` a video call.
+
+```ts
+import SendBirdCall from 'sendbird-calls';
 
 const dialParams = { userId: CALLEE_ID, isVideoCall: false, callOption: {} };
 const call = SendBirdCall.dial(dialParams, /* (call, error) => {} */);
 ```
-The browser prompts for mic/camera on first call / `SendBirdCall.useMedia()`. (source: sendbird-calls-javascript README §authenticate/dial; init + authenticate type-checked)
+(source: sendbird-calls-javascript README §authenticate/dial)
 
-### Web: receive, accept, and end a call
+## Web: microphone and camera access
+The browser prompts for mic/camera on first call / `SendBirdCall.useMedia()`. (source: sendbird-calls-javascript README §authenticate/dial) When the browser never asks, or the call has no remote audio or video, see `knowledge/curated/js/cross-cutting/troubleshooting.md` "Web: no remote audio or video, or incoming calls are missed".
+
+## Web: receive, accept, and end a call
 Accept or decline in `onRinging` with `call.accept(...)` or `call.end()`. Give the call a remote media element (a `<video>` or `<audio>` element that plays automatically): "The remoteMediaView is required for the remote media stream to be displayed."
 
 ```ts
@@ -55,7 +66,7 @@ SendBirdCall.addListener(UNIQUE_HANDLER_ID, {
 - Dial only after the callee has authenticated: a dial right after the callee signed in failed with an error saying the callee had not authenticated to Calls yet, and the same dial a few seconds later rang.
 - `templates/js/react/calls/` has these calls wrapped (`setup.ts`) and a ready call screen (`DirectCallPanel.tsx`); with them, a voice call and a video call between two browsers rang, connected with live remote audio (and video), and ended on both sides.
 
-## React Native (`@sendbird/calls-react-native`)
+## React Native (`@sendbird/calls-react-native`): initialize and authenticate
 ```ts
 import { SendbirdCalls } from '@sendbird/calls-react-native';
 
@@ -65,7 +76,7 @@ await SendbirdCalls.authenticate({ userId: USER_ID, accessToken: ACCESS_TOKEN })
 ```
 (source: sendbird-calls-sdk-react-native README §authenticate)
 
-### React Native: dial, receive, accept, and end a call
+## React Native: make or receive a call (dial, accept, end)
 The SDK hands over call properties; get the `DirectCall` with `SendbirdCalls.getDirectCall()` before calling `accept()` or `end()`.
 
 ```ts
@@ -86,7 +97,14 @@ await outgoing.end(); // hang up or cancel
 
 (source: @sendbird/calls-react-native 1.2.0 README.md "Receive a call", "Make a call") (@sendbird/calls-react-native 1.2.0 `lib/typescript`: `SendbirdCallsModule.d.ts` `setListener` 237, `getDirectCall` 127, `dial` 179; `DirectCall.d.ts` `addListener` 52, `accept(options?, holdActiveCall?)` 58, `end()` 66; `types/Call.d.ts` `CallOptions` 325)
 
-### React Native: camera and microphone permissions
+## React Native: receive calls in the background or after the app was closed (push)
+`@sendbird/calls-react-native` receives new incoming calls only through push: in the foreground, in the background, and after the app was closed. A plain remote notification does not show a call screen. Register the push token after `SendbirdCalls.authenticate(...)` resolves:
+- iOS: a VoIP push with CallKit. Register the VoIP token with `SendbirdCalls.ios_registerVoIPPushToken(token)`, and do not unregister it from a cleanup that runs right afterwards (for example a `useEffect` cleanup). (source: @sendbird/calls-react-native 1.2.0 lib/typescript/libs/SendbirdCallsModule.d.ts:140, 199-213)
+- Android: an FCM message that the app turns into an incoming-call notification. Register the FCM token with `SendbirdCalls.registerPushToken(token)`, and pass incoming FCM data to `SendbirdCalls.android_handleFirebaseMessageData(data)`. (source: @sendbird/calls-react-native 1.2.0 lib/typescript/libs/SendbirdCallsModule.d.ts:166, 229 ; source: https://sendbird.com/docs/calls/sdk/v1/react-native/direct-call/receiving-a-call/receive-a-call-in-the-background)
+
+The `calls-incoming` skill wires this. Common failures: `knowledge/curated/js/cross-cutting/troubleshooting.md` "React Native: incoming calls don't ring, or the notification disappears with no call screen".
+
+## React Native: camera and microphone permissions
 Calls needs system permission for the camera and microphone. On iOS, add `NSMicrophoneUsageDescription` and `NSCameraUsageDescription` to the app's `Info.plist`. On Android the permissions are declared in the React Native module's `AndroidManifest.xml`, and the docs request them at runtime with `react-native-permissions`, including `BLUETOOTH_CONNECT` on Android. Ask before the first dial or accept.
 
 ```ts

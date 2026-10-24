@@ -221,7 +221,9 @@ val threadParams = ThreadMessageListParams().apply {
     previousResultSize = 0
     nextResultSize = 30
 }
-message.getThreadedMessagesByTimestamp(message.createdAt, threadParams) { parent, replies, e -> }
+message.getThreadedMessagesByTimestamp(message.createdAt, threadParams) { parentMessage, replies, e ->
+    val list = replies.orEmpty()  // Kotlin sees List<BaseMessage>?
+}
 
 // Keep the parent's reply count current.
 SendbirdChat.addChannelHandler("threads", object : GroupChannelHandler() {
@@ -233,7 +235,8 @@ SendbirdChat.addChannelHandler("threads", object : GroupChannelHandler() {
 })
 ```
 - Only user and file messages can be threaded: a reply to a reply is rejected, and admin messages can't be replies or have replies. A message that is not a reply has `parentMessageId == 0`. When a reply is created, `onMessageReceived()` and `onThreadInfoUpdated()` fire; when a reply is deleted, only `onThreadInfoUpdated()` does. `replyToChannel` on the create params also sends the reply to the channel (default `false`; needs `parentMessageId`). (source: https://sendbird.com/docs/chat/sdk/v4/android/message/using-message-threading/create-a-message-thread, https://sendbird.com/docs/chat/sdk/v4/android/message/using-message-threading/list-replies-in-a-message-thread — reviewed 2026-10-11)
-- `message.threadInfo` has `replyCount`, `mostRepliedUsers`, and `lastRepliedAt`. `MessageListParams.replyType` takes `ReplyType.NONE`, `ALL`, or `ONLY_REPLY_TO_CHANNEL`, and `MessagePayloadFilter` has `includeThreadInfo` and `includeParentMessageInfo`. When replies also show in the UIKit main list, see "Thread replies show up in the main UIKit message list" in knowledge/curated/android/cross-cutting/troubleshooting.md.
+- In Kotlin the handler's reply list is `List<BaseMessage>?`: passing it straight to `addAll()` or a `List<BaseMessage>` parameter fails with "Argument type mismatch: actual type is 'List<BaseMessage>?'". Use `replies.orEmpty()`. A thread screen can start from `templates/android/view/chat/MessageThreads.kt` or `templates/android/compose/chat/ThreadViewModel.kt`, which the template compile check builds.
+- `message.threadInfo` has `replyCount`, `mostRepliedUsers`, and `lastRepliedAt`. `MessageListParams.replyType` takes `ReplyType.NONE`, `ALL`, or `ONLY_REPLY_TO_CHANNEL`, and `MessagePayloadFilter` has `includeThreadInfo` and `includeParentMessageInfo`. Import it as `com.sendbird.android.params.common.MessagePayloadFilter` (not under `com.sendbird.android.params`) and set it with `params.messagePayloadFilter = MessagePayloadFilter(...)`; `MessageListParams` is `com.sendbird.android.params.MessageListParams` and `ReplyType` is `com.sendbird.android.message.ReplyType`. (source: `sendbird-chat` 4.36.5 AAR class paths `com/sendbird/android/params/common/MessagePayloadFilter.class`, `com/sendbird/android/params/MessageListParams.class`, `com/sendbird/android/message/ReplyType.class`; `javap -public` `BaseMessageListParams.setMessagePayloadFilter(MessagePayloadFilter)` — verified 2026-10-24) When replies also show in the UIKit main list, see "Thread replies show up in the main UIKit message list" in knowledge/curated/android/cross-cutting/troubleshooting.md.
 - (source: `sendbird-chat` 4.36.5 AAR, `javap -public`: `BaseMessageCreateParams` — `setParentMessageId(long)`, `setReplyToChannel(boolean)`; `UserMessageCreateParams(String)`; `BaseChannel.sendUserMessage(UserMessageCreateParams, UserMessageHandler)`; `BaseMessage` — `getMessageId()`, `getParentMessageId()`, `getCreatedAt()`, `getThreadInfo()`, `applyThreadInfoUpdateEvent(ThreadInfoUpdateEvent)`, `getThreadedMessagesByTimestamp(long, ThreadMessageListParams, ThreadedMessagesHandler)`; `ThreadMessageListParams()` with `BaseMessageListParams.setPreviousResultSize(int)` / `setNextResultSize(int)`; `ThreadedMessagesHandler.onResult(BaseMessage, List<BaseMessage>, SendbirdException)`; `ThreadInfo` — `getReplyCount()`, `getMostRepliedUsers()`, `getLastRepliedAt()`; `ThreadInfoUpdateEvent.getTargetMessageId()`; `BaseChannelHandler.onThreadInfoUpdated(BaseChannel, ThreadInfoUpdateEvent)`; `MessageListParams.setReplyType(ReplyType)`; `ReplyType` — `NONE`, `ALL`, `ONLY_REPLY_TO_CHANNEL`; `MessagePayloadFilter.setIncludeThreadInfo(boolean)`, `setIncludeParentMessageInfo(boolean)` — verified 2026-10-11; also source: https://sendbird.com/docs/chat/sdk/v4/android/ref/-sendbird-chat/com.sendbird.android.message/-base-message/index.html)
 
 ## Admin messages
@@ -290,6 +293,8 @@ channel.addReaction(message, ":+1:") { reactionEvent, e -> }
 channel.deleteReaction(message, ":+1:") { reactionEvent, e -> }
 ```
 Both are on `BaseChannel`, so they work for group and open channels identically. (source: `sendbird-chat-sdk-android` 4.36.5 AAR, `javap` on `com.sendbird.android.channel.BaseChannel`)
+
+To show who reacted, read each `Reaction`'s `key`, `count`, and `sampledReactedUserInfoList` (each `ReactedUserInfo` has `userId` and `nickname`). Do not use `userIds` or `sampledUserIds`: both are deprecated ("As of 4.22.0, use [sampledReactedUserInfoList] instead. You can use [sampledReactedUserInfoList.userId]."). (source: `sendbird-chat` 4.36.5 AAR, `javap -v` on `com.sendbird.android.message.Reaction` — `getUserIds()` and `getSampledUserIds()` carry `kotlin.Deprecated` with that message, `getSampledReactedUserInfoList()`, `getCount()`, `getKey()`; `javap -public` on `com.sendbird.android.message.ReactedUserInfo` — `getUserId()`, `getNickname()` — verified 2026-10-24)
 
 ## Typing indicator (group channels)
 ```kotlin

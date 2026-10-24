@@ -15,6 +15,7 @@ Sources: (source: knowledge/curated/ios/products/chat.md) (source: https://sendb
 - `MessageEditing.swift` — edit and delete your own messages (`MessageEditor`), and hear about other members' edits and deletes (`MessageChangeObserver`).
 - `UnreadCount.swift` — total unread count for a tab or app badge, live updates, per-channel count, mark as read (`UnreadCountObserver`).
 - `TypingAndReadReceipts.swift` — typing indicator and read receipts for one conversation (`ChannelActivityObserver`).
+- `MessageThreads.swift` — thread replies: load a root message's replies, send a reply, hear new replies (`MessageThreads`, `ThreadReplyObserver`).
 
 ## How to splice
 1. Add the SPM package `https://github.com/sendbird/sendbird-chat-sdk-ios` (product `SendbirdChatSDK`, from 4.0.0) — prefer SPM, do not add CocoaPods.
@@ -53,6 +54,14 @@ one stands alone.
 3. Show "… is typing" from `onTypingChanged`. Call `ChannelActivityObserver.markRead(channel)` when the screen shows and when a new message arrives.
 4. For your own messages, show a read mark when `ChannelActivityObserver.unreadMemberCount(of: message, in: channel) == 0`,
    and reload visible rows on `onReadReceiptsChanged`.
+
+### Thread replies (`MessageThreads.swift`)
+1. Open the thread screen with the root message (`parentMessageId == 0`); `MessageThreads.rootId(of:)` gives its ID when the user tapped a reply.
+   In the thread view controller call the property `rootMessage`, never `parent`: `UIViewController` already has `parent`,
+   and a stored `parent` of another type does not build.
+2. `MessageThreads.loadReplies(of: rootMessage) { replies, error in ... }`; send with `MessageThreads.reply(to:text:in:completion:)`
+   and show the returned pending message.
+3. `ThreadReplyObserver(channelURL:rootMessageId:onReply:)`: `start()` in `viewDidLoad`, `stop()` when the screen goes away.
 
 ## Variations (see knowledge/curated/ios/products/chat.md, all cited)
 - Authenticated: `SendbirdChat.connect(userId:authToken:) { ... }`.

@@ -5,6 +5,9 @@
 # A product in config .productScope.notYetSupported is never in scope: it is left out of the
 # default, dropped (with a note on stderr) from SENDBIRD_PRODUCTS or the profile, and
 # `--check <product>` fails with "product not supported yet" instead of "out of configured scope".
+# A product this plugin does not ship (not in config .products, for example AI Agent in an edition
+# without it) fails `--check` with "product not covered by this plugin": widening SENDBIRD_PRODUCTS or
+# the profile cannot add it, so the answer must not suggest that.
 set -euo pipefail
 # Until it is marked shown, the first-run notice (hooks/first-run-notice.sh) goes to stderr: in Codex a
 # skill can run this before the plugin's hooks are trusted.
@@ -24,6 +27,10 @@ not_yet_note() { # $1 = product, $2 = optional "left out of ..." clause
 if [ "${2:-}" = "--check" ]; then
   requested="${3:?usage: resolve-products.sh <project-dir> --check <product>}"
   if is_not_yet "$requested"; then not_yet_note "$requested"; exit 1; fi
+  if ! printf '%s\n' "$supported" | grep -Fxq "$requested"; then
+    echo "product not covered by this plugin: $requested — this plugin covers $(printf '%s\n' "$supported" | paste -sd, - | sed 's/,/, /g'); tell the customer this plugin does not cover $requested, write no code for it, and do not suggest SENDBIRD_PRODUCTS or enabledProducts (they cannot add it)" >&2
+    exit 1
+  fi
 fi
 
 selected=""; source_name=""

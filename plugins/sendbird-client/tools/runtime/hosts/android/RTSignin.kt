@@ -39,7 +39,9 @@ fun rtPickSigninField(nodes: List<RTSigninNode>): RTSigninPick? {
 /** The button that submits the form, read after the user ID is typed. Rules, in order:
  *  1. the button whose id is a starter convention (sb_login_button, login_button, signin_button)
  *  2. the button nearest the field at or below its top (beside it, then under it), enabled or not:
- *     a sign-in button that is still disabled is waited for, not passed over for the next one down
+ *     a sign-in button that is still disabled is waited for, not passed over for the next one down;
+ *     a cancel or close button never counts here (a sign-in dialog puts "Cancel" left of "Sign in" on
+ *     the same row, and the left one won the tie: a 2026-10 TC run)
  *  3. the only enabled button on screen
  *  4. a button labelled sign in / log in / login, then 로그인 / 시작 (the label is the last resort)
  *  Buttons inside the field (a clear or trailing icon) never count. */
@@ -48,7 +50,7 @@ fun rtPickSigninButton(nodes: List<RTSigninNode>, field: Int): RTSigninPick? {
     val buttons = nodes.indices.filter { !nodes[it].field && nodes[it].visible && !f.contains(nodes[it]) }
     val ids = setOf("sb_login_button", "login_button", "signin_button")
     buttons.firstOrNull { idName(nodes[it].id) in ids }?.let { return RTSigninPick(it, "id ${nodes[it].id}") }
-    val below = buttons.filter { nodes[it].y >= f.y }
+    val below = buttons.filter { nodes[it].y >= f.y && !Regex("(?i)^(cancel|close|dismiss|취소|닫기)$").containsMatchIn(nodes[it].label.trim()) }
     fun gap(b: RTSigninNode) = maxOf(0, b.y - (f.y + f.h))
     fun dx(b: RTSigninNode) = Math.abs((b.x + b.w / 2) - (f.x + f.w / 2))
     // nearest first; at the same distance the one more centered under the field, then the left one

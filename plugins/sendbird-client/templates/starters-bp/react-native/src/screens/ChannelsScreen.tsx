@@ -23,6 +23,9 @@ export function ChannelsScreen({ onBack }: { onBack: () => void }) {
   const [channel, setChannel] = useState<Channel | null>(null);
 
   if (channel) {
+    // Keep the fragment the first thing on this screen. A bar or banner above it shifts the fragment
+    // down, and on iOS the input then stays behind the keyboard unless that height is passed as
+    // keyboardAvoidOffset (knowledge/curated/js/products/uikit.md "Keyboard covering the input").
     return (
       <KeyboardAvoidingView style={styles.screen} behavior={KEYBOARD_BEHAVIOR}>
         <GroupChannelFragment

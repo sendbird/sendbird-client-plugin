@@ -91,12 +91,19 @@ final class RTUITests: XCTestCase {
             // A React Native Pressable or Touchable without accessibilityRole="button" is no button to
             // XCUITest: it is an "other" element whose label is its text. Buttons are tried first; the
             // touchable only when no button matches (2026-10-19: a RN app whose buttons had no role)
+            // Only a short label without commas counts on such an element: React Native reads a whole list row out as
+            // one label ("Always Developers, 3, ... SendBird's chat API"), and a row whose last message says "chat"
+            // is no chat button (2026-10-24: the harness opened an unrelated channel and never saw B's)
+            let shortLabel = NSPredicate(format: "label MATCHES %@", "[^,]{1,30}")
             let firstEntry: ([NSPredicate]) -> XCUIElement = { preds in
                 let p = NSCompoundPredicate(andPredicateWithSubpredicates: preds)
                 let button = self.app.buttons.matching(p).firstMatch
-                return button.exists ? button : self.app.otherElements.matching(p).firstMatch
+                return button.exists ? button : self.app.otherElements.matching(NSCompoundPredicate(andPredicateWithSubpredicates: preds + [shortLabel])).firstMatch
             }
+            // the stable identifier of templates/starters-bp/BEST_PRACTICES.md comes first
+            let taggedEntry = app.descendants(matching: .any).matching(identifier: "sb_open_channels").firstMatch
             let currentEntry: () -> XCUIElement = {
+                if !direct && taggedEntry.exists { return taggedEntry }
                 guard direct else { return firstEntry([listPredicate]) }
                 let preferred = firstEntry([directPredicate, preferredPredicate])
                 return preferred.exists ? preferred : firstEntry([directPredicate])
@@ -106,13 +113,18 @@ final class RTUITests: XCTestCase {
             var entryLabel = ""
             // some apps present the channel list right after sign-in: a "Channels" title with cells
             // (never in direct chat: the button, not a list, has to open the conversation)
-            let listShown = { !direct && self.app.staticTexts.matching(NSPredicate(format: "label ==[c] %@", "Channels")).firstMatch.exists && self.app.cells.count > 0 }
+            // (a React Native FlatList has no cells: there the list counts as shown once B's channel is a row on it, or
+            // the app tags the list sb_channel_list)
+            let channelName = env["RT_CHANNEL"] ?? ""
+            let listShown = { !direct && (self.app.descendants(matching: .any).matching(identifier: "sb_channel_list").firstMatch.exists
+                || self.app.staticTexts.matching(NSPredicate(format: "label ==[c] %@", "Channels")).firstMatch.exists
+                && (self.app.cells.count > 0 || (!channelName.isEmpty && self.element(containing: channelName) != nil))) }
             // direct chat: the chat button may sit on a product screen one tap away from home
             if direct && !waitUntil(10, entryReady) {
                 let product = firstEntry([NSPredicate(format: "label MATCHES[c] %@", ".*product.*")])
                 if product.exists && product.isHittable { product.tap(); Thread.sleep(forTimeInterval: 2) }
             }
-            if waitUntil(20, { listShown() || entryReady() }) {
+            if waitUntil(40, { listShown() || entryReady() }) {
                 if listShown() {
                     entryLabel = "(the channel list was already on screen)"
                 } else {
@@ -146,7 +158,18 @@ final class RTUITests: XCTestCase {
                 }
             } else if opened {
                 var cell: XCUIElement?
-                if waitUntil(180, { cell = element(containing: name); return cell != nil }) , let cell {
+                // a row that does not show the channel name is found by B's message, which carries this run's tag:
+                // a table row only (in a conversation the same text is a message, not a row), and only to open it;
+                // A must still see the message inside the conversation (2026-10-24: a Chat SDK list showed
+                // "2 members (1 unread)" and the last message, never the name)
+                var byPreview = false
+                let previewRow = { () -> XCUIElement? in
+                    guard !b1.isEmpty else { return nil }
+                    let row = self.app.cells.containing(NSPredicate(format: "label CONTAINS %@", b1)).firstMatch
+                    return row.exists ? row : nil
+                }
+                if waitUntil(180, { cell = element(containing: name); if cell == nil, let row = previewRow() { cell = row; byPreview = true }; return cell != nil }) , let cell {
+                    if byPreview { record("channel-name", nil, "A's list row for \"\(name)\" does not show the channel name; found the row by B's message \"\(b1)\"") }
                     cell.tap()
                     // the conversation is open only when its message input is on screen; the list row alone
                     // can already show B's message as a preview
@@ -199,12 +222,28 @@ final class RTUITests: XCTestCase {
     private func signInThroughForm(_ user: String) {
         var nodes: [RTSigninNode] = []
         var fieldPick: RTSigninPick?
-        guard waitUntil(30, { nodes = signinNodes(); fieldPick = rtPickSigninField(nodes); return fieldPick != nil }), let fieldPick else {
+        var found = waitUntil(20, { nodes = signinNodes(); fieldPick = rtPickSigninField(nodes); return fieldPick != nil })
+        // A form that opens behind a button ("Sign in" presents an alert with the user ID field): tap
+        // that button once and look again (a 2026-10 TC run: "0 text field(s) on screen").
+        if !found {
+            let opener = app.buttons.matching(NSPredicate(format: "label MATCHES[c] %@", "(sign ?in|log ?in|login|로그인|시작.*)")).firstMatch
+            if opener.exists && opener.isHittable {
+                opener.tap()
+                found = waitUntil(15, { nodes = signinNodes(); fieldPick = rtPickSigninField(nodes); return fieldPick != nil })
+            }
+        }
+        guard found, let fieldPick else {
             dump("sign-in")
             record("sign-in", false, "the app's sign-in form did not appear (no user ID text field: \(nodes.filter { $0.kind == .field }.count) text field(s) on screen)", shot: shot("no-sign-in-form"))
             return
         }
         tap(nodes[fieldPick.index])
+        // Clear what the app put in the field first: typing after a prefilled "buyer-1" signed in as
+        // "buyer-1rt-ios-…", a user the server did not know (a 2026-10 TC run).
+        let focused = app.textFields.matching(NSPredicate(format: "hasKeyboardFocus == true")).firstMatch
+        if focused.exists, let text = focused.value as? String, !text.isEmpty, text != (focused.placeholderValue ?? "") {
+            app.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: text.count))
+        }
         app.typeText(user)
         // the button is read after typing: a form may enable it only once the field has text
         var buttonPick: RTSigninPick?
@@ -404,8 +443,13 @@ final class RTUITests: XCTestCase {
         guard longPress(text, step: "rich-reaction") else { return }
         dump("rich-reaction-menu")
         let menuShot = shot("rich-reaction-menu")
-        // the emoji row sits above the text menu (Copy / Reply / ...): take its first entry
-        let anchor = menuItem(["Copy", "Reply", "Edit", "Delete", "Reply in thread"])
+        // the emoji row sits above the text menu (Copy / Reply / ...): anchor on the menu's TOP entry.
+        // menuItem returns the last match, which on a long menu (Copy, Mark as unread, Reply in thread)
+        // is three rows below the emoji row and outside the 160-point window searched below.
+        let menuNames = ["Copy", "Reply", "Edit", "Delete", "Reply in thread", "Mark as unread"]
+        let anchor = [app.buttons, app.cells, app.staticTexts, app.menuItems]
+            .flatMap { hittable($0.matching(NSPredicate(format: "label IN[c] %@", menuNames))) }
+            .min(by: { $0.frame.minY < $1.frame.minY }) ?? menuItem(menuNames)
         let emojiNamed = hittable(app.descendants(matching: .any).matching(NSPredicate(format: "identifier BEGINSWITH 'sendbird_emoji' OR label BEGINSWITH 'sendbird_emoji'")))
         var pick = emojiNamed.first
         if pick == nil, let anchor {

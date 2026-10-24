@@ -72,7 +72,7 @@ installation guide (https://rnfirebase.io). Until then the app runs without push
 | `sb_connection_status` | status text | `src/screens/HomeScreen.tsx:20` |
 | `sb_open_channels` | Channels button | `src/screens/HomeScreen.tsx:24` |
 | `sb_logout_button` | Sign out button | `src/screens/HomeScreen.tsx:25` |
-| `sb_channel_list` | container of the UIKit channel list | `src/screens/ChannelsScreen.tsx:44` |
+| `sb_channel_list` | container of the UIKit channel list | `src/screens/ChannelsScreen.tsx:47` |
 | `sb_message_input`, `sb_send_button` | not set | UIKit for React Native 3.12.10 sets no `testID` in its components. |
 
 ## Verified

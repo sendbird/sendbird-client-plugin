@@ -17,12 +17,14 @@ export default function App() {
   return (
     <main style={{ fontFamily: 'system-ui, sans-serif', maxWidth: 480, margin: '48px auto', padding: '0 16px' }}>
       {signedIn ? (
-        <p>Signed in as <b>{signedIn}</b> <button onClick={signOut}>Sign out</button></p>
+        <p>Signed in as <b>{signedIn}</b> <button data-testid="sb_logout_button" onClick={signOut}>Sign out</button></p>
       ) : (
-        <p>
-          <input id="user" placeholder="User ID" value={userId} onChange={(e) => setUserId(e.target.value)} />{' '}
-          <button disabled={!userId} onClick={signIn}>Sign in</button>
-        </p>
+        // A form, so Enter signs in; the test ids are the stable identifiers in
+        // templates/starters-bp/BEST_PRACTICES.md, which the run check looks for first.
+        <form onSubmit={(e) => { e.preventDefault(); void signIn(); }}>
+          <input id="user" data-testid="sb_login_user_id" autoComplete="username" placeholder="User ID" value={userId} onChange={(e) => setUserId(e.target.value)} />{' '}
+          <button type="submit" data-testid="sb_login_button" disabled={!userId}>Sign in</button>
+        </form>
       )}
       {error && <p style={{ color: '#b42318' }}>{error}</p>}
     </main>

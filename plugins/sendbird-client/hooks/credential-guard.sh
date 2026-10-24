@@ -27,7 +27,12 @@ CORE="$(cd "$HERE/../core/commands" && pwd)"
 hit="$(printf '%s' "$body" | bash "$CORE/check-credential.sh" | jq -r '.hit // empty')"
 [ -z "$hit" ] && exit 0
 
-jq -n --arg reason "Possible secret ($hit) in ${path:-the edited file}. Use an environment variable or secret manager; do not write or pass credential literals." '{
+reason="Possible secret ($hit) in ${path:-the edited file}. Use an environment variable or secret manager; do not write or pass credential literals."
+# a session, access, or auth token given a string literal, a placeholder included (core/commands/check-credential.sh)
+case "$hit" in *"token literal"*)
+  reason="$reason A session or access token is never a string literal in app code, a placeholder such as \"TODO_SESSION_TOKEN\" included: read it from the app's token source. When the app has none, follow docs/AGENT_CONTRACT.md: for an authenticated session, one app function fetches the token from the customer's server (no URL or token in it) and the token server goes under manualSteps; for AI Agent user details, keep the anonymous session and pass the details in the context object (section 7)." ;;
+esac
+jq -n --arg reason "$reason" '{
   hookSpecificOutput: {
     hookEventName: "PreToolUse",
     permissionDecision: "deny",

@@ -24,6 +24,11 @@
             "type": "command",
             "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/first-run-notice.sh\" prompt",
             "statusMessage": "Sendbird plugin: one-time notice — its hooks run local scripts; nothing is sent to Sendbird"
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/session-state.sh\" prompt",
+            "statusMessage": "Sendbird plugin: note pasted tokens (hashes only)"
           }
         ]
       }
@@ -60,12 +65,32 @@
         ]
       },
       {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/build-command-guard.sh\"",
+            "statusMessage": "Sendbird plugin: no project builds during plugin work unless you asked for one"
+          }
+        ]
+      },
+      {
         "matcher": "Bash|apply_patch",
         "hooks": [
           {
             "type": "command",
             "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/source-claim-guard.sh\"",
             "statusMessage": "Sendbird plugin: block unsourced Sendbird API code"
+          }
+        ]
+      },
+      {
+        "matcher": "Agent",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/token-relay-guard.sh\"",
+            "statusMessage": "Sendbird plugin: keep pasted tokens out of agent briefs"
           }
         ]
       }
@@ -78,6 +103,11 @@
             "type": "command",
             "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/telemetry-start.sh\"",
             "statusMessage": "Sendbird plugin: local telemetry (opt-in)"
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/session-state.sh\" agent-start",
+            "statusMessage": "Sendbird plugin: track running agents"
           }
         ]
       }
@@ -95,6 +125,11 @@
             "type": "command",
             "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/unsourced-claim-warn.sh\"",
             "statusMessage": "Sendbird plugin: check agent answer sources"
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/session-state.sh\" agent-stop",
+            "statusMessage": "Sendbird plugin: keep the agent report for the final answer check"
           }
         ]
       }

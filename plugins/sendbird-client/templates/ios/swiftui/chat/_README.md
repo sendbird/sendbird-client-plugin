@@ -17,6 +17,7 @@ Sources: (source: knowledge/curated/ios/products/chat.md) (source: https://sendb
 - `MessageActionsModel.swift` — edit and delete your own messages, and receive other members' edits and deletes as a Combine stream (`MessageEditing.swift`).
 - `UnreadCountModel.swift` — total unread count for a tab badge, live updates, per-channel count, mark as read (`UnreadCount.swift`).
 - `ChannelActivityModel.swift` — typing indicator and read receipts for one conversation (`TypingAndReadReceipts.swift`).
+- `ThreadModel.swift` — thread replies of a root message, send a reply, new replies as they arrive (`MessageThreads.swift`).
 
 ## Splice steps
 1. Add the Chat SDK via SPM: `github.com/sendbird/sendbird-chat-sdk-ios`, product `SendbirdChatSDK`, from `4.0.0`.
@@ -73,6 +74,11 @@ as long as the screen.
 3. Show "… is typing" from `activity.typingNames`. Call `activity.markRead()` when a new message arrives on screen.
 4. For your own messages, show a read mark when `activity.unreadMemberCount(of: message) == 0`, and read
    `activity.readReceiptsVersion` in the same view so it redraws when someone reads.
+
+### Thread replies (`ThreadModel.swift`)
+1. Push the thread view with the root message (`parentMessageId == 0`) and hold `@StateObject var thread = ThreadModel(channel:rootMessage:)`
+   (created in the view's `init` with `StateObject(wrappedValue:)`).
+2. `start()` in `.onAppear`, `stop()` when the thread view is dismissed; show `thread.replies`, send with `thread.reply(text)`.
 
 ## Notes
 - Message UI: Chat SDK is headless. For prebuilt SwiftUI chat screens use `SendbirdSwiftUI`

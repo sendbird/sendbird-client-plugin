@@ -31,7 +31,17 @@ fi
 mkdir -p "$dir/.sendbird-client"
 stored="$(cat "$prof" 2>/dev/null || echo '{}')"
 printf '%s' "$stored" | jq -e . >/dev/null 2>&1 || stored='{}'
+# With both editions of this plugin installed, the other one may already hold the confirmed App ID in
+# its own state folder: carry it over so setup does not ask for it again (common/sibling-profile.sh).
+if [ -z "$(printf '%s' "$stored" | jq -r '.appId // empty | strings')" ]; then
+  # shellcheck source=common/sibling-profile.sh
+  source "$HERE/common/sibling-profile.sh"
+  sib="$(sibling_app_id "$dir" ".sendbird-client")"
+  [ -z "$sib" ] || stored="$(printf '%s' "$stored" | jq --arg a "$sib" '. + {appId: $a}')"
+fi
 
 # Stored fields survive; fresh detection overwrites only the keys it actually produces.
 jq -n --argjson stored "$stored" --argjson fresh "$fresh" '$stored + $fresh' > "$prof"
 echo "wrote $prof"
+# The facts a caller decides on, so a session sees host=hybrid without reading the file.
+jq -r '"detected: platform=\(.platform // "unknown") host=\(.host // "unknown") products=\((.products // []) | join(","))"' "$prof"

@@ -16,8 +16,12 @@ Sources: (source: knowledge/curated/android/products/chat.md) (source: https://s
 - `MessageEditing.kt` — edit and delete your own messages (`MessageEditor`), and hear about other members' edits and deletes (`MessageChangeListener`).
 - `UnreadCount.kt` — total unread count for a tab or launcher badge, live updates, per-channel count, mark as read (`UnreadCountTracker`).
 - `TypingAndReadReceipts.kt` — typing indicator and read receipts for one conversation (`ChannelActivityTracker`).
+- `MessageThreads.kt` — thread replies: load a root message's replies, send a reply, hear new replies (`MessageThreads`, `ThreadReplyListener`).
 
 ## How to splice
+0. Screens of your own: the plain starter targets API 35, so on Android 15 every Activity draws edge-to-edge. Call the
+   starter's `padForSystemBarsAndKeyboard()` (`SystemInsets.kt`) right after `setContentView` in each Activity you add,
+   or the message input sits behind the keyboard (see `knowledge/curated/android/hosts/view.md`).
 1. Gradle: maven `https://repo.sendbird.com/public/maven` in `settings.gradle`;
    `implementation("com.sendbird.sdk:sendbird-chat:4.36.3")` in `build.gradle`.
 2. Set `ChatApplication` as `android:name` in `AndroidManifest.xml`.
@@ -54,6 +58,13 @@ change their `package` line to the app's package.
 3. Show "… is typing" from `onTypingChanged`. Call `ChannelActivityTracker.markRead(channel)` when the screen shows and when a new message arrives.
 4. For your own messages, show a read mark when `ChannelActivityTracker.unreadMemberCount(channel, message) == 0`,
    and rebind visible rows on `onReadReceiptsChanged`.
+
+### Thread replies (`MessageThreads.kt`)
+1. Open the thread screen with the root message (`parentMessageId == 0`); `MessageThreads.rootId(message)` gives its ID when the user tapped a reply.
+2. `MessageThreads.loadReplies(root) { replies, e -> ... }` — `replies` is never null here. The SDK's own callback hands Kotlin a
+   `List<BaseMessage>?`, so code that calls `getThreadedMessagesByTimestamp` directly must use `replies.orEmpty()` before `addAll`.
+3. Send with `MessageThreads.reply(channel, message, text) { sent, e -> ... }` and show the returned pending message.
+4. `ThreadReplyListener(channelUrl, rootId, onReply)`: `start()` in `onCreate`, `stop()` in `onDestroy`.
 
 ## Variations (see knowledge/curated/android/products/chat.md, all cited)
 - Authenticated: `SendbirdChat.connect(userId, authToken) { user, e -> }`.
