@@ -13,6 +13,9 @@
 #                removes it (build-command-guard.sh). The request also starts this turn's trace
 #                (turn-trace-<session_id>) again, with a "skill <name>" line when it names a skill as
 #                /<plugin>:<name> or $<plugin>:<name>.
+#                When destructive-command-guard.sh denied a Sendbird CLI delete in the last turn (Codex or a
+#                non-interactive run), a prompt that says yes and names its targets writes
+#                destructive-confirmed-<session_id>, which lets that command run once.
 #   tool         PreToolUse: what the call shows of a skill's steps goes into the turn's trace
 #                (hook-helpers.sh trace_lines): the skill it starts (the Skill tool, or a shell read of
 #                skills/<name>/SKILL.md in Codex), the curated files it reads (the Read tool, or a shell
@@ -55,6 +58,22 @@ case "$event" in
       rm -f "$trace"
       s="$(printf '%s' "$prompt" | sed -nE '1s#^[[:space:]]*[/$]([A-Za-z0-9_-]+:)?([a-z0-9-]+)([[:space:]].*)?$#\2#p')"
       [ -z "$s" ] || { mkdir -p "$(dirname "$trace")" 2>/dev/null && printf 'skill %s\n' "$s" >> "$trace"; }
+    fi
+    # A destructive CLI command destructive-command-guard.sh denied in the last turn waits for this prompt:
+    # a yes that names every target of it (or a yes, for a command with no target) confirms it once.
+    # Any other prompt drops it, and a confirmation not used in its turn is dropped by the next prompt.
+    confirmed="$(session_state_file destructive-confirmed)"; pending="$(session_state_file destructive-pending)"
+    if [ -n "$confirmed" ]; then
+      rm -f "$confirmed"
+      if [ -s "$pending" ] && prompt_confirms "$prompt"; then
+        named=1
+        while IFS= read -r t; do
+          [ -n "$t" ] || continue
+          printf '%s' "$prompt" | grep -Fq -- "$t" || { named=0; break; }
+        done < <(sed -n 's/^target //p' "$pending")
+        [ "$named" -eq 1 ] && cp "$pending" "$confirmed" 2>/dev/null
+      fi
+      rm -f "$pending"
     fi
     tokens="$(request_tokens "$prompt")"
     [ -n "$tokens" ] || exit 0
