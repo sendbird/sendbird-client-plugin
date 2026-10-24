@@ -115,7 +115,8 @@ turn_user_prompt() {
 # Task) call whose tool_result is "Async agent launched ..." (or missing) and whose
 # <task-notification> (it names the call as <tool-use-id>ID</tool-use-id>) has not arrived. Codex: a
 # spawn_agent call (its output names the agent, {"task_name": "/root/<name>"}) with no agent_message
-# "Message Type: FINAL_ANSWER" from that agent ("Sender: /root/<name>") after it.
+# "Message Type: FINAL_ANSWER" from that agent ("Sender: /root/<name>") after it, while an agent of this
+# session that hooks/session-state.sh saw start has not stopped.
 # Claude Code also lists the tasks still in flight in the Stop input (background_tasks, an entry per
 # task with type "subagent" and status "running" for an agent); when that list is there it decides.
 # Without it and without a readable transcript (claude -p --no-session-persistence writes no session
@@ -152,8 +153,14 @@ agent_pending() {
     | [ $spawns[] as $c
         | (([ $outs[] | select(.id == $c) ] | first // {out: ""}).out | (try (fromjson | .task_name // "") catch "")) as $name
         | select(if $name == "" then ($finals | length) == 0 else (any($finals[]; contains("Sender: " + $name + "\n")) | not) end) | $c ] as $codex
-    | ($claude | length) + ($codex | length)' "$tp" 2>/dev/null)"
-  [ -n "$n" ] && [ "$n" -gt 0 ] 2>/dev/null
+    | "\($claude | length) \($codex | length)"' "$tp" 2>/dev/null)"
+  set -- $n
+  [ "${1:-0}" -gt 0 ] 2>/dev/null && return 0
+  # Codex 0.164 sends a subagent's result as "Message Type: MESSAGE", not FINAL_ANSWER, so a spawn without a
+  # FINAL_ANSWER counts as running only while hooks/session-state.sh still has an agent of this session that
+  # started and has not stopped (SubagentStart / SubagentStop). Before this, every Codex run with a subagent
+  # looked like an interim answer and skipped the run summary checks (a 2026-10 TC run).
+  [ "${2:-0}" -gt 0 ] 2>/dev/null && agents_running
 }
 
 # --- Cited sources (source-claim-guard.sh, final-answer-gate.sh) ---------------------------
@@ -513,4 +520,58 @@ destructive_targets() {
 prompt_confirms() {
   printf '%s' "$1" | grep -Eiq "(^|[^a-z])(no|not|don'?t|do not|never|cancel|stop|wait)([^a-z]|$)|아니|하지 ?마|말아|취소|멈춰|중단|잠깐" && return 1
   printf '%s' "$1" | grep -Eiq '(^|[^a-z])(yes|yep|confirm(ed)?|approved?|go ahead|proceed|do it|delete (it|them)|ok(ay)?)([^a-z]|$)|네|예|응|좋아|확인|승인|진행|지워|삭제해|해 ?줘|해도 ?(돼|좋아)'
+}
+
+# answer_json_block <text> : the last ```json fenced block of an answer (the run summary), or nothing
+answer_json_block() {
+  printf '%s\n' "$1" | awk '/^[[:space:]]*```json[[:space:]]*$/ {on=1; buf=""; next}
+    on && /^[[:space:]]*```[[:space:]]*$/ {on=0; last=buf; next} on {buf = buf $0 "\n"} END {printf "%s", last}'
+}
+# answer_asks_app_id <text> : 0 when the answer stops to ask for the App ID: a needs_input run summary with a
+# question about it, or (without a run summary) a prose line about the App ID that asks for it
+answer_asks_app_id() {
+  local block
+  block="$(answer_json_block "$1")"
+  if [ -n "$block" ]; then
+    printf '%s' "$block" | jq -e '.status == "needs_input"
+      and any((.questions // [])[]; tostring | test("app[ _-]?id|앱 ?id"; "i"))' >/dev/null 2>&1
+    return
+  fi
+  printf '%s\n' "$1" | grep -Ei '(app[ _-]?id|앱 ?id)' | grep -Eiq '\?|알려 ?(주|줘)|입력해 ?(주|줘)'
+}
+
+# CHAT_INIT_RE : a Chat SDK init call (iOS initialize, Android and JS init)
+CHAT_INIT_RE='SendbirdChat\.(initialize|init)\('
+# template_markers <plugin root> <platform> <host> : the names a Chat init template of that host declares
+# (a type, an object, or an exported function of templates/<platform>/<host>/chat/ files that call
+# SendbirdChat init), at least six characters long, one per line. A run that splices the template keeps
+# them; one that writes its own init code has none of them.
+template_markers() {
+  local dir="$1/templates/$2/$3/chat" f
+  [ -d "$dir" ] || return 0
+  for f in "$dir"/*; do
+    case "$f" in */_README.md) continue ;; esac
+    grep -qE "$CHAT_INIT_RE" "$f" 2>/dev/null || continue
+    grep -oE '^((public|internal|private|final|open|data|export|default|async)[[:space:]]+)*(class|struct|enum|actor|object|fun|func|function|interface)[[:space:]]+[A-Za-z_][A-Za-z0-9_]*' "$f" \
+      | awk '{print $NF}'
+  done | awk 'length($0) >= 6 && !seen[$0]++'
+}
+
+# cited_sources <text> : what each "source:" or "출처:" marker in an answer cites, one per line, for
+# resolve_cited_sources. A Markdown link (source: [knowledge/curated/ios/cross-cutting/errors.md — Diagnosing
+# connection failures](/abs/path/errors.md)) gives the first word of its text and its target; a plain marker
+# gives the word after it (a path, path:line, or URL), cut after the file name when Korean or a closing
+# backtick follows it ("`errors.md`의"). 근거: (basis) counts as a marker too. In a 2026-10 Codex TC run the
+# link was read as "[knowledge/..." and never resolved, and a later answer that wrote 근거: was not read at
+# all, so cited answers were sent back as citing nothing.
+cited_sources() {
+  local m
+  while IFS= read -r m; do
+    [ -n "$m" ] || continue
+    printf '%s\n' "$m" | sed -E 's/^[^[]*\[([^]]*)\].*$/\1/' | awk '{print $1}'
+    printf '%s\n' "$m" | sed -E 's/^.*\]\(([^)]*)\)$/\1/'
+  done < <(printf '%s\n' "$1" | grep -Eio '(source:|출처:|근거:)[[:space:]]*\[[^]]*\]\([^)[:space:]]+\)')
+  printf '%s\n' "$1" | grep -Eio '(source:|출처:|근거:)[[:space:]]*[^[)[:space:]][^)[:space:]]*' \
+    | sed -E 's/^([Ss][Oo][Uu][Rr][Cc][Ee]:|출처:|근거:)[[:space:]]*//' \
+    | sed -E 's/(\.(md|swift|kt|java|ts|tsx|js|jsx|json|swiftinterface))[^:0-9A-Za-z_.,-].*$/\1/'
 }

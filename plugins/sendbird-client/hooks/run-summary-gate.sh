@@ -22,6 +22,7 @@
 # as the outcome (hooks/lib/hook-helpers.sh agent_pending: the Stop input's background_tasks, else the
 # transcript, else the agents hooks/session-state.sh saw start and not stop, since `claude -p
 # --no-session-persistence` writes no transcript).
+# A run that adds Chat SDK init code without the detected host's init template is sent back too.
 # A manualSteps entry that asks the customer to call a helper this run added, or the sign-in function it
 # wired, from the app's sign-in or sign-out is sent back as well (docs/AGENT_CONTRACT.md section 3).
 # A needs_input summary that asks the apply-fix question when the request itself asked for the fix
@@ -169,6 +170,43 @@ if [ -n "$block" ] && printf '%s' "$block" | jq -e 'type == "object"' >/dev/null
     problems="${problems}${problems:+$'\n'}manualSteps entry $(printf '%s' "$step" | jq -Rs .) asks the customer to call ${found%% *}, which ${found#* } (a file this run changed) contains. Calling a helper this run added, or the sign-in function it wired, is not a hand-off (docs/AGENT_CONTRACT.md section 3, \"Finish what the project allows\"): drop the entry. When the app has a sign-out or logout function, the helper is called from it in the project; when it has none, name the helper, its file, and that it disconnects and removes the handlers this run added in the answer text instead, and keep manualSteps for work outside the project"
   done < <(printf '%s' "$block" | jq -r '(.manualSteps // []) | if type == "array" then .[] else empty end | strings' 2>/dev/null)
 fi
+# The platform agents splice the verified Chat init template of the detected host
+# (templates/<platform>/<host>/chat/, agents/*-agent.md) instead of writing their own init and connect code.
+# In a 2026-10 Codex TC run the iOS agent rewrote it as its own class and left out the template's
+# bootstrap and unread-count observer types. A run whose changed files add a Chat SDK init call
+# (CHAT_INIT_RE; lines git shows as added, or a file the run created) while no changed file uses a name the
+# template declares (template_markers) is sent back once. A source comment that only names the template
+# folder does not count: a later Codex run added "// source: templates/ios/uikit/chat/InitConnect.swift" to
+# its own rewritten class and passed an earlier version of this check.
+if [ -n "$block" ] && [ -n "$state_dir" ] && printf '%s' "$block" | jq -e 'type == "object"' >/dev/null 2>&1; then
+  prof="$cwd/$state_dir/profile.json"
+  t_plat="$(jq -r '.platform // empty' "$prof" 2>/dev/null)"; t_host="$(jq -r '.host // empty' "$prof" 2>/dev/null)"
+  markers=""
+  [ -n "$t_plat" ] && [ -n "$t_host" ] && markers="$(template_markers "${CLAUDE_PLUGIN_ROOT:-$HERE/..}" "$t_plat" "$t_host")"
+  if [ -n "$markers" ]; then
+    t_dir="templates/$t_plat/$t_host/chat"
+    in_git=0; git -C "$cwd" rev-parse --verify -q HEAD >/dev/null 2>&1 && in_git=1
+    init_file=""; named=0
+    while IFS=$'\t' read -r rel action; do
+      [ -n "$rel" ] && [ -f "$cwd/$rel" ] || continue
+      case "$rel" in *.swift|*.kt|*.java|*.ts|*.tsx|*.js|*.jsx) ;; *) continue ;; esac
+      grep -Fwq -f <(printf '%s\n' "$markers") "$cwd/$rel" 2>/dev/null && named=1
+      [ -z "$init_file" ] || continue
+      if [ "$in_git" -eq 1 ] && git -C "$cwd" cat-file -e "HEAD:$rel" 2>/dev/null; then
+        added="$(git -C "$cwd" diff HEAD -- "$rel" 2>/dev/null | grep '^+' | grep -v '^+++')"
+      elif [ "$in_git" -eq 1 ] || [ "$action" = created ]; then
+        added="$(cat "$cwd/$rel" 2>/dev/null)"
+      else
+        added=""
+      fi
+      printf '%s' "$added" | grep -Eq "$CHAT_INIT_RE" && init_file="$rel"
+    done < <(printf '%s' "$block" | jq -r '(.changes // []) | if type == "array" then .[] else empty end | objects
+      | select(.action != "deleted") | [.path, .action] | map(strings) | select(length == 2) | @tsv' 2>/dev/null)
+    if [ -n "$init_file" ] && [ "$named" -eq 0 ]; then
+      problems="${problems}${problems:+$'\n'}this run added Chat SDK init code in $init_file without the $t_plat $t_host template: no changed file uses a name $t_dir declares ($(printf '%s' "$markers" | paste -sd ',' - | sed 's/,/, /g')); a source comment that names the template is not the template. The platform agent splices the verified template instead of writing its own init, connect, and observers: have it rewrite that code from $t_dir, keeping the template's types and functions under their names and its source comments, and call them from the app's own sign-in, then report again"
+    fi
+  fi
+fi
 # a clean answer ends the chain, so its record goes
 [ -n "$problems" ] || { [ -n "$mark" ] && rm -f "$mark"; exit 0; }
 
@@ -178,6 +216,7 @@ problem_kind() {
     *"asks for a bundler, env loader"*) echo appid-env-step ;;
     *"about building or type-checking"*) echo build-step ;;
     *"asks the customer to call"*) echo helper-handoff ;;
+    *"init code in "*" template"*) echo template ;;
     *"lists no checks"*) echo no-checks ;;
     *"already asks to apply the fix"*) echo apply-consent ;;
     "the answer does not end with"*|"the last json block is not"*) echo no-summary ;;
