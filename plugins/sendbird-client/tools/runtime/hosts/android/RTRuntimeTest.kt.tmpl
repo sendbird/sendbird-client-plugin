@@ -179,8 +179,10 @@ class RTRuntimeTest {
             }
             // an app whose home screen is the channel list itself (no title, no chat button): B's channel
             // shows up there. Look for it first, so a row's preview text that mentions "chat" is not
-            // taken for a chat button
-            val channelOnHome = arg("rtDirect") != "1" && waitUntil(20000) { find(By.textContains(channel)) != null }
+            // taken for a chat button. A row may show member names instead of the channel name; B's first
+            // message (this run's tag) in the row's preview finds it then (2026-10-24: a Compose list titled rows by
+            // member nicknames, so the harness tapped an old row whose preview said "chat API")
+            val channelOnHome = arg("rtDirect") != "1" && waitUntil(20000) { find(By.textContains(channel)) != null || find(By.textContains(b1)) != null }
             var opened = channelOnHome || waitUntil(20000) { listShown() || run { entry = findEntry(); entry != null && entry!!.isEnabled } }
             // no title and no button, but signed in: look for the channel on the home screen
             val homeList = channelOnHome || (!opened && arg("rtDirect") != "1" && !signinShown(signinLabel))
@@ -191,6 +193,7 @@ class RTRuntimeTest {
                 Thread.sleep(4000)
                 record("chat-screen", true, "tapped \"$label\" on the home screen", shot("channel-list"))
                 var cell: UiObject2? = null
+                var byPreview = false
                 if (arg("rtDirect") == "1") {
                     // the button opened a 1:1 conversation with B directly: send, then wait for B's reply
                     val inputShown = waitUntil(30000) { find(By.clazz("android.widget.EditText")) != null }
@@ -203,7 +206,15 @@ class RTRuntimeTest {
                         dump("message-a-live")
                         record("message-a-live", false, "A never showed B's reply \"$b2\"", shot("no-live"))
                     }
-                } else if (waitUntil(180000) { cell = find(By.textContains(channel)); cell != null }) {
+                } else if (waitUntil(180000) {
+                        cell = find(By.textContains(channel))
+                        // a row without the channel name: B's message in the preview, only on a list (no message input yet)
+                        if (cell == null && find(By.clazz("android.widget.EditText")) == null) {
+                            cell = find(By.textContains(b1)); byPreview = cell != null
+                        }
+                        cell != null
+                    }) {
+                    if (byPreview) record("channel-name", null, "A's list row for \"$channel\" does not show the channel name; found the row by B's message \"$b1\"")
                     cell!!.click()
                     // the conversation is open only when its message input is on screen; the list row alone
                     // can already show B's message as a preview

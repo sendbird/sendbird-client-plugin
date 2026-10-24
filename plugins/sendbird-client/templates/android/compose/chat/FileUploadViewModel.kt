@@ -6,6 +6,9 @@
 // View-host template templates/android/view/chat/FileMessageSender.kt, verified with javap on the sendbird-chat 4.36.4 and
 // 4.36.5 AARs. This file only wraps them in a ViewModel with a StateFlow so Compose can show progress and a retry button;
 // the wrapper is standard AndroidX/coroutines/Compose, not an SDK API.
+// In Kotlin sendFileMessage and resendMessage return FileMessage? (2026-10-24: a copy that kept only
+// `channel.sendFileMessage(...).requestId` did not build), so the pending message stays nullable and cancel reads it
+// with ?. — keep that shape when adapting this file.
 // Compiled by tools/templates/compile-check-android.sh against the pinned and latest SDK set.
 package com.sendbird.client.templatecheck.compose.chat
 
@@ -58,10 +61,18 @@ class FileUploadViewModel : ViewModel() {
     /** Resends the failed message with the file it was first sent with. */
     fun retry(channel: GroupChannel) {
         val failed = _state.value.failed ?: return
-        if (!failed.isResendable) return
+        resend(channel, failed)
+    }
+
+    /** Resends a failed file message picked from the message list (for example from the collection's failedMessages). */
+    fun resend(channel: GroupChannel, failed: FileMessage) {
+        if (!failed.isResendable || _state.value.progress != null) return
         _state.value = FileUploadState(progress = 0)
         pending = channel.resendMessage(failed, handler())
     }
+
+    /** The request ID of the upload that is running, or null; FileMessage? because the SDK returns it nullable. */
+    val pendingRequestId: String? get() = pending?.requestId
 
     private fun handler() = object : FileMessageWithProgressHandler {
         override fun onProgress(bytesSent: Int, totalBytesSent: Int, totalBytesToSend: Int) {

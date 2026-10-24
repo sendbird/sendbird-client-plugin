@@ -7,6 +7,8 @@
 // wraps them in an ObservableObject; the wrapper is standard SwiftUI/Combine, not an SDK API. Compiled by
 // tools/templates/compile-check-ios.sh against the pinned and latest SPM releases. Delegate callbacks may arrive off
 // the main thread, so they are `nonisolated` and hop to the main actor.
+// BaseMessage.threadInfo is a non-optional ThreadInfo: read `message.threadInfo.replyCount` (replyCount(of:) below), never
+// `if let info = message.threadInfo` (2026-10-24: "initializer for conditional binding must have Optional type").
 
 import Foundation
 import Combine
@@ -50,6 +52,11 @@ final class ThreadModel: NSObject, ObservableObject, GroupChannelDelegate {
     }
 
     func stop() { SendbirdChat.removeChannelDelegate(forIdentifier: identifier) }
+
+    /// The reply count to show under `message` in the conversation ("3 replies"): 0 for a reply or a message without replies.
+    nonisolated static func replyCount(of message: BaseMessage) -> Int {
+        message.parentMessageId == 0 ? message.threadInfo.replyCount : 0
+    }
 
     func reply(_ text: String) {
         let params = UserMessageCreateParams(message: text)
