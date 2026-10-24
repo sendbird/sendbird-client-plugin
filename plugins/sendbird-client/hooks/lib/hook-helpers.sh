@@ -343,13 +343,19 @@ agents_running() {
 # A token the customer pasted is a secret: a run of 24 or more letters, digits, _ and - with a letter and
 # a digit in it, written within 60 characters after a word such as token, secret, session, API key, or
 # 토큰, or a JWT anywhere in the request. A UUID (an App ID) is not a secret and does not count.
+# Not a token either (a 2026-10 dev session was blocked twice for repeating its own scratchpad path):
+# - a part of a file path or a URL path: a run right after or before / or \, or followed by a file
+#   extension (".log"), such as the "-Users-<name>-...-sendbird-plugin" folder of a Claude Code session;
+# - a run that holds a UUID, such as a session ID folder ("<uuid>_old") or an artifact ID;
+# - 키 inside a longer Korean word: "패키지" (package) is not "키" (key), so 키 counts only when no Hangul
+#   syllable comes right before it.
 # request_tokens <text> : the tokens in that text, one per line
 request_tokens() {
   jq -rn --arg req "$1" '
-    [ ($req | match("(?i)(token|secret|session|api[ _-]?key|password|bearer|credential|토큰|시크릿|비밀|세션|키)[^\\n]{0,60}?(?<![A-Za-z0-9_-])([A-Za-z0-9_-]{24,})"; "g") | .captures[1].string),
+    [ ($req | match("(?i)(token|secret|session|api[ _-]?key|password|bearer|credential|토큰|시크릿|비밀|세션|(?<![가-힣])키)[^\\n]{0,60}?(?<![A-Za-z0-9_/\\\\-])([A-Za-z0-9_-]{24,})(?![A-Za-z0-9_/\\\\-]|\\.[A-Za-z0-9])"; "g") | .captures[1].string),
       ($req | match("eyJ[A-Za-z0-9_-]{10,}\\.[A-Za-z0-9_-]{5,}\\.[A-Za-z0-9_-]{5,}"; "g") | .string) ]
     | map(select(test("[A-Za-z]") and test("[0-9]")
-        and (test("^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}$") | not)))
+        and (test("[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}") | not)))
     | unique | .[]' 2>/dev/null
 }
 
