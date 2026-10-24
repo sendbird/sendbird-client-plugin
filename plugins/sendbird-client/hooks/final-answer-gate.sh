@@ -65,6 +65,46 @@ if [ -n "$reports" ] && [ -s "$reports" ] && ! agent_pending; then
   rm -f "$reports"
 fi
 
+# skills/upgrade-sdk/SKILL.md steps 2 and 4, checked from what this turn did (hooks/session-state.sh keeps
+# it per session, so this works without a transcript too). In five 2026-10 TC rounds the upgrade answer gave
+# target versions without the latestInMajor, latest, and source values of latest-version.sh, and the plan
+# was made without opening the curated files step 4 names. Only a turn that ran the skill and looked up a
+# version is checked, and never an interim answer while an agent of the turn still runs.
+if trace_has "skill upgrade-sdk" && trace_lines | grep -q '^latest ' && ! agent_pending; then
+  up_problems=""
+  missing_reads="$(upgrade_missing_reads "$(jget '.cwd')" | paste -sd ',' - | sed 's/,/, /g')"
+  [ -z "$missing_reads" ] || up_problems="step 4 says to read ${missing_reads} before the plan, and this turn did not open them: read each one now (the Read tool, or cat in a shell), check the plan against its rules, and cite each rule you apply with its file and heading"
+  missing_fields=""
+  printf '%s' "$text" | grep -q 'latestInMajor' || missing_fields="latestInMajor"
+  printf '%s' "$text" | grep -Eq '(^|[^A-Za-z])latest([^A-Za-z]|$)' || missing_fields="${missing_fields}${missing_fields:+, }latest"
+  missing_src=""
+  while read -r _ kind pkg; do
+    [ -n "$pkg" ] || continue
+    case "$kind" in
+      npm) src="npm view $pkg versions" ;;
+      spm) src="git ls-remote --tags $pkg" ;;
+      maven) src="${pkg##*:}/maven-metadata.xml" ;;
+      *) continue ;;
+    esac
+    printf '%s' "$text" | grep -Fq -- "$src" && continue
+    # a lookup that failed is reported with its error instead of a source
+    printf '%s' "$text" | grep -Fq -- "$pkg" && printf '%s' "$text" | grep -Eiq 'error|failed|could not|실패|오류' && continue
+    missing_src="${missing_src}${missing_src:+; }$src"
+  done < <(trace_lines | grep '^latest ' | awk '!seen[$0]++')
+  if [ -n "$missing_fields$missing_src" ]; then
+    q="step 2 says to quote latestInMajor, latest, and source from the output of tools/local-sdk/latest-version.sh for each package"
+    [ -z "$missing_fields" ] || q="$q, and this answer does not name ${missing_fields}"
+    [ -z "$missing_src" ] || q="$q, and it leaves out the source of ($missing_src)"
+    q="$q: give each package's latestInMajor and latest values by those names, with the source exactly as the tool printed it (for a lookup that failed, its error instead)"
+    up_problems="${up_problems}${up_problems:+; and }$q"
+  fi
+  if [ -n "$up_problems" ]; then
+    jq -n --arg p "$up_problems" '{decision: "block",
+      reason: ("Upgrade answer check (Sendbird plugin, skills/upgrade-sdk/SKILL.md): " + $p + ". Write the whole answer again as the reply itself (the user may see only this reply, so do not say it is repeated or mention this check), keeping its plan, its question, and its run summary as they are unless the rules you read change them. Do not change project files because of this check.")}'
+    exit 0
+  fi
+fi
+
 # docs/AGENT_CONTRACT.md "Cite the curated entry": when this turn read a curated file and the answer
 # cites a link but no curated path, the link stands in for the entry (often a community or source
 # link the entry itself cites). Send it back once to cite the curated entry first.

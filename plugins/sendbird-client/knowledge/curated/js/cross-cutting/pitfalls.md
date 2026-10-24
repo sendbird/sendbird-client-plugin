@@ -11,6 +11,7 @@
 - React UIKit: import `@sendbird/uikit-react/dist/index.css` or the UI is unstyled (see uikit.md).
 - React Native UIKit/AI Agent: `platformServices` / `nativeModules` (mmkv) are required — follow the quickstart, don't guess factory calls.
 - React Native 0.87+: `<StatusBar backgroundColor=...>` fails type-checking because 0.87 removed the prop; color the top view behind the status bar instead (see theme.md, Status bar).
+- React Native 0.87+: `FlatList`'s `ListEmptyComponent` and the other list element props take an element, a component, or `undefined`, not `null`, so `cond ? <Text>…</Text> : null` fails type-checking (TS2322); write `: undefined` (see chat.md, React vs React Native). (source: @react-native/virtualized-lists@0.87.1 types_generated/Lists/VirtualizedListProps.d.ts:140, :145, :154)
 
 ## Auth
 

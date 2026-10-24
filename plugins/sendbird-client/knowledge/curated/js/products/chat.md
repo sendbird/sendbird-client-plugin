@@ -120,6 +120,7 @@ channel.sendUserMessage(params)
 ```
 `channel` from `sb.groupChannel.createChannel(params)` (group) or the open-channel API. (source: sendbird.com/docs chat v4 javascript getting-started)
 The failed message passed to `onFailed` can be `null`, so check it before adding it to a `BaseMessage[]` list. (source: `@sendbird/chat@4.22.13` lib/__definition.d.ts:1627 `FailedMessageHandler<T> = (err: Error, message: T | null) => void`, :2889 `MessageRequestHandler.onFailed`)
+`sendUserMessage()` and `sendFileMessage()` return a `MessageRequestHandler` with no type argument, so `onPending`, `onSucceeded`, and `onFailed` hand over the message typed `SendableMessage`, not `UserMessage` or `FileMessage`. Narrow it with `isUserMessage()` or `isFileMessage()` before putting it in state typed `UserMessage`, `FileMessage`, or their union; putting it there directly fails the type check (TS2345). (source: https://sendbird.com/docs/chat/sdk/v4/javascript/ref/classes/_sendbird_chat.BaseChannel.html) (source: https://sendbird.com/docs/chat/sdk/v4/javascript/ref/classes/_sendbird_chat_message.MessageRequestHandler.html) (source: https://sendbird.com/docs/chat/sdk/v4/javascript/ref/classes/_sendbird_chat_message.BaseMessage.html) (source: `@sendbird/chat@4.22.14` lib/__definition.d.ts:442 `sendUserMessage(params: UserMessageCreateParams): MessageRequestHandler`, :472 `sendFileMessage(params: FileMessageCreateParams): MessageRequestHandler`, :2875 `MessageRequestHandler<T extends SendableMessage = SendableMessage>`, :2842 `isUserMessage(): this is UserMessage`, :2847 `isFileMessage(): this is FileMessage`)
 
 ### Send a file message
 ```ts
@@ -466,6 +467,7 @@ sb.groupChannel.addGroupChannelHandler('UNIQUE_HANDLER_ID', new GroupChannelHand
 ## React vs React Native
 - The core SDK is identical; only the surrounding app differs. Templates: `templates/js/react/chat/`, `templates/js/react-native/chat/`.
 - For full prebuilt UI use Sendbird UIKit (`@sendbird/uikit-react` / `@sendbird/uikit-react-native`) — see `knowledge/curated/js/products/uikit.md`.
+- React Native 0.87+ `FlatList`: `ListEmptyComponent`, `ListHeaderComponent`, and `ListFooterComponent` take an element, a component, or `undefined`, not `null`. A Chat SDK screen that writes `ListEmptyComponent={loading ? undefined : <Text>…</Text>}` type-checks; `cond ? <Text>…</Text> : null` fails with TS2322. (source: @react-native/virtualized-lists@0.87.1 types_generated/Lists/VirtualizedListProps.d.ts:140 `ListEmptyComponent`, :145 `ListFooterComponent`, :154 `ListHeaderComponent`, each `(React.ComponentType<any> | React.JSX.Element) | undefined`)
 
 ## Pitfalls
 - Import `SendbirdGroupChat`, `GroupChannel`, and `GroupChannelModule` from `@sendbird/chat/groupChannel`, never from the root `@sendbird/chat` (TS2724). Check the "Import paths" table above before writing any Chat SDK import.

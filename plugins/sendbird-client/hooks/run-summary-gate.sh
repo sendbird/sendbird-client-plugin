@@ -22,6 +22,8 @@
 # as the outcome (hooks/lib/hook-helpers.sh agent_pending: the Stop input's background_tasks, else the
 # transcript, else the agents hooks/session-state.sh saw start and not stop, since `claude -p
 # --no-session-persistence` writes no transcript).
+# A manualSteps entry that asks the customer to call a helper this run added, or the sign-in function it
+# wired, from the app's sign-in or sign-out is sent back as well (docs/AGENT_CONTRACT.md section 3).
 # A needs_input summary that asks the apply-fix question when the request itself asked for the fix
 # ("fix it", "apply", "고쳐 줘", "적용해 줘"; docs/AGENT_CONTRACT.md section 7) is sent back once too.
 set -uo pipefail
@@ -139,6 +141,34 @@ else
          then "the run changed app files but lists no checks: put each check from docs/AGENT_CONTRACT.md section 4 and the skill'"'"'s own checks under checks, as pass, fail, or not_run" else empty end)
       ] | unique | .[]' 2>/dev/null)" || exit 0
 fi
+# docs/AGENT_CONTRACT.md section 3 "Finish what the project allows": calling the disconnect helper a run
+# added (or the sign-in function it wired) is not a manualSteps entry. In five 2026-10 TC rounds a run
+# added LoginService.onLogoutRequested() and still listed "Call ... onLogoutRequested() from sign-out"
+# under manualSteps. An entry that asks to call, wire, or invoke something from the app's sign-in or
+# sign-out and names a function (name( or `name`) that a file under changes contains is sent back.
+helper_verb='(^|[^A-Za-z])(call|calls|calling|wire|wiring|hook|invoke|invoking|trigger|run)([^A-Za-z]|$)'
+auth_word='sign[- ]?(in|out)|log[- ]?(in|out)|logout|login|signout|signin|로그인|로그아웃'
+if [ -n "$block" ] && printf '%s' "$block" | jq -e 'type == "object"' >/dev/null 2>&1; then
+  changed="$(printf '%s' "$block" | jq -r '(.changes // []) | if type == "array" then .[] else empty end | objects
+    | select(.action != "deleted") | .path | strings | select(test("^(/|\\.\\./)") | not)' 2>/dev/null)"
+  while IFS= read -r step; do
+    [ -n "$step" ] && [ -n "$changed" ] || continue
+    printf '%s' "$step" | grep -Eiq "$helper_verb" || continue
+    printf '%s' "$step" | grep -Eiq "$auth_word" || continue
+    found=""
+    while IFS= read -r id; do
+      [ "${#id}" -ge 4 ] || continue
+      while IFS= read -r rel; do
+        [ -n "$rel" ] && [ -f "$cwd/$rel" ] || continue
+        if grep -Eq "(^|[^A-Za-z0-9_])${id}([^A-Za-z0-9_]|$)" "$cwd/$rel" 2>/dev/null; then found="$id $rel"; break; fi
+      done <<< "$changed"
+      [ -z "$found" ] || break
+    done < <(printf '%s' "$step" | { grep -Eo '[A-Za-z_][A-Za-z0-9_]*(\.[A-Za-z_][A-Za-z0-9_]*)*\(|`[A-Za-z_][A-Za-z0-9_.]*`' || true; } \
+      | sed -E 's/[`(]//g; s/.*\.//' | awk '!seen[$0]++')
+    [ -n "$found" ] || continue
+    problems="${problems}${problems:+$'\n'}manualSteps entry $(printf '%s' "$step" | jq -Rs .) asks the customer to call ${found%% *}, which ${found#* } (a file this run changed) contains. Calling a helper this run added, or the sign-in function it wired, is not a hand-off (docs/AGENT_CONTRACT.md section 3, \"Finish what the project allows\"): drop the entry. When the app has a sign-out or logout function, the helper is called from it in the project; when it has none, name the helper, its file, and that it disconnects and removes the handlers this run added in the answer text instead, and keep manualSteps for work outside the project"
+  done < <(printf '%s' "$block" | jq -r '(.manualSteps // []) | if type == "array" then .[] else empty end | strings' 2>/dev/null)
+fi
 # a clean answer ends the chain, so its record goes
 [ -n "$problems" ] || { [ -n "$mark" ] && rm -f "$mark"; exit 0; }
 
@@ -147,6 +177,7 @@ problem_kind() {
   case "$1" in
     *"asks for a bundler, env loader"*) echo appid-env-step ;;
     *"about building or type-checking"*) echo build-step ;;
+    *"asks the customer to call"*) echo helper-handoff ;;
     *"lists no checks"*) echo no-checks ;;
     *"already asks to apply the fix"*) echo apply-consent ;;
     "the answer does not end with"*|"the last json block is not"*) echo no-summary ;;

@@ -30,7 +30,8 @@
 # times and its body once; only the body sets the section length, so a short section does not win on
 # the file title alone (every section of the file carries it). A docs page counts its title three
 # times, its headings and description twice, and its API names and keywords once. Curated files are cut at their `## ` headings when the
-# search runs, so they are never stale; docs pages come from core/docs-pages.tsv
+# search runs, so they are never stale (a section over 300 lines is also indexed by the text before its
+# first `### ` heading, under the same source, and the better of the two is shown); docs pages come from core/docs-pages.tsv
 # (tools/curated/build-docs-pages.py).
 #
 # Output: one JSON object on stdout:
@@ -112,6 +113,11 @@ vmap="$(printf '%s' "$vmap" | sed 's/^ *//; s/ *$//')"
 # core/docs-pages.tsv: kind ref product platform versions title section line keys text (docs rows
 # hold the page headings in column 7 and the description in column 10).
 CHUNK_AWK='
+# A section longer than long_lines lines is also indexed by its opening text (the lines before its first
+# "### " heading), under the same heading and line: a search shows the one of the two that scores
+# higher. BM25 divides the word counts of a body by its length, so a 440-line section ranked 6th for its
+# own title (a 2026-10 TC run: "React" in js/products/uikit.md, whose "### " parts all mention React
+# Native too). Indexing every "### " part on its own instead lowered the eval in tests/search.
 function flush(   t, k, keys) {
   if (sec_line == 0 && body == "") return
   if (body ~ /^(\\n)*$/) { body = ""; return }
@@ -119,7 +125,9 @@ function flush(   t, k, keys) {
   for (k in KS) keys = keys (keys == "" ? "" : " ") k
   split("", KS)
   printf "curated\t%s\t%s\t%s\t%s\t%s\t%s\t%d\t%s\t%s\n", rel, prod, plat, tags, title, section, (sec_line ? sec_line : 1), keys, body
-  body = ""
+  if (sec_line > 0 && nl > long_lines && intro !~ /^(\\n)*$/)
+    printf "curated\t%s\t%s\t%s\t%s\t%s\t%s\t%d\t%s\t%s\n", rel, prod, plat, tags, title, section, sec_line, introkeys, intro
+  body = ""; intro = ""; introkeys = ""; has_sub = 0; nl = 0
 }
 function addkeys(s,   id, n, i, c, p, prev, nxt) {
   while (match(s, /[A-Za-z][A-Za-z0-9]*[a-z0-9][A-Z][A-Za-z0-9]*/)) {
@@ -167,13 +175,20 @@ FNR == 1 {
   if (seg[4] == "products") { prod = seg[5]; sub(/\.md$/, "", prod); if (prod == "auth") prod = "chat" }
   else if (seg[4] == "cross-cutting" && seg[5] ~ /^(chat|uikit|ai-agent|desk|calls|live)-/) { prod = seg[5]; sub(/-[^-]*$/, "", prod) }
   tags = ""; title = ""; section = ""; sec_line = 0; body = ""; in_code = 0; split("", KS)
+  intro = ""; introkeys = ""; has_sub = 0; nl = 0
 }
 FNR <= 5 && /last-verified-against:/ { h = $0; sub(/.*last-verified-against:[ ]*/, "", h); sub(/[ ]*-->.*/, "", h); tags = tagsof(h); next }
 /^<!--.*-->[ ]*$/ && FNR <= 6 { next }
 /^```/ { in_code = !in_code }
 !in_code && /^# / && title == "" { title = esc(substr($0, 3)); next }
 !in_code && /^## / { flush(); section = esc(substr($0, 4)); sec_line = FNR; next }
+# the opening text of a section ends at its first "### " heading (see flush)
+!in_code && sec_line > 0 && !has_sub && /^### / {
+  has_sub = 1; intro = body; introkeys = ""
+  for (k in KS) introkeys = introkeys (introkeys == "" ? "" : " ") k
+}
 {
+  nl++
   addkeys($0)
   line = esc($0)
   body = (body == "") ? line : body "\\n" line
@@ -391,7 +406,7 @@ while IFS= read -r f; do files="$files$f
 result="$(
   {
     if [ -n "$files" ]; then
-      printf '%s' "$files" | tr '\n' '\0' | xargs -0 awk -v root="$ROOT/" "$CHUNK_AWK"
+      printf '%s' "$files" | tr '\n' '\0' | xargs -0 awk -v root="$ROOT/" -v long_lines=300 "$CHUNK_AWK"
     fi
     if [ "$kind" != curated ] && [ -f "$DOCS" ]; then cat "$DOCS"; fi
   } | awk -v query="$query" -v platform="$platform" -v product="$product" -v vmap="$vmap" \
