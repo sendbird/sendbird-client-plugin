@@ -15,6 +15,7 @@ Sources: (source: knowledge/curated/js/products/chat.md) (source: https://sendbi
 - `MessageEditing.ts` — edit and delete your own messages, and hear about other members' edits and deletes.
 - `UnreadCount.ts` — `useTotalUnreadCount(sb)` hook for a tab badge, per-channel count, mark as read.
 - `TypingAndReadReceipts.ts` — `useChannelActivity(sb, channel)` hook for "… is typing" and read marks.
+- `KeyboardAvoidingScreen.tsx` — the root of a screen with a message input at the bottom, so the keyboard does not cover the input (React Native only, no Sendbird API).
 
 ## How to splice
 1. `npm install @sendbird/chat`
@@ -22,6 +23,10 @@ Sources: (source: knowledge/curated/js/products/chat.md) (source: https://sendbi
 3. App ID read per the profile `tier2.appIdSource` (knowledge/curated/js/setup.md "App ID") — never ask the customer to add a bundler; access/session tokens are secrets.
 
 The feature files below assume a connected `sb` and a loaded group channel. Copy only the files the app needs.
+
+### Conversation and thread screens (`KeyboardAvoidingScreen.tsx`)
+1. Every screen you build with a message input at the bottom uses `<KeyboardAvoidingScreen style={styles.screen}>` as its root instead of `<View>`. Without it the keyboard covers the input and its Send button on iOS, and on Android 15 and later.
+2. Pass `topOffset` only when something outside the screen draws above it (a navigator header: `useHeaderHeight()`); a header inside the screen counts as 0.
 
 ### Send an image or document (`FileMessageUpload.ts`)
 1. Map the picker result to `{ uri, name, type }` (for an image picker asset: `uri`, `fileName`, `type`).
