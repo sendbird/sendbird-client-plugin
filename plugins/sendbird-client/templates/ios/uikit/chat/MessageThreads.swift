@@ -12,6 +12,9 @@
 // against the pinned and latest SPM releases.
 // A thread screen is a UIViewController: never name its root-message property `parent`, which is UIViewController's
 // own `parent` (2026-10-24: `private let parent: BaseMessage` did not build). This file says `rootMessage`.
+// BaseMessage.threadInfo (1039) is a non-optional ThreadInfo (6841, replyCount 6842): `if let info = message.threadInfo`
+// does not build ("initializer for conditional binding must have Optional type"; 2026-10-24), so replyCount(of:) reads it
+// directly.
 
 import Foundation
 import SendbirdChatSDK
@@ -21,6 +24,11 @@ enum MessageThreads {
     /// The ID a reply must carry: the root message's ID, also when the user replies to a reply.
     static func rootId(of message: BaseMessage) -> Int64 {
         message.parentMessageId != 0 ? message.parentMessageId : message.messageId
+    }
+
+    /// The reply count to show under `message`: its thread's replies when it is a root message, 0 for a reply.
+    static func replyCount(of message: BaseMessage) -> Int {
+        message.parentMessageId == 0 ? message.threadInfo.replyCount : 0
     }
 
     /// Loads up to `limit` replies of `rootMessage`, oldest first. `completion` always gets an array (empty on an error).

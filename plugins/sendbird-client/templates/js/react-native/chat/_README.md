@@ -28,6 +28,9 @@ The feature files below assume a connected `sb` and a loaded group channel. Copy
 2. `sendFile(channel, file, { onPending, onSucceeded, onFailed })`; show the pending message with a spinner.
 3. On `onFailed` keep the failed message and offer Retry: `resendFailedFile(channel, failed, callbacks, file)`.
 4. Ask for photo library or camera permission first (see the `permissions-setup` skill).
+5. A picker module with a privacy-manifest resource bundle (for example `react-native-image-picker`) declares iOS 9.0 for
+   that bundle, which Xcode 27 refuses. The plugin's starters raise it in the Podfile's `post_install`; another project
+   needs the same loop (knowledge/curated/js/hosts/react-native.md "Version compatibility checklist").
 
 ### Edit and delete messages (`MessageEditing.ts`)
 1. In the long-press menu, show Edit and Delete only when `isMine(sb, message)`.

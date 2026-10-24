@@ -6,9 +6,14 @@
 // markAsRead(CompletionHandler), getUnreadMemberCount(BaseMessage), getReadMembers(BaseMessage, boolean), url;
 // GroupChannelHandler open onTypingStatusUpdated(GroupChannel) and onUserMarkedRead(GroupChannel, List<String>);
 // SendbirdChat addChannelHandler / removeChannelHandler. Not used on purpose: onReadStatusUpdated, which is deprecated.
+// android.text.TextWatcher gives onTextChanged a CharSequence?, and Kotlin has no CharSequence?.orEmpty() (2026-10-24: a
+// screen that bridged the two with `s.orEmpty()` did not build), so onTextChanged takes CharSequence? and typingWatcher
+// wires the input for you.
 // Compiled by tools/templates/compile-check-android.sh against the pinned and latest SDK set.
 package com.sendbird.client.templatecheck.chat
 
+import android.text.Editable
+import android.text.TextWatcher
 import com.sendbird.android.SendbirdChat
 import com.sendbird.android.channel.BaseChannel
 import com.sendbird.android.channel.GroupChannel
@@ -49,10 +54,20 @@ class ChannelActivityTracker(
     }
 
     companion object {
-        /** Call from the input's TextWatcher: typing starts while there is text and ends when it is cleared.
-         *  Also call `channel.endTyping()` right after sending. */
-        fun onTextChanged(channel: GroupChannel, text: CharSequence) {
-            if (text.isEmpty()) channel.endTyping() else channel.startTyping()
+        /** Call from the input's TextWatcher with its `s` as is: typing starts while there is text and ends when it is
+         *  cleared. Also call `channel.endTyping()` right after sending. */
+        fun onTextChanged(channel: GroupChannel, text: CharSequence?) {
+            if (text.isNullOrEmpty()) channel.endTyping() else channel.startTyping()
+        }
+
+        /** The TextWatcher for the message input: `input.addTextChangedListener(typingWatcher { channel })`.
+         *  [channel] is read on every change, so it may still be null while the channel loads. */
+        fun typingWatcher(channel: () -> GroupChannel?): TextWatcher = object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                channel()?.let { onTextChanged(it, s) }
+            }
+            override fun afterTextChanged(s: Editable?) {}
         }
 
         /** Call when the conversation is shown and when a new message arrives while it is on screen. */

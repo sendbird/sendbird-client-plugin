@@ -7,7 +7,8 @@
 // BaseMessageListParams setPreviousResultSize(int) / setNextResultSize(int); UserMessageCreateParams(String) with
 // BaseMessageCreateParams setParentMessageId(long); BaseChannel sendUserMessage(UserMessageCreateParams, UserMessageHandler);
 // SendbirdChat addChannelHandler(String, BaseChannelHandler), removeChannelHandler(String); GroupChannelHandler
-// onMessageReceived; BaseChannelHandler onThreadInfoUpdated(BaseChannel, ThreadInfoUpdateEvent).
+// onMessageReceived; BaseChannelHandler onThreadInfoUpdated(BaseChannel, ThreadInfoUpdateEvent); BaseMessage getThreadInfo()
+// and ThreadInfo getReplyCount() (4.36.4 and 4.36.5). Kotlin sees threadInfo as not nullable, so replyCount reads it directly.
 // The Kotlin compiler sees ThreadedMessagesHandler's list as List<BaseMessage>? (2026-10-24: a thread screen that passed it
 // to addAll() did not build), so every list below goes through orEmpty().
 // Compiled by tools/templates/compile-check-android.sh against the pinned and latest SDK set.
@@ -29,6 +30,10 @@ object MessageThreads {
     /** The ID a reply must carry: the root message's ID, also when the user replies to a reply. */
     fun rootId(message: BaseMessage): Long =
         if (message.parentMessageId != 0L) message.parentMessageId else message.messageId
+
+    /** The reply count to show under [message]: its thread's replies when it is a root message, 0 for a reply. */
+    fun replyCount(message: BaseMessage): Int =
+        if (message.parentMessageId == 0L) message.threadInfo.replyCount else 0
 
     /** Loads up to [limit] replies of [root], oldest first. [onResult] always gets a list (empty on an error). */
     fun loadReplies(root: BaseMessage, limit: Int = 100, onResult: (List<BaseMessage>, SendbirdException?) -> Unit) {

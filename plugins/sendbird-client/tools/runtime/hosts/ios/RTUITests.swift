@@ -81,7 +81,10 @@ final class RTUITests: XCTestCase {
         let chatUI = env["RT_CHAT_UI"] == "1"
         if chatUI {
             let direct = env["RT_DIRECT"] == "1"
-            let listPredicate = NSPredicate(format: "label MATCHES[c] %@", ".*(chat|channel|message|inbox).*")
+            // a button that leads to chats, never one that makes something new ("New channel", "Create chat"), as on
+            // Android (2026-10-24: a React Native home with "New channel" and a channel list without a title)
+            let listPredicate = NSPredicate(format: "label MATCHES[c] %@ AND NOT (label MATCHES[c] %@)",
+                                            ".*(chat|channel|message|inbox).*", ".*\\b(new|create|add|start)\\b.*")
             // direct chat: the button that opens the conversation ("Chat with seller", "Message seller"),
             // never one to a list ("Channels", "Inbox") or one that makes something new; a label with
             // "with" or "seller" comes first (2026-10-19: a React Native home had "Channels" and "View product")
@@ -115,10 +118,16 @@ final class RTUITests: XCTestCase {
             // (never in direct chat: the button, not a list, has to open the conversation)
             // (a React Native FlatList has no cells: there the list counts as shown once B's channel is a row on it, or
             // the app tags the list sb_channel_list)
+            // A list without a title also counts once B's channel is a row: by its name, or by B's first message (this
+            // run's tag) when the row shows member names instead
             let channelName = env["RT_CHANNEL"] ?? ""
+            let firstTextB = env["RT_TEXT_B1"] ?? ""
+            let bRowShown = { (!channelName.isEmpty && self.element(containing: channelName) != nil)
+                || (!firstTextB.isEmpty && self.element(containing: firstTextB) != nil) }
             let listShown = { !direct && (self.app.descendants(matching: .any).matching(identifier: "sb_channel_list").firstMatch.exists
                 || self.app.staticTexts.matching(NSPredicate(format: "label ==[c] %@", "Channels")).firstMatch.exists
-                && (self.app.cells.count > 0 || (!channelName.isEmpty && self.element(containing: channelName) != nil))) }
+                && (self.app.cells.count > 0 || bRowShown())
+                || bRowShown()) }
             // direct chat: the chat button may sit on a product screen one tap away from home
             if direct && !waitUntil(10, entryReady) {
                 let product = firstEntry([NSPredicate(format: "label MATCHES[c] %@", ".*product.*")])
