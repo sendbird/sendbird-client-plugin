@@ -34,7 +34,7 @@
     ],
     "PreToolUse": [
       {
-        "matcher": "Skill|Agent|Write|Edit|MultiEdit|Bash",
+        "matcher": "Skill|Agent|Write|Edit|MultiEdit|Bash|Read",
         "hooks": [
           {
             "type": "command",
@@ -93,6 +93,24 @@
           {
             "type": "command",
             "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/token-relay-guard.sh\""
+          }
+        ]
+      },
+      {
+        "matcher": "Skill|Read|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/session-state.sh\" tool"
+          }
+        ]
+      },
+      {
+        "matcher": "Agent",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/upgrade-sdk-guard.sh\""
           }
         ]
       }

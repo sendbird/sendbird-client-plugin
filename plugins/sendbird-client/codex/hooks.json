@@ -93,6 +93,26 @@
             "statusMessage": "Sendbird plugin: keep pasted tokens out of agent briefs"
           }
         ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/session-state.sh\" tool",
+            "statusMessage": "Sendbird plugin: note the skill steps this turn ran"
+          }
+        ]
+      },
+      {
+        "matcher": "Agent",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/upgrade-sdk-guard.sh\"",
+            "statusMessage": "Sendbird plugin: read the upgrade rules before the hand-off"
+          }
+        ]
       }
     ],
     "SubagentStart": [

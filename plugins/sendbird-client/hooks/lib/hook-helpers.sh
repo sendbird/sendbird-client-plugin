@@ -434,3 +434,53 @@ report_source_files() {
     }
     { col = 0 }' | awk '!seen[$0]++'
 }
+
+# --- What this turn did (hooks/session-state.sh writes it on PreToolUse, and starts it again on each
+# request) ----------------------------------------------------------------------------------------
+# turn-trace-<session_id> holds one line per fact, so a gate can check a skill's steps without a transcript:
+#   skill <name>                       a skill the turn started: the Skill tool, a shell read of
+#                                      skills/<name>/SKILL.md (Codex), or a request that starts with
+#                                      /<plugin>:<name> or $<plugin>:<name>
+#   read knowledge/curated/<path>.md   a curated file the turn read: the Read tool, or a shell command
+#                                      that reads it (cat, sed, head, grep, and the like)
+#   latest <npm|spm|maven> <name>      a tools/local-sdk/latest-version.sh lookup
+# trace_lines : this turn's trace (nothing without a session_id or a trace)
+trace_lines() {
+  local f
+  f="$(session_state_file turn-trace)"
+  [ -n "$f" ] && [ -r "$f" ] && cat "$f"
+  return 0
+}
+# trace_has <line> : 0 when this turn's trace has that exact line
+trace_has() { trace_lines | grep -Fxq -- "$1"; }
+# curated_paths : the knowledge/curated/**/*.md paths named in the text on stdin, one per line
+curated_paths() { grep -Eo 'knowledge/curated/[A-Za-z0-9_./-]+\.md' | awk '!seen[$0]++'; }
+# latest_calls : one "latest <kind> <name>" line per latest-version.sh call in the command on stdin
+latest_calls() {
+  tr "\"'" '  ' | grep -Eo 'latest-version\.sh[[:space:]]+(npm|spm|maven)[[:space:]]+[^[:space:];|&)]+' \
+    | awk '{ print "latest", $2, $3 }' | awk '!seen[$0]++'
+}
+
+# upgrade_missing_reads <project-dir> : the curated files skills/upgrade-sdk/SKILL.md step 4 says to read
+# before the plan (knowledge/curated/<platform>/setup.md, hosts/<host>.md, and products/uikit.md when
+# UIKit is installed) that this turn did not read, one per line. The platform, host, and products come
+# from the profile tools/detection/detect.sh wrote in the project; without one, or for a file the plugin
+# does not ship (a hybrid host), nothing is printed.
+upgrade_missing_reads() {
+  local root sd prof plat host f files
+  root="${CLAUDE_PLUGIN_ROOT:-$(dirname "${BASH_SOURCE[0]}")/../..}"
+  sd="$(jq -r '.stateDir // empty' "$root/config/plugin-config.json" 2>/dev/null)"
+  [ -n "$sd" ] && [ -n "${1:-}" ] || return 0
+  prof="$1/$sd/profile.json"
+  [ -r "$prof" ] || return 0
+  plat="$(jq -r '.platform // empty' "$prof" 2>/dev/null)"
+  host="$(jq -r '.host // empty' "$prof" 2>/dev/null)"
+  case "$plat" in ios|android|js) ;; *) return 0 ;; esac
+  files="setup.md"
+  [ -n "$host" ] && files="$files hosts/$host.md"
+  jq -e '(.products // []) | index("uikit")' "$prof" >/dev/null 2>&1 && files="$files products/uikit.md"
+  for f in $files; do
+    [ -f "$root/knowledge/curated/$plat/$f" ] || continue
+    trace_has "read knowledge/curated/$plat/$f" || printf '%s\n' "knowledge/curated/$plat/$f"
+  done
+}
