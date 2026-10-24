@@ -484,3 +484,27 @@ upgrade_missing_reads() {
     trace_has "read knowledge/curated/$plat/$f" || printf '%s\n' "knowledge/curated/$plat/$f"
   done
 }
+
+# --- Destructive CLI commands confirmed in the next prompt (destructive-command-guard.sh, session-state.sh)
+# destructive_targets <part> : what a Sendbird CLI delete, revoke, or deactivate acts on, one per line: the
+# words after the action that are not options (--id, -y), not the values of context options (--profile,
+# --org-id, --app-id, --region, --env, --output, --format), and not shell variables. "sendbird --profile
+# prod --app-id $APP chat user delete --id u-01 --yes" gives u-01.
+destructive_targets() {
+  printf '%s\n' "$1" | awk '{
+    on = 0; skip = 0
+    for (i = 1; i <= NF; i++) {
+      w = $i
+      if (!on) { if (w ~ /^(delete|revoke|deactivate)$/) on = 1; continue }
+      if (skip) { skip = 0; continue }
+      if (w ~ /^--(profile|org-id|app-id|region|env|output|format)$/) { skip = 1; continue }
+      if (w ~ /^-/ || w ~ /^\$/ || w ~ /=/) continue
+      print w
+    }
+  }' | awk 'NF && !seen[$0]++'
+}
+# prompt_confirms <text> : 0 when the text says yes to a pending action and does not say no
+prompt_confirms() {
+  printf '%s' "$1" | grep -Eiq "(^|[^a-z])(no|not|don'?t|do not|never|cancel|stop|wait)([^a-z]|$)|아니|하지 ?마|말아|취소|멈춰|중단|잠깐" && return 1
+  printf '%s' "$1" | grep -Eiq '(^|[^a-z])(yes|yep|confirm(ed)?|approved?|go ahead|proceed|do it|delete (it|them)|ok(ay)?)([^a-z]|$)|네|예|응|좋아|확인|승인|진행|지워|삭제해|해 ?줘|해도 ?(돼|좋아)'
+}
