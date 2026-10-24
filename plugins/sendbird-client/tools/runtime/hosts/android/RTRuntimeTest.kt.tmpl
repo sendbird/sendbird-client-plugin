@@ -156,12 +156,13 @@ class RTRuntimeTest {
 
         if (chatUI) {
             val direct = arg("rtDirect") == "1"
-            // a button that leads to chats, not one that creates something ("New channel", "Create chat").
+            // a button that leads to chats, not one that creates something ("New channel", "Create chat") or searches
+            // ("Search messages", 2026-10-25).
             // Direct chat: the button that opens the conversation ("Chat with seller", "Message seller"),
             // never one to a list ("Channels", "Inbox"); a label with "with" or "seller" comes first
             // (2026-10-19: a React Native home had "Channels" and "View product")
             val entryRe = if (direct) Pattern.compile("(?i)(?!.*\\b(new|create|add|channels?|inbox)\\b).*(chat|message|contact).*")
-                else Pattern.compile("(?i)(?!.*\\b(new|create|add|start)\\b).*(chat|channel|message|inbox).*")
+                else Pattern.compile("(?i)(?!.*\\b(new|create|add|start|search)\\b).*(chat|channel|message|inbox).*")
             val preferredRe = Pattern.compile("(?i)(?!.*\\b(new|create|add|channels?|inbox)\\b)(?=.*(chat|message|contact)).*\\b(with|seller)\\b.*")
             val entrySel = By.text(entryRe).clickable(true)
             val entryTextSel = By.text(entryRe)

@@ -81,10 +81,11 @@ final class RTUITests: XCTestCase {
         let chatUI = env["RT_CHAT_UI"] == "1"
         if chatUI {
             let direct = env["RT_DIRECT"] == "1"
-            // a button that leads to chats, never one that makes something new ("New channel", "Create chat"), as on
-            // Android (2026-10-24: a React Native home with "New channel" and a channel list without a title)
+            // a button that leads to chats, never one that makes something new ("New channel", "Create chat") or
+            // searches ("Search messages"), as on Android (2026-10-24: a React Native home with "New channel" and a
+            // channel list without a title; 2026-10-25: one with "Search messages" above its list)
             let listPredicate = NSPredicate(format: "label MATCHES[c] %@ AND NOT (label MATCHES[c] %@)",
-                                            ".*(chat|channel|message|inbox).*", ".*\\b(new|create|add|start)\\b.*")
+                                            ".*(chat|channel|message|inbox).*", ".*\\b(new|create|add|start|search)\\b.*")
             // direct chat: the button that opens the conversation ("Chat with seller", "Message seller"),
             // never one to a list ("Channels", "Inbox") or one that makes something new; a label with
             // "with" or "seller" comes first (2026-10-19: a React Native home had "Channels" and "View product")
