@@ -38,7 +38,7 @@ Splice from `templates/js/{react|react-native}/{product}/` matching the detected
 - Read the App ID by `tier2.appIdSource` (`knowledge/curated/js/setup.md` "App ID"). With `config`, the config module is what "from configuration" or "not a literal" means; do not use `import.meta.env` or `process.env` without the matching loader, and do not ask for a bundler.
 - In React, confirm client-only SDK initialization is not recreated on render and is not executed during server rendering.
 - In React Native, verify the required native modules and `platformServices` implementation instead of substituting stubs.
-- Do not run `tsc` or the project's `build` or `typecheck` scripts; this run does not build (contract section 3). Check that every Sendbird symbol you import is in the installed package's `api-surface.md`.
+- Do not run `tsc` or the project's `build` or `typecheck` scripts; this run does not build (contract section 3). When you wrote or changed chat screens on the Chat SDK without UIKit, run `bash "${CLAUDE_PLUGIN_ROOT}/tools/verify/check-written.sh" <project-dir> <the files you wrote>` instead, fix the errors it lists in those files, and run it again (up to three runs; contract section 3, "Type-check the Chat SDK screens you wrote"). Report its JSON result as the check `typecheck`. Check that every Sendbird symbol you import is in the installed package's `api-surface.md`.
 
 ## No-Fabrication Policy (non-negotiable)
 - Never invent an API name, signature, parameter, error code, enum case, or docs URL. Every emitted symbol must be verifiable in the sources listed under Source priority above.

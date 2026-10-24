@@ -40,7 +40,7 @@ If the project still uses Chat SDK v3 (`import SendBirdSDK`, `SBD`-prefixed type
 - Confirm the owning lifecycle entry (`UIApplicationDelegate`, `UISceneDelegate`, or SwiftUI `App`) before inserting initialization.
 - Confirm the package product and imported module from the resolved package, not from memory.
 - Keep UI presentation on the main actor or main queue when the verified API requires UI work.
-- Do not build the project or run `xcodebuild`, `xcodegen`, or `swift build`; this run does not build (contract section 3). Check the package version in `Package.swift`, `project.yml`, or the Xcode project, and in `Package.resolved` when it exists, and report the SDK version used.
+- Do not build the project or run `xcodebuild`, `xcodegen`, or `swift build`; this run does not build (contract section 3). When you wrote or changed chat screens on the Chat SDK without UIKit, run `bash "${CLAUDE_PLUGIN_ROOT}/tools/verify/check-written.sh" <project-dir> <the files you wrote>` instead, fix the errors it lists in those files, and run it again (up to three runs; contract section 3, "Type-check the Chat SDK screens you wrote"). Report its JSON result as the check `typecheck`. Check the package version in `Package.swift`, `project.yml`, or the Xcode project, and in `Package.resolved` when it exists, and report the SDK version used.
 - Do not proactively mention CocoaPods, `pod install`, or `.xcworkspace` unless the customer's project already has a Podfile, or the customer explicitly asks for CocoaPods.
 
 ## Templates
