@@ -208,6 +208,18 @@ Sendbird delivers Android push as FCM data messages, and the `sendbird` payload 
 
 (source: https://firebase.google.com/docs/cloud-messaging/customize-messages/set-message-type; https://firebase.google.com/docs/cloud-messaging/error-codes; https://sendbird.com/docs/chat/sdk/v4/android/push-notifications/managing-push-notifications/set-up-push-notifications-for-fcm)
 
+## Push only for mentions (push trigger option)
+A user can limit push notifications to messages that mention them, for every channel or for one channel. The user-level setter takes `SendbirdChat.PushTriggerOption` (`ALL`, `MENTION_ONLY`, `OFF`); the channel-level setter takes `GroupChannel.PushTriggerOption`, which adds `DEFAULT` so the channel follows the user-level setting (the default).
+
+```kotlin
+import com.sendbird.android.SendbirdChat
+import com.sendbird.android.channel.GroupChannel
+
+SendbirdChat.setPushTriggerOption(SendbirdChat.PushTriggerOption.MENTION_ONLY) { e -> }        // all channels without their own setting
+groupChannel.setMyPushTriggerOption(GroupChannel.PushTriggerOption.MENTION_ONLY) { e -> }      // this group channel only
+```
+Like every push, these apply only while the user is disconnected. HMS apps call `SendbirdChat.HMS.setPushTriggerOption` instead. (source: https://sendbird.com/docs/chat/sdk/v4/android/push-notifications/managing-push-notifications/configure-push-notification-preferences ; `sendbird-chat` 4.36.5 AAR, `javap -public`: `SendbirdChat.setPushTriggerOption(SendbirdChat$PushTriggerOption, CompletionHandler)`, `SendbirdChat$PushTriggerOption`, `GroupChannel.setMyPushTriggerOption(GroupChannel$PushTriggerOption, CompletionHandler)`, `GroupChannel$PushTriggerOption`)
+
 ## Setup checklist
 - Add the FCM dependency. Apply the `com.google.gms.google-services` Gradle plugin only when `app/google-services.json` exists in the project. With the plugin applied and the file absent, the build fails with "File google-services.json is missing" (the plugin's default strategy is `ERROR`). Never apply it unconditionally and never invent a placeholder `google-services.json`. Without the file, leave the plugin out (or apply it inside `if (file("google-services.json").exists()) { ... }` in `app/build.gradle(.kts)`, so adding the file later is enough), and list "download `google-services.json` from your Firebase project in the Firebase console and put it in `app/`" in the customer's hand-off steps. For variants that really do not need it, the plugin's `WARN` strategy for a missing file (set in the plugin's Gradle configuration block; see its README) turns the failure into a warning, but a build without the file has no Firebase configuration at runtime, so push does not work until the file is added.
   (source: https://github.com/google/play-services-plugins/blob/4bde1b858612402ae5452cbef107b141afd44ef5/google-services-plugin/src/main/kotlin/com/google/gms/googleservices/GoogleServicesTask.kt#L60-L82) (source: https://github.com/google/play-services-plugins/blob/4bde1b858612402ae5452cbef107b141afd44ef5/google-services-plugin/README.md)

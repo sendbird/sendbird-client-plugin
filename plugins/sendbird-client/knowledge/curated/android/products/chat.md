@@ -425,6 +425,16 @@ listQuery.next { channels, e -> }
 ```
 - (source: https://sendbird.com/docs/chat/sdk/v4/android/channel/searching-channels/search-group-channels-by-name-url-or-other-filters — reviewed 2026-10-07; `sendbird-chat` 4.36.5 AAR, `javap -public`: `GroupChannel.createMyGroupChannelListQuery(GroupChannelListQueryParams)`, `GroupChannelListQueryParams.setChannelNameContainsFilter(String)` — verified 2026-10-07)
 
+## Find users by nickname
+```kotlin
+val userQuery = SendbirdChat.createApplicationUserListQuery(
+    ApplicationUserListQueryParams().apply { nicknameStartsWithFilter = "Ja" }
+)
+userQuery.next { users, e -> }
+```
+- The nickname filter matches the start of the nickname only; the other filters are user IDs and a metadata key with values. There is no filter for a word in the middle of a nickname, so autocomplete on any part of a name needs the app's own user index.
+- (source: https://sendbird.com/docs/chat/sdk/v4/android/user/retrieving-users/retrieve-a-list-of-users-in-an-application — parameter table ; https://sendbird.com/docs/chat/sdk/v4/javascript/user/retrieving-users/retrieve-a-list-of-users-in-an-application — the same filter described as "nicknames start with the specified value" ; `sendbird-chat` 4.36.5 AAR, `javap -public`: `SendbirdChat.createApplicationUserListQuery(ApplicationUserListQueryParams)`, `ApplicationUserListQueryParams.setNicknameStartsWithFilter(String)`, `ApplicationUserListQuery.next(UsersHandler)`)
+
 ## Read receipts for a message
 ```kotlin
 val unreadCount = groupChannel.getUnreadMemberCount(message)           // 0 = every member has read it

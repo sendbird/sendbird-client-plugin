@@ -121,6 +121,13 @@ const result = await Permissions.requestMultiple(CALL_PERMISSIONS);
 ```
 (source: https://sendbird.com/docs/calls/sdk/v1/react-native/getting-started/make-first-call — Step 2)
 
+## Web and React Native: the network drops during a call (reconnecting)
+When a connected call loses its media connection, the SDK tries to reconnect on its own; the app does not dial again. Two call events report it, with the same names on both hosts: `onReconnecting` when the call "started attempting to reconnect to the other party after a media connection disruption", and `onReconnected` when the connection is back. Use them to show a "Reconnecting…" state instead of ending the call. On the web, a call that ends because the connection was lost is reported through `onEnded`, which the web docs describe as also covering a call "ended due to other reasons such as decline or connection lost"; the React Native README does not say this.
+- Web (`sendbird-calls`): set them on the call like the other events, `call.onReconnecting = (call) => { … }` and `call.onReconnected = (call) => { … }`. (source: https://github.com/sendbird/sendbird-calls-javascript/blob/1.10.21/README.md#L176-L215 ; https://sendbird.com/docs/calls/sdk/v1/javascript/features/direct-call)
+- React Native (`@sendbird/calls-react-native`): include `onReconnecting(call)` and `onReconnected(call)` in the `DirectCallListener` passed to `directCall.addListener(...)`. (source: https://github.com/sendbird/sendbird-calls-sdk-react-native/blob/v1.2.0/README.md#L251-L282 ; @sendbird/calls-react-native 1.2.0 lib/typescript/types/Call.d.ts:14, 39, 45)
+
+On the web this is separate from the connection that brings incoming calls: "In the event of accidental disconnection, the application will attempt to reconnect every 2 seconds." (source: https://github.com/sendbird/sendbird-calls-javascript/blob/1.10.21/README.md#L322)
+
 ## Sign out
 "When users log out of their call client apps, they must be deauthenticated with `SendBirdCall.deauthenticate()` method." (source: sendbird-calls 1.10.21 README.md:656)
 

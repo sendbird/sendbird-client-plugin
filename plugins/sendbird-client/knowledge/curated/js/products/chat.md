@@ -427,6 +427,14 @@ const channels = await listQuery.next();
 ```
 - (source: https://sendbird.com/docs/chat/sdk/v4/javascript/channel/searching-channels/search-group-channels-by-name-url-or-other-filters — reviewed 2026-10-07; `@sendbird/chat` 4.22.13 `lib/__definition.d.ts`: `GroupChannelModule.createMyGroupChannelListQuery` 6162, `GroupChannelFilterParams.channelNameContainsFilter` 5812, `GroupChannelListQuery.next` 6144 — verified 2026-10-07)
 
+## Find users by nickname
+```ts
+const userQuery = sb.createApplicationUserListQuery({ nicknameStartsWithFilter: 'Ja' });
+const users = await userQuery.next();
+```
+- The nickname filter matches the start of the nickname only ("retrieve users whose nicknames start with the specified value"); the other filters are user IDs and a metadata key with values. There is no filter for a word in the middle of a nickname, so autocomplete on any part of a name needs the app's own user index.
+- (source: https://sendbird.com/docs/chat/sdk/v4/javascript/user/retrieving-users/retrieve-a-list-of-users-in-an-application — parameter table ; `@sendbird/chat` 4.22.13 `lib/__definition.d.ts`: `SendbirdChat.createApplicationUserListQuery` 4444, `ApplicationUserListQueryParams.nicknameStartsWithFilter` 103-119, `ApplicationUserListQuery.next` 100)
+
 ## Read receipts for a message
 ```ts
 const unreadCount = channel.getUnreadMemberCount(message);   // 0 = every member has read it

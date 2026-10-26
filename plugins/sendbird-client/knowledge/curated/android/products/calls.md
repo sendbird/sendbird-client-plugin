@@ -141,6 +141,9 @@ SendBirdCall.addListener("incoming-calls", object : SendBirdCallListener() {
 
 `templates/android/view/calls/SetupCalls.java` wraps all of this (permissions list, dial, accept, end, sign-out); `templates/android/compose/calls/DirectCallVideo.kt` adds the call state and the video views for Compose.
 
+## The network drops during a call (reconnecting)
+When a connected call loses its connection, the SDK tries to reconnect on its own; the app does not dial again. The call's `DirectCallListener` reports the two steps: `onReconnecting(call)` when "a DirectCall instance is attempting to reconnect to Sendbird server after losing connection", and `onReconnected(call)` when "the call successfully reconnects". Use them to show a "Reconnecting…" state instead of ending the call. A call that ends because the connection was lost is reported through `onEnded(call)`, which the docs describe as also covering a call "ended due to other reasons such as decline or connection lost". `SendBirdCall.Options.addDirectCallSound()` with `SendBirdCall.SoundType.RECONNECTING` and `RECONNECTED` plays a sound for each step. (source: https://sendbird.com/docs/calls/sdk/v1/android/features/direct-call — the `DirectCallListener` event table and "Add sound effects")
+
 ## Sign out
 On logout, deauthenticate the user so this device stops receiving their calls:
 

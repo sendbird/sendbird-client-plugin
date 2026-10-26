@@ -60,6 +60,23 @@ await sb.groupChannel.markAsDelivered(CHANNEL_URL);
 
 (source: https://sendbird.com/docs/chat/sdk/v4/javascript/message/marking-messages-as-delivered-in-a-group-channel/mark-messages-as-delivered) (source: https://sendbird.com/docs/chat/sdk/v4/javascript/ref/classes/_sendbird_chat.default.html) (source: @sendbird/chat 4.22.13 lib/__definition.d.ts:6338-6342 — `GroupChannelModule.markAsDelivered(channelUrl)` ; lib/__definition.d.ts:2134 — `GroupChannel.markAsDelivered()` ; lib/__definition.d.ts:4533-4540 — `markPushNotificationAsDelivered`)
 
+## Push only for mentions (push trigger option)
+A user can limit push notifications to messages that mention them, for every channel or for one channel. `PushTriggerOption` is one enum exported from `@sendbird/chat`; the user-level setter takes `ALL`, `MENTION_ONLY`, or `OFF`, and the channel-level setter also takes `DEFAULT`, which makes the channel follow the user-level setting (the default).
+
+```ts
+import { PushTriggerOption } from '@sendbird/chat';
+import type { GroupChannel } from '@sendbird/chat/groupChannel';
+
+async function mentionsOnly(channel?: GroupChannel) {
+  if (channel) {
+    await channel.setMyPushTriggerOption(PushTriggerOption.MENTION_ONLY); // this channel only
+  } else {
+    await sb.setPushTriggerOption(PushTriggerOption.MENTION_ONLY); // all channels without their own setting
+  }
+}
+```
+The docs' examples pass the string `'mention_only'`; in TypeScript use the enum member, because a string literal is not assignable to the enum type. Like every push, these apply only while the user is disconnected. (source: https://sendbird.com/docs/chat/sdk/v4/javascript/push-notifications/configuring-preferences/push-notification-preferences — option tables ; `@sendbird/chat` 4.22.13 `lib/__definition.d.ts`: `PushTriggerOption` 3992-3997, `SendbirdChat.setPushTriggerOption` 4640, `GroupChannel.setMyPushTriggerOption` 2200 ; index.d.ts:66 — root export)
+
 ## Setup checklist
 
 - React Native: obtain the FCM/APNs token via the native push module, then register it after connect. With React Native UIKit, connect does this for you (see "React Native UIKit: automatic token registration").

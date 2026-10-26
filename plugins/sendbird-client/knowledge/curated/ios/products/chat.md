@@ -471,6 +471,16 @@ listQuery.loadNextPage { channels, error in }
 ```
 - (source: https://sendbird.com/docs/chat/sdk/v4/ios/channel/searching-channels/search-group-channels-by-name-url-or-other-filters — reviewed 2026-10-07; `SendbirdChatSDK.swiftinterface` (4.39.11): `GroupChannel.createMyGroupChannelListQuery(paramsBuilder:)` 2730, `GroupChannelListQueryParams.channelNameContainsFilter` 3194 — verified 2026-10-07)
 
+## Find users by nickname
+```swift
+let userQuery = SendbirdChat.createApplicationUserListQuery { params in
+    params.nicknameStartsWithFilter = "Ja"
+}
+userQuery.loadNextPage { users, error in }
+```
+- The nickname filter matches the start of the nickname only; the other filters are user IDs and a metadata key with values. There is no filter for a word in the middle of a nickname, so autocomplete on any part of a name needs the app's own user index.
+- (source: https://sendbird.com/docs/chat/sdk/v4/ios/ref/Classes/ApplicationUserListQueryParams.html — `nicknameStartsWithFilter` ; https://sendbird.com/docs/chat/sdk/v4/javascript/user/retrieving-users/retrieve-a-list-of-users-in-an-application — the same filter described as "nicknames start with the specified value" ; `SendbirdChatSDK.swiftinterface` (4.39.11): `SendbirdChat.createApplicationUserListQuery(paramsBuilder:)` 6359, `ApplicationUserListQueryParams.nicknameStartsWithFilter` 386, `ApplicationUserListQuery.loadNextPage(completionHandler:)` 353)
+
 ## Read receipts for a message
 ```swift
 let unreadCount = channel.getUnreadMemberCount(message)        // 0 = every member has read it

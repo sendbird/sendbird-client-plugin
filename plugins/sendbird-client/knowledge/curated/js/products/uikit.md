@@ -357,6 +357,42 @@ function ChannelWithThread({ channelUrl }: { channelUrl: string }) {
 ```
 (source: https://sendbird.com/docs/chat/uikit/v3/react/features/message-threading/threads) (source: https://sendbird.com/docs/chat/uikit/v3/react/modules/thread) (source: @sendbird/uikit-react 3.19.1 types/modules/GroupChannel/context/types.d.ts:57-58, 75-77 — `replyType`, `threadReplySelectType`, `onReplyInThreadClick` ; types/modules/Thread/context/ThreadProvider.d.ts:10-18 — `channelUrl`, `message`, `onHeaderActionClick`, `onMoveToParentMessage` ; types/modules/Thread/index.d.ts ; types/utils/index.d.ts:49 — `SendableMessageType`)
 
+**Message menu inside the thread.** Customizing the menu on `GroupChannel` (see "Message menu items" above) does not reach the thread screen, which draws its messages in two places with their own menus: the replies (`ThreadListItem`, drawn through `Thread`'s `renderMessage`) and the parent message at the top (`ParentMessageInfo`, drawn through `renderParentMessageInfo`). Both take `renderMessageMenu`, so give the same renderer to each. Keep the default class name on `ParentMessageInfo`, which is what the default renderer passes.
+
+```tsx
+import Thread from '@sendbird/uikit-react/Thread';
+import ThreadListItem from '@sendbird/uikit-react/Thread/components/ThreadListItem';
+import ParentMessageInfo from '@sendbird/uikit-react/Thread/components/ParentMessageInfo';
+import { MessageMenu, type MessageMenuProps } from '@sendbird/uikit-react/ui/MessageMenu';
+import type { FileMessage, MultipleFilesMessage, UserMessage } from '@sendbird/chat/message';
+
+const copyAndDeleteOnly = (menuProps: MessageMenuProps) => (
+  <MessageMenu
+    {...menuProps}
+    renderMenuItems={({ items }) => (
+      <>
+        <items.CopyMenuItem />
+        <items.DeleteMenuItem />
+      </>
+    )}
+  />
+);
+
+function ThreadWithShortMenu({ channelUrl, parent }: { channelUrl: string; parent: UserMessage | FileMessage | MultipleFilesMessage }) {
+  return (
+    <Thread
+      channelUrl={channelUrl}
+      message={parent}
+      renderMessage={(props) => <ThreadListItem {...props} renderMessageMenu={copyAndDeleteOnly} />}
+      renderParentMessageInfo={() => (
+        <ParentMessageInfo className="sendbird-thread-ui__parent-message-info" renderMessageMenu={copyAndDeleteOnly} />
+      )}
+    />
+  );
+}
+```
+Type-checked against `@sendbird/uikit-react` 3.19.1 with `tsc --noEmit --strict`. (source: https://github.com/sendbird/sendbird-uikit-react/blob/v3.19.1/src/modules/Thread/components/ThreadUI/index.tsx#L43 — default `renderParentMessageInfo` ; https://github.com/sendbird/sendbird-uikit-react/blob/v3.19.1/src/modules/Thread/components/ThreadList/index.tsx#L26 — default `renderMessage` is `ThreadListItem` ; https://github.com/sendbird/sendbird-uikit-react/blob/v3.19.1/src/modules/Thread/components/ThreadList/ThreadListItem.tsx#L27 — `ThreadListItemProps` extends `MessageComponentRenderers` ; https://github.com/sendbird/sendbird-uikit-react/blob/v3.19.1/src/modules/Thread/components/ThreadList/ThreadListItemContent.tsx#L97 — the reply falls back to its own `MessageMenu` ; https://github.com/sendbird/sendbird-uikit-react/blob/v3.19.1/src/modules/Thread/components/ParentMessageInfo/index.tsx#L40-L46 — `renderMessageMenu` ; https://sendbird.com/docs/chat/uikit/v3/react/modules/thread)
+
 ### Channel settings menu
 `ChannelSettings` draws its menu with `renderModerationPanel({ menuItems })`. `menuItems` has an `operator` and a `nonOperator` object; each key is one row (the operator rows are `operators`, `allUsers`, `mutedUsers`, `bannedUsers`, and `freezeChannel`; the non-operator row is `allUsers`), and the rows appear in key order. Return `MenuListByRole` with a changed copy to remove, reorder, or add rows; a row with `hideMenu: true` is skipped. `renderLeaveChannel` replaces the leave button, and `renderHeader` the header.
 
@@ -377,6 +413,41 @@ function SettingsWithoutFreeze({ channelUrl }: { channelUrl: string }) {
 }
 ```
 (source: https://sendbird.com/docs/chat/uikit/v3/react/tutorial/customize-channel-settings) (source: https://github.com/sendbird/sendbird-uikit-react/blob/v3.19.1/src/modules/ChannelSettings/components/ChannelSettingsUI/hooks/useMenuItems.tsx#L68-L120 — row keys ; https://github.com/sendbird/sendbird-uikit-react/blob/v3.19.1/src/modules/ChannelSettings/components/ChannelSettingsUI/MenuListByRole.tsx#L28 — `hideMenu` ; @sendbird/uikit-react 3.19.1 types/modules/ChannelSettings/components/ChannelSettingsUI/index.d.ts:6-14 ; types/modules/ChannelSettings/components/ChannelSettingsUI/MenuListByRole.d.ts)
+
+**Member menu (the "..." on each member).** The member lists under the settings menu draw each row with `UserListItem`, and its "..." menu offers `OperatorToggleMenuItem`, `MuteToggleMenuItem`, and `BanToggleMenuItem`. Pass `renderUserListItem` to `ChannelSettings`, return `UserListItem` with `renderListItemMenu`, and return `UserListItemMenu` whose `renderMenuItems` lists the items you keep plus your own:
+
+```tsx
+import ChannelSettings from '@sendbird/uikit-react/ChannelSettings';
+import UserListItem from '@sendbird/uikit-react/ui/UserListItem';
+import { UserListItemMenu } from '@sendbird/uikit-react/ui/UserListItemMenu';
+
+function SettingsMemberMenu({ channelUrl, onReport }: { channelUrl: string; onReport: (userId: string) => void }) {
+  return (
+    <ChannelSettings
+      channelUrl={channelUrl}
+      renderUserListItem={(itemProps) => (
+        <UserListItem
+          {...itemProps}
+          key={itemProps.user.userId}
+          renderListItemMenu={(menuProps) => (
+            <UserListItemMenu
+              {...menuProps}
+              renderMenuItems={({ items }) => (
+                <>
+                  <items.OperatorToggleMenuItem />
+                  <items.MuteToggleMenuItem />
+                  <div onClick={() => onReport(itemProps.user.userId)}>Report</div>
+                </>
+              )}
+            />
+          )}
+        />
+      )}
+    />
+  );
+}
+```
+Type-checked against `@sendbird/uikit-react` 3.19.1 with `tsc --noEmit --strict`. (source: https://sendbird.com/docs/chat/uikit/v3/react/tutorial/customize-channel-settings — "Member list" ; @sendbird/uikit-react 3.19.1 types/modules/ChannelSettings/context/types.d.ts:27 — `renderUserListItem` ; types/ui/UserListItem/index.d.ts:27 — `renderListItemMenu` ; types/ui/UserListItemMenu/UserListItemMenu.d.ts:4-17 — `RenderUserListItemMenuItemsParams`, `renderMenuItems`)
 
 ### Session tokens: `accessToken` and `configureSession`
 When your Sendbird application requires a token to connect, UIKit for React takes it from two `SendbirdProvider` props.

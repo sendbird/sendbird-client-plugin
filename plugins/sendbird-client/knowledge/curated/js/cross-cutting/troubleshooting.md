@@ -47,6 +47,15 @@
 - **"process is not defined" from `@sendbird/uikit-react`:** reported with 3.1.1 under webpack 5, where the stack pointed at a `debuglog` helper in `MessageInput.js`; the posted workaround was a community polyfill. In 3.19.1 the only `process` reference in the published files is `process.env.NODE_ENV`, and webpack 5 sets that value from `mode` by default (source: https://webpack.js.org/configuration/optimization/#optimizationnodeenv). Upgrade before adding a polyfill.
 - **Cases:** https://community.sendbird.com/t/sdk-4-13-2-uses-node-libraries/9854, https://community.sendbird.com/t/ui-kit-v3-5-beta-does-not-work-with-create-react-app/4766 — community, https://community.sendbird.com/t/breaking-change-webpack-5-used-to-include-polyfills-for-node-js-core-modules-by-default/4837, https://community.sendbird.com/t/uncaught-referenceerror-process-is-not-defined-in-react-uikit-v3/5394 — community
 
+### Create React App or React 17: UIKit React fails to build, or never finishes initializing
+
+- **Cause:** Three fixed `@sendbird/uikit-react` bugs match this, depending on the version the app runs.
+  - Before 3.4.3, UIKit called `renderToString` from `react-dom/server`. The 3.4.3 entry replaced it with its own function and says the old one "was creating issue in customers with cra@4 & react@17". (source: https://github.com/sendbird/sendbird-uikit-react/blob/v3.20.0/CHANGELOG.md#L2677-L2692)
+  - 3.6.0 and 3.6.1 "wouldnt work by default on CRA because of module resolution error on uikit-tools"; 3.6.2 fixed it. (source: https://github.com/sendbird/sendbird-uikit-react/blob/v3.20.0/CHANGELOG.md#L2267-L2274)
+  - Before 3.17.4, "SDK initialization could fail or remain uninitialized in React 17". (source: https://github.com/sendbird/sendbird-uikit-react/blob/v3.20.0/CHANGELOG.md#L310-L312)
+- **Fix — Web:** Upgrade `@sendbird/uikit-react` to 3.17.4 or later; the pinned 3.19.1 has all three fixes. React 17 itself stays supported: 3.20.0 still lists `react` and `react-dom` `^16.8.6 || ^17.0.0 || ^18.0.0 || ^19.0.0` as peer dependencies (source: https://github.com/sendbird/sendbird-uikit-react/blob/v3.20.0/package.json#L73-L76). If the error remains on 3.17.4 or later, read the module path in it; when it is not under `node_modules/@sendbird/`, another package causes it.
+- **Cases:** no public report found; the three causes come from the CHANGELOG entries cited above.
+
 ### Errors that come from two copies of a Sendbird package
 
 - **Symptom — React Native:** After an upgrade, UIKit hooks report a missing BottomSheet or ActionMenu context.

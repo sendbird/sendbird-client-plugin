@@ -18,6 +18,16 @@ Add the SDK(s) you need via Swift Package Manager, initialize once at launch, th
 - Use CocoaPods only when the project already has a `Podfile`. Do not introduce CocoaPods into an SPM or fresh project.
 - XcodeGen projects: declare packages under `packages:` in `project.yml` and add the product under the target's `dependencies:`; `xcodegen generate` writes the SPM refs into the `.xcodeproj` (no `.xcworkspace`).
 
+## Minimum iOS version
+
+| Package | Lowest iOS it supports |
+|---|---|
+| Chat SDK (`sendbird-chat-sdk-ios`) | iOS 13, from 4.25.0 on (iOS 12 before that) |
+| UIKit (`sendbird-uikit-ios-spm`) | iOS 13 |
+| Calls (`sendbird-calls-ios`) | iOS 14 |
+
+An app whose deployment target is iOS 12 cannot take Chat SDK 4.25.0 or later. Raise the deployment target to iOS 13 (iOS 14 when the app also uses Calls) rather than pinning an old Chat SDK, because UIKit 3.36.x already needs Chat SDK 4.39.6 or later (table below). (source: https://github.com/sendbird/sendbird-chat-sdk-ios/blob/4.39.11/CHANGELOG.md#L531-L536 — 4.25.0: "The minimum supported iOS version has been raised from iOS 12 to iOS 13" ; https://github.com/sendbird/sendbird-chat-sdk-ios/blob/4.39.11/Package.swift#L8 ; https://github.com/sendbird/sendbird-uikit-ios-spm/blob/3.36.2/Package.swift#L8 ; https://github.com/sendbird/sendbird-calls-ios/blob/1.12.3/Package.swift#L7)
+
 ## Keep shared dependencies compatible
 
 Swift Package Manager resolves a single version of `sendbird-chat-sdk-ios` (and of `sendbird-uikit-ios-spm`) for the whole app, so the version you pin must satisfy the minimum declared by every Sendbird package you add. Minimums declared in the current public manifests:
