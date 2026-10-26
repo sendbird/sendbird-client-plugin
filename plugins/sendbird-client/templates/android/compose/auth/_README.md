@@ -24,7 +24,7 @@ ViewModel/`StateFlow` wrapper is new. Compiled by `tools/templates/compile-check
        AuthStatus(vm, onLoginRequired = { vm.connect("USER_ID", token) })
    }
    ```
-   (`viewModel()` comes from `androidx.lifecycle:lifecycle-viewmodel-compose`.)
+   (`viewModel()` comes from `androidx.lifecycle:lifecycle-viewmodel-compose`, which `activity-compose` does not bring. Add it to the module's dependencies when the project does not have it yet, or the build fails with "Unresolved reference 'viewModel'"; see `knowledge/curated/android/hosts/compose.md`.)
 5. Tokens are secrets — never hard-code or log them.
 
 ## Notes (see knowledge/curated/android/products/auth.md, all cited)
