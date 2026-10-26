@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "0.1.108",
+  "schemaVersion": "0.1.109",
   "knowledge": {
     "mode": "runtime-fetch",
     "_modes": [
@@ -105,7 +105,8 @@
       "uikit"
     ],
     "notYetSupported": [],
-    "_note": "The default scope is every product in .products except notYetSupported. `focus` marks where verification depth is highest. A customer narrows scope with SENDBIRD_PRODUCTS or .sendbird-client/profile.json enabledProducts. A notYetSupported product is never in scope: resolve-products.sh drops it from SENDBIRD_PRODUCTS or the profile, --check reports it as not supported yet, and the welcome hook tells the model to decline it. Its knowledge and templates stay shipped, so removing it from notYetSupported turns it back on."
+    "unsupportedHosts": {},
+    "_note": "The default scope is every product in .products except notYetSupported. `focus` marks where verification depth is highest. A customer narrows scope with SENDBIRD_PRODUCTS or .sendbird-client/profile.json enabledProducts. A notYetSupported product is never in scope: resolve-products.sh drops it from SENDBIRD_PRODUCTS or the profile, --check reports it as not supported yet, and the welcome hook tells the model to decline it. Its knowledge and templates stay shipped, so removing it from notYetSupported turns it back on. unsupportedHosts maps a product to the hosts that cannot run it, each with the reason: --check fails with \"product not available on this host\" when the project's host is one of them."
   },
   "stateDir": ".sendbird-client"
 }
