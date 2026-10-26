@@ -8,6 +8,9 @@
 # A product this plugin does not ship (not in config .products, for example AI Agent in an edition
 # without it) fails `--check` with "product not covered by this plugin": widening SENDBIRD_PRODUCTS or
 # the profile cannot add it, so the answer must not suggest that.
+# A product the plugin covers that the project's host cannot run (config .productScope.unsupportedHosts, for
+# example Live on React Native) fails `--check` with "product not available on this host" and the reason.
+# The host is the profile's, else the side-effect-free detector's (core/commands/detect.sh).
 set -euo pipefail
 # Until it is marked shown, the first-run notice (hooks/first-run-notice.sh) goes to stderr: in Codex a
 # skill can run this before the plugin's hooks are trusted.
@@ -30,6 +33,19 @@ if [ "${2:-}" = "--check" ]; then
   if ! printf '%s\n' "$supported" | grep -Fxq "$requested"; then
     echo "product not covered by this plugin: $requested — this plugin covers $(printf '%s\n' "$supported" | paste -sd, - | sed 's/,/, /g'); tell the customer this plugin does not cover $requested, write no code for it, and do not suggest SENDBIRD_PRODUCTS or enabledProducts (they cannot add it)" >&2
     exit 1
+  fi
+  why_host() { # $1 = host : the reason the requested product cannot run on it, or nothing
+    jq -r --arg p "$requested" --arg h "$1" '.productScope.unsupportedHosts[$p][$h] // empty' "$config"
+  }
+  if [ -n "$(jq -r --arg p "$requested" '.productScope.unsupportedHosts[$p] // empty | keys[]' "$config" 2>/dev/null)" ]; then
+    host="$(jq -r '.host // empty' "$dir/.sendbird-client/profile.json" 2>/dev/null || true)"
+    [ -n "$host" ] || host="$(bash "$ROOT/core/commands/detect.sh" "$dir" 2>/dev/null | jq -r '.host // empty' 2>/dev/null || true)"
+    reason=""
+    [ -z "$host" ] || reason="$(why_host "$host")"
+    if [ -n "$reason" ]; then
+      echo "product not available on this host: $requested on $host — $reason; tell the customer that, change no file and write no code for it, and do not suggest SENDBIRD_PRODUCTS or enabledProducts (they cannot change it)" >&2
+      exit 1
+    fi
   fi
 fi
 
