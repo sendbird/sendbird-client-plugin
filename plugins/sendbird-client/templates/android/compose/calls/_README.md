@@ -32,6 +32,7 @@ shapes from the public `sendbird-calls-android` README and the public
        call?.takeIf { it.isVideoCall }?.let { DirectCallVideo(it, Modifier.fillMaxSize()) }
    }
    ```
+   (`viewModel()` comes from `androidx.lifecycle:lifecycle-viewmodel-compose`, which `activity-compose` does not bring. Add it to the module's dependencies when the project does not have it yet, or the build fails with "Unresolved reference 'viewModel'"; see `knowledge/curated/android/hosts/compose.md`.)
 5. App ID from BuildConfig/secret — never hard-code; the access token is a secret.
    Hand-off (`manualSteps`) holds only the steps in `knowledge/curated/android/products/calls.md` "Manual steps" (App ID, a token server when the app uses tokens, push credentials, and the `calls-incoming` skill as the next step when this run did not wire incoming-call push). No Calls doc has a dashboard step that enables Calls, so never tell the customer to enable Calls.
 

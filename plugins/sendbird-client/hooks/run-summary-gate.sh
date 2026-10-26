@@ -177,14 +177,17 @@ fi
 # (CHAT_INIT_RE; lines git shows as added, or a file the run created) while no changed file uses a name the
 # template declares (template_markers) is sent back once. A source comment that only names the template
 # folder does not count: a later Codex run added "// source: templates/ios/uikit/chat/InitConnect.swift" to
-# its own rewritten class and passed an earlier version of this check.
+# its own rewritten class and passed an earlier version of this check. Every verified template of the host
+# that initializes Chat counts (template_init_files), so a run that splices the Desk template on its own is
+# not sent back for leaving out the Chat one.
 if [ -n "$block" ] && [ -n "$state_dir" ] && printf '%s' "$block" | jq -e 'type == "object"' >/dev/null 2>&1; then
   prof="$cwd/$state_dir/profile.json"
   t_plat="$(jq -r '.platform // empty' "$prof" 2>/dev/null)"; t_host="$(jq -r '.host // empty' "$prof" 2>/dev/null)"
   markers=""
   [ -n "$t_plat" ] && [ -n "$t_host" ] && markers="$(template_markers "${CLAUDE_PLUGIN_ROOT:-$HERE/..}" "$t_plat" "$t_host")"
   if [ -n "$markers" ]; then
-    t_dir="templates/$t_plat/$t_host/chat"
+    root="${CLAUDE_PLUGIN_ROOT:-$HERE/..}"
+    t_dir="$(template_init_files "$root" "$t_plat" "$t_host" | sed "s#^$root/##; s#/[^/]*\$##" | awk '!seen[$0]++' | paste -sd ',' - | sed 's/,/, /g')"
     in_git=0; git -C "$cwd" rev-parse --verify -q HEAD >/dev/null 2>&1 && in_git=1
     init_file=""; named=0
     while IFS=$'\t' read -r rel action; do
@@ -203,7 +206,7 @@ if [ -n "$block" ] && [ -n "$state_dir" ] && printf '%s' "$block" | jq -e 'type 
     done < <(printf '%s' "$block" | jq -r '(.changes // []) | if type == "array" then .[] else empty end | objects
       | select(.action != "deleted") | [.path, .action] | map(strings) | select(length == 2) | @tsv' 2>/dev/null)
     if [ -n "$init_file" ] && [ "$named" -eq 0 ]; then
-      problems="${problems}${problems:+$'\n'}this run added Chat SDK init code in $init_file without the $t_plat $t_host template: no changed file uses a name $t_dir declares ($(printf '%s' "$markers" | paste -sd ',' - | sed 's/,/, /g')); a source comment that names the template is not the template. The platform agent splices the verified template instead of writing its own init, connect, and observers: have it rewrite that code from $t_dir, keeping the template's types and functions under their names and its source comments, and call them from the app's own sign-in, then report again"
+      problems="${problems}${problems:+$'\n'}this run added Chat SDK init code in $init_file without the $t_plat $t_host template: no changed file uses a name the templates in $t_dir declare ($(printf '%s' "$markers" | paste -sd ',' - | sed 's/,/, /g')); a source comment that names the template is not the template. The platform agent splices the verified template instead of writing its own init, connect, and observers: have it rewrite that code from the one of those templates that fits the request, keeping the template's types and functions under their names and its source comments, and call them from the app's own sign-in, then report again"
     fi
   fi
 fi

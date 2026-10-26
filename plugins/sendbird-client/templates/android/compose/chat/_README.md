@@ -34,6 +34,7 @@ Sources: (source: knowledge/curated/android/products/chat.md) (source: https://s
        ChatStatus(vm)
    }
    ```
+   (`viewModel()` comes from `androidx.lifecycle:lifecycle-viewmodel-compose`, which `activity-compose` does not bring. Add it to the module's dependencies when the project does not have it yet, or the build fails with "Unresolved reference 'viewModel'"; see `knowledge/curated/android/hosts/compose.md`.)
 5. App ID from `BuildConfig`/secret (do not hard-code). Authenticated apps connect with a token:
    `SendbirdChat.connect(userId, authToken) { ... }`.
 

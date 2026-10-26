@@ -542,19 +542,34 @@ answer_asks_app_id() {
 
 # CHAT_INIT_RE : a Chat SDK init call (iOS initialize, Android and JS init)
 CHAT_INIT_RE='SendbirdChat\.(initialize|init)\('
+# template_init_files <plugin root> <platform> <host> : the template files of that host that call SendbirdChat
+# init, one per line: the chat/ folder first, then every other product folder. The Chat template is not the
+# only verified init: a product that runs on top of Chat, such as Desk, has a template that initializes Chat
+# itself. In a 2026-10 TC run the iOS agent spliced the SwiftUI Desk template, was sent back for init code
+# without the Chat template, added ChatSession next to it, and moved Desk authentication out of
+# onLoginSucceeded.
+template_init_files() {
+  local base="$1/templates/$2/$3" d f
+  [ -d "$base" ] || return 0
+  for d in "$base/chat" "$base"/*; do
+    [ -d "$d" ] || continue
+    for f in "$d"/*; do
+      case "$f" in */_README.md) continue ;; esac
+      grep -qE "$CHAT_INIT_RE" "$f" 2>/dev/null && printf '%s\n' "$f"
+    done
+  done | awk '!seen[$0]++'
+}
 # template_markers <plugin root> <platform> <host> : the names a Chat init template of that host declares
-# (a type, an object, or an exported function of templates/<platform>/<host>/chat/ files that call
-# SendbirdChat init), at least six characters long, one per line. A run that splices the template keeps
-# them; one that writes its own init code has none of them.
+# (a type, an object, or an exported function of the template_init_files), at least six characters long,
+# one per line. A run that splices one of those templates keeps them; one that writes its own init code
+# has none of them.
 template_markers() {
-  local dir="$1/templates/$2/$3/chat" f
-  [ -d "$dir" ] || return 0
-  for f in "$dir"/*; do
-    case "$f" in */_README.md) continue ;; esac
-    grep -qE "$CHAT_INIT_RE" "$f" 2>/dev/null || continue
+  local f
+  while IFS= read -r f; do
+    [ -n "$f" ] || continue
     grep -oE '^((public|internal|private|final|open|data|export|default|async)[[:space:]]+)*(class|struct|enum|actor|object|fun|func|function|interface)[[:space:]]+[A-Za-z_][A-Za-z0-9_]*' "$f" \
       | awk '{print $NF}'
-  done | awk 'length($0) >= 6 && !seen[$0]++'
+  done < <(template_init_files "$@") | awk 'length($0) >= 6 && !seen[$0]++'
 }
 
 # cited_sources <text> : what each "source:" or "출처:" marker in an answer cites, one per line, for
