@@ -294,7 +294,7 @@ mkdir -p "$TOOLS"
 if [ ! -f "$TOOLS/.ready-2" ]; then
   echo "installing harness tools into $TOOLS"
   [ -f "$TOOLS/package.json" ] || echo '{"name":"sendbird-runtime-tools","private":true,"type":"module"}' > "$TOOLS/package.json"
-  ( cd "$TOOLS" && npm install --no-audit --no-fund --silent @sendbird/chat@4.22.13 playwright@1.48.2 vite@6.4.3 @vitejs/plugin-react@4.3.4 ) \
+  ( cd "$TOOLS" && npm install --no-audit --no-fund --silent @sendbird/chat@4.22.13 playwright@1.48.2 vite@6.4.4 @vitejs/plugin-react@4.3.4 ) \
     > "$out/tools-install.log" 2>&1 || finish fail "could not install harness tools (tools-install.log)" 1
   touch "$TOOLS/.ready-2"
 fi
