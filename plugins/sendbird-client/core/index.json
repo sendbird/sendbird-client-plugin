@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-10-24T00:58:32Z",
+  "generatedAt": "2026-10-26T16:11:25Z",
   "count": 52,
   "entries": [
     {
@@ -264,7 +264,10 @@
       "category": "cross-cutting",
       "status": "populated",
       "lastVerifiedAgainst": "sendbird-chat-sdk-ios 4.39.11 / sendbird-uikit-ios 3.36.1",
-      "verifiedDates": []
+      "verifiedDates": [
+        "2026-06-10",
+        "2026-10-19"
+      ]
     },
     {
       "file": "knowledge/curated/ios/cross-cutting/push.md",
@@ -359,7 +362,8 @@
       "lastVerifiedAgainst": "sendbird-uikit-ios 3.36.1",
       "verifiedDates": [
         "2026-06-09",
-        "2026-10-11"
+        "2026-10-11",
+        "2026-10-19"
       ]
     },
     {
@@ -489,7 +493,7 @@
       "platform": "js",
       "category": "products",
       "status": "populated",
-      "lastVerifiedAgainst": "@sendbird/chat 4.22.13",
+      "lastVerifiedAgainst": "@sendbird/chat 4.22.14",
       "verifiedDates": [
         "2026-06-09",
         "2026-09-29",
@@ -507,9 +511,10 @@
       "platform": "js",
       "category": "products",
       "status": "populated",
-      "lastVerifiedAgainst": "@sendbird/uikit-react 3.19.1 / @sendbird/uikit-react-native 3.12.10",
+      "lastVerifiedAgainst": "@sendbird/uikit-react 3.20.0 / @sendbird/uikit-react-native 3.12.10",
       "verifiedDates": [
-        "2026-09-29"
+        "2026-09-29",
+        "2026-10-27"
       ]
     },
     {
