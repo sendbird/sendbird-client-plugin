@@ -67,6 +67,10 @@ func connectAndRegisterPendingToken() {
 
 (source: SendbirdChatSDK.swiftinterface (4.39.11) lines 6393 `getPendingPushToken()`, 6396 `registerDevicePushTokenForMultiDevicePush(_:completionHandler:)`, 5744 `PushTokenRegistrationStatus.pending`, 6318 `connect(userId:completionHandler:)`; source: https://sendbird.com/docs/chat/sdk/v4/ios/push-notifications/configuring-preferences/register-push-notification-credentials — reviewed 2026-10-11)
 
+### Chat SDK 4.3.1 to 4.5.2: the pending token can be lost
+
+The Chat SDK CHANGELOG marks 4.3.1, 4.3.2, 4.4.0, and 4.5.0 "DO NOT USE THIS VERSION: There is a bug where the pending push token is removed after connecting a user." 4.5.1 fixed the removal ("Fixed not to delete pendingPushToken after applying cache configuration"), and 4.5.3 fixed "an issue where push notification doesn't get delivered to some users". On any version from 4.3.1 through 4.5.2, a token registered before connect can be gone by the time the code above reads it, so the device never receives push. Upgrade to 4.5.3 or later; the current 4.x release is the usual choice, and UIKit 3.36.x needs 4.39.6 or later anyway (knowledge/curated/ios/setup.md). (source: https://github.com/sendbird/sendbird-chat-sdk-ios/blob/4.39.11/CHANGELOG.md#L1262-L1379 — entries v4.5.3, v4.5.1, v4.5.0, v4.4.0, v4.3.2, v4.3.1)
+
 ## Handle a notification payload (background and tap)
 
 Sendbird sends APNs an alert (`{sender's nickname}: {text message}`), the default sound, and a badge with the user's total unread message count (the badge can be turned off in the dashboard). The push also carries a JSON object under the `sendbird` key: `type` (`MESG`, `FILE`, or `ADMM` for an admin message), `message`, `channel.channel_url`, `sender`, `unread_message_count`, and more. The docs handle it in `application(_:didReceiveRemoteNotification:fetchCompletionHandler:)`, which receives notifications while the app is inactive, in the foreground, or in the background.
@@ -122,6 +126,22 @@ class NotificationService: UNNotificationServiceExtension {
 VoIP push for Calls is registered through the Calls SDK, not Chat — use
 `SendBirdCall.registerVoIPPush(token:unique:)` (see knowledge/curated/ios/products/calls.md).
 The Chat SDK's PushKit registration method was removed.
+
+## Push only for mentions (push trigger option)
+A user can limit push notifications to messages that mention them, for every channel or for one channel. The user-level setter takes `PushTriggerOption` (`.all`, `.mentionOnly`, `.off`); the channel-level setter takes `GroupChannelPushTriggerOption`, which adds `.default` so the channel follows the user-level setting (the default).
+
+```swift
+import SendbirdChatSDK
+
+func mentionsOnly(in channel: GroupChannel?) {
+    if let channel {
+        channel.setMyPushTriggerOption(.mentionOnly) { error in }        // this group channel only
+    } else {
+        SendbirdChat.setPushTriggerOption(.mentionOnly) { error in }     // all channels without their own setting
+    }
+}
+```
+Like every push, these apply only while the user is disconnected. (source: https://sendbird.com/docs/chat/sdk/v4/ios/push-notifications/configuring-preferences/push-notification-preferences ; `SendbirdChatSDK.swiftinterface` (4.39.11): `SendbirdChat.setPushTriggerOption(_:completionHandler:)` 6440, `PushTriggerOption` 5767-5771, `GroupChannel.setMyPushTriggerOption(_:completionHandler:)` 2723, `GroupChannelPushTriggerOption` 3470-3475)
 
 ## Setup checklist
 - Enable Push Notifications + Background Modes (Remote notifications) capabilities.
