@@ -7,7 +7,7 @@ allowed-tools: WebFetch, Read, Glob, Grep, Bash, Agent
 
 # /sendbird-client:docs-search
 
-Resolve every plugin-owned path below from `${CLAUDE_PLUGIN_ROOT}`. Where that variable is empty (Codex does not set it for shell commands), the plugin root is the folder two levels above this SKILL.md.
+Resolve every plugin-owned path below from `${CLAUDE_PLUGIN_ROOT}`. Where that variable is empty (Codex does not set it for shell commands), the plugin root is the folder two levels above this SKILL.md. A shell command that only reads or checks files exits 0 when a file it looks for is missing (`if [ -f <file> ]; then cat <file>; fi`, or `|| true` after an optional read), and quotes separator lines (`echo '=== name'`: zsh, the default macOS shell, treats a word that starts with `=` as a command name). Otherwise a normal check is shown to the customer as a failed command.
 
 The docs agent answers this question, not this session. Resolve it with `bash "${CLAUDE_PLUGIN_ROOT}/tools/routing/route-agent.sh" <project-dir> docs` (it prints `sendbird-docs-agent`), then hand off to `sendbird-docs-agent` by calling the `Agent` tool once with the agent as Claude Code lists it, `sendbird-client:sendbird-docs-agent`. In Codex, which has no `Agent` tool, hand off by running the plugin's `sendbird-docs-agent` launcher skill instead. Do not read the knowledge files, search the docs index, fetch docs pages, or write an answer yourself before the agent responds; the lookup brief below is the agent's work.
 

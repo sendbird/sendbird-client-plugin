@@ -7,7 +7,7 @@ allowed-tools: Read, Bash, Grep, Glob, WebFetch, Agent
 
 # /sendbird-client:verify-integration
 
-Resolve every plugin-owned path below from `${CLAUDE_PLUGIN_ROOT}`. Where that variable is empty (Codex does not set it for shell commands), the plugin root is the folder two levels above this SKILL.md.
+Resolve every plugin-owned path below from `${CLAUDE_PLUGIN_ROOT}`. Where that variable is empty (Codex does not set it for shell commands), the plugin root is the folder two levels above this SKILL.md. A shell command that only reads or checks files exits 0 when a file it looks for is missing (`if [ -f <file> ]; then cat <file>; fi`, or `|| true` after an optional read), and quotes separator lines (`echo '=== name'`: zsh, the default macOS shell, treats a word that starts with `=` as a command name). Otherwise a normal check is shown to the customer as a failed command.
 Resolve the platform agent with `bash "${CLAUDE_PLUGIN_ROOT}/tools/routing/route-agent.sh" <project-dir> code`, then hand off to that agent (for example `sendbird-android-agent`) by calling the `Agent` tool once with that agent as Claude Code lists it (this plugin's name, a colon, then the agent name). In Codex, which has no `Agent` tool, hand off by running the plugin's launcher skill with that agent's name instead (for example the `sendbird-android-agent` skill). Do not perform the platform checklist yourself or return an integration verdict before the agent responds. If the hand-off fails, report that the platform inspection was not completed; a router result alone is not an inspection.
 
 Read-only sanity scan (Intent A — factual checks). It reads the project and does not build, compile, or type-check it unless the customer explicitly asks for a build.
