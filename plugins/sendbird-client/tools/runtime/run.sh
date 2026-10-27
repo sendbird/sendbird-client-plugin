@@ -25,7 +25,8 @@
 #   --check           preflight only: report what the run needs and what is missing (JSON on stdout).
 #                     Copies, installs, builds, and launches nothing. Exit 0 ready, 2 not ready.
 #   --app-id-env      read the App ID from this environment variable only. Default: SENDBIRD_APP_ID,
-#                     then appId in the project's .sendbird-client/profile.json
+#                     then appId in the project's .sendbird-client/profile.json, then app_id in its
+#                     sendbird.json (written by the Sendbird CLI's project init)
 #   --chat-screens    the app has its own chat screens built on the Chat SDK (no UIKit dependency):
 #                     drive them like UIKit screens instead of stopping after connect. Not decided
 #                     automatically: the harness finds screens by their controls (a chat or channel
@@ -133,7 +134,11 @@ elif ! is_placeholder "${SENDBIRD_APP_ID:-}"; then
   RT_APP_ID="$SENDBIRD_APP_ID"; app_id_from="SENDBIRD_APP_ID"; app_id_missing=""
 else
   RT_APP_ID="$(jq -r '.appId // empty' "$profile" 2>/dev/null || true)"; app_id_from="profile.json appId"
-  app_id_missing="no App ID: SENDBIRD_APP_ID is not set (or holds a placeholder) and the project's profile.json has no appId"
+  app_id_missing="no App ID: SENDBIRD_APP_ID is not set (or holds a placeholder), the project's profile.json has no appId, and it has no sendbird.json with an app_id"
+  # sendbird.json: the project marker the Sendbird CLI writes (sendbird project init); never a symlink
+  if is_placeholder "$RT_APP_ID" && [ ! -L "$project/sendbird.json" ]; then
+    RT_APP_ID="$(jq -r '.app_id // empty | strings' "$project/sendbird.json" 2>/dev/null || true)"; app_id_from="sendbird.json app_id"
+  fi
 fi
 is_placeholder "$RT_APP_ID" && RT_APP_ID=""
 export RT_APP_ID

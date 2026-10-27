@@ -1,25 +1,25 @@
 {
   "version": 1,
-  "about": "Questions a caller shows before the plugin builds a new app. The setup skill asks them in this order (interactive), or reads the answers from the request (non-interactive). Each question has at most 4 options, the limit of Claude Code's question tool. Options with a product only appear when that product is in the plugin's scope. A `required` question left with one option in scope is not asked: that option is its answer (for example `products` when the scope has Chat but not Calls). A question whose answer the request already gives is not asked either (skills/setup/SKILL.md, New app step 2). A question with \"offered\": false is a feature not offered in new-app setup for now: it is left out of the questions (set it to true or remove it to offer it again). A request that names that feature still gets it built, unless its product is not supported yet (config productScope.notYetSupported): that product is declined, never built.",
+  "about": "Questions about a new app. The setup skill does not walk the customer through them: it reads the answers the request gives, uses a question's `default` when the request does not answer it, and asks only a question marked \"ask\": true that the request does not answer (interactive), or returns those as needs_input (non-interactive) (skills/setup/SKILL.md, New app step 2). Each question has at most 4 options, the limit of Claude Code's question tool. Options with a product only appear when that product is in the plugin's scope. A question left with one option in scope is not asked: that option is its answer (for example `chat-ui` when UIKit is out of scope). There is no Calls-only app: an app with Calls always has Chat too. A question with \"offered\": false is a feature not offered in new-app setup for now: it is left out of the questions (set it to true or remove it to offer it again). A request that names that feature still gets it built, unless its product is not supported yet (config productScope.notYetSupported): that product is declined, never built.",
   "questions": [
     {
-      "id": "products", "type": "multi", "required": true,
+      "id": "products", "type": "multi", "default": ["chat"],
       "question": "What should the app include?",
       "options": [
         { "id": "chat", "label": "Chat", "product": "chat" },
-        { "id": "calls", "label": "Voice and video calls", "product": "calls" }
+        { "id": "calls", "label": "Voice and video calls (always with Chat)", "product": "calls" }
       ]
     },
     {
-      "id": "chat-ui", "type": "single", "required": true, "when": { "products": ["chat"] },
-      "question": "How should the chat screens be built?",
+      "id": "chat-ui", "type": "single", "ask": true, "when": { "products": ["chat"] },
+      "question": "How should the chat screens be built: with Sendbird UIKit, which has ready-made chat screens, or as your own screens on the Chat SDK?",
       "options": [
-        { "id": "uikit", "label": "UIKit: ready-made screens you theme", "product": "uikit" },
-        { "id": "chat-sdk", "label": "Your own screens on the Chat SDK", "product": "chat" }
+        { "id": "uikit", "label": "Sendbird UIKit: ready-made chat screens you can theme", "product": "uikit" },
+        { "id": "chat-sdk", "label": "My own screens on the Chat SDK", "product": "chat" }
       ]
     },
     {
-      "id": "platform", "type": "single", "required": true,
+      "id": "platform", "type": "single", "ask": true,
       "question": "Which platform should the app run on?",
       "options": [
         { "id": "react", "label": "React (web)" },
@@ -29,15 +29,15 @@
       ]
     },
     {
-      "id": "ios-ui", "type": "single", "required": true, "when": { "platform": ["ios"] },
-      "question": "Which iOS UI framework?",
+      "id": "ios-ui", "type": "single", "ask": true, "when": { "platform": ["ios"] },
+      "question": "Which iOS UI framework should the app use (Apple's UIKit or SwiftUI, separate from Sendbird UIKit)?",
       "options": [
         { "id": "uikit", "label": "UIKit" },
         { "id": "swiftui", "label": "SwiftUI" }
       ]
     },
     {
-      "id": "android-ui", "type": "single", "required": true, "when": { "platform": ["android"] },
+      "id": "android-ui", "type": "single", "ask": true, "when": { "platform": ["android"] },
       "question": "Which Android UI toolkit?",
       "options": [
         { "id": "view", "label": "Views (XML)" },
@@ -45,7 +45,7 @@
       ]
     },
     {
-      "id": "chat", "type": "multi", "required": false, "when": { "products": ["chat"] },
+      "id": "chat", "type": "multi", "default": ["channel-list", "conversation"], "when": { "products": ["chat"] },
       "question": "Which chat features should the app have? Sign-in and connect are always included.",
       "options": [
         { "id": "channel-list", "label": "Channel list", "product": "chat" },
@@ -54,7 +54,7 @@
       ]
     },
     {
-      "id": "calls", "type": "multi", "required": true, "when": { "products": ["calls"] },
+      "id": "calls", "type": "multi", "default": ["voice-call", "video-call"], "when": { "products": ["calls"] },
       "question": "Which call types should the app have?",
       "options": [
         { "id": "voice-call", "label": "1:1 voice call", "product": "calls" },
@@ -62,7 +62,7 @@
       ]
     },
     {
-      "id": "notes", "type": "text", "required": false,
+      "id": "notes", "type": "text",
       "question": "Anything else the app should do? (optional)"
     }
   ],
