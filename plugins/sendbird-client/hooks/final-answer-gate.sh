@@ -117,6 +117,12 @@ if [ -n "$skills_run" ] && ! printf '%s\n' "$skills_run" | grep -Eqx 'setup|run-
   exit 0
 fi
 
+# A turn that only ran a Sendbird CLI plugin skill (its sendbird-setup choosing an app, then showing the SDK
+# code of its own guide) is the CLI's work: the citation checks below are this plugin's rules, and sending
+# such an answer back held up the CLI's app setup. A turn that also ran a skill of this or any other plugin,
+# or none, is still checked.
+if trace_lines | grep -q '^other-skill ' && ! trace_lines | grep -q '^skill '; then exit 0; fi
+
 # docs/AGENT_CONTRACT.md "Cite the curated entry": when this turn read a curated file and the answer
 # cites a link but no curated path, the link stands in for the entry (often a community or source
 # link the entry itself cites). Send it back once to cite the curated entry first.

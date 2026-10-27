@@ -2,12 +2,12 @@
 name: setup
 description: Wizard to create a new Sendbird app or integrate Sendbird into the current project. In an empty folder it starts the app from the plugin's own starter and asks what the app includes (Chat, Calls), how its chat screens are built (UIKit or the Chat SDK), and which platform and features to build; in an existing project it detects platform, host, package manager, lifecycle, and products, installs the SDK, inserts init + connect, and scaffolds a first screen. Use when the customer asks to make a new chat app or chat web page with Sendbird (Chat SDK or UIKit), for example "sendbirdChat으로 채팅웹 만들어줘" in an empty folder, when starting a Sendbird integration, when running first-time setup, or when the customer asks to move a hard-coded App ID into configuration. It writes the customer's app code; it does not create a Sendbird application (the dashboard application that has an App ID), so a request such as "Sendbird에 새 애플리케이션 만들어 줘" is not for this skill.
 argument-hint: "[new-app] [--product chat|uikit|calls]"
-allowed-tools: Read, Edit, Write, Bash, Grep, Glob, WebFetch, Agent, AskUserQuestion
+allowed-tools: Read, Edit, Write, Bash, Grep, Glob, WebFetch, Agent, AskUserQuestion, Skill
 ---
 
 # /sendbird-client:setup
 
-A request to create a Sendbird application itself (the application on the Sendbird Dashboard that gets an App ID, for example "Sendbird에 새 애플리케이션 만들어 줘" or "create a new Sendbird application"), not app code, is not setup: change nothing, run no detection, and say that this plugin writes app code and does not create Sendbird applications. Point to the Sendbird Dashboard (do not guess a URL or a menu path) and, when the session lists a Sendbird CLI plugin skill, to that skill. A request that names a platform, a project, or screens ("채팅 앱 만들어 줘", "a chat web page") is app code and stays here.
+A request to create a Sendbird application itself (the application on the Sendbird Dashboard that gets an App ID, for example "Sendbird에 새 애플리케이션 만들어 줘" or "create a new Sendbird application"), not app code, is not setup: change nothing, run no detection, and say that this plugin writes app code and does not create Sendbird applications. When the session lists a Sendbird CLI plugin skill, use that skill for it; otherwise point to the Sendbird Dashboard (do not guess a URL or a menu path). A request that names a platform, a project, or screens ("채팅 앱 만들어 줘", "a chat web page") is app code and stays here.
 
 Interactive first-integration wizard.
 

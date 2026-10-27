@@ -457,6 +457,19 @@ report_source_files() {
 #   read knowledge/curated/<path>.md   a curated file the turn read: the Read tool, or a shell command
 #                                      that reads it (cat, sed, head, grep, and the like)
 #   latest <npm|spm|maven> <name>      a tools/local-sdk/latest-version.sh lookup
+#   other-skill sendbird-cli:<name>    a Sendbird CLI plugin skill the turn started (its sendbird-setup
+#                                      choosing an app): the citation checks skip a turn that ran only these
+# skill_trace_line <name> : the trace line for a skill the turn started, from the Skill tool or a request
+# that starts with /<name> or $<name>. A Sendbird CLI plugin skill (sendbird-cli:<name>) is other-skill;
+# every other skill keeps its bare name, as before.
+skill_trace_line() {
+  local s="${1#[/\$]}"
+  [ -n "$s" ] || return 0
+  case "$s" in
+    sendbird-cli:*) printf 'other-skill %s' "$s" ;;
+    *) printf 'skill %s' "${s##*:}" ;;
+  esac
+}
 # trace_lines : this turn's trace (nothing without a session_id or a trace)
 trace_lines() {
   local f
