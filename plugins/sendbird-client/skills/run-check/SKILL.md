@@ -7,7 +7,7 @@ allowed-tools: Read, Bash, Grep, Glob, Agent, AskUserQuestion
 
 # /sendbird-client:run-check
 
-Resolve every plugin-owned path below from `${CLAUDE_PLUGIN_ROOT}`. Where that variable is empty (Codex does not set it for shell commands), the plugin root is the folder two levels above this SKILL.md.
+Resolve every plugin-owned path below from `${CLAUDE_PLUGIN_ROOT}`. Where that variable is empty (Codex does not set it for shell commands), the plugin root is the folder two levels above this SKILL.md. A shell command that only reads or checks files exits 0 when a file it looks for is missing (`if [ -f <file> ]; then cat <file>; fi`, or `|| true` after an optional read), and quotes separator lines (`echo '=== name'`: zsh, the default macOS shell, treats a word that starts with `=` as a command name). Otherwise a normal check is shown to the customer as a failed command.
 For a question about the project's sign-in or connect code, resolve the platform agent with `bash "${CLAUDE_PLUGIN_ROOT}/tools/routing/route-agent.sh" <project-dir> code`.
 
 Runs the app for real. This is the only skill that builds and launches the customer's project, and it does so only because the customer asked.
