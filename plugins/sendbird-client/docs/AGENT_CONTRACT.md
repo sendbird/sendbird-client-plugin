@@ -67,7 +67,6 @@ bash "${CLAUDE_PLUGIN_ROOT}/core/commands/search.sh" "<question>" --platform <pl
 - Write files with the host's file-editing tool: Write and Edit in Claude Code, `apply_patch` in Codex. Do not write source files with shell redirection, heredocs, or `sed -i`.
 - Limit edits to the requested product and the lifecycle code required to support it.
 - Build with the SDK the request names. When it names the Chat SDK and not UIKit (for example "Chat SDK", "sendbirdChat", "SendbirdChat", "@sendbird/chat", `--product chat`, "without UIKit", or "UIKit 없이"), write the screens on the Chat SDK alone: do not install a UIKit package and do not start from `templates/starters-bp/`. When the request names UIKit, or names no SDK, the usual choices stay; in a new app, setup's `chat-ui` answer makes this choice. When an existing project's request names no SDK, say in the answer which one you built with (UIKit or the Chat SDK) and why.
-- Some Chat features work only on higher Sendbird plans (`core/plans.json`, `knowledge/curated/common/plans.md`). Do not add one the customer did not ask for, and before adding one they did ask for, check it with `tools/detection/resolve-plan.sh <project-dir> --check <feature-id>`: build on `ok`, ask first on `confirm`, and write no code on `sales`.
 - Install dependencies so the project's next clean install works. On JS, install with the project's package manager (`npm install <package>@<version>`, `yarn add`, or `pnpm add`) so `package.json` and the lockfile name the same version. Editing `package.json` alone is not an install, and an install is never a `manualSteps` entry. Never pass `--legacy-peer-deps` or `--force` to npm (or `--ignore-engines` to yarn): they hide a version conflict that breaks the next `npm install`. When a package's peer range rejects the project's versions, install the newest version whose `peerDependencies` accept them; check with `npm view <package>@<range> peerDependencies`.
 - Do not install tools or write files outside the project for your own checks (for example `npm i playwright` in `/tmp`). Use what the project and the machine already have, and report a check you could not run as not run.
 - Keep the signatures of existing functions, classes, and constructors you edit. Callers you cannot see would break. Get what the SDK needs (an Android `Context`, the SDK instance) from the `Application` class or a holder instead of a new parameter.
@@ -125,7 +124,7 @@ When the run changed app code, suggest once in the answer text that `/sendbird-c
 When `SENDBIRD_NONINTERACTIVE` is `1`, `true`, or `yes` in any case (for example `SENDBIRD_NONINTERACTIVE=1 claude -p ...` in CI or a script), nobody can answer a question during the run. Any other value, including an empty one, `0`, `false`, or `no`, keeps the run interactive.
 
 - Never ask the user a question, and never end the answer with one.
-- For a value you would otherwise ask for, use the environment (`SENDBIRD_APP_ID`, `SENDBIRD_PRODUCTS`, `SENDBIRD_REGION`, `SENDBIRD_PLAN`) or the project's `profile.json` when they have it.
+- For a value you would otherwise ask for, use the environment (`SENDBIRD_APP_ID`, `SENDBIRD_PRODUCTS`, `SENDBIRD_REGION`) or the project's `profile.json` when they have it.
 - Installing the Sendbird dependency that the request clearly needs is allowed: the request is the consent. Install it as section 3 says and list it under `changes`.
 - A request to add a product's screen or feature includes installing and initializing that product. Do not stop to ask for a choice that has a safe default; use the default and say so in the answer:
   - the user ID: the one the app's existing sign-in code already has
@@ -139,6 +138,4 @@ When `SENDBIRD_NONINTERACTIVE` is `1`, `true`, or `yes` in any case (for example
 - End the final answer with one fenced `json` block that validates against `core/schemas/run-summary.schema.json`. Paths in `changes` are relative to the project root. The block follows the full answer (section 6 and the skill's own report), never replaces it. List the section 4 checks and the skill's own under `checks`, and the skills the answer suggests next (such as verify-integration or run-check) under `nextSteps`.
 
 The caller answers by running again with the value in the environment or in the prompt (for example `host: swiftui`).
-
-A feature the customer's plan does not include (section 3, `knowledge/curated/common/plans.md`) is asked about before any file is written: the run changes nothing and returns `needs_input` with a question whose id is `confirm-<feature-id>` and whose options are `yes` and `no`. The caller answers in the prompt with `confirm-<feature-id>=yes` (build it) or `confirm-<feature-id>=no` (leave it out), next to any other answers.
 
