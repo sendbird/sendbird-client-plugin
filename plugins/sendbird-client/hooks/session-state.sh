@@ -12,13 +12,14 @@
 #                project (prompt_asks_build) writes build-asked-<session_id>, and one that does not
 #                removes it (build-command-guard.sh). The request also starts this turn's trace
 #                (turn-trace-<session_id>) again, with a "skill <name>" line when it names a skill as
-#                /<plugin>:<name> or $<plugin>:<name>.
+#                /<plugin>:<name> or $<plugin>:<name> ("other-skill sendbird-cli:<name>" for a Sendbird CLI plugin skill).
 #                When destructive-command-guard.sh denied a Sendbird CLI delete in the last turn (Codex or a
 #                non-interactive run), a prompt that says yes and names its targets writes
 #                destructive-confirmed-<session_id>, which lets that command run once.
 #   tool         PreToolUse: what the call shows of a skill's steps goes into the turn's trace
 #                (hook-helpers.sh trace_lines): the skill it starts (the Skill tool, or a shell read of
-#                skills/<name>/SKILL.md in Codex), the curated files it reads (the Read tool, or a shell
+#                skills/<name>/SKILL.md in Codex; a Sendbird CLI plugin skill goes in as other-skill),
+#                the curated files it reads (the Read tool, or a shell
 #                command such as cat or sed naming knowledge/curated/**/*.md), and its
 #                tools/local-sdk/latest-version.sh lookups (final-answer-gate.sh, upgrade-sdk-guard.sh).
 #   agent-start  SubagentStart (both hosts send .agent_id): the agent goes into agents-running-<session_id>.
@@ -56,8 +57,9 @@ case "$event" in
     trace="$(session_state_file turn-trace)"
     if [ -n "$trace" ]; then
       rm -f "$trace"
-      s="$(printf '%s' "$prompt" | sed -nE '1s#^[[:space:]]*[/$]([A-Za-z0-9_-]+:)?([a-z0-9-]+)([[:space:]].*)?$#\2#p')"
-      [ -z "$s" ] || { mkdir -p "$(dirname "$trace")" 2>/dev/null && printf 'skill %s\n' "$s" >> "$trace"; }
+      s="$(printf '%s' "$prompt" | sed -nE '1s#^[[:space:]]*[/$](([A-Za-z0-9_-]+:)?[a-z0-9-]+)([[:space:]].*)?$#\1#p')"
+      l="$(skill_trace_line "$s")"
+      [ -z "$l" ] || { mkdir -p "$(dirname "$trace")" 2>/dev/null && printf '%s\n' "$l" >> "$trace"; }
     fi
     # A destructive CLI command destructive-command-guard.sh denied in the last turn waits for this prompt:
     # a yes that names every target of it (or a yes, for a command with no target) confirms it once.
@@ -89,14 +91,15 @@ case "$event" in
     tool="$(jget '.tool_name')"
     case "$tool" in
       Skill)
-        s="$(jget '.tool_input.skill')"; s="${s##*:}"
-        lines="${s:+skill $s}" ;;
+        lines="$(skill_trace_line "$(jget '.tool_input.skill')")" ;;
       Read)
         lines="$(jget '.tool_input.file_path' | curated_paths | sed 's/^/read /')" ;;
       Bash)
         c="$(jget '.tool_input.command')"
         lines="$(
-          printf '%s\n' "$c" | grep -Eo 'skills/[a-z0-9-]+/SKILL\.md' | sed -E 's#^skills/([a-z0-9-]+)/SKILL\.md$#skill \1#'
+          printf '%s\n' "$c" | grep -Eo '(sendbird-cli/([^/[:space:]"'"'"']+/)?)?skills/[a-z0-9-]+/SKILL\.md' \
+            | sed -E -e 's#^sendbird-cli/.*skills/([a-z0-9-]+)/SKILL\.md$#other-skill sendbird-cli:\1#' \
+                     -e 's#^skills/([a-z0-9-]+)/SKILL\.md$#skill \1#'
           if printf '%s\n' "$c" | grep -Eq '(^|[^A-Za-z0-9_-])(cat|sed|head|tail|awk|nl|less|more|bat|grep|rg|perl|python3?)([^A-Za-z0-9_-]|$)'; then
             printf '%s\n' "$c" | curated_paths | sed 's/^/read /'
           fi
