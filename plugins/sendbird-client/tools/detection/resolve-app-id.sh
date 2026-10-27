@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
 # Say where the project's Sendbird App ID comes from, never the value itself.
-# Usage: resolve-app-id.sh <project-dir>   -> {"from":"env"} | {"from":"profile"} | {"from":"missing"}
+# Usage: resolve-app-id.sh <project-dir>
+#   -> {"from":"env"} | {"from":"profile"} | {"from":"sendbird-json"} | {"from":"missing"}
 # Order (the same as tools/runtime/run.sh): SENDBIRD_APP_ID unless it is empty or a placeholder, then
 # appId in .sendbird-client/profile.json, then the appId another edition of this plugin stored in its
-# own state folder in the project (common/sibling-profile.sh), then missing. Unlike run.sh, an all-zero App ID counts as set:
+# own state folder in the project (common/sibling-profile.sh), then app_id in the sendbird.json that
+# `sendbird project init` (the Sendbird CLI) writes in the project folder, then missing. Unlike run.sh, an all-zero App ID counts as set:
 # setup only wires the app to read the value from configuration, so it never needs a working application.
 set -euo pipefail
 # Until it is marked shown, the first-run notice (hooks/first-run-notice.sh) goes to stderr: in Codex a
@@ -26,8 +28,16 @@ if is_placeholder "$app_id"; then
   source "$(cd "$(dirname "$0")" && pwd)/common/sibling-profile.sh"
   app_id="$(sibling_app_id "$dir" ".sendbird-client")"
 fi
+if ! is_placeholder "$app_id"; then
+  echo '{"from":"profile"}'
+  exit 0
+fi
+# sendbird.json is the CLI's project marker; a symlink is not read, as the CLI refuses one too.
+marker="$dir/sendbird.json"
+app_id=""
+[ -L "$marker" ] || app_id="$(jq -r '.app_id // empty | strings' "$marker" 2>/dev/null || true)"
 if is_placeholder "$app_id"; then
   echo '{"from":"missing"}'
 else
-  echo '{"from":"profile"}'
+  echo '{"from":"sendbird-json"}'
 fi
