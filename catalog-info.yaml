@@ -2,11 +2,11 @@ apiVersion: backstage.io/v1alpha1
 kind: Component
 metadata:
   name: sendbird-client-plugin
-  description: Sendbird Client plugin for Claude Code — integration helper for Sendbird Chat, UIKit, and Calls on iOS, Android, and JS
+  description: Sendbird Client plugin for Claude Code and Codex — helps add Sendbird Chat, UIKit, and Calls to iOS, Android, and JavaScript apps
   annotations:
     github.com/project-slug: sendbird/sendbird-client-plugin
 spec:
-  type: library
-  lifecycle: experimental
+  type: tool
+  lifecycle: production
   owner: dep-client-platform
   system: sendbird-customer-enablement
