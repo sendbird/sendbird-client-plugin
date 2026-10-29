@@ -9,4 +9,4 @@ spec:
   type: tool
   lifecycle: production
   owner: dep-client-platform
-  system: sendbird-customer-enablement
+  system: sendbird-developer-tools
