@@ -41,7 +41,13 @@ field() { # $1 = manifest key; jq when present, else the plain "key": "value" li
 }
 name="$(field name)"; display="$(field displayName)"; repo="$(field repository)"
 [ -n "$name" ] || exit 0
-msg="${display:-$name} plugin: this plugin runs shell scripts on your computer with your user account's permissions, at session start, before file writes and shell commands, after an agent finishes, and when an answer ends. In Claude Code it also runs one JavaScript file that only shows this notice. They read your project files and parts of this conversation, can block an action or ask Claude to revise its answer, and fetch public pages from sendbird.com/docs and github.com/sendbird. Nothing from your project or conversation is sent to Sendbird. A plugin update replaces these scripts; auto-update is off unless you turn it on. Details: ${repo}#what-runs-on-your-machine (shown once, and again if this notice changes)"
+msg="${display:-$name} plugin runs shell scripts on your computer with your user account's permissions.
+They run when a session starts, before file writes and shell commands, after an agent finishes, and when an answer ends. In Claude Code, one JavaScript file also runs, only to show this notice.
+The scripts read your project files and parts of this conversation. They can block an action or ask Claude to revise its answer. They fetch public pages from sendbird.com/docs and github.com/sendbird.
+Nothing from your project or conversation is sent to Sendbird.
+A plugin update replaces these scripts. Auto-update is off unless you turn it on.
+Details: ${repo}#what-runs-on-your-machine
+This notice appears once, and again if it changes."
 # The shown mark lives in the plugin's data folder, which Claude Code and Codex keep across plugin updates.
 # Hooks get CLAUDE_PLUGIN_DATA; a skill's shell command does not (Codex sets nothing there), so the same
 # folder is found from where the plugin is installed: <home>/plugins/cache/<marketplace>/<plugin>/<version>
@@ -78,5 +84,5 @@ marks=1
   exit 0
 }
 if command -v jq >/dev/null 2>&1; then jq -n --arg m "$msg" '{systemMessage: $m}'
-else printf '{"systemMessage":"%s"}\n' "$(printf '%s' "$msg" | sed 's/\\/\\\\/g; s/"/\\"/g')"; fi
+else esc="${msg//\\/\\\\}"; esc="${esc//\"/\\\"}"; printf '{"systemMessage":"%s"}\n' "${esc//$'\n'/\\n}"; fi
 exit 0

@@ -54,7 +54,7 @@ if [ "$deny_mode" -eq 0 ]; then
   hookSpecificOutput: {
     hookEventName: "PreToolUse",
     permissionDecision: "ask",
-    permissionDecisionReason: ("This Sendbird CLI command deletes, revokes, or deactivates something and skips the CLI confirmation with --yes: " + $c + "\nA person must approve it. Run it with --dry-run first and show the user what it will change.")
+    permissionDecisionReason: ("This Sendbird CLI command deletes, revokes, or turns off something, and --yes skips the CLI'\''s own confirmation:\n" + $c + "\nApprove it only if you want this change. To see what it changes first, ask for a --dry-run.")
   }
 }'
   exit 0

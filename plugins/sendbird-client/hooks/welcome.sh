@@ -48,6 +48,7 @@ ALWAYS-ON rules for ANY Sendbird answer (even without a skill):
 - iOS packaging is SPM-first: never introduce CocoaPods into a fresh/SPM project; sendbird-chat-ios-spm is legacy v3 — v4 lives in sendbird-chat-sdk-ios.
 - Never state pricing or quota figures, even from a page you opened (link the pricing page instead), or "latest" version numbers from memory; tokens are secrets — never hard-code or log them, and never repeat a token the customer pasted: call it "the token you provided" in the answer, in Skill arguments, and in agent briefs.
 - Running the app: only /sendbird-client:run-check builds and launches the customer's app against their Sendbird application, and only when the customer asks for it; other skills suggest it instead of running it.
+- Answers and questions are for the customer, a developer: write them as "Write for the customer" in $ROOT/docs/AGENT_CONTRACT.md section 6 says.
 EOF
 # An empty project folder (the hook runs in the session's folder): a request to make an app here
 # is a new app, which setup's "New app" steps start from the plugin's starter. Seen on 2026-10-17:
