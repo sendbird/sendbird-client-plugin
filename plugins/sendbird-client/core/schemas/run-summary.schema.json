@@ -88,7 +88,7 @@
       "items": { "type": "string", "minLength": 1 }
     },
     "manualSteps": {
-      "description": "Steps the customer still has to do because they need something the project does not contain (a token server, a dashboard setting, a signing key, a device run, a value nobody supplied). Each says what is missing. Work the plugin could do inside the project never goes here, and neither does a build, a type check, or a note that this run did not build. Empty when nothing is left.",
+      "description": "Steps the customer still has to do because they need something the project does not contain (a token server, a Sendbird Dashboard setting, a signing key, a device run, a value nobody supplied). Each says what is missing. Work the plugin could do inside the project never goes here, and neither does a build, a type check, or a note that this run did not build. Empty when nothing is left.",
       "type": "array",
       "items": { "type": "string", "minLength": 1 }
     },

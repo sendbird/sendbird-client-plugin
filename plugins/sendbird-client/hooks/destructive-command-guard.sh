@@ -89,7 +89,7 @@ jq -n --arg c "$(printf '%s' "$hit" | cut -c1-200)" --arg t "$named" '{
   hookSpecificOutput: {
     hookEventName: "PreToolUse",
     permissionDecision: "deny",
-    permissionDecisionReason: ("Destructive command check (Sendbird plugin): this Sendbird CLI command deletes, revokes, or deactivates something and skips the CLI confirmation with --yes: " + $c + "\nIt was NOT run, and this session cannot show the customer an approval prompt. Do not run it another way (without --yes, in a script, or through another tool). Stop this turn now: show the customer the command and what it will change (run it with --dry-run to preview), and ask them to confirm it in their next message"
+    permissionDecisionReason: ("Destructive command check (Sendbird Client plugin): this Sendbird CLI command deletes, revokes, or deactivates something and skips the CLI confirmation with --yes: " + $c + "\nIt was NOT run, and this session cannot show the customer an approval prompt. Do not run it another way (without --yes, in a script, or through another tool). Stop this turn now: show the customer the command and what it will change (run it with --dry-run to preview), and ask them to confirm it in their next message"
       + (if $t != "" then " by naming " + $t + " and saying yes" else " with a yes" end)
       + ". In a non-interactive run, end with status needs_input and that question. Run the command only after that message confirms it; the confirmation covers this command once.")
   }

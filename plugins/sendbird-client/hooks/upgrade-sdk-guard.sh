@@ -26,7 +26,7 @@ jq -n --arg m "$missing" '{
   hookSpecificOutput: {
     hookEventName: "PreToolUse",
     permissionDecision: "deny",
-    permissionDecisionReason: ("Upgrade step check (Sendbird plugin, skills/upgrade-sdk/SKILL.md step 4): before the plan goes to the platform agent, read " + $m + " (the Read tool, or cat in a shell), check the plan against their rules for the target versions, and cite each rule you apply. Then hand the plan to the agent again.")
+    permissionDecisionReason: ("Upgrade step check (Sendbird Client plugin, skills/upgrade-sdk/SKILL.md step 4): before the plan goes to the platform agent, read " + $m + " (the Read tool, or cat in a shell), check the plan against their rules for the target versions, and cite each rule you apply. Then hand the plan to the agent again.")
   }
 }'
 exit 0

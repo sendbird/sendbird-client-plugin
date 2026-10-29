@@ -7,12 +7,12 @@
           {
             "type": "command",
             "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/welcome.sh\"",
-            "statusMessage": "Sendbird plugin: session rules"
+            "statusMessage": "Sendbird Client plugin: session rules"
           },
           {
             "type": "command",
             "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/first-run-notice.sh\" start",
-            "statusMessage": "Sendbird plugin: one-time notice — its hooks run local scripts; nothing is sent to Sendbird"
+            "statusMessage": "Sendbird Client plugin: one-time notice — its hooks run local scripts; nothing is sent to Sendbird"
           }
         ]
       }
@@ -23,12 +23,12 @@
           {
             "type": "command",
             "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/first-run-notice.sh\" prompt",
-            "statusMessage": "Sendbird plugin: one-time notice — its hooks run local scripts; nothing is sent to Sendbird"
+            "statusMessage": "Sendbird Client plugin: one-time notice — its hooks run local scripts; nothing is sent to Sendbird"
           },
           {
             "type": "command",
             "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/session-state.sh\" prompt",
-            "statusMessage": "Sendbird plugin: note pasted tokens (hashes only)"
+            "statusMessage": "Sendbird Client plugin: note pasted tokens (hashes only)"
           }
         ]
       }
@@ -40,7 +40,7 @@
           {
             "type": "command",
             "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/first-run-notice.sh\" tool",
-            "statusMessage": "Sendbird plugin: one-time notice — its hooks run local scripts; nothing is sent to Sendbird"
+            "statusMessage": "Sendbird Client plugin: one-time notice — its hooks run local scripts; nothing is sent to Sendbird"
           }
         ]
       },
@@ -50,7 +50,7 @@
           {
             "type": "command",
             "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/credential-guard.sh\"",
-            "statusMessage": "Sendbird plugin: block credentials in writes"
+            "statusMessage": "Sendbird Client plugin: block credentials in writes"
           }
         ]
       },
@@ -60,7 +60,7 @@
           {
             "type": "command",
             "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/destructive-command-guard.sh\"",
-            "statusMessage": "Sendbird plugin: confirm destructive Sendbird CLI commands"
+            "statusMessage": "Sendbird Client plugin: confirm destructive Sendbird CLI commands"
           }
         ]
       },
@@ -70,7 +70,7 @@
           {
             "type": "command",
             "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/build-command-guard.sh\"",
-            "statusMessage": "Sendbird plugin: no project builds during plugin work unless you asked for one"
+            "statusMessage": "Sendbird Client plugin: no project builds during plugin work unless you asked for one"
           }
         ]
       },
@@ -80,7 +80,7 @@
           {
             "type": "command",
             "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/source-claim-guard.sh\"",
-            "statusMessage": "Sendbird plugin: block unsourced Sendbird API code"
+            "statusMessage": "Sendbird Client plugin: block unsourced Sendbird API code"
           }
         ]
       },
@@ -90,7 +90,7 @@
           {
             "type": "command",
             "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/token-relay-guard.sh\"",
-            "statusMessage": "Sendbird plugin: keep pasted tokens out of agent briefs"
+            "statusMessage": "Sendbird Client plugin: keep pasted tokens out of agent briefs"
           }
         ]
       },
@@ -100,7 +100,7 @@
           {
             "type": "command",
             "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/session-state.sh\" tool",
-            "statusMessage": "Sendbird plugin: note the skill steps this turn ran"
+            "statusMessage": "Sendbird Client plugin: note the skill steps this turn ran"
           }
         ]
       },
@@ -110,7 +110,7 @@
           {
             "type": "command",
             "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/upgrade-sdk-guard.sh\"",
-            "statusMessage": "Sendbird plugin: read the upgrade rules before the hand-off"
+            "statusMessage": "Sendbird Client plugin: read the upgrade rules before the hand-off"
           }
         ]
       }
@@ -122,12 +122,12 @@
           {
             "type": "command",
             "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/telemetry-start.sh\"",
-            "statusMessage": "Sendbird plugin: local telemetry (opt-in)"
+            "statusMessage": "Sendbird Client plugin: local telemetry (opt-in)"
           },
           {
             "type": "command",
             "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/session-state.sh\" agent-start",
-            "statusMessage": "Sendbird plugin: track running agents"
+            "statusMessage": "Sendbird Client plugin: track running agents"
           }
         ]
       }
@@ -139,17 +139,17 @@
           {
             "type": "command",
             "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/telemetry-end.sh\"",
-            "statusMessage": "Sendbird plugin: local telemetry (opt-in)"
+            "statusMessage": "Sendbird Client plugin: local telemetry (opt-in)"
           },
           {
             "type": "command",
             "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/unsourced-claim-warn.sh\"",
-            "statusMessage": "Sendbird plugin: check agent answer sources"
+            "statusMessage": "Sendbird Client plugin: check agent answer sources"
           },
           {
             "type": "command",
             "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/session-state.sh\" agent-stop",
-            "statusMessage": "Sendbird plugin: keep the agent report for the final answer check"
+            "statusMessage": "Sendbird Client plugin: keep the agent report for the final answer check"
           }
         ]
       }
@@ -160,12 +160,12 @@
           {
             "type": "command",
             "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/final-answer-gate.sh\"",
-            "statusMessage": "Sendbird plugin: check final answer sources"
+            "statusMessage": "Sendbird Client plugin: check final answer sources"
           },
           {
             "type": "command",
             "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run-summary-gate.sh\"",
-            "statusMessage": "Sendbird plugin: check run summary (non-interactive)"
+            "statusMessage": "Sendbird Client plugin: check run summary (non-interactive)"
           }
         ]
       }

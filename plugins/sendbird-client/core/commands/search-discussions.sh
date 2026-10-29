@@ -31,7 +31,7 @@ not_run() { echo "NOT RUN: $*"; exit 3; }
 [ $# -ge 2 ] || usage
 repo="$1"; shift
 query="$*"
-command -v jq >/dev/null 2>&1 || not_run "jq is not installed"
+command -v jq >/dev/null 2>&1 || not_run "jq isn't installed"
 jq -e --arg r "$repo" '[.repos | .. | strings | select(test("^[A-Za-z0-9-]+/[A-Za-z0-9._-]+$"))] | index($r)' "$CONFIG" >/dev/null 2>&1 \
   || { echo "search-discussions.sh: $repo is not a public repository listed in config/plugin-config.json .repos" >&2; exit 2; }
 
