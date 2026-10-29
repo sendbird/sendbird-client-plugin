@@ -2,7 +2,7 @@
 
 ## Reporting a vulnerability
 
-Please report security issues privately through GitHub: open this repository's
+Report security issues privately through GitHub: open this repository's
 **Security** tab and choose **Report a vulnerability**. Do not open a public issue.
 
 ## What the plugin runs on your machine

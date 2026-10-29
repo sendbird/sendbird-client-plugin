@@ -35,7 +35,7 @@ Upgrade within a major version, or to a newer major when the customer asks for o
    - bump each version with the project's package manager and its existing pin style (exact stays exact, a range stays a range), and update the lockfile (`npm install <package>@<version>` and the like);
    - replace each deprecated call with the replacement, verified in the target version's surface: `bash "${CLAUDE_PLUGIN_ROOT}/tools/local-sdk/read-surface.sh" <project-dir> <product> <target version>` after the install. A replacement whose return type or callback shape differs (for example a promise versus a request handler) is adapted at the call site without changing the signature of the app's own function;
    - run `deprecated-usage.sh` again with the target version and report what remains.
-   This skill does not build the project. To build and launch it against the customer's application, suggest `/sendbird-client:run-check`.
+   This skill does not build the project. To build and launch it against the customer's Sendbird app, suggest `/sendbird-client:run-check`.
 8. **Report.** The version table (before, after, source), changed files, each deprecated call and its replacement with the citation, checks not run with the reason, and any newer major left out. In a non-interactive run, end with the run summary (`core/schemas/run-summary.schema.json`, `skill: "upgrade-sdk"`).
 
 ## Wired knowledge

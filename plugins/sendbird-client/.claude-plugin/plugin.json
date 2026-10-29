@@ -1,7 +1,7 @@
 {
   "name": "sendbird-client",
   "displayName": "Sendbird Client",
-  "version": "0.1.116",
+  "version": "0.1.117",
   "description": "Help adding Sendbird Chat, UIKit, and Calls to iOS, Android, and JS apps, including authentication and sessions. It runs local shell scripts as hooks. See \"What runs on your machine\" in the README.",
   "author": {
     "name": "Sendbird",

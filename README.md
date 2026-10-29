@@ -25,7 +25,7 @@ Then, in your project:
 /sendbird-client:setup --product chat
 ```
 
-For 1:1 voice and video calls, run `/sendbird-client:setup --product calls`, or ask in plain language, for example "Let the signed-in user place 1:1 voice and video calls to another user and accept or decline incoming calls with Sendbird Calls." On iOS, Android, and React Native, incoming calls need push credentials (VoIP or FCM) in the Sendbird dashboard even while the app is open; the plugin lists that as a manual step.
+For 1:1 voice and video calls, run `/sendbird-client:setup --product calls`, or ask in plain language, for example "Let the signed-in user place 1:1 voice and video calls to another user and accept or decline incoming calls with Sendbird Calls." On iOS, Android, and React Native, incoming calls need push credentials (VoIP or FCM) in the Sendbird Dashboard even while your app is open; the plugin lists that as a manual step.
 
 To use it for one run without installing (for example from a script or another CLI), download
 `sendbird-client-<version>.zip` from [Releases](https://github.com/sendbird/sendbird-client-plugin/releases)
@@ -137,7 +137,7 @@ The two fetching hooks send a plain request for the cited public page (8-second 
 
 The hooks read their input with `jq`. When `jq` is not on your `PATH`, the credential, source, and destructive-command guards cannot check a call, so instead of blocking or allowing it they ask you to approve every file write and shell command, and the session start says that `jq` is missing. The other hooks then do nothing. Install `jq` to turn the checks back on.
 
-**Scripts the agent runs** through Claude Code's Bash tool, under your Claude Code permission settings: project detection (reads manifests such as `package.json`, `Podfile`, `Package.swift`, `build.gradle`) the installed-SDK reader (reads `node_modules/@sendbird/*`, `Pods/`, `.build/`, this project's Xcode `DerivedData`, and the Gradle cache), the offline docs search `core/commands/search.sh` (reads the docs page index and curated knowledge shipped inside the plugin and, when given your project, its lockfiles to learn the installed SDK versions; it makes no network request and writes no file), and the docs page reader `core/commands/fetch-doc.sh` (one HTTPS request with `curl` for a `sendbird.com/docs` page that the plugin's page index lists; it prints the page and writes no file). The plugin ships no official page text; pages are read from `sendbird.com/docs` when they are needed.
+**Scripts the agent runs** through Claude Code's Bash tool, under your Claude Code permission settings: project detection (reads manifests such as `package.json`, `Podfile`, `Package.swift`, `build.gradle`), the installed-SDK reader (reads `node_modules/@sendbird/*`, `Pods/`, `.build/`, this project's Xcode `DerivedData`, and the Gradle cache), the offline docs search `core/commands/search.sh` (reads the docs page index and curated knowledge shipped inside the plugin and, when given your project, its lockfiles to learn the installed SDK versions; it makes no network request and writes no file), and the docs page reader `core/commands/fetch-doc.sh` (one HTTPS request with `curl` for a `sendbird.com/docs` page that the plugin's page index lists; it prints the page and writes no file). The plugin ships no official page text; pages are read from `sendbird.com/docs` when they are needed.
 
 **Instructions** — skills and agents that tell Claude how to work. They change what Claude does in your session.
 
@@ -146,7 +146,7 @@ The hooks read their input with `jq`. When `jq` is not on your `PATH`, the crede
 - **Installing the SDK.** When you ask for setup, the agent runs the package manager your project already uses (npm, yarn, or pnpm; Swift Package Manager, or CocoaPods only when the project already has a `Podfile`; Gradle), which downloads the Sendbird packages from npm, GitHub, the CocoaPods trunk, and Sendbird's Maven repository (`repo.sendbird.com`).
 - **Looking up docs.** Agents and skills read official pages on `sendbird.com/docs` with `core/commands/fetch-doc.sh` (only pages listed in the plugin's page index) or Claude Code's web fetch tool, and pages on `github.com/sendbird` with the web fetch tool. The plugin does not limit which domains that tool can reach; your Claude Code permission settings do.
 - **Searching public Sendbird repositories.** Agents may run the GitHub CLI (`gh search code`, `gh api` for public discussions) through Claude Code's Bash tool. These send your search terms, such as a Sendbird API name, to the GitHub API under your own `gh` login.
-- **Running your app (run check).** Only when you ask for a run check and agree to the build, `tools/runtime/run.sh` copies your project to a temporary folder (your project is never changed), installs its dependencies there with npm (and CocoaPods for a React Native app on iOS), and builds it with Xcode or Gradle, which download what the build needs. It installs its own pinned tools (Playwright with Chromium, Vite, and the Sendbird Chat SDK for the second test user) from npm into a temporary folder outside your project, then launches the app in a browser, a simulator, or an emulator, where two test users with generated IDs connect to your Sendbird application and exchange messages.
+- **Running your app (run check).** Only when you ask for a run check and agree to the build, `tools/runtime/run.sh` copies your project to a temporary folder (your project is never changed), installs its dependencies there with npm (and CocoaPods for a React Native app on iOS), and builds it with Xcode or Gradle, which download what the build needs. It installs its own pinned tools (Playwright with Chromium, Vite, and the Sendbird Chat SDK for the second test user) from npm into a temporary folder outside your project, then launches the app in a browser, a simulator, or an emulator, where two test users with generated IDs connect to your Sendbird app and exchange messages.
 
 None of them sends your project files or conversation to Sendbird. Claude Code itself sends your conversation, and the files it reads, to its model provider under your Claude Code terms; that is outside this plugin.
 
@@ -160,7 +160,7 @@ None of them sends your project files or conversation to Sendbird. Claude Code i
 
 The `sendbird` marketplace that lists the plugin is in [sendbird/sendbird-plugins](https://github.com/sendbird/sendbird-plugins).
 
-This repository is published automatically; every change arrives as a release pull request. Please open an issue for bugs or wrong answers — pull requests are not merged here.
+This repository is published automatically; every change arrives as a release pull request. Open an issue for bugs or wrong answers — pull requests aren't merged here.
 
 ## License
 

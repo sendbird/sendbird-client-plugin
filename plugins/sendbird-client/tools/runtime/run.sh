@@ -134,7 +134,7 @@ elif ! is_placeholder "${SENDBIRD_APP_ID:-}"; then
   RT_APP_ID="$SENDBIRD_APP_ID"; app_id_from="SENDBIRD_APP_ID"; app_id_missing=""
 else
   RT_APP_ID="$(jq -r '.appId // empty' "$profile" 2>/dev/null || true)"; app_id_from="profile.json appId"
-  app_id_missing="no App ID: SENDBIRD_APP_ID is not set (or holds a placeholder), the project's profile.json has no appId, and it has no sendbird.json with an app_id"
+  app_id_missing="no App ID: SENDBIRD_APP_ID isn't set (or holds a placeholder), the project's profile.json has no appId, and it has no sendbird.json with an app_id"
   # sendbird.json: the project marker the Sendbird CLI writes (sendbird project init); never a symlink
   if is_placeholder "$RT_APP_ID" && [ ! -L "$project/sendbird.json" ]; then
     RT_APP_ID="$(jq -r '.app_id // empty | strings' "$project/sendbird.json" 2>/dev/null || true)"; app_id_from="sendbird.json app_id"
@@ -285,7 +285,7 @@ finish() {  # finish <status> <reason> <exit>
 }
 
 if [ -z "$RT_APP_ID" ]; then
-  echo "SKIP: $app_id_missing (an application that allows user-ID-only connect)"
+  echo "SKIP: $app_id_missing (a Sendbird app that allows user-ID-only connect)"
   finish skip "$app_id_missing" 2
 fi
 in_codex_sandbox && finish skip "$SANDBOX_REASON" 2

@@ -34,7 +34,7 @@ text="$(final_answer_text)"
 # secret and does not count.
 if text_repeats_request_token "$text"; then
   jq -n '{decision: "block",
-    reason: "Final-answer secret check (Sendbird plugin): this answer repeats a token value the customer pasted in the request. Write the whole answer again as the reply itself (the user may see only this reply, so do not say it is repeated or mention this check), and refer to that value only as \"the token you provided\" (in Korean, \"주신 토큰\"); never write the value or part of it, in the text, in code, or in a run summary."}'
+    reason: "Final-answer secret check (Sendbird Client plugin): this answer repeats a token value the customer pasted in the request. Write the whole answer again as the reply itself (the user may see only this reply, so do not say it is repeated or mention this check), and refer to that value only as \"the token you provided\" (in Korean, \"주신 토큰\"); never write the value or part of it, in the text, in code, or in a run summary."}'
   exit 0
 fi
 
@@ -56,7 +56,7 @@ if [ -n "$reports" ] && [ -s "$reports" ] && ! agent_pending; then
   done < <(report_source_files < "$reports")
   if [ -n "$missing_checks$missing_sources" ]; then
     jq -n --arg c "$missing_checks" --arg s "$missing_sources" '{decision: "block",
-      reason: ("Final-answer relay check (Sendbird plugin): the agent'\''s report has "
+      reason: ("Final-answer relay check (Sendbird Client plugin): the agent'\''s report has "
         + ([ (if $c != "" then "check lines this answer leaves out (" + $c + ")" else empty end),
              (if $s != "" then "symbol/source table rows whose sources this answer leaves out (" + $s + ")" else empty end) ] | join(" and "))
         + ". Write the whole answer again as the reply itself (the user may see only this reply, so do not say it is repeated or mention this check), and carry the agent'\''s Checks and Evidence sections as it wrote them: each check on its own line by its name with the result and file:line, and the symbol, source, version, and verification table with every row (docs/AGENT_CONTRACT.md section 6). Translate the wording if you answer in another language, but keep the check names, symbols, paths, lines, and versions exactly.")}'
@@ -100,7 +100,7 @@ if trace_has "skill upgrade-sdk" && trace_lines | grep -q '^latest ' && ! agent_
   fi
   if [ -n "$up_problems" ]; then
     jq -n --arg p "$up_problems" '{decision: "block",
-      reason: ("Upgrade answer check (Sendbird plugin, skills/upgrade-sdk/SKILL.md): " + $p + ". Write the whole answer again as the reply itself (the user may see only this reply, so do not say it is repeated or mention this check), keeping its plan, its question, and its run summary as they are unless the rules you read change them. Do not change project files because of this check.")}'
+      reason: ("Upgrade answer check (Sendbird Client plugin, skills/upgrade-sdk/SKILL.md): " + $p + ". Write the whole answer again as the reply itself (the user may see only this reply, so do not say it is repeated or mention this check), keeping its plan, its question, and its run summary as they are unless the rules you read change them. Do not change project files because of this check.")}'
     exit 0
   fi
 fi
@@ -113,7 +113,7 @@ fi
 skills_run="$(trace_lines | sed -n 's/^skill //p' | grep -v -- '-agent$' | awk '!seen[$0]++')"
 if [ -n "$skills_run" ] && ! printf '%s\n' "$skills_run" | grep -Eqx 'setup|run-check' && answer_asks_app_id "$text"; then
   jq -n --arg s "$(printf '%s' "$skills_run" | paste -sd ',' - | sed 's/,/, /g')" '{decision: "block",
-    reason: ("App ID check (Sendbird plugin): this turn ran " + $s + ", which does not need the App ID, and only setup stops to ask for it (docs/AGENT_CONTRACT.md section 3: whether it is set comes only from the from value of tools/detection/resolve-app-id.sh, never from reading project.yml, profile.json, or the environment). Do not ask for it and do not stop on it: continue the skill and hand the code to the platform agent as the skill says (in Codex, its launcher skill), so the app reads the App ID from its configuration at run time. When resolve-app-id.sh reports from missing, put setting the App ID under manualSteps. Then write the whole answer again as the reply itself (the user may see only this reply, so do not mention this check).")}'
+    reason: ("App ID check (Sendbird Client plugin): this turn ran " + $s + ", which does not need the App ID, and only setup stops to ask for it (docs/AGENT_CONTRACT.md section 3: whether it is set comes only from the from value of tools/detection/resolve-app-id.sh, never from reading project.yml, profile.json, or the environment). Do not ask for it and do not stop on it: continue the skill and hand the code to the platform agent as the skill says (in Codex, its launcher skill), so the app reads the App ID from its configuration at run time. When resolve-app-id.sh reports from missing, put setting the App ID under manualSteps. Then write the whole answer again as the reply itself (the user may see only this reply, so do not mention this check).")}'
   exit 0
 fi
 
@@ -130,7 +130,7 @@ if printf '%s' "$text" | grep -Eq 'https?://' \
   && ! printf '%s' "$text" | grep -Eq 'knowledge/curated/|(common|cross-cutting|products|hosts)/[A-Za-z0-9._-]+\.md' \
   && turn_tool_inputs | grep -Fq 'knowledge/curated/'; then
   jq -n '{decision: "block",
-    reason: "Final-answer citation gate (Sendbird plugin): this turn read knowledge/curated files, but the answer cites only links. Write the whole answer again as the reply itself (the user may see only this reply, so do not say it is repeated or mention this check): cite the curated entry you used as knowledge/curated/<platform>/<path> with its heading or line, next to the fact it supports. A link that the entry cites (a public source file, a community case) may follow it but never replaces it, and cite a page only if you read it in this turn. Do not invent symbols."}'
+    reason: "Final-answer citation gate (Sendbird Client plugin): this turn read knowledge/curated files, but the answer cites only links. Write the whole answer again as the reply itself (the user may see only this reply, so do not say it is repeated or mention this check): cite the curated entry you used as knowledge/curated/<platform>/<path> with its heading or line, next to the fact it supports. A link that the entry cites (a public source file, a community case) may follow it but never replaces it, and cite a page only if you read it in this turn. Do not invent symbols."}'
   exit 0
 fi
 
@@ -163,5 +163,5 @@ resolve_cited_sources "$(jget '.cwd')" <<< "$sources"
 all_symbols_sourced "$symbols" && exit 0
 
 jq -n '{decision: "block",
-  reason: "Final-answer citation gate (Sendbird plugin): this answer names Sendbird APIs/code but cites no source. Write the whole answer again as the reply itself (the user may see only this reply, so do not say it is repeated or mention this check), citing a verifiable source per symbol — knowledge/curated/<platform>/... , the customer-local SDK surface or installed SDK files, a file in a public sendbird/* repo (a /blob/ or /raw/ link, not an issue or discussion), or a version-matched sendbird.com/docs page — or state: I do not know, and list what you checked. Do not invent symbols."}'
+  reason: "Final-answer citation gate (Sendbird Client plugin): this answer names Sendbird APIs/code but cites no source. Write the whole answer again as the reply itself (the user may see only this reply, so do not say it is repeated or mention this check), citing a verifiable source per symbol — knowledge/curated/<platform>/... , the customer-local SDK surface or installed SDK files, a file in a public sendbird/* repo (a /blob/ or /raw/ link, not an issue or discussion), or a version-matched sendbird.com/docs page — or state: I do not know, and list what you checked. Do not invent symbols."}'
 exit 0

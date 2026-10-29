@@ -126,7 +126,7 @@ export async function findExpect(chat, otherId, text, timeoutSec = 90) {
 // filter catches is accepted (the sender gets success and a message ID) and shown to the sender
 // only; a test application did this to texts with long digit runs (2026-10-21). Called only after a
 // step has failed, so connecting as the sender does not touch a passing run.
-export const HIDDEN_NOTE = "; the sender's own view of the channel has it, so the server accepted it but does not show it to other users — check the application's message filters";
+export const HIDDEN_NOTE = "; the sender's own view of the channel has it, so the server accepted it but doesn't show it to other users — check the Sendbird app's message filters";
 
 export async function senderOnly(senderId, channelUrl, text, timeoutSec = 10) {
   let chat;

@@ -20,5 +20,5 @@ text_repeats_request_token "$input" || exit 0
 jq -n '{hookSpecificOutput: {
   hookEventName: "PreToolUse",
   permissionDecision: "deny",
-  permissionDecisionReason: "Secret check (Sendbird plugin): this call passes a token value the customer pasted in the request. Make the call again with that value replaced by \"the token you provided\": say that the customer gave a token and what it is for, never the value or part of it. Code reads a token at run time (from the app'\''s token server or a session handler), so the value is never needed."}}'
+  permissionDecisionReason: "Secret check (Sendbird Client plugin): this call passes a token value the customer pasted in the request. Make the call again with that value replaced by \"the token you provided\": say that the customer gave a token and what it is for, never the value or part of it. Code reads a token at run time (from the app'\''s token server or a session handler), so the value is never needed."}}'
 exit 0
