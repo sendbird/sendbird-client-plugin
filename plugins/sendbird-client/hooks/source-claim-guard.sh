@@ -64,7 +64,8 @@ deny() {
   jq -n --arg sym "${UNSOURCED_SYMBOL:-}" --arg un "$unresolved" --arg na "$NOT_APPLIED" '{hookSpecificOutput:{
     hookEventName:"PreToolUse",
     permissionDecision:"deny",
-    permissionDecisionReason:((if $sym != "" then "No cited source contains \($sym). " else "" end)
+    permissionDecisionReason:("Sendbird Client plugin: This change adds Sendbird code without a source from the Sendbird docs, so it wasn'\''t made. The code needs a source before it'\''s added.\n"
+      + (if $sym != "" then "No cited source contains \($sym). " else "" end)
       + (if $un != "" then "Not accepted as a source: \($un). " else "" end)
       + "Sendbird API code requires a concrete source comment (source: <path or URL>) whose file or public URL contains the emitted symbol. Preserve the template source comment or cite knowledge/curated, the customer SDK cache or installed SDK files (node_modules/@sendbird, Pods, .build, SourcePackages, DerivedData), a version-matched sendbird.com/docs page or a file in a public sendbird/* repo (a /blob/ or /raw/ link, not an issue or discussion), or stop if unverifiable. Cite a plugin file by its path from the plugin root (knowledge/curated/<platform>/<file>.md) or by its absolute path inside the plugin folder; a file in the app, outside the installed SDK, does not count. " + $na)
   }}'
