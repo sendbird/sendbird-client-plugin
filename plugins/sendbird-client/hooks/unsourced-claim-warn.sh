@@ -26,10 +26,12 @@ printf '%s' "$text" | grep -Eq 'https?://[A-Za-z0-9./_-]+' && needs_cite=1
 if printf '%s' "$text" | grep -Eiq '(source:|verified against|from sendbird/|#discussions/|[A-Za-z0-9_-]\.[A-Za-z0-9]+:[0-9]+\b|knowledge/(imports|curated)/)'; then
   exit 0
 fi
-msg="⚠️ This answer names Sendbird APIs / code / a docs URL but includes no citation. Per the No-Fabrication policy, re-emit with a verifiable source for each symbol (source: <knowledge/imports path | public mirror | sendbird.com/docs URL>), or state 'I don't know — here's what I checked'."
+# The person sees the systemMessage; only Claude reads the reason, so the instruction stays there.
+msg="⚠️ This answer names Sendbird APIs, code, or a docs URL without a source. Check them against the Sendbird docs before you use them."
+reason="This answer names Sendbird APIs / code / a docs URL but includes no citation. Per the No-Fabrication policy, re-emit with a verifiable source for each symbol (source: <knowledge/imports path | public mirror | sendbird.com/docs URL>), or state 'I don't know — here's what I checked'."
 if [ "$(jget .hook_event_name)" = SubagentStop ]; then
   [ "$(jget .stop_hook_active)" = "true" ] && exit 0
-  jq -n --arg m "$msg" '{decision: "block", reason: $m, systemMessage: $m}'
+  jq -n --arg m "$msg" --arg r "$reason" '{decision: "block", reason: $r, systemMessage: $m}'
   exit 0
 fi
 emit_warning "$msg"

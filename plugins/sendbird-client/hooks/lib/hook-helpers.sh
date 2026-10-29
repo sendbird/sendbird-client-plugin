@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 # Shared helpers for hook scripts. Source this file. Reads stdin JSON once.
 
-# JQ_MISSING_REASON : what a guard tells the user when jq is missing (welcome.sh says it too)
-JQ_MISSING_REASON='The Sendbird plugin safety checks (credential, source citation, and destructive-command guards) need jq, which is not on PATH, so this call was not checked. Approve it only if you trust it, and install jq to turn the checks back on.'
+# JQ_MISSING_REASON : what a guard tells the user when jq is missing (welcome.sh says it too). It goes
+# into JSON through printf '%s', so each \n stays a JSON line-break escape.
+JQ_MISSING_REASON='The Sendbird plugin couldn'"'"'t check this call because jq isn'"'"'t installed.\nThe checks cover credentials, source citations, and destructive commands.\nApprove it only if you trust it. To turn the checks back on, install jq.'
 
 # ask_without_jq : the PreToolUse "ask" decision, built with printf because jq is absent
 ask_without_jq() {

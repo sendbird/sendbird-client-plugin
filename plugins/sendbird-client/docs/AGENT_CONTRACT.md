@@ -120,6 +120,18 @@ When the skill relays an agent's result, it keeps each citation (file:line, cura
 
 When the run changed app code, suggest once in the answer text that `/sendbird-client:run-check` builds and launches the app against the customer's application. Only suggest it: do not run it, and never put it in `manualSteps`.
 
+### Write for the customer
+
+The customer, a developer, reads the answer and every question. Write them for that person, not for another agent:
+
+- Don't pass on instructions meant for an agent or a hook, such as "re-emit" or "Do not repeat the change automatically". Say what happened and what to do next, or leave the line out.
+- Report a problem in three parts, in this order: what happened, what to check, and what to do.
+- Use words a developer knows, such as "Sendbird app" and "App ID". Avoid or explain internal terms such as hook, readback, mutation, outcome, and No-Fabrication policy. Keep code, commands, and file paths exactly as they are.
+- When you ask a question, say what happens for each answer.
+- Use present tense, active voice, and sentence case. Don't use "please", "simply", or exclamation marks.
+- State only what a source or a check shows. Don't make a statement stronger than its source: keep "may" as "may", and keep every possible cause the source lists.
+- Capitalize Sendbird product names such as Chat, UIKit, and Calls. Keep them lowercase only inside code, commands, and flags.
+
 ## 7. Non-interactive runs
 
 When `SENDBIRD_NONINTERACTIVE` is `1`, `true`, or `yes` in any case (for example `SENDBIRD_NONINTERACTIVE=1 claude -p ...` in CI or a script), nobody can answer a question during the run. Any other value, including an empty one, `0`, `false`, or `no`, keeps the run interactive.
