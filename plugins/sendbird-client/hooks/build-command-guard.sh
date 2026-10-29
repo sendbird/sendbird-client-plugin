@@ -100,7 +100,7 @@ jq -n --arg c "$hit" '{
   hookSpecificOutput: {
     hookEventName: "PreToolUse",
     permissionDecision: "deny",
-    permissionDecisionReason: ("This run does not build, compile, or type-check the project (docs/AGENT_CONTRACT.md section 3), and the customer did not ask for a build: " + $c + "\nDo not run it or a variant of it. Check each Sendbird symbol against the installed SDK surface or the cited curated section instead; the plugin'"'"'s own test suites build the code it emits. If a build is needed, say so in the answer; the run-check skill builds and runs the app when the customer asks.")
+    permissionDecisionReason: ("Sendbird Client plugin: Building the project isn'\''t part of this request, so the command didn'\''t run. To build and run the app, ask for it.\nThis run does not build, compile, or type-check the project (docs/AGENT_CONTRACT.md section 3), and the customer did not ask for a build: " + $c + "\nDo not run it or a variant of it. Check each Sendbird symbol against the installed SDK surface or the cited curated section instead; the plugin'"'"'s own test suites build the code it emits. If a build is needed, say so in the answer; the run-check skill builds and runs the app when the customer asks.")
   }
 }'
 exit 0
