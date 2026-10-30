@@ -31,7 +31,7 @@ your own sign-in. The practices it follows are listed in `../BEST_PRACTICES.md`.
 | BP10 | `app/src/main/java/com/example/starterbp/view/sendbird/PushTokens.kt:7` | One registration point for the FCM token, registered for the signed-in user after connect (`app/src/main/java/com/example/starterbp/view/sendbird/SendbirdSession.kt:145`). |
 | BP11 | `app/src/main/java/com/example/starterbp/view/sendbird/SendbirdSession.kt:69` | UIKit initializes the Chat SDK with local caching on. |
 | BP12 | `app/src/main/java/com/example/starterbp/view/sendbird/SendbirdSession.kt:64` | `SendbirdUIKit.setDefaultThemeMode` before init and before the first UIKit screen. |
-| BP13 | `app/src/main/java/com/example/starterbp/view/sendbird/SendbirdErrors.kt:8` | Maps the verified error codes to a message; a failed connect shows it on the sign-in screen (`app/src/main/java/com/example/starterbp/view/sendbird/SendbirdSession.kt:135`). |
+| BP13 | `app/src/main/java/com/example/starterbp/view/sendbird/SendbirdErrors.kt:9` | Maps the verified error codes to a message; a failed connect shows it on the sign-in screen (`app/src/main/java/com/example/starterbp/view/sendbird/SendbirdSession.kt:135`). |
 | BP16 | `app/src/main/java/com/example/starterbp/view/sendbird/SendbirdSession.kt:36` | One `object`; `LoginService` (`app/src/main/java/com/example/starterbp/view/auth/LoginService.kt:7`) forwards to it and `MainActivity` collects its state (`app/src/main/java/com/example/starterbp/view/MainActivity.kt:19`). |
 | BP17 | `app/src/main/res/layout/activity_main.xml:2` | Resource ids (see below). |
 

@@ -46,13 +46,13 @@ export function SignedInApp({ userId, accessToken }: { userId: string; accessTok
       connection: {
         onConnected: () => setConnectError(null),
         onFailed: (error) => {
-          const view = describeError(error);
+          const view = describeError(error, accessToken !== undefined);
           if (view.signInAgain) void signOut(view.text);
           else setConnectError(view);
         },
       },
     }),
-    [],
+    [accessToken],
   );
 
   // BP01 / BP03 / BP05: one provider at the root of the signed-in tree; it connects as this user.

@@ -10,9 +10,15 @@ struct SendbirdErrorView {
     /// true when the user has to sign in again (the token or the user is no longer valid)
     let signInAgain: Bool
 
-    init(_ error: SBError) {
+    /// tokenSent: whether connect sent a session token. Without one, 400302 means the application does
+    /// not allow connecting with a user ID alone, or this user has been issued a token; signing in again
+    /// sends no token either, so the text points at the token hook instead.
+    init(_ error: SBError, tokenSent: Bool = true) {
         code = error.code
         switch error.code {
+        case ChatError.accessTokenNotValid.rawValue where !tokenSent:   // 400302
+            text = "Sign-in needs a session token (\(error.code)). Return one from TokenProvider.fetchSessionToken."
+            signInAgain = true
         case ChatError.userDeactivated.rawValue,          // 400300
              ChatError.userNotExist.rawValue,             // 400301
              ChatError.accessTokenNotValid.rawValue,      // 400302
