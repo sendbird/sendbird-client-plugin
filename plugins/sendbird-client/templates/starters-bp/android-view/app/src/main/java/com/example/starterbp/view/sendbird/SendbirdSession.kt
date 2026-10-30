@@ -130,7 +130,7 @@ object SendbirdSession {
 
     private fun didConnect(userId: String, user: User?, e: SendbirdException?) {
         if (_state.value != SessionState.Connecting(userId)) return // signed out meanwhile
-        val error = e?.let { SendbirdErrorView(it) }
+        val error = e?.let { SendbirdErrorView(it, tokenSent = sessionToken != null) }
         if (user == null || error?.signInAgain == true) {
             // BP13: show the code; the user signs in again.
             SendbirdChat.removeConnectionHandler(CONNECTION_HANDLER_ID)

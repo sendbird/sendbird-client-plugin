@@ -114,7 +114,7 @@ final class SendbirdSession: NSObject {
         guard state == .connecting(userId: userId) else { return }   // signed out meanwhile
         guard user != nil, error == nil else {
             // BP13: show the code; the user signs in again.
-            let notice = error.map { SendbirdErrorView($0).text } ?? "Could not connect. Try again."
+            let notice = error.map { SendbirdErrorView($0, tokenSent: SBUGlobals.accessToken != nil).text } ?? "Could not connect. Try again."
             removeHandlers()
             SBUGlobals.currentUser = nil
             SBUGlobals.accessToken = nil

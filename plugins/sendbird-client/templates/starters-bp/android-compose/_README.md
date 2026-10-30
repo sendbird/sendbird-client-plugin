@@ -31,7 +31,7 @@ then replace the user ID field with your own sign-in. The practices it follows a
 | BP10 | `app/src/main/java/com/example/starterbp/compose/sendbird/PushTokens.kt:7` | One registration point for the FCM token, registered for the signed-in user after connect (`app/src/main/java/com/example/starterbp/compose/sendbird/SendbirdSession.kt:135`). |
 | BP11 | `app/src/main/java/com/example/starterbp/compose/sendbird/SendbirdSession.kt:64` | `UikitInitParams` becomes Chat SDK `InitParams` with caching on (read from `uikit-data` 1.3.6 bytecode, `UikitInitParamsKt.toInitParams`). |
 | BP12 | `app/src/main/java/com/example/starterbp/compose/MainActivity.kt:51` | One `SendbirdTheme` around the app and the UIKit screens. |
-| BP13 | `app/src/main/java/com/example/starterbp/compose/sendbird/SendbirdErrors.kt:8` | Maps the verified error codes to a message; a failed connect shows it on the sign-in screen (`app/src/main/java/com/example/starterbp/compose/sendbird/SendbirdSession.kt:125`). |
+| BP13 | `app/src/main/java/com/example/starterbp/compose/sendbird/SendbirdErrors.kt:9` | Maps the verified error codes to a message; a failed connect shows it on the sign-in screen (`app/src/main/java/com/example/starterbp/compose/sendbird/SendbirdSession.kt:125`). |
 | BP16 | `app/src/main/java/com/example/starterbp/compose/sendbird/SendbirdSession.kt:37` | One `object`; `LoginService` (`app/src/main/java/com/example/starterbp/compose/auth/LoginService.kt:7`) forwards to it and the UI collects its state. |
 | BP17 | `app/src/main/java/com/example/starterbp/compose/MainActivity.kt:106` | Test tags, exposed as resource ids (see below). |
 

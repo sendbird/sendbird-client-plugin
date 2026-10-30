@@ -114,17 +114,17 @@ object SendbirdSession {
                 // BP05: tell UIKit who the user is, then connect through UIKit.
                 SendbirdUikitCompose.prepare(UikitCurrentUserInfo(userId = userId, authToken = token))
                 val result = runCatching { SendbirdUikitCompose.connect() }
-                didConnect(userId, result.exceptionOrNull())
+                didConnect(userId, result.exceptionOrNull(), tokenSent = token != null)
             }
         }
     }
 
-    private fun didConnect(userId: String, error: Throwable?) {
+    private fun didConnect(userId: String, error: Throwable?, tokenSent: Boolean) {
         if (_state.value != SessionState.Connecting(userId)) return // signed out meanwhile
         if (error != null) {
             // BP13: show the code; the user signs in again.
             SendbirdChat.removeConnectionHandler(CONNECTION_HANDLER_ID)
-            val text = (error as? SendbirdException)?.let { SendbirdErrorView(it).text }
+            val text = (error as? SendbirdException)?.let { SendbirdErrorView(it, tokenSent).text }
             _state.value = SessionState.SignedOut(text ?: "Could not connect. Try again.")
             return
         }

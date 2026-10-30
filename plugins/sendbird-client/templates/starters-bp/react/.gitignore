@@ -3,3 +3,6 @@ dist
 .env
 .env.local
 .env.*.local
+
+# The Sendbird client plugin's state folder (profile, logs, check results): never commit it
+.sendbird-client/

@@ -46,7 +46,7 @@ export function SessionBridge() {
         markConnected(connectingUserId, sdk.connectionState === ConnectionState.OPEN ? 'connected' : 'reconnecting');
       })
       .catch((error: unknown) => {
-        if (!cancelled) markConnectFailed(connectingUserId, describeError(error).text); // BP13
+        if (!cancelled) markConnectFailed(connectingUserId, describeError(error, accessToken !== undefined).text); // BP13
       });
     return () => {
       cancelled = true;
