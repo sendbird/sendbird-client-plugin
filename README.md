@@ -58,7 +58,7 @@ Codex does not run a plugin's hooks until you trust them. When a session starts 
 
 ## Keeping it up to date
 
-An installed plugin is a snapshot: Claude Code replaces it only when the plugin version changes, and every change that ships to users bumps the patch version. Third-party marketplaces such as `sendbird` do not auto-update by default. Turn it on in any one of these places:
+An installed plugin is a snapshot: Claude Code replaces it only when the plugin version changes, and every change that ships to users gets a new version. Third-party marketplaces such as `sendbird` do not auto-update by default. Turn it on in any one of these places:
 
 | Who it applies to | Where | How |
 |---|---|---|
