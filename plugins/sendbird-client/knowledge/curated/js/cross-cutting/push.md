@@ -1,5 +1,5 @@
 <!-- last-verified-against: @sendbird/chat 4.22.13 -->
-<!-- verified-at: 2026-09-22 -->
+<!-- verified-at: 2026-11-02 -->
 <!-- verification-method: compile-check-js -->
 <!-- status: populated -->
 # js — push

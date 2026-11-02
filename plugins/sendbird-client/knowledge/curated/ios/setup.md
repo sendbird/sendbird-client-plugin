@@ -1,5 +1,5 @@
 <!-- last-verified-against: sendbird-chat-sdk-ios 4.39.11 / sendbird-uikit-ios 3.36.1 -->
-<!-- verified-at: 2026-09-22 -->
+<!-- verified-at: 2026-11-02 -->
 <!-- verification-method: compile-check-ios -->
 <!-- status: populated -->
 # ios — setup

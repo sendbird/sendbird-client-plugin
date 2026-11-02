@@ -1,5 +1,6 @@
 <!-- last-verified-against: sendbird-uikit-android 3.26.3 -->
 <!-- status: populated -->
+<!-- verified-at: 2026-11-02 -->
 # android uikit
 
 > Verified against the public mirror `sendbird/sendbird-uikit-android` (uikit-samples BaseApplication, verified 2026-06-09). The templates compiled against 3.26.3 in GitHub Actions run 34187419379 on 2026-09-08. The "Present prebuilt screens" section below verified against the real `uikit-3.26.3.aar` (downloaded from `https://repo.sendbird.com/public/maven`, decompiled with `javap -public`, verified 2026-09-29). The customization sections (message views, message input, channel list, header) were read from the public `sendbird-uikit-android` source on `main`, whose `gradle.properties` is `UIKIT_VERSION = 3.26.3` (commit `07ffe8e`), and every example compiled against uikit 3.26.3 with `tools/curated/compile-snippets-android.sh` (verified 2026-10-11). The header notes on typing text color and long channel names were added on 2026-10-12 from the same commit. Cite each symbol; do not add API from memory. Compose-native equivalents live in knowledge/curated/android/hosts/compose.md.
