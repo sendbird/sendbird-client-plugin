@@ -1,6 +1,6 @@
 // source: https://sendbird.com/docs/chat/sdk/v4/android/ref/-sendbird-chat/com.sendbird.android.channel/-group-channel/index.html
 // source: https://sendbird.com/docs/chat/sdk/v4/android/ref/-sendbird-chat/com.sendbird.android/-sendbird-chat/index.html
-// source: knowledge/curated/android/products/chat.md ("Typing indicator (group channels)", "Read receipts for a message")
+// source: https://sendbird.com/docs/chat/sdk/v4/android/message/managing-read-status-in-a-group-channel/get-read-status
 // SDK calls (GroupChannel startTyping / endTyping / typingUsers / markAsRead / getUnreadMemberCount, GroupChannelHandler
 // onTypingStatusUpdated / onUserMarkedRead, SendbirdChat addChannelHandler / removeChannelHandler) are the ones in the
 // View-host template templates/android/view/chat/TypingAndReadReceipts.kt, verified with javap on the sendbird-chat 4.36.4 and

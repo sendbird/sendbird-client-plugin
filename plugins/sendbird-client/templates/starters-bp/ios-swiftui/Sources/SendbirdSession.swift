@@ -1,8 +1,8 @@
-// source: knowledge/curated/ios/products/uikit.md ("Initialize (once, at launch)", "Set the current user (required)")
-// source: knowledge/curated/ios/cross-cutting/troubleshooting.md ("UIKit shows every message on the left…": connect through SendbirdUI)
+// source: https://github.com/sendbird/sendbird-uikit-ios/blob/3.36.1/Sources/SendbirdUI.swift#L95-L127
+// source: https://github.com/sendbird/sendbird-uikit-ios/blob/3.36.1/Sources/View/Channel/MessageCell/MessageCellParams/SBUUserMessageCellParams.swift#L55-L59
 // source: knowledge/curated/ios/products/auth.md ("Token refresh — SessionDelegate")
-// source: knowledge/curated/ios/products/chat.md ("Connection state and reconnection", "Call APIs only after connect completes")
-// source: knowledge/curated/ios/cross-cutting/push.md ("One token, one device, one signed-in user": SendbirdSwiftUI has the same SendbirdUI calls)
+// source: https://sendbird.com/docs/chat/sdk/v4/ios/event-delegate/managing-connection-delegates/add-or-remove-a-connection-delegate
+// source: https://sendbird.com/docs/chat/sdk/v4/ios/push-notifications/configuring-preferences/register-push-notification-credentials
 // source: knowledge/curated/ios/hosts/swiftui.md ("Switching users and keeping custom views")
 // source: https://github.com/sendbird/sendbird-uikit-ios/blob/3.36.1/Sources/SendbirdUI.swift#L649
 // source: https://sendbird.com/docs/chat/sdk/v4/ios/ref/Classes/SendbirdChat.html

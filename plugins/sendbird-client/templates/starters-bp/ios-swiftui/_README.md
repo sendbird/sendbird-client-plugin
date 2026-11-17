@@ -33,7 +33,7 @@ replace the user ID field with your own sign-in. The practices it follows are li
 | BP10 | `Sources/AppDelegate.swift:10` | One marked place to turn on push; the token is registered for the signed-in user after connect (`Sources/SendbirdSession.swift:162`). |
 | BP11 | `Sources/SendbirdSession.swift:52` | `isLocalCachingEnabled = true`. |
 | BP12 | `Sources/StarterTheme.swift:5` | `SBUTheme.set(colorScheme:)` once, before SendbirdSwiftUI initializes. |
-| BP13 | `Sources/SendbirdErrors.swift:6` | Maps the verified error codes to a message; a failed connect shows it on the sign-in screen (`Sources/SendbirdSession.swift:110`). |
+| BP13 | `Sources/SendbirdErrors.swift:5` | Maps the verified error codes to a message; a failed connect shows it on the sign-in screen (`Sources/SendbirdSession.swift:110`). |
 | BP14 | `Sources/HomeView.swift:44` | The host navigation bar is hidden on the view that hosts the Sendbird screen. |
 | BP16 | `Sources/SendbirdSession.swift:13` | `SendbirdSession.shared`; `RootView` observes it (`Sources/StarterApp.swift:13`) and `LoginService` forwards to it (`Sources/LoginService.swift:4`). No view owns its own copy, so a sign-in from any path connects. |
 | BP17 | `Sources/LoginView.swift:24` | Accessibility identifiers (see below). |

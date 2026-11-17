@@ -1,4 +1,3 @@
-// source: knowledge/curated/ios/cross-cutting/errors.md ("Handling tips", "Diagnosing connection failures")
 // source: https://sendbird.com/docs/chat/sdk/v4/ios/error-codes
 import Foundation
 import SendbirdChatSDK

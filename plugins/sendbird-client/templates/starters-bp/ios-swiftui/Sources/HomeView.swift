@@ -1,4 +1,4 @@
-// source: knowledge/curated/ios/hosts/swiftui.md ("SwiftUI-native chat views (SendbirdSwiftUI)", "Switching users and keeping custom views")
+// source: https://sendbird.com/docs/chat/uikit/v3/swiftui/essentials/installation
 // source: knowledge/curated/ios/cross-cutting/troubleshooting.md ("Sendbird SwiftUI screens show two navigation bars")
 import SwiftUI
 import SendbirdSwiftUI

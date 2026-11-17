@@ -1,5 +1,5 @@
-// source: knowledge/curated/js/hosts/react-native.md ("App lifecycle (Chat SDK without UIKit)", "UIKit container: local cache storage")
-// source: knowledge/curated/js/cross-cutting/theme.md ("React Native": styles.theme)
+// source: https://sendbird.com/docs/chat/sdk/v4/javascript/getting-started/environment-specific-implementation
+// source: https://sendbird.com/docs/chat/uikit/v3/react-native/theme-and-style-resources/theme-resource
 // source: https://github.com/sendbird/sendbird-uikit-react-native/blob/v3.12.10/packages/uikit-react-native/src/containers/SendbirdUIKitContainer.tsx#L81-L95
 import { useState } from 'react';
 import { SendbirdUIKitContainer } from '@sendbird/uikit-react-native';

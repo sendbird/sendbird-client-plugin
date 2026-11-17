@@ -1,7 +1,6 @@
 // source: https://sendbird.com/docs/chat/sdk/v4/android/ref/-sendbird-chat/com.sendbird.android.channel/-base-channel/index.html
 // source: https://sendbird.com/docs/chat/sdk/v4/android/message/sending-a-message/track-file-upload-progress-using-a-handler
-// source: knowledge/curated/android/products/chat.md ("Upload progress")
-// source: knowledge/curated/android/cross-cutting/pitfalls.md ("Messages (file send / resend)")
+// source: https://sendbird.com/docs/chat/sdk/v4/android/local-caching/using-message-collection/message-collection
 // Verified with javap on the sendbird-chat 4.36.4 and 4.36.5 AARs: BaseChannel sendFileMessage(FileMessageCreateParams,
 // FileMessageWithProgressHandler), resendMessage(FileMessage, FileMessageWithProgressHandler), cancelFileMessageUpload(String);
 // FileMessageCreateParams(File) with fileName/mimeType setters; FileMessageWithProgressHandler onProgress(Int, Int, Int) and

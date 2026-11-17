@@ -1,5 +1,5 @@
-// source: knowledge/curated/js/cross-cutting/theme.md ("Light / dark", "Brand colors (`colorSet`) and strings (`stringSet`)")
-// source: knowledge/curated/js/hosts/react.md ("Multiple tabs or windows")
+// source: https://sendbird.com/docs/chat/uikit/v3/react/theme-and-style-resources/theme-resources
+// source: https://sendbird.com/docs/chat/sdk/v4/javascript/local-caching/overview-local-caching
 //
 // Values handed to SendbirdProvider. They are module constants on purpose: the provider re-applies
 // colorSet whenever the object identity changes, so never build these objects inside a component.

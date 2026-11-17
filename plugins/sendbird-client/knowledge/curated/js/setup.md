@@ -10,7 +10,6 @@
 ## Packages (npm)
 - Chat (core): `@sendbird/chat`
 - UIKit: `@sendbird/uikit-react` (web) / `@sendbird/uikit-react-native` (RN)
-- AI Agent: `@sendbird/ai-agent-messenger-react` / `@sendbird/ai-agent-messenger-react-native`
 - Calls: `sendbird-calls` (web) / `@sendbird/calls-react-native` (RN)
 - Desk: `sendbird-desk`
 - Live: `@sendbird/live`

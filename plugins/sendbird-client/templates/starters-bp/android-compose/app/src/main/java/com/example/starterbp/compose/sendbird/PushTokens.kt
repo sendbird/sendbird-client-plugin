@@ -1,4 +1,4 @@
-// source: knowledge/curated/android/cross-cutting/push.md ("Handler-based vs manual token registration", "Logout: unregister this device before disconnecting"); knowledge/curated/android/hosts/compose.md ("UIKit for Jetpack Compose — init, then push")
+// source: https://sendbird.com/docs/chat/sdk/v4/android/ref/-sendbird-chat/com.sendbird.android/-sendbird-chat/index.html
 package com.example.starterbp.compose.sendbird
 
 import com.sendbird.android.SendbirdChat

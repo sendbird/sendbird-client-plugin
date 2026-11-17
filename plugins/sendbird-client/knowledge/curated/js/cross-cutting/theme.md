@@ -210,4 +210,3 @@ function ChatRoot({ children }: { children: ReactNode }) {
 
 ## Related
 - UIKit: knowledge/curated/js/products/uikit.md
-- AI Agent theme: knowledge/curated/js/cross-cutting/ai-agent-theme.md

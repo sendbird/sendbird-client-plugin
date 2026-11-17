@@ -23,7 +23,7 @@
     },
     "products": {
       "type": "array",
-      "items": { "type": "string", "enum": ["chat", "uikit", "ai-agent", "desk", "calls", "live"] }
+      "items": { "type": "string", "enum": ["chat", "uikit", "desk", "calls", "live"] }
     },
     "legacyMajors": {
       "type": "array",
@@ -32,7 +32,7 @@
         "type": "object",
         "required": ["product", "major", "package"],
         "properties": {
-          "product": { "type": "string", "enum": ["chat", "uikit", "ai-agent", "desk", "calls", "live"] },
+          "product": { "type": "string", "enum": ["chat", "uikit", "desk", "calls", "live"] },
           "major": { "type": "integer", "minimum": 0 },
           "package": { "type": "string" }
         }

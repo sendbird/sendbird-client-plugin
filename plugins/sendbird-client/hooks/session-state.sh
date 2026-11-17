@@ -5,12 +5,13 @@
 # argument, an agent brief, and the first result of a non-interactive run). Never blocks, never prints.
 #
 # Usage: session-state.sh prompt|tool|agent-start|agent-stop   (the hook event)
-#   prompt       UserPromptSubmit (Claude Code and Codex send the text as .prompt): the SHA-256 and
+#   prompt       UserPromptSubmit (Claude Code and Codex send the text as .prompt; a <task-notification>
+#                prompt, a background task that finished, is skipped): the SHA-256 and
 #                length of each token the request pastes (hook-helpers.sh request_tokens) go to
 #                request-tokens-<session_id>. The token itself is never written.
 #                (final-answer-gate.sh, token-relay-guard.sh). A request that asks for a build of the
 #                project (prompt_asks_build) writes build-asked-<session_id>, and one that does not
-#                removes it (build-command-guard.sh). The request also starts this turn's trace
+#                removes it (build-command-guard.sh). Every request removes plugin-work-<session_id>. The request also starts this turn's trace
 #                (turn-trace-<session_id>) again, with a "skill <name>" line when it names a skill as
 #                /<plugin>:<name> or $<plugin>:<name> ("other-skill sendbird-cli:<name>" for a Sendbird CLI plugin skill).
 #                When destructive-command-guard.sh denied a Sendbird CLI delete in the last turn (Codex or a
@@ -50,6 +51,18 @@ case "$event" in
   prompt)
     prompt="$(jget '.prompt')"
     [ -n "$prompt" ] || exit 0
+    # A finished background task (a background shell command, agent, or monitor) reaches the session
+    # as a UserPromptSubmit whose prompt is a <task-notification> block, with the same fields as a
+    # request (observed in Claude Code 2.1.318). It is not the customer's request: it must not record a
+    # build request, start a new turn trace, or confirm a pending command.
+    case "$(printf '%s' "$prompt" | sed -n '/[^[:space:]]/{p;q;}' | sed 's/^[[:space:]]*//')" in
+      '<task-notification>'*) exit 0 ;;
+    esac
+    # Plugin work (build-command-guard.sh) lasts one request: the next request starts without it, and the
+    # guard marks it again when that request uses the plugin. In a 2026-11 audit one docs-search early in a
+    # session kept ./gradlew test, swift test, and tsc denied for every later, unrelated request.
+    w="$(session_state_file plugin-work)"
+    [ -z "$w" ] || rm -f "$w"
     b="$(session_state_file build-asked)"
     if [ -n "$b" ]; then
       if prompt_asks_build "$prompt"; then mkdir -p "$(dirname "$b")" 2>/dev/null && : > "$b"; else rm -f "$b"; fi

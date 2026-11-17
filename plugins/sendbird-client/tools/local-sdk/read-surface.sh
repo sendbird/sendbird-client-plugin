@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 # Read a customer-INSTALLED Sendbird product's public surface and cache it locally.
 # Usage: read-surface.sh <project-dir> <product> [resolved-version]
-# Writes <project-dir>/.sendbird-client/cache/<product>/api-surface.md (gitignored; never committed).
+# Writes <project-dir>/.sendbird-client/cache/<product>/api-surface.md. The state folder holds a .gitignore of
+# its own, so git ignores it and it is never committed.
+# Prints "wrote <file>" when it read an installed SDK, and "unavailable: <reason> (placeholder at <file>)" when
+# it found none; both exit 0.
 set -euo pipefail
 # Until it is marked shown, the first-run notice (hooks/first-run-notice.sh) goes to stderr: in Codex a
 # skill can run this before the plugin's hooks are trusted.
@@ -14,6 +17,14 @@ plat="$(bash "$ROOT/tools/detection/common/detect-platform.sh" "$dir" 2>/dev/nul
 host="unknown"
 [ "$plat" = "js" ] && host="$(bash "$ROOT/tools/detection/js/detect-host.sh" "$dir" 2>/dev/null || echo unknown)"
 out="$dir/.sendbird-client/cache/$product/api-surface.md"; mkdir -p "$(dirname "$out")"
+[ -f "$dir/.sendbird-client/.gitignore" ] || printf '# The coding plugin keeps its state here; git ignores the whole folder.\n*\n' > "$dir/.sendbird-client/.gitignore"
+# report : the last line the caller reads. A file that says the surface is unavailable is not a surface: a
+# 2026-11 audit saw "wrote ..." for a folder with no SDK and took it as read.
+report() {
+  local why
+  why="$(sed -n 's/^_Public SDK surface unavailable: \(.*\)\. Resolve the stated condition, then re-run\._$/\1/p' "$out" | head -1)"
+  if [ -n "$why" ]; then echo "unavailable: $why (placeholder at $out)"; else echo "wrote $out"; fi
+}
 # shellcheck source=lib/render.sh
 source "$HERE/lib/render.sh"
 case "$plat" in
@@ -24,7 +35,6 @@ case "$plat" in
       calls) if [ -d "$dir/node_modules/@sendbird/calls-react-native" ]; then pkg="@sendbird/calls-react-native"; else pkg="sendbird-calls"; fi;;
       desk) pkg="sendbird-desk";;
       live) pkg="@sendbird/live";;
-      ai-agent) if [ -d "$dir/node_modules/@sendbird/ai-agent-messenger-react-native" ]; then pkg="@sendbird/ai-agent-messenger-react-native"; else pkg="@sendbird/ai-agent-messenger-react"; fi;;
       *) pkg="@sendbird/$product";;
     esac
     pkg_dir="$dir/node_modules/$pkg"
@@ -46,14 +56,10 @@ case "$plat" in
     # Module names verified in the public SPM packages (sendbird-chat-sdk-ios,
     # sendbird-uikit-ios-spm, sendbird-live-sdk-ios). Match on `<Module>.swiftmodule/`,
     # never on the whole path: a project folder named `uikit-demo` must not turn the
-    # Chat interface into a UIKit candidate. AI Agent, Desk, and Calls names come from the
-    # curated install sections (knowledge/curated/ios/products/ai-agent.md and desk.md
-    # "Install (SPM)", calls.md "Install (SPM only)"). Since 1.23.0 the AI Agent Messenger
-    # module is built from source and its public API ships in the SendbirdAIAgentCore binary,
-    # so either name counts; `|` separates names.
+    # Chat interface into a UIKit candidate. Desk and Calls names come from the curated
+    # install sections (desk.md "Install (SPM)", calls.md "Install (SPM only)"); `|` separates names.
     case "$product" in
       chat) module="SendbirdChatSDK";; uikit) module="SendbirdUIKit";; live) module="SendbirdLiveSDK";;
-      ai-agent) module="SendbirdAIAgentCore|SendbirdAIAgentMessenger";;
       desk) module="SendBirdDesk";; calls) module="SendBirdCalls";;
       *) module="";;
     esac
@@ -103,7 +109,7 @@ case "$plat" in
     if [ -n "$jv" ]; then bash "$HERE/read-javap.sh" "$jv" "$product" > "$out"
     else
       case "$product" in
-        chat) artifact="sendbird-chat";; uikit) artifact="uikit";; ai-agent) artifact="ai-agent-messenger";;
+        chat) artifact="sendbird-chat";; uikit) artifact="uikit";;
         calls) artifact="sendbird-calls";; desk) artifact="sendbird-desk-android-sdk";; live) artifact="sendbird-live";;
         *) artifact="$product";;
       esac
@@ -115,7 +121,7 @@ case "$plat" in
         count="$(printf '%s\n' "$versions" | sed '/^$/d' | wc -l | tr -d ' ')"
         if [ "$count" -gt 1 ]; then
           render_empty "$product" "multiple installed $artifact versions found ($(printf '%s' "$versions" | paste -sd, -)); pass the resolved version as the third argument" > "$out"
-          echo "wrote $out"
+          report
           exit 0
         fi
         version="$(printf '%s\n' "$versions" | tail -1)"
@@ -129,4 +135,4 @@ case "$plat" in
     render_empty "$product" "platform not detected for $dir" > "$out"
     ;;
 esac
-echo "wrote $out"
+report

@@ -1,6 +1,6 @@
 // source: https://sendbird.com/docs/chat/sdk/v4/ios/ref/Classes/BaseChannel.html (updateUserMessage, deleteMessage, channelURL)
 // source: https://sendbird.com/docs/chat/sdk/v4/ios/ref/Classes/SendbirdChat.html (getCurrentUser, addChannelDelegate, removeChannelDelegate)
-// source: knowledge/curated/ios/products/chat.md ("Update and delete a message")
+// source: https://sendbird.com/docs/chat/sdk/v4/ios/message/managing-a-message/update-a-message
 // The SDK calls are the ones in the UIKit-host template templates/ios/uikit/chat/MessageEditing.swift, verified
 // against the 4.39.10 and 4.39.11 release .swiftinterface. This file only wraps them in an ObservableObject; the
 // wrapper is standard SwiftUI/Combine, not an SDK API. Compiled by tools/templates/compile-check-ios.sh against the

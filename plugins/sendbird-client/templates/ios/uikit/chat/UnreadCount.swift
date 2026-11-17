@@ -1,7 +1,6 @@
 // source: https://sendbird.com/docs/chat/sdk/v4/ios/ref/Classes/SendbirdChat.html (getTotalUnreadMessageCount, addUserEventDelegate, removeUserEventDelegate)
 // source: https://sendbird.com/docs/chat/sdk/v4/ios/ref/Classes/GroupChannel.html (unreadMessageCount, markAsRead)
 // source: https://sendbird.com/docs/chat/sdk/v4/ios/event-delegate/managing-user-event-delegates/add-or-remove-a-user-event-delegate
-// source: knowledge/curated/ios/products/chat.md ("Unread counts")
 // Verified against the 4.39.10 and 4.39.11 release .swiftinterface (SendbirdChat static
 // getTotalUnreadMessageCount(completionHandler:) with CountHandler, addUserEventDelegate(_:identifier:),
 // removeUserEventDelegate(forIdentifier:); UserEventDelegate optional didUpdateTotalUnreadMessageCount(unreadMessageCount:);

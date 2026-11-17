@@ -1,7 +1,6 @@
 // source: https://sendbird.com/docs/chat/sdk/v4/android/ref/-sendbird-chat/com.sendbird.android/-sendbird-chat/index.html
 // source: https://sendbird.com/docs/chat/sdk/v4/android/ref/-sendbird-chat/com.sendbird.android.channel/-group-channel/index.html
 // source: https://sendbird.com/docs/chat/sdk/v4/android/event-handler/managing-user-event-handlers/add-or-remove-a-user-event-handler
-// source: knowledge/curated/android/products/chat.md ("Unread counts")
 // SDK calls (getTotalUnreadMessageCount with UnreadMessageCountHandler, addUserEventHandler / removeUserEventHandler,
 // UserEventHandler onTotalUnreadMessageCountChanged(UnreadMessageCount), GroupChannel unreadMessageCount / markAsRead) are the
 // ones in the View-host template templates/android/view/chat/UnreadCount.kt, verified with javap on the sendbird-chat 4.36.4

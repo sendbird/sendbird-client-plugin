@@ -1,7 +1,7 @@
 // source: https://sendbird.com/docs/chat/sdk/v4/javascript/ref/classes/_sendbird_chat_groupChannel.GroupChannel.html (updateUserMessage, deleteMessage, url)
 // source: https://sendbird.com/docs/chat/sdk/v4/javascript/ref/classes/_sendbird_chat_groupChannel.GroupChannelModule.html (addGroupChannelHandler, removeGroupChannelHandler)
 // source: https://sendbird.com/docs/chat/sdk/v4/javascript/ref/classes/_sendbird_chat.default.html (currentUser)
-// source: knowledge/curated/js/products/chat.md ("Update and delete a message")
+// source: https://sendbird.com/docs/chat/sdk/v4/javascript/message/managing-a-message/update-a-message
 // Verified against the @sendbird/chat 4.22.11 and 4.22.14 type declarations: BaseChannel updateUserMessage(messageId,
 // UserMessageUpdateParams): Promise<UserMessage>, deleteMessage(BaseMessage): Promise<void>; SendbirdChat currentUser;
 // GroupChannelModule addGroupChannelHandler(key, GroupChannelHandler) / removeGroupChannelHandler(key); GroupChannelHandler

@@ -1,7 +1,6 @@
 // source: https://sendbird.com/docs/chat/sdk/v4/android/ref/-sendbird-chat/com.sendbird.android/-sendbird-chat/index.html
 // source: https://sendbird.com/docs/chat/sdk/v4/android/ref/-sendbird-chat/com.sendbird.android.channel/-group-channel/index.html
 // source: https://sendbird.com/docs/chat/sdk/v4/android/event-handler/managing-user-event-handlers/add-or-remove-a-user-event-handler
-// source: knowledge/curated/android/products/chat.md ("Unread counts")
 // Verified with javap on the sendbird-chat 4.36.4 and 4.36.5 AARs: SendbirdChat getTotalUnreadMessageCount(params, UnreadMessageCountHandler)
 // (params has a default, so the handler is passed by name), addUserEventHandler(String, UserEventHandler),
 // removeUserEventHandler(String); UserEventHandler abstract onFriendsDiscovered(List<User>) and open

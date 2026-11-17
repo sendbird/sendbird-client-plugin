@@ -1,10 +1,10 @@
 <!-- last-verified-against: sendbird-chat-sdk-ios 4.39.11 -->
-<!-- verified-at: 2026-09-22 -->
+<!-- verified-at: 2026-11-16 -->
 <!-- verification-method: compile-check-ios -->
 <!-- status: populated -->
 # ios — push
 
-> Push APIs read from the SDK's own `SendbirdChatSDK.swiftinterface`, verified 2026-09-30. register/unregister, logout order, and the Notification Service Extension snippet build-verified (xcodebuild). The pending-token and payload sections were added on 2026-10-11 from the 4.39.11 interface and the iOS push registration page. Used by `/sendbird-client:push-setup`. Do not invent API.
+> Push APIs read from the SDK's own `SendbirdChatSDK.swiftinterface`, verified 2026-09-30. register/unregister, logout order, and the Notification Service Extension snippet build-verified (xcodebuild). The pending-token and payload sections were added on 2026-10-11 from the 4.39.11 interface and the iOS push registration page. On 2026-11-09 the Chat SDK CHANGELOG cited below was re-read at tag 4.39.12: the only new entry is 4.39.12 (CSAT follow-up interfaces, a channel-update crash fix, and a fix for a duplicate wrapper-class warning), nothing about push, and the cited 4.39.11 lines 1262-1379 are unchanged (lines 1273-1390 at 4.39.12). On 2026-11-16 it was re-read at tag 4.39.14: 4.39.13 and 4.39.14 add only bug fixes and improvements, the only push-related entry is 4.39.13 "Stopped the WebSocket receive log and the push notification log from printing the session key and the device push token" (no API or registration change), and the cited lines are unchanged (lines 1305-1422 at 4.39.14). Used by `/sendbird-client:push-setup`. Do not invent API.
 
 ## Overview
 iOS push uses APNs. Register the device's APNs token with Sendbird after the user connects; register a PushKit (VoIP) token for Calls. Upload your APNs auth key / certificate on the Sendbird dashboard.
@@ -156,4 +156,3 @@ Like every push, these apply only while the user is disconnected. (source: https
 
 ## Related
 - Chat connect: knowledge/curated/ios/products/chat.md
-- AI Agent push: see knowledge/curated/ios/products/ai-agent.md

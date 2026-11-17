@@ -34,7 +34,7 @@
     ],
     "PreToolUse": [
       {
-        "matcher": "Skill|Agent|Write|Edit|MultiEdit|Bash|Read",
+        "matcher": "Skill|Agent|Write|Edit|MultiEdit|Bash|Read|Grep|Glob",
         "hooks": [
           {
             "type": "command",
@@ -111,6 +111,15 @@
           {
             "type": "command",
             "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/upgrade-sdk-guard.sh\""
+          }
+        ]
+      },
+      {
+        "matcher": "Read|Grep|Glob|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/plugin-read-allow.sh\""
           }
         ]
       }

@@ -10,8 +10,8 @@
 
 ## Integration notes
 
-- Core chat via `@sendbird/chat`; prebuilt UI via `@sendbird/uikit-react`; AI Agent via `@sendbird/ai-agent-messenger-react`.
-- UIKit/AI Agent React components need their CSS imported (e.g. `@sendbird/uikit-react/dist/index.css`).
+- Core chat via `@sendbird/chat`; prebuilt UI via `@sendbird/uikit-react`.
+- UIKit React components need their CSS imported (e.g. `@sendbird/uikit-react/dist/index.css`).
 - Manage handlers in `useEffect` cleanup; init `sb` once (module singleton / context), not per render.
 
 ## Multiple tabs or windows

@@ -1,7 +1,6 @@
 // source: https://sendbird.com/docs/chat/uikit/v3/react/essentials/handlers ("Session handlers": configureSession + accessToken on SendbirdProvider)
 // source: https://github.com/sendbird/sendbird-uikit-react/blob/v3.19.1/src/lib/Sendbird/types.ts#L47 (ConfigureSessionTypes; SendbirdProviderProps accessToken/configureSession at lines 205, 208)
 // source: https://github.com/sendbird/sendbird-uikit-react/blob/v3.19.1/src/lib/Sendbird/context/hooks/useSendbird.tsx#L234-L241 (setSessionHandler before sdk.connect(userId, accessToken))
-// source: knowledge/curated/js/products/uikit.md ("Session tokens: `accessToken` and `configureSession`")
 // source: knowledge/curated/js/products/auth.md ("Token refresh — SessionHandler (set before connect)")
 // Type-checked by tools/templates/compile-check-js.sh against the pinned and latest packages.
 //

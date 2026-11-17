@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Detect the resolved Sendbird SDK version of each product in a project.
 # Prints one "<product> <x.y.z>" line per product with an exact version, ordered
-# chat, uikit, calls, desk, live, ai-agent. Nothing is printed for a product whose version
+# chat, uikit, calls, desk, live. Nothing is printed for a product whose version
 # is unknown (a dynamic Gradle version such as 3.+, or no lockfile and no exact range).
 #
 # detect-existing-integration.sh reports one version for the whole project; this keeps the
@@ -34,7 +34,6 @@ js_product() { # npm package name -> product, or nothing
     sendbird-calls|@sendbird/calls-react-native) echo calls ;;
     sendbird-desk) echo desk ;;
     @sendbird/live) echo live ;;
-    @sendbird/ai-agent-messenger-react|@sendbird/ai-agent-messenger-react-native) echo ai-agent ;;
   esac
 }
 
@@ -123,7 +122,6 @@ candidates() {
       else if (a == "sendbird-calls") p = "calls"
       else if (a == "sendbird-desk-android-sdk") p = "desk"
       else if (a == "sendbird-live") p = "live"
-      else if (a == "ai-agent-messenger") p = "ai-agent"
       if (p != "") print p, $2 }' || true
 }
 

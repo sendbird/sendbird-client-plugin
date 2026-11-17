@@ -1,4 +1,4 @@
-// source: knowledge/curated/ios/setup.md ("Pitfalls": App ID from config)
+// source: https://sendbird.com/docs/chat/sdk/v4/ios/application/authenticating-a-user/authentication
 import Foundation
 
 enum AppConfig {

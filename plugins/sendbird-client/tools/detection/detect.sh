@@ -14,6 +14,9 @@ set -euo pipefail
 first_run_notice="$(cd "$(dirname "$0")" && pwd)/../../hooks/first-run-notice.sh"
 [ ! -f "$first_run_notice" ] || bash "$first_run_notice" script || true
 dir="${1:?usage: detect.sh <project-dir>}"
+# A path that is not a folder printed nothing and exited 1 (a 2026-11 audit), which left the agent nothing
+# to tell the customer.
+[ -d "$dir" ] || { echo "detect.sh: no folder at $dir. Pass the project folder (the one with package.json, the Xcode project, or build.gradle)." >&2; exit 1; }
 HERE="$(cd "$(dirname "$0")" && pwd)"
 CORE="$(cd "$HERE/../../core/commands" && pwd)"
 
@@ -29,6 +32,8 @@ if [ ! -f "$prof" ] && [ -z "$(find "$dir" -mindepth 1 -maxdepth 1 ! -name '.*' 
 fi
 
 mkdir -p "$dir/.sendbird-client"
+# The state folder is the plugin's, not the app's: a .gitignore in it keeps git from committing it.
+[ -f "$dir/.sendbird-client/.gitignore" ] || printf '# The coding plugin keeps its state here; git ignores the whole folder.\n*\n' > "$dir/.sendbird-client/.gitignore"
 stored="$(cat "$prof" 2>/dev/null || echo '{}')"
 printf '%s' "$stored" | jq -e . >/dev/null 2>&1 || stored='{}'
 # With both editions of this plugin installed, the other one may already hold the confirmed App ID in

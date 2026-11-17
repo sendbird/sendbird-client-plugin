@@ -68,7 +68,6 @@
         "enum": [
           "chat",
           "uikit",
-          "ai-agent",
           "desk",
           "calls",
           "live"
@@ -92,7 +91,6 @@
             "enum": [
               "chat",
               "uikit",
-              "ai-agent",
               "desk",
               "calls",
               "live"

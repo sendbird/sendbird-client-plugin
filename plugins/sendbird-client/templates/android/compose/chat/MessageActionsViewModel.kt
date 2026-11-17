@@ -1,6 +1,6 @@
 // source: https://sendbird.com/docs/chat/sdk/v4/android/ref/-sendbird-chat/com.sendbird.android.channel/-base-channel/index.html
 // source: https://sendbird.com/docs/chat/sdk/v4/android/ref/-sendbird-chat/com.sendbird.android/-sendbird-chat/index.html
-// source: knowledge/curated/android/products/chat.md ("Update and delete a message")
+// source: https://sendbird.com/docs/chat/sdk/v4/android/message/managing-a-message/update-a-message
 // SDK calls (updateUserMessage, deleteMessage, SendbirdChat currentUser / addChannelHandler / removeChannelHandler,
 // GroupChannelHandler onMessageUpdated / onMessageDeleted) are the ones in the View-host template
 // templates/android/view/chat/MessageEditing.kt, verified with javap on the sendbird-chat 4.36.4 and 4.36.5 AARs. This file

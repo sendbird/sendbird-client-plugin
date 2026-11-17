@@ -13,11 +13,10 @@
 - Dependencies (pick what you need):
   - Chat: `implementation("com.sendbird.sdk:sendbird-chat:4.36.5")`
   - UIKit: `implementation("com.sendbird.sdk:uikit:3.26.3")`
-  - AI Agent: `implementation("com.sendbird.sdk:ai-agent-messenger:1.19.1")`
   - Calls: `implementation 'com.sendbird.sdk:sendbird-calls:1.12.5'`
   - Desk: `implementation 'com.sendbird.sdk:sendbird-desk-android-sdk:1.2.0'`
   - Live: `implementation 'com.sendbird.sdk:sendbird-live:1.2.8'`
-- UIKit/AI Agent need `buildFeatures { viewBinding = true }`, Java 11, API 21+.
+- UIKit needs `buildFeatures { viewBinding = true }`, Java 11, API 21+.
 
 ## Getting a newer Chat SDK under UIKit
 
@@ -63,7 +62,7 @@ android {
 Merge the `android { }` lines into the existing block, and read the value in code as `BuildConfig.SENDBIRD_APP_ID`. (source: templates/starters-bp/android-view/app/build.gradle.kts lines 2 and 13-35, built by the starters-build workflow)
 
 ## Init
-- Initialize once in `Application.onCreate` (Chat: `SendbirdChat.init`; UIKit: `SendbirdUIKit.init(adapter, context)`; AI Agent: `AIAgentMessenger.initialize(...)`).
+- Initialize once in `Application.onCreate` (Chat: `SendbirdChat.init`; UIKit: `SendbirdUIKit.init(adapter, context)`).
 - Register your `Application` in `AndroidManifest.xml`.
 
 ## DNS fallback (4.19.2+)
@@ -83,7 +82,6 @@ SendbirdChat.init(params, initResultHandler)
 - App ID from BuildConfig/secret; tokens are secrets.
 - One App ID per app run. The authentication docs say the initialization method "must be called once across your client app", and they describe no way to switch to another App ID at runtime; keep development and production App IDs in separate build types or flavors. (source: https://sendbird.com/docs/chat/sdk/v4/android/application/authenticating-a-user/authentication)
   - When the customer asks to switch App IDs inside the app (a settings switch, a debug menu), do not build a runtime switch. Say why (the rule above), give each build type (debug and release) or flavor its own `SENDBIRD_APP_ID` value in the app's Gradle build file, passed on the way "App ID in Gradle" above describes, and finish the run with that change instead of asking or declining. A value the customer did not give stays empty and goes under the run's manual steps.
-- Match Chat/UIKit min versions required by AI Agent (see products/ai-agent.md).
 
 ## Related
 - Chat: knowledge/curated/android/products/chat.md

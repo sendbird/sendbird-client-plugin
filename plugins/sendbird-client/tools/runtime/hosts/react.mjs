@@ -27,6 +27,7 @@ const userB = process.env.RT_USER_B;
 const chatUI = process.env.RT_CHAT_UI === '1';
 const direct = process.env.RT_DIRECT === '1';
 const chatScreens = process.env.RT_CHAT_SCREENS === '1';
+const startPath = process.env.RT_START_PATH || '';  // --start-path: where the chat entry is, after sign-in
 const expectTexts = (process.env.RT_EXPECT_TEXT || '').split('\n').filter(Boolean);
 const expectSelectors = (process.env.RT_EXPECT_SELECTOR || '').split('\n').filter(Boolean);
 // digits only: a letter tag hit the test app's profanity filter (server stored asterisks, 2026-10-14)
@@ -229,7 +230,7 @@ async function directChat(page) {
       const product = page.getByRole('button', { name: /product/i }).or(page.getByRole('link', { name: /product/i })).first();
       if (await product.isVisible().catch(() => false)) { await product.click(); entry = await directEntry(page, 10000); }
     }
-    if (!entry) return { ok: false, detail: 'no chat button on the screen after sign-in (a button or link named for chat or messages)' };
+    if (!entry) return { ok: false, detail: `no chat button on the screen after sign-in${startPath ? ` and going to ${startPath}` : ''} (a button or link named for chat or messages)${startPath ? '' : '; when the button is on another screen, run again with --start-path and that screen\'s path'}` };
     label = entry.label;
     await entry.el.click();
   }
@@ -268,6 +269,13 @@ async function main() {
     const s1 = await shot(a, 'a-signed-in');
     if (signed !== 'ok') { fail('sign-in', `A: ${signed}`, s1); return rc; }
     step('sign-in', true, `A=${userA} via ${page0.mode === 'harness-page' ? 'onLoginSucceeded (harness page)' : 'the sign-in form'}${signInEntry ? ` behind "${signInEntry}"` : ''}`, s1);
+    if (startPath) {
+      // the app's own router moves without a reload (react-router and the others listen to popstate), so
+      // the signed-in state in memory stays
+      await a.evaluate((p) => { window.history.pushState({}, '', p); window.dispatchEvent(new PopStateEvent('popstate', { state: {} })); }, startPath);
+      await a.waitForLoadState('networkidle').catch(() => {});
+      console.log(`note: A went to ${startPath} (--start-path)`);
+    }
 
     if (direct) {
       // the chat screen is the 1:1 conversation itself; it is opened after the connect check

@@ -21,9 +21,9 @@
         "required": ["url", "title", "product", "platform", "docsPlatform", "section"],
         "additionalProperties": false,
         "properties": {
-          "url": { "type": "string", "pattern": "^https://sendbird\\.com/docs/(chat/sdk/v4|chat/uikit/v3|calls/sdk/v1|desk/sdk/v1|live/sdk/v1|ai-agent)/[a-z0-9./_-]+$" },
+          "url": { "type": "string", "pattern": "^https://sendbird\\.com/docs/(chat/sdk/v4|chat/uikit/v3|calls/sdk/v1|desk/sdk/v1|live/sdk/v1)/[a-z0-9./_-]+$" },
           "title": { "type": "string", "minLength": 1 },
-          "product": { "type": "string", "enum": ["chat", "uikit", "ai-agent", "desk", "calls", "live"] },
+          "product": { "type": "string", "enum": ["chat", "uikit", "desk", "calls", "live"] },
           "platform": { "type": "string", "enum": ["ios", "android", "js", "common"] },
           "docsPlatform": {
             "type": ["string", "null"],

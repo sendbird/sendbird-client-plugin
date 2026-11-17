@@ -14,7 +14,7 @@
 | UIKit v2 (View) | UIKit v3 (View) | https://sendbird.com/docs/chat/uikit/v3/android-view/miscellaneous/migration-guide |
 | v3 code built on low-level channel and message calls | group channel and message collections (optional, recommended by the guide) | https://sendbird.com/docs/chat/sdk/v4/android/getting-started/collection-migration-guide |
 
-The docs index (`core/docs-index.json`) has no major-version migration guide for UIKit for Jetpack Compose, Calls, Desk, Live, or AI Agent on Android (checked 2026-10-16). For those, say that no public migration guide exists and work from the product's current docs.
+The docs index (`core/docs-index.json`) has no major-version migration guide for UIKit for Jetpack Compose, Calls, Desk, or Live on Android (checked 2026-10-16). For those, say that no public migration guide exists and work from the product's current docs.
 
 ## Order of work
 

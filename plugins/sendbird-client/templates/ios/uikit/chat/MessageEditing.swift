@@ -1,7 +1,6 @@
 // source: https://sendbird.com/docs/chat/sdk/v4/ios/ref/Classes/BaseChannel.html (updateUserMessage, deleteMessage, channelURL)
 // source: https://sendbird.com/docs/chat/sdk/v4/ios/ref/Classes/SendbirdChat.html (getCurrentUser, addChannelDelegate, removeChannelDelegate)
 // source: https://sendbird.com/docs/chat/sdk/v4/ios/message/managing-a-message/update-a-message
-// source: knowledge/curated/ios/products/chat.md ("Update and delete a message")
 // Verified against the 4.39.10 and 4.39.11 release .swiftinterface (extension BaseChannel:
 // updateUserMessage(messageId:params:completionHandler:), deleteMessage(_:completionHandler:);
 // UserMessageUpdateParams init(message:); BaseMessage sender, messageId; SendbirdChat getCurrentUser(),

@@ -5,8 +5,8 @@
 # A product in config .productScope.notYetSupported is never in scope: it is left out of the
 # default, dropped (with a note on stderr) from SENDBIRD_PRODUCTS or the profile, and
 # `--check <product>` fails with "product not supported yet" instead of "out of configured scope".
-# A product this plugin does not ship (not in config .products, for example AI Agent in an edition
-# without it) fails `--check` with "product not covered by this plugin": widening SENDBIRD_PRODUCTS or
+# A product this plugin does not ship (not in config .products, for example a product an edition
+# leaves out) fails `--check` with "product not covered by this plugin": widening SENDBIRD_PRODUCTS or
 # the profile cannot add it, so the answer must not suggest that.
 # A product the plugin covers that the project's host cannot run (config .productScope.unsupportedHosts, for
 # example Live on React Native) fails `--check` with "product not available on this host" and the reason.
