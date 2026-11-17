@@ -4,8 +4,10 @@
 # ("This run does not build, compile, or type-check the project"). Agents kept running
 # `npm run typecheck` despite that line (a 2026-10 TC run: four runs failed on it).
 #
-# - Skill / Agent (Claude Code): a call of one of this plugin's skills or agents marks the session as
-#   plugin work. Nothing is ever denied for these tools.
+# - Skill / Agent (Claude Code): a call of one of this plugin's skills or agents marks the current request
+#   as plugin work (plugin-work-<session_id>; hooks/session-state.sh removes it when the next request
+#   arrives, so a later request that does not use the plugin builds freely). Nothing is ever denied for
+#   these tools.
 # - Bash (Claude Code and Codex, tool_input.command as a string or an argument list): a command that
 #   names the plugin's folder (its tools, scripts, or a SKILL.md it reads, which is how Codex runs a
 #   skill) also marks the session, and the parts of it that name that folder are always allowed (each part
@@ -14,7 +16,7 @@
 #   asking: tools/verify/check-written.sh, which the chat-ui=chat-sdk path runs on the screens it wrote
 #   (contract section 3, "Type-check the Chat SDK screens you wrote"); it is the only way that path
 #   type-checks, so a direct tsc, Gradle, or swiftc command stays denied. Any other command is denied
-#   when the session is plugin work, the latest request did not ask for a build (hooks/session-state.sh
+#   when the request is plugin work, the latest request did not ask for a build (hooks/session-state.sh
 #   prompt writes build-asked-<session_id> then), and a part of the command is a build (below).
 # Without a session_id there is no state to read, and the guard allows everything.
 set -uo pipefail
@@ -24,7 +26,6 @@ source "$HERE/lib/hook-helpers.sh"
 read_stdin_json
 
 ROOT="$(plugin_root_real)"
-plugin_name="$(jq -r '.name // empty' "$ROOT/.claude-plugin/plugin.json" 2>/dev/null)"
 mark_plugin_work() {
   local f
   f="$(session_state_file plugin-work)"
@@ -36,27 +37,29 @@ tool="$(jget .tool_name)"
 case "$tool" in
   Skill|Agent|Task)
     name="$(jget .tool_input.skill)"; [ -n "$name" ] || name="$(jget .tool_input.subagent_type)"
+    plugin_name="$(jq -r '.name // empty' "$ROOT/.claude-plugin/plugin.json" 2>/dev/null)"
     if [ -n "$plugin_name" ] && [ "${name%%:*}" = "$plugin_name" ]; then mark_plugin_work; fi
     exit 0 ;;
   Bash) ;;
   *) exit 0 ;;
 esac
 
-cmd="$(printf '%s' "$HOOK_JSON" | jq -r '.tool_input.command | if type == "array" then join(" ") else (. // "") end' 2>/dev/null)"
+cmd="$(command_text)"
 [ -n "$cmd" ] || exit 0
 
 # names_plugin <text> : 0 when the text names the plugin's own folder
 names_plugin() {
-  printf '%s' "$1" | grep -qF 'CLAUDE_PLUGIN_ROOT' \
-    || { [ -n "$ROOT" ] && printf '%s' "$1" | grep -qF "$ROOT"; } \
-    || { [ -n "${CLAUDE_PLUGIN_ROOT:-}" ] && printf '%s' "$1" | grep -qF "$CLAUDE_PLUGIN_ROOT"; }
+  case "$1" in *CLAUDE_PLUGIN_ROOT*) return 0 ;; esac
+  [ -n "$ROOT" ] && case "$1" in *"$ROOT"*) return 0 ;; esac
+  [ -n "${CLAUDE_PLUGIN_ROOT:-}" ] && case "$1" in *"$CLAUDE_PLUGIN_ROOT"*) return 0 ;; esac
+  return 1
 }
 # is_written_check <part> : 0 when the part runs the plugin's own tools/verify/check-written.sh, the one
 # type check a run makes without a build request (contract section 3); a same-named script elsewhere is not it
 is_written_check() {
   printf '%s' "$1" | grep -Eq '(^|[[:space:]/])tools/verify/check-written\.sh([[:space:]]|$)' && names_plugin "$1"
 }
-# A command that names the plugin's folder makes the session plugin work from here on. Only the parts
+# A command that names the plugin's folder makes the current request plugin work. Only the parts
 # of the command that name it (the plugin's own scripts) are exempt below; another part of the same
 # command is checked like any command ("cd <plugin>/x && npm run typecheck" ran in a 2026-10 TC run
 # because the whole command was let through).
@@ -86,7 +89,7 @@ build_part() {
         gradle*|gradlew*|./gradlew*|*/gradlew*)
           printf '%s' "$p" | grep -Eq '^[^[:space:]]*gradlew?(\.bat)?([[:space:]]+-[^[:space:]]+)*([[:space:]]+(dependencies|tasks|help|properties|--version|-v|--stop|:[A-Za-z0-9_:-]*dependencies))*[[:space:]]*$' && continue ;;
       esac
-      if printf '%s' "$p" | grep -Eq '^([^[:space:]]*/)?(xcodebuild|xcodegen|tsc|gradlew?(\.bat)?)([[:space:]]|$)|^swift[[:space:]]+(build|test)([[:space:]]|$)|^(npm|yarn|pnpm|bun)[[:space:]]+(run[[:space:]]+)?(build|typecheck|type-check|tsc|compile)([[:space:]:]|$)|^([^[:space:]]*/)?(vite|next|webpack|react-scripts)[[:space:]]+build([[:space:]]|$)'; then
+      if printf '%s' "$p" | grep -Eq '^([^[:space:]]*/)?(xcodebuild|xcodegen|tsc|gradlew?(\.bat)?)([[:space:]]|$)|^swift[[:space:]]+(build|test)([[:space:]]|$)|^(npm|yarn|pnpm|bun)[[:space:]]+(run[[:space:]]+)?(build|typecheck|type-check|tsc|compile|test|t)([[:space:]:]|$)|^([^[:space:]]*/)?(vite|next|webpack|react-scripts)[[:space:]]+build([[:space:]]|$)'; then
         printf '%s' "$p" | cut -c1-160
         return 0
       fi
@@ -100,7 +103,7 @@ jq -n --arg c "$hit" '{
   hookSpecificOutput: {
     hookEventName: "PreToolUse",
     permissionDecision: "deny",
-    permissionDecisionReason: ("Sendbird Client plugin: Building the project isn'\''t part of this request, so the command didn'\''t run. To build and run the app, ask for it.\nThis run does not build, compile, or type-check the project (docs/AGENT_CONTRACT.md section 3), and the customer did not ask for a build: " + $c + "\nDo not run it or a variant of it. Check each Sendbird symbol against the installed SDK surface or the cited curated section instead; the plugin'"'"'s own test suites build the code it emits. If a build is needed, say so in the answer; the run-check skill builds and runs the app when the customer asks.")
+    permissionDecisionReason: ("Sendbird Client Plugin: This request didn'\''t ask for a build or a test run, so this command didn'\''t run. To run it, ask for it, for example \"build it\" or \"run the tests\".\nThis run does not build, compile, or type-check the project (docs/AGENT_CONTRACT.md section 3), and the customer did not ask for a build: " + $c + "\nDo not run it or a variant of it. Check each Sendbird symbol against the installed SDK surface or the cited curated section instead; the plugin'"'"'s own test suites build the code it emits. If a build is needed, say so in the answer; the run-check skill builds and runs the app when the customer asks.")
   }
-}'
+}' | customer_lines
 exit 0

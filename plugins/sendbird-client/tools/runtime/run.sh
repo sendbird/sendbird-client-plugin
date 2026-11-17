@@ -8,7 +8,7 @@
 # Usage: run.sh <project-dir> --host <react|react-native|ios-uikit|ios-swiftui|android-view|android-compose>
 #               [--platform ios|android] [--check] [--out DIR] [--app-id-env NAME] [--expect-text TEXT]...
 #               [--expect-element ID]... [--b-custom-type TYPE] [--direct-chat USER] [--chat-screens] [--rich] [--keep]
-#               [--go-ahead]
+#               [--start-path PATH] [--go-ahead]
 #   --go-ahead        the customer agreed to this run: copying the project, installing, building, and
 #                     launching the app, with test users in their application. The run-check skill
 #                     passes it only after the customer said yes (or the request itself allowed the
@@ -47,7 +47,15 @@
 #   --expect-text     text that must be on the chat screen (a customization), repeatable
 #   --expect-element  element that must be on the chat screen: a CSS selector (react), an
 #                     accessibility identifier (iOS), or a resource id / content description (Android)
+#   --start-path      react only: after sign-in, go to this path of the app (for example /products/1) before
+#                     looking for the chat button or the channel list, for an app whose chat entry is not on
+#                     the first screen after sign-in. The page is not reloaded: the path is pushed to the
+#                     browser history, as the app's router does, so the signed-in state stays
 #   --keep            keep the working copy (it holds the App ID; delete it yourself)
+#
+# Each install (the harness tools, the project's npm install) prints a line every minute while it runs and
+# stops after RT_INSTALL_TIMEOUT seconds (default 900) with a fail result that says so. A 2026-11 audit saw
+# the tools install wait twelve minutes with no output behind a proxy setting.
 #
 # The application must allow connecting with a user ID only: users A and B are new test users with
 # generated IDs (rt-<host>-a-xxxxxx) and no access token. Without an App ID, or inside the Codex sandbox
@@ -71,7 +79,7 @@ first_run_notice="$(cd "$(dirname "$0")" && pwd)/../../hooks/first-run-notice.sh
 HERE="$(cd "$(dirname "$0")" && pwd)"
 usage() { echo "usage: run.sh <project-dir> --host <react|react-native|ios-uikit|ios-swiftui|android-view|android-compose> [--platform ios|android] [--check] [--out DIR] [--app-id-env NAME] [--expect-text TEXT]... [--expect-element ID]... [--b-custom-type TYPE] [--direct-chat USER] [--chat-screens] [--rich] [--keep] [--go-ahead]" >&2; exit 64; }
 
-project=""; host=""; platform=""; out=""; keep=0; check=0; app_id_env=""; expect_text=""; expect_element=""; b_custom_type=""; direct_user=""; chat_screens=0; rich=0; go_ahead=0
+start_path=""; project=""; host=""; platform=""; out=""; keep=0; check=0; app_id_env=""; expect_text=""; expect_element=""; b_custom_type=""; direct_user=""; chat_screens=0; rich=0; go_ahead=0
 while [ $# -gt 0 ]; do
   case "$1" in
     --host) [ $# -ge 2 ] || usage; host="$2"; shift 2 ;;
@@ -83,6 +91,8 @@ while [ $# -gt 0 ]; do
     --b-custom-type) [ $# -ge 2 ] || usage; b_custom_type="$2"; shift 2 ;;
     --direct-chat) [ $# -ge 2 ] || usage; direct_user="$2"; shift 2 ;;
     --chat-screens) chat_screens=1; shift ;;
+    --start-path) [ $# -ge 2 ] || usage; start_path="$2"; shift 2
+      case "$start_path" in /*) ;; *) echo "--start-path takes a path that starts with /: $start_path" >&2; exit 64 ;; esac ;;
     --rich) rich=1; shift ;;
     --check) check=1; shift ;;
     --keep) keep=1; shift ;;
@@ -99,6 +109,7 @@ case "$host" in
   "") echo "--host is required" >&2; usage ;;
   *) echo "unknown host: $host" >&2; usage ;;
 esac
+[ -z "$start_path" ] || [ "$host" = react ] || { echo "--start-path is for --host react only" >&2; exit 64; }
 # A React Native app runs on one platform per run; every other host has its platform already.
 if [ "$host" = react-native ]; then
   case "$platform" in
@@ -259,10 +270,38 @@ fi
 
 [ -n "$out" ] || out="$(mktemp -d "${TMPDIR:-/tmp}/runtime.XXXXXX")"
 mkdir -p "$out"; out="$(cd "$out" && pwd)"
+# Results under the plugin's state folder in the project: that folder ignores itself in git (detect.sh too).
+case "$out" in "$(cd "$project" && pwd)/.sendbird-client"/*)
+  [ -f "$project/.sendbird-client/.gitignore" ] || printf '# The coding plugin keeps its state here; git ignores the whole folder.\n*\n' > "$project/.sendbird-client/.gitignore" ;;
+esac
 : > "$out/steps.jsonl"
 
 # say: standard output without the App ID (a driver's step detail can quote a Sendbird host name)
 say() { python3 -I -u "$HERE/lib/redact.py" -; }
+
+# limited <log> <what> <command...> : runs the command with its output in <log>, prints a line every minute
+# while it runs, and stops it after RT_INSTALL_TIMEOUT seconds (exit 124). macOS has no timeout(1).
+limited() {
+  local log="$1" what="$2" limit="${RT_INSTALL_TIMEOUT:-900}" pid waited=0 rc
+  shift 2
+  "$@" >> "$log" 2>&1 &
+  pid=$!
+  while kill -0 "$pid" 2>/dev/null; do
+    sleep 5; waited=$((waited + 5))
+    if [ "$waited" -ge "$limit" ]; then
+      kill "$pid" 2>/dev/null; sleep 1; kill -9 "$pid" 2>/dev/null; wait "$pid" 2>/dev/null
+      echo "$what: stopped after $((limit / 60)) minutes with no end"; return 124
+    fi
+    [ $((waited % 60)) -eq 0 ] && echo "$what: still running ($((waited / 60)) min)"
+  done
+  wait "$pid"; rc=$?
+  return "$rc"
+}
+install_failed() { # install_failed <rc> <what> <log name> : the fail reason for an install that did not finish
+  if [ "$1" -eq 124 ]; then
+    echo "$2 did not finish within $(( ${RT_INSTALL_TIMEOUT:-900} / 60 )) minutes ($3); a proxy setting (HTTPS_PROXY) or an unreachable npm registry is the usual cause"
+  else echo "$2 failed ($3)"; fi
+}
 
 finish() {  # finish <status> <reason> <exit>
   python3 -I "$HERE/lib/redact.py" "$out"
@@ -299,8 +338,10 @@ mkdir -p "$TOOLS"
 if [ ! -f "$TOOLS/.ready-2" ]; then
   echo "installing harness tools into $TOOLS"
   [ -f "$TOOLS/package.json" ] || echo '{"name":"sendbird-runtime-tools","private":true,"type":"module"}' > "$TOOLS/package.json"
-  ( cd "$TOOLS" && npm install --no-audit --no-fund --silent @sendbird/chat@4.22.13 playwright@1.48.2 vite@6.4.5 @vitejs/plugin-react@4.3.4 ) \
-    > "$out/tools-install.log" 2>&1 || finish fail "could not install harness tools (tools-install.log)" 1
+  : > "$out/tools-install.log"
+  limited "$out/tools-install.log" "installing harness tools" \
+    bash -c 'cd "$1" && npm install --no-audit --no-fund --silent @sendbird/chat@4.22.13 playwright@1.48.2 vite@6.4.5 @vitejs/plugin-react@4.3.4' _ "$TOOLS" \
+    || finish fail "$(install_failed $? "installing the harness tools" tools-install.log)" 1
   touch "$TOOLS/.ready-2"
 fi
 cp "$HERE/lib/peer.mjs" "$HERE/lib/signin.mjs" "$HERE/lib/screens.mjs" "$HERE/hosts/react.mjs" "$HERE/hosts/vite.harness.config.mjs" "$TOOLS/"
@@ -339,7 +380,7 @@ msg_state="$(message_steps_note "$chat_ui" "$([ "$chat_ui" = 1 ] || chat_sdk_sen
 
 rand() { LC_ALL=C tr -dc 'a-z0-9' < /dev/urandom | head -c 6; }
 RT_USER_A="rt-${host}-a-$(rand)"; RT_USER_B="${direct_user:-rt-${host}-b-$(rand)}"; RT_DIRECT="$([ -n "$direct_user" ] && echo 1 || echo 0)"
-export RT_DIRECT RT_RICH="$rich" RT_CHAT_SCREENS="$chat_screens"
+export RT_DIRECT RT_RICH="$rich" RT_CHAT_SCREENS="$chat_screens" RT_START_PATH="$start_path"
 export RT_USER_A RT_USER_B RT_WORK="$work" RT_OUT="$out" RT_CHAT_UI="$chat_ui" RT_EXPECT_TEXT="$expect_text" RT_EXPECT_SELECTOR="$expect_element" RT_B_CUSTOM_TYPE="$b_custom_type"
 export RT_ENV_NAMES="$env_names" RT_BUILD_SETTINGS="$build_settings" RT_GRADLE_PROPS="$gradle_props" RT_TOOLS="$TOOLS" RT_HERE="$HERE" RT_PLATFORM="$platform"
 echo "runtime: $host${platform:+ ($platform)} | A=$RT_USER_A B=$RT_USER_B | chat screens: $([ "$chat_ui" = 1 ] && echo yes || echo no) | App ID via $(jq -r '.how | join(", ")' <<<"$appid_json") | out $out"
@@ -347,9 +388,11 @@ echo "runtime: $host${platform:+ ($platform)} | A=$RT_USER_A B=$RT_USER_B | chat
 case "$host" in
   react)
     if ! compgen -G "$PLAYWRIGHT_BROWSERS_PATH/chromium*" >/dev/null; then
-      ( cd "$TOOLS" && npx --no-install playwright install chromium ) >> "$out/tools-install.log" 2>&1 || finish fail "could not install Chromium (tools-install.log)" 1
+      ( cd "$TOOLS" && ./node_modules/.bin/playwright install chromium ) >> "$out/tools-install.log" 2>&1 || finish fail "could not install Chromium (tools-install.log)" 1
     fi
-    ( cd "$work" && npm install --no-audit --no-fund ) > "$out/npm-install.log.raw" 2>&1 || finish fail "npm install failed in the project (npm-install.log)" 1
+    : > "$out/npm-install.log.raw"
+    limited "$out/npm-install.log.raw" "npm install in the project copy" bash -c 'cd "$1" && npm install --no-audit --no-fund' _ "$work" \
+      || finish fail "$(install_failed $? "npm install in the project" npm-install.log)" 1
     ( cd "$TOOLS" && node react.mjs ) 2>&1 | say | tee "$out/driver.log.raw"
     rc="${PIPESTATUS[0]}" ;;
   ios-uikit|ios-swiftui)

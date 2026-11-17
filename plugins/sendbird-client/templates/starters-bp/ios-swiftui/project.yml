@@ -1,5 +1,5 @@
-# source: knowledge/curated/ios/setup.md ("Packaging — prefer Swift Package Manager", "Keep shared dependencies compatible")
-# source: knowledge/curated/ios/hosts/swiftui.md ("SwiftUI-native chat views (SendbirdSwiftUI)")
+# source: https://github.com/sendbird/sendbird-uikit-ios-spm/blob/3.36.1/Package.swift#L19-L25
+# source: https://sendbird.com/docs/chat/uikit/v3/swiftui/essentials/installation
 # XcodeGen spec: run `xcodegen generate` to create StarterSwiftUI.xcodeproj.
 name: StarterSwiftUI
 options:

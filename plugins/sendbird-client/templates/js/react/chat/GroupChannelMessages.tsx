@@ -10,7 +10,8 @@
 // (:2103), MessageRequestHandler onPending/onFailed/onSucceeded (:2882/:2889/:2896),
 // FailedMessageHandler (:1627). Type-checked with `tsc --strict --skipLibCheck`
 // against the real package.
-// source: knowledge/curated/js/products/chat.md "List and receive messages" —
+// source: https://sendbird.com/docs/chat/sdk/v4/javascript/local-caching/using-message-collection/message-collection
+// source: https://github.com/sendbird/sendbird-chat-sample-react/blob/main/src/samples/BasicGroupChannelSample.js
 // the onCacheResult/onApiResult array order is not documented, so every batch is
 // sorted by createdAt here instead of rendered as it arrives.
 //

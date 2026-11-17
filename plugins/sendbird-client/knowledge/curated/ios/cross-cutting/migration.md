@@ -1,10 +1,10 @@
 <!-- last-verified-against: sendbird-chat-sdk-ios 4.39.11 / sendbird-uikit-ios 3.36.2 (new names); public migration guides fetched 2026-10-16 -->
-<!-- verified-at: 2026-10-16 -->
+<!-- verified-at: 2026-11-09 -->
 <!-- verification-method: docs-page + sdk-surface -->
 <!-- status: populated -->
 # ios — major version migration
 
-> Moving an app from Chat SDK v3 to v4 and from UIKit v2 to v3. Every old and new name below is taken from Sendbird's public migration guides (cited per section), verified 2026-10-16. Each new name was also found in the SendbirdChatSDK 4.39.11 or SendbirdUIKit 3.36.2 interface; rows of the guides whose new name is not in those interfaces are left out. The guides hold the full lists; this page keeps the parts an agent needs first.
+> Moving an app from Chat SDK v3 to v4 and from UIKit v2 to v3. Every old and new name below is taken from Sendbird's public migration guides (cited per section), verified 2026-10-16. Each new name was also found in the SendbirdChatSDK 4.39.11 or SendbirdUIKit 3.36.2 interface; rows of the guides whose new name is not in those interfaces are left out. The guides hold the full lists; this page keeps the parts an agent needs first. On 2026-11-09 the cited UIKit `README.md` was re-read: its only change since 2026-10-16 is line 63 (UIKit 3.36.3 raised the minimum Chat SDK to 4.39.12), and the CocoaPods lines 113-129 cited below are unchanged.
 
 ## Which guide applies
 
@@ -15,7 +15,7 @@
 | UIKit v3.5 or earlier, customizing through `SBUModuleSet` instances | UIKit v3.6 and later | https://sendbird.com/docs/chat/uikit/v3/ios-uikit/miscellaneous/migration-guide/from-version-three-point-five |
 | v3 code built on low-level channel and message calls | group channel and message collections (optional, recommended by the guide) | https://sendbird.com/docs/chat/sdk/v4/ios/getting-started/collection-migration-guide |
 
-The docs index (`core/docs-index.json`) has no major-version migration guide for SwiftUI, Calls, Desk, Live, or AI Agent on iOS (checked 2026-10-16). For those, say that no public migration guide exists and work from the product's current docs.
+The docs index (`core/docs-index.json`) has no major-version migration guide for SwiftUI, Calls, Desk, or Live on iOS (checked 2026-10-16). For those, say that no public migration guide exists and work from the product's current docs.
 
 ## Order of work
 

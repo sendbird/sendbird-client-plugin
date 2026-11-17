@@ -39,9 +39,12 @@ field() { # $1 = manifest key; jq when present, else the plain "key": "value" li
   if command -v jq >/dev/null 2>&1; then jq -r --arg k "$1" '.[$k] // empty' "$MANIFEST" 2>/dev/null
   else sed -n "s/^[[:space:]]*\"$1\":[[:space:]]*\"\\([^\"]*\\)\".*/\\1/p" "$MANIFEST" 2>/dev/null | head -1; fi
 }
-name="$(field name)"; display="$(field displayName)"; repo="$(field repository)"
+if command -v jq >/dev/null 2>&1; then # one jq call for the three fields
+  IFS=$'\037' read -r name display repo < <(jq -r '[.name // "", .displayName // "", .repository // ""] | map(gsub("[\u001f\n]"; " ")) | join("\u001f")' "$MANIFEST" 2>/dev/null)
+else name="$(field name)"; display="$(field displayName)"; repo="$(field repository)"; fi
 [ -n "$name" ] || exit 0
-msg="${display:-$name} plugin runs shell scripts on your computer with your user account's permissions.
+label="${display:-$name}"; case "$label" in *[Pp]lugin) ;; *) label="$label plugin" ;; esac # "Sendbird Client Plugin" stays as is
+msg="$label runs shell scripts on your computer with your user account's permissions.
 They run when a session starts, before file writes and shell commands, after an agent finishes, and when an answer ends. In Claude Code, one JavaScript file also runs, only to show this notice.
 The scripts read your project files and parts of this conversation. They can block an action or ask Claude to revise its answer. They fetch public pages from sendbird.com/docs and github.com/sendbird.
 Nothing from your project or conversation is sent to Sendbird.
@@ -80,7 +83,7 @@ marks=1
 [ "$marks" -eq 1 ] && { { mkdir -p "$data" 2>/dev/null && printf '%s\n' "$sum" > "$mark" 2>/dev/null; } ||
   { [ -n "$local_mark" ] && mkdir -p "${local_mark%/*}" 2>/dev/null && printf '%s\n' "$sum" > "$local_mark" 2>/dev/null; }; }
 [ "$event" = script ] && {
-  printf '%s plugin runs local scripts on your computer. Details: %s#what-runs-on-your-machine\n%s\n' "${display:-$name}" "$repo" "$msg" >&2
+  printf '%s runs local scripts on your computer. Details: %s#what-runs-on-your-machine\n%s\n' "$label" "$repo" "$msg" >&2
   exit 0
 }
 if command -v jq >/dev/null 2>&1; then jq -n --arg m "$msg" '{systemMessage: $m}'

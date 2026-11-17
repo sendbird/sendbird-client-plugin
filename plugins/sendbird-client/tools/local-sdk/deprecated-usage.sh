@@ -35,6 +35,7 @@ done
 dir="$(cd "$dir" && pwd)"
 plat="$(bash "$ROOT/tools/detection/common/detect-platform.sh" "$dir" 2>/dev/null || echo unknown)"
 cache="$dir/.sendbird-client/cache/deprecations"; mkdir -p "$cache"
+[ -f "$dir/.sendbird-client/.gitignore" ] || printf '# The coding plugin keeps its state here; git ignores the whole folder.\n*\n' > "$dir/.sendbird-client/.gitignore"
 not_run() { echo "NOT RUN: $1"; exit 3; }
 
 case "$plat" in
@@ -57,7 +58,7 @@ case "$plat" in
     echo "CHECKED: ios $product $(sed -n 's/.*source: \(.*\) -->.*/\1/p' "$surf" | head -1) ($(wc -l < "$cache/$product.tsv" | tr -d ' ') deprecated declarations)" ;;
   android)
     case "$product" in
-      chat) artifact="sendbird-chat";; uikit) artifact="uikit";; ai-agent) artifact="ai-agent-messenger";;
+      chat) artifact="sendbird-chat";; uikit) artifact="uikit";;
       calls) artifact="sendbird-calls";; desk) artifact="sendbird-desk-android-sdk";; live) artifact="sendbird-live";;
       uikit-compose) artifact="uikit-compose";;
       *) artifact="$product";;

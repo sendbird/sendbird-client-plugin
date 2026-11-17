@@ -1,4 +1,4 @@
-// source: knowledge/curated/ios/products/auth.md ("Connect (session token)", "Token rules")
+// source: https://sendbird.com/docs/chat/sdk/v4/ios/application/authenticating-a-user/authentication
 import Foundation
 
 enum TokenProvider {

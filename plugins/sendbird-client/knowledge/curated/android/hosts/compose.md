@@ -8,7 +8,7 @@
 - `androidx.compose.*` imports, `@Composable`, `setContent { }`, Compose BOM in Gradle.
 
 ## Integration notes
-- The classic UIKit (`com.sendbird.sdk:uikit`) and AI Agent for Android are View/Fragment-based (see templates/android/compose/*/_README.md). UIKit also ships a Compose-native variant — see "UIKit for Jetpack Compose — init, then push" below.
+- The classic UIKit (`com.sendbird.sdk:uikit`) is View/Fragment-based (see templates/android/compose/*/_README.md). UIKit also ships a Compose-native variant — see "UIKit for Jetpack Compose — init, then push" below.
 - Host the View/Fragment screens via interop (`AndroidView`, `AndroidFragment`, `FragmentContainerView`), or start the provided activities (e.g. `MessengerActivity`).
 - When you host those View/Fragment screens, init + session + connect are identical to the View host; the host only changes how UI is embedded. The Compose-native UIKit has its own init (below).
 - `viewModel()` (`import androidx.lifecycle.viewmodel.compose.viewModel`) is in `androidx.lifecycle:lifecycle-viewmodel-compose`. `androidx.activity:activity-compose` does not depend on it (its 1.10.1 POM lists `lifecycle-viewmodel`, `lifecycle-runtime`, and `lifecycle-common` only), so a module that has only `activity-compose`, `compose.ui`, and `material3` fails with "Unresolved reference 'viewModel'". When code you add calls `viewModel()`, declare `lifecycle-viewmodel-compose` in that module's dependencies (or the version catalog) unless the project already has it. (source: https://dl.google.com/android/maven2/androidx/activity/activity-compose/1.10.1/activity-compose-1.10.1.pom, https://dl.google.com/android/maven2/androidx/lifecycle/lifecycle-viewmodel-compose-android/2.8.7/lifecycle-viewmodel-compose-android-2.8.7.aar classes.jar `androidx/lifecycle/viewmodel/compose/ViewModelKt.class`, checked 2026-10-26)
@@ -279,4 +279,3 @@ fun ChatWithSellerButton(navController: NavController, sellerUserId: String) {
 
 ## Related
 - View host: knowledge/curated/android/hosts/view.md
-- AI Agent: knowledge/curated/android/products/ai-agent.md

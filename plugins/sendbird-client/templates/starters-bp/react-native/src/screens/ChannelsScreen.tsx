@@ -1,4 +1,4 @@
-// source: knowledge/curated/js/products/uikit.md ("React Native", "Channel list: custom item, filter, loading state")
+// source: https://sendbird.com/docs/chat/uikit/v3/react-native/essentials/authentication
 // source: https://github.com/sendbird/sendbird-uikit-react-native/blob/v3.12.10/packages/uikit-react-native/src/domain/groupChannel/types.ts#L26-L31
 // source: https://github.com/sendbird/sendbird-uikit-react-native/blob/v3.12.10/packages/uikit-react-native/src/components/ChannelInput/index.tsx#L102
 // source: https://reactnative.dev/blog/2026/06/11/react-native-0.86 ("KeyboardAvoidingView works correctly on Android 15+ with edgeToEdgeEnabled")

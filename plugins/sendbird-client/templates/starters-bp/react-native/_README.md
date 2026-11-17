@@ -32,7 +32,7 @@ the Android Emulator. The practices it follows are listed in `../BEST_PRACTICES.
 | BP10 | `src/sendbird/platformServices.ts:48` | UIKit's connect registers the push token through the notification service (auto registration is on by default; `src/sendbird/SessionBridge.tsx:39`). |
 | BP11 | `App.tsx:16` | An MMKV store as `chatOptions.localCacheStorage`; the container turns local caching on. |
 | BP12 | `App.tsx:23` | `styles.theme` on the container. |
-| BP13 | `src/sendbird/errors.ts:4` | Maps the verified error codes to a message; a failed connect shows it on the sign-in screen (`src/sendbird/SessionBridge.tsx:49`). |
+| BP13 | `src/sendbird/errors.ts:3` | Maps the verified error codes to a message; a failed connect shows it on the sign-in screen (`src/sendbird/SessionBridge.tsx:49`). |
 | BP15 | `App.tsx:22` | The container also follows the app state (foreground and background) for the Chat SDK. |
 | BP16 | `src/auth/session.ts:1` | One store; `Screens` (`App.tsx:43`) and `SessionBridge` read it. |
 | BP17 | `src/screens/LoginScreen.tsx:39` | `testID` values (see below). |

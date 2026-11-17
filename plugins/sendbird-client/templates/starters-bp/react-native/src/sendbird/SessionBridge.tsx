@@ -1,7 +1,7 @@
 // source: https://github.com/sendbird/sendbird-uikit-react-native/blob/v3.12.10/packages/uikit-react-native/src/hooks/useConnection.ts#L29-L104
 // source: knowledge/curated/js/products/auth.md ("Token refresh — SessionHandler (set before connect)")
-// source: knowledge/curated/js/products/chat.md ("Connection state and reconnection")
-// source: knowledge/curated/js/cross-cutting/push.md ("Logout: unregister this device before disconnecting")
+// source: https://sendbird.com/docs/chat/sdk/v4/javascript/event-handler/managing-connection-event-handlers/add-or-remove-a-connection-event-handler
+// source: https://sendbird.com/docs/chat/sdk/v4/javascript/application/authenticating-a-user/authentication
 //
 // Connects and disconnects through UIKit, inside SendbirdUIKitContainer, following the session.
 import { useEffect } from 'react';

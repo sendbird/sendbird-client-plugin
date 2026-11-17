@@ -32,7 +32,7 @@ The practices it follows are listed in `../BEST_PRACTICES.md`.
 | BP10 | `Sources/AppDelegate.swift:10` | One marked place to turn on push; the token is registered for the signed-in user after connect (`Sources/SendbirdSession.swift:168`). |
 | BP11 | `Sources/SendbirdSession.swift:58` | `isLocalCachingEnabled = true` (UIKit 3.33.1 and later keep it on in any case). |
 | BP12 | `Sources/StarterTheme.swift:5` | `SBUTheme.set(colorScheme:)` once, before the first UIKit screen. |
-| BP13 | `Sources/SendbirdErrors.swift:6` | Maps the verified error codes to a message; a failed connect shows it on the sign-in screen (`Sources/SendbirdSession.swift:116`). |
+| BP13 | `Sources/SendbirdErrors.swift:5` | Maps the verified error codes to a message; a failed connect shows it on the sign-in screen (`Sources/SendbirdSession.swift:116`). |
 | BP16 | `Sources/SendbirdSession.swift:13` | `SendbirdSession.shared`; `LoginService` (`Sources/LoginService.swift:4`) and the scene (`Sources/SceneDelegate.swift:4`) all use it. |
 | BP17 | `Sources/ChannelScreens.swift:28` | Accessibility identifiers, including the UIKit input and send button (see below). |
 

@@ -1,4 +1,4 @@
-// source: knowledge/curated/android/cross-cutting/push.md ("Handler-based vs manual token registration", "Logout: unregister this device before disconnecting")
+// source: https://sendbird.com/docs/chat/sdk/v4/android/ref/-sendbird-chat/com.sendbird.android/-sendbird-chat/index.html
 package com.example.starterbp.view.sendbird
 
 import com.sendbird.android.SendbirdChat

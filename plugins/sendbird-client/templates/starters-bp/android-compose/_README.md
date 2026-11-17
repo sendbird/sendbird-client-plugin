@@ -19,20 +19,20 @@ then replace the user ID field with your own sign-in. The practices it follows a
 
 | ID | File:line | What the code does |
 |---|---|---|
-| BP01 | `app/src/main/java/com/example/starterbp/compose/StarterApplication.kt:9` | `SendbirdUikitCompose.init` once, in `Application.onCreate`; its `Flow` is collected (`app/src/main/java/com/example/starterbp/compose/sendbird/SendbirdSession.kt:63`). |
+| BP01 | `app/src/main/java/com/example/starterbp/compose/StarterApplication.kt:9` | `SendbirdUikitCompose.init` once, in `Application.onCreate`; its `Flow` is collected (`app/src/main/java/com/example/starterbp/compose/sendbird/SendbirdSession.kt:62`). |
 | BP02 | `app/build.gradle.kts:11` | First non-blank of the Gradle property, the environment variable, and `local.properties`, passed on as `BuildConfig.SENDBIRD_APP_ID`; never fails the build (`gradle.properties:3`). Empty is reported on the sign-in screen (`app/src/main/java/com/example/starterbp/compose/MainActivity.kt:92`). |
-| BP03 | `app/src/main/java/com/example/starterbp/compose/sendbird/SendbirdSession.kt:94` | Connects only after `onLoginSucceeded(userId)`; a sign-in that arrives before init finishes waits for it. |
-| BP04 | `app/src/main/java/com/example/starterbp/compose/sendbird/SendbirdSession.kt:85` | `SendbirdChat.setSessionHandler` once after init, before any connect; it asks `TokenProvider` (`app/src/main/java/com/example/starterbp/compose/sendbird/TokenProvider.kt:5`) for a new token. |
-| BP05 | `app/src/main/java/com/example/starterbp/compose/sendbird/SendbirdSession.kt:114` | `SendbirdUikitCompose.prepare(UikitCurrentUserInfo(...))`, then `connect()`. |
+| BP03 | `app/src/main/java/com/example/starterbp/compose/sendbird/SendbirdSession.kt:93` | Connects only after `onLoginSucceeded(userId)`; a sign-in that arrives before init finishes waits for it. |
+| BP04 | `app/src/main/java/com/example/starterbp/compose/sendbird/SendbirdSession.kt:84` | `SendbirdChat.setSessionHandler` once after init, before any connect; it asks `TokenProvider` (`app/src/main/java/com/example/starterbp/compose/sendbird/TokenProvider.kt:5`) for a new token. |
+| BP05 | `app/src/main/java/com/example/starterbp/compose/sendbird/SendbirdSession.kt:113` | `SendbirdUikitCompose.prepare(UikitCurrentUserInfo(...))`, then `connect()`. |
 | BP06 | `app/src/main/java/com/example/starterbp/compose/MainActivity.kt:130` | The Channels button appears only after connect returns. |
-| BP07 | `app/src/main/java/com/example/starterbp/compose/sendbird/SendbirdSession.kt:187` | A `ConnectionHandler` drives the status line (Connected, Reconnecting…, Offline). |
-| BP08 | `app/src/main/java/com/example/starterbp/compose/sendbird/SendbirdSession.kt:109` | Added before connect under one identifier, removed on sign-out (`app/src/main/java/com/example/starterbp/compose/sendbird/SendbirdSession.kt:147`). |
-| BP09 | `app/src/main/java/com/example/starterbp/compose/sendbird/SendbirdSession.kt:138` | Unregisters the push token (`app/src/main/java/com/example/starterbp/compose/sendbird/PushTokens.kt:28`), then `SendbirdUikitCompose.disconnect()`. |
-| BP10 | `app/src/main/java/com/example/starterbp/compose/sendbird/PushTokens.kt:7` | One registration point for the FCM token, registered for the signed-in user after connect (`app/src/main/java/com/example/starterbp/compose/sendbird/SendbirdSession.kt:135`). |
-| BP11 | `app/src/main/java/com/example/starterbp/compose/sendbird/SendbirdSession.kt:64` | `UikitInitParams` becomes Chat SDK `InitParams` with caching on (read from `uikit-data` 1.3.6 bytecode, `UikitInitParamsKt.toInitParams`). |
+| BP07 | `app/src/main/java/com/example/starterbp/compose/sendbird/SendbirdSession.kt:186` | A `ConnectionHandler` drives the status line (Connected, Reconnecting…, Offline). |
+| BP08 | `app/src/main/java/com/example/starterbp/compose/sendbird/SendbirdSession.kt:108` | Added before connect under one identifier, removed on sign-out (`app/src/main/java/com/example/starterbp/compose/sendbird/SendbirdSession.kt:146`). |
+| BP09 | `app/src/main/java/com/example/starterbp/compose/sendbird/SendbirdSession.kt:137` | Unregisters the push token (`app/src/main/java/com/example/starterbp/compose/sendbird/PushTokens.kt:28`), then `SendbirdUikitCompose.disconnect()`. |
+| BP10 | `app/src/main/java/com/example/starterbp/compose/sendbird/PushTokens.kt:7` | One registration point for the FCM token, registered for the signed-in user after connect (`app/src/main/java/com/example/starterbp/compose/sendbird/SendbirdSession.kt:134`). |
+| BP11 | `app/src/main/java/com/example/starterbp/compose/sendbird/SendbirdSession.kt:63` | `UikitInitParams` becomes Chat SDK `InitParams` with caching on (read from `uikit-data` 1.3.6 bytecode, `UikitInitParamsKt.toInitParams`). |
 | BP12 | `app/src/main/java/com/example/starterbp/compose/MainActivity.kt:51` | One `SendbirdTheme` around the app and the UIKit screens. |
-| BP13 | `app/src/main/java/com/example/starterbp/compose/sendbird/SendbirdErrors.kt:9` | Maps the verified error codes to a message; a failed connect shows it on the sign-in screen (`app/src/main/java/com/example/starterbp/compose/sendbird/SendbirdSession.kt:125`). |
-| BP16 | `app/src/main/java/com/example/starterbp/compose/sendbird/SendbirdSession.kt:37` | One `object`; `LoginService` (`app/src/main/java/com/example/starterbp/compose/auth/LoginService.kt:7`) forwards to it and the UI collects its state. |
+| BP13 | `app/src/main/java/com/example/starterbp/compose/sendbird/SendbirdErrors.kt:9` | Maps the verified error codes to a message; a failed connect shows it on the sign-in screen (`app/src/main/java/com/example/starterbp/compose/sendbird/SendbirdSession.kt:124`). |
+| BP16 | `app/src/main/java/com/example/starterbp/compose/sendbird/SendbirdSession.kt:36` | One `object`; `LoginService` (`app/src/main/java/com/example/starterbp/compose/auth/LoginService.kt:7`) forwards to it and the UI collects its state. |
 | BP17 | `app/src/main/java/com/example/starterbp/compose/MainActivity.kt:106` | Test tags, exposed as resource ids (see below). |
 
 Not applicable here: BP14 (SwiftUI), BP15 (React Native).

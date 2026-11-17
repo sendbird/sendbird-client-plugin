@@ -1,5 +1,4 @@
-// source: knowledge/curated/js/cross-cutting/errors.md ("Handling tips", "Connection failures")
-// source: knowledge/curated/js/products/chat.md ("Call APIs only after connect completes")
+// source: https://sendbird.com/docs/chat/sdk/v4/javascript/application/authenticating-a-user/authentication
 //
 // BP13: show the error code and choose the next step from the verified error table.
 import { SendbirdErrorCode } from '@sendbird/chat';

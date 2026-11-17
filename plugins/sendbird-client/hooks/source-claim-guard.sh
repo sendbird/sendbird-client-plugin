@@ -13,30 +13,59 @@ read_stdin_json guard
 
 cwd="$(jget '.cwd')"
 
-# body_is_sourced <body> <existing file text>: 0 when every Sendbird symbol in <body> is found in a
-# source that <body> or the existing file cites.
+# A file that imports or names a Sendbird SDK. Only in such a file do the common type names below
+# (GroupChannel, BaseMessage, MessengerLauncher) and calls through an SDK instance count as Sendbird API: in a
+# 2026-11 audit a LangChain.js file that used BaseMessage, in a project with no Sendbird in it, was denied.
+SB_MARKER='@sendbird/|sendbird-(calls|desk)|com\.sendbird|Sendbird(Chat|UIKit|Calls|Live|Desk)|SendBird(Call|Desk)|SBU[A-Z]|SBDSK'
+
+# sdk_symbols <code> <context> : the Sendbird symbols <code> uses, one per line. <context> is the whole file
+# text (before and after the change); it decides whether the file is Sendbird code at all and what the SDK
+# instance is called.
+sdk_symbols() {
+  local code="$1" context="$2" symbols="" typed prefixes instance_methods module_methods
+  symbols="$(printf '%s' "$code" | grep -Eo '(SendbirdChat|SendBirdCall|SendbirdCalls|SendbirdUIKit|SendbirdLive|SendbirdDesk|SendBirdDesk|SBU[A-Z][A-Za-z0-9_]*|SBA[A-Z][A-Za-z0-9_]*|SBDSK[A-Za-z0-9_]*)(\.[A-Za-z_][A-Za-z0-9_]*)?' || true)"
+  if printf '%s' "$context" | grep -Eq "$SB_MARKER"; then
+    symbols="$(printf '%s\n' "$symbols"; printf '%s' "$code" | grep -Eo '(MessengerLauncher|GroupChannel|BaseMessage)(\.[A-Za-z_][A-Za-z0-9_]*)?' || true)"
+    # The SDK instance under any name: sb, or a name the code types as the instance
+    # ("sdk: SendbirdGroupChat", "chat: SendbirdChat"), so "sdk.groupChannel.getTotalUnreadMessageCount()"
+    # is checked like "sb.groupChannel...". A shell-written file with that call and no source comment
+    # was let through because only sb. counted (a 2026-10 TC run, Codex).
+    typed="$(printf '%s' "$context" | grep -Eo '[A-Za-z_][A-Za-z0-9_]*[?!]?[[:space:]]*:[[:space:]]*Sendbird[A-Za-z]*' | sed -E 's/[?!]?[[:space:]]*:.*//' | grep -Ev '^(sb|channel|messengerLauncher)$' | sort -u | paste -sd '|' - || true)"
+    prefixes="sb|messengerLauncher${typed:+|$typed}"
+    # channel is a Sendbird channel only in a file that uses one (GroupChannel, OpenChannelHandler,
+    # sb.groupChannel.getChannel, SBUGroupChannelViewController) and does not make channel a Kotlin coroutine
+    # Channel or a Go chan: in the audit a Kotlin channel.trySend was denied, and no source could have let it
+    # through, because no Sendbird page names trySend.
+    if printf '%s' "$context" | grep -Eq '(Group|Open|Feed|Base)Channel|\.(groupChannel|openChannel|feedChannel)\.' \
+      && ! printf '%s' "$context" | grep -Eq '(^|[^A-Za-z0-9_])channel[[:space:]]*(:[[:space:]]*(Send|Receive)?Channel<|=[[:space:]]*Channel[<(]|:?=[[:space:]]*make\(chan)'; then
+      prefixes="$prefixes|channel"
+    fi
+    instance_methods="$(printf '%s' "$code" | grep -Eo "(^|[^A-Za-z0-9_])($prefixes)\.[A-Za-z_][A-Za-z0-9_]*" | sed 's/.*\.//' || true)"
+    # a call through a channel module (sb.groupChannel.createChannel, sdk.openChannel.getChannel)
+    module_methods="$(printf '%s' "$code" | grep -Eo '\.(groupChannel|openChannel|feedChannel)\.[A-Za-z_][A-Za-z0-9_]*' | sed 's/.*\.//' || true)"
+    symbols="$(printf '%s\n%s\n%s\n' "$symbols" "$instance_methods" "$module_methods")"
+  fi
+  printf '%s\n' "$symbols" | grep -Ev '\.(xcframework|framework|swiftmodule|swiftinterface|swiftdoc|bundle)$' | sed '/^$/d' | sort -u
+}
+
+# body_is_sourced <body> <existing file text> [<file text before the change>] : 0 when every Sendbird symbol
+# <body> adds is found in a source that <body> or the existing file text cites. A symbol the file already
+# used before the change is not new: the customer's own code has no source comments, and in the audit
+# renaming one variable in it was denied for the SDK calls it already made. The text before the change is
+# the existing file text unless given (a Write that replaces a file cites only what it writes).
 body_is_sourced() {
-local body="$1" existing="$2" context symbols instance_methods sources
-context="${existing}${existing:+$'\n'}${body}"
+local body="$1" existing="$2" before="${3-$2}" context code symbols old sources
+context="${before}${before:+$'\n'}${existing}${existing:+$'\n'}${body}"
 # A source comment names files, not API: its path (e.g. a framework folder) is not a symbol.
 code="$(printf '%s' "$body" | grep -v 'source:' || true)"
-symbols="$(printf '%s' "$code" | grep -Eo '(SendbirdChat|SendBirdCall|SendbirdCalls|AIAgentMessenger|SendbirdUIKit|SendbirdLive|SendbirdDesk|SendBirdDesk|MessengerLauncher|GroupChannel|BaseMessage|SBU[A-Z][A-Za-z0-9_]*|SBA[A-Z][A-Za-z0-9_]*|SBDSK[A-Za-z0-9_]*)(\.[A-Za-z_][A-Za-z0-9_]*)?' | grep -Ev '\.(xcframework|framework|swiftmodule|swiftinterface|swiftdoc|bundle)$' | sort -u || true)"
-if printf '%s' "$context" | grep -Eq '@sendbird/|sendbird-(calls|desk)|Sendbird(Chat|UIKit|Calls|Live|Desk)|AIAgentMessenger'; then
-  # The SDK instance under any name: sb, or a name the code types as the instance
-  # ("sdk: SendbirdGroupChat", "chat: SendbirdChat"), so "sdk.groupChannel.getTotalUnreadMessageCount()"
-  # is checked like "sb.groupChannel...". A shell-written file with that call and no source comment
-  # was let through because only sb. counted (a 2026-10 TC run, Codex).
-  typed="$(printf '%s' "$context" | grep -Eo '[A-Za-z_][A-Za-z0-9_]*[?!]?[[:space:]]*:[[:space:]]*Sendbird[A-Za-z]*' | sed -E 's/[?!]?[[:space:]]*:.*//' | grep -Ev '^(sb|channel|messengerLauncher)$' | sort -u | paste -sd '|' - || true)"
-  prefixes="sb|channel|messengerLauncher${typed:+|$typed}"
-  instance_methods="$(printf '%s' "$code" | grep -Eo "($prefixes)\.[A-Za-z_][A-Za-z0-9_]*" | sed 's/.*\.//' | sort -u || true)"
-  # a call through a channel module (sb.groupChannel.createChannel, sdk.openChannel.getChannel)
-  module_methods="$(printf '%s' "$code" | grep -Eo '\.(groupChannel|openChannel|feedChannel)\.[A-Za-z_][A-Za-z0-9_]*' | sed 's/.*\.//' | sort -u || true)"
-  instance_methods="$(printf '%s\n%s\n' "$instance_methods" "$module_methods" | sed '/^$/d' | sort -u)"
-  symbols="$(printf '%s\n%s\n' "$symbols" "$instance_methods" | sed '/^$/d' | sort -u)"
+symbols="$(sdk_symbols "$code" "$context")"
+if [ -n "$symbols" ] && [ -n "$before" ]; then
+  old="$(sdk_symbols "$(printf '%s' "$before" | grep -v 'source:' || true)" "$context")"
+  [ -z "$old" ] || symbols="$(comm -23 <(printf '%s\n' "$symbols") <(printf '%s\n' "$old"))"
 fi
 [ -n "$symbols" ] || return 0
 
-sources="$(printf '%s' "$context" | grep -Eo 'source:[[:space:]]*`?[^)`[:space:]]+' | sed -E 's/^source:[[:space:]]*`?//' | sort -u || true)"
+sources="$(printf '%s\n%s' "$existing" "$body" | grep -Eo 'source:[[:space:]]*`?[^)`[:space:]]+' | sed -E 's/^source:[[:space:]]*`?//' | sort -u || true)"
 # Plugin files, the plugin's SDK cache, installed SDK interfaces, and public Sendbird pages
 # (hooks/lib/hook-helpers.sh resolve_cited_sources); a file the model wrote in the app does not count.
 resolve_cited_sources "$cwd" <<< "$sources"
@@ -64,11 +93,11 @@ deny() {
   jq -n --arg sym "${UNSOURCED_SYMBOL:-}" --arg un "$unresolved" --arg na "$NOT_APPLIED" '{hookSpecificOutput:{
     hookEventName:"PreToolUse",
     permissionDecision:"deny",
-    permissionDecisionReason:("Sendbird Client plugin: This change adds Sendbird code without a source from the Sendbird docs, so it wasn'\''t made. The code needs a source before it'\''s added.\n"
+    permissionDecisionReason:("Sendbird Client Plugin: This change uses Sendbird APIs that weren'\''t checked against the Sendbird docs or your installed SDK, so it wasn'\''t made. They are checked first and the change is made again; you don'\''t need to do anything.\n"
       + (if $sym != "" then "No cited source contains \($sym). " else "" end)
       + (if $un != "" then "Not accepted as a source: \($un). " else "" end)
-      + "Sendbird API code requires a concrete source comment (source: <path or URL>) whose file or public URL contains the emitted symbol. Preserve the template source comment or cite knowledge/curated, the customer SDK cache or installed SDK files (node_modules/@sendbird, Pods, .build, SourcePackages, DerivedData), a version-matched sendbird.com/docs page or a file in a public sendbird/* repo (a /blob/ or /raw/ link, not an issue or discussion), or stop if unverifiable. Cite a plugin file by its path from the plugin root (knowledge/curated/<platform>/<file>.md) or by its absolute path inside the plugin folder; a file in the app, outside the installed SDK, does not count. " + $na)
-  }}'
+      + "Sendbird API code requires a concrete source comment (source: <path or URL>) whose file or public URL contains the emitted symbol. Preserve the template source comment or cite knowledge/curated, the customer SDK cache or installed SDK files (node_modules/@sendbird, Pods, .build, SourcePackages, DerivedData), a version-matched sendbird.com/docs page or a file in a public sendbird/* repo (a /blob/ or /raw/ link, not an issue or discussion), or stop if unverifiable. For a fact from a curated entry, cite the public page the entry gives for it (a sendbird.com/docs page or a public sendbird/* file, exactly as the entry writes it): the customer can open it. Cite the curated file itself only when the entry gives no such page, by its path from the plugin root (knowledge/curated/<platform>/<file>.md) or by its absolute path inside the plugin folder; a file in the app, outside the installed SDK, does not count. " + $na)
+  }}' | customer_lines
   exit 0
 }
 
@@ -101,7 +130,7 @@ case "$tool" in
     body="$(jget .tool_input.content)"
     check_import_paths "$(jget .tool_input.file_path)" "$body"
     is_source_file "$(jget .tool_input.file_path)" || exit 0
-    if [ -n "$body" ] && ! body_is_sourced "$body" ""; then deny; fi ;;
+    if [ -n "$body" ] && ! body_is_sourced "$body" "" "$(existing_text "$(jget .tool_input.file_path)")"; then deny; fi ;;
   Edit|MultiEdit)
     if [ "$tool" = Edit ]; then body="$(jget .tool_input.new_string)"
     else body="$(printf '%s' "$HOOK_JSON" | jq -r '[.tool_input.edits[]?.new_string // empty] | join("\n")' 2>/dev/null)"; fi
@@ -123,7 +152,9 @@ case "$tool" in
     # (cat > F <<EOF, printf ... > F, tee F), an in-place edit (sed -i, perl -i), or a script that
     # writes files (open(..., 'w'), writeFile, write_text). Commands that only read files are not checked.
     # Codex may send the command as an argument list (["/bin/zsh", "-lc", "cat > f <<'EOF' ..."])
-    cmd="$(printf '%s' "$HOOK_JSON" | jq -r '.tool_input.command | if type == "array" then join(" ") else (. // "") end' 2>/dev/null)"
+    cmd="$(command_text)"
+    # every pattern below needs one of these words, so a command without them writes no source file
+    case "$cmd" in *'>'*|*tee*|*sed*|*perl*|*open\(*|*writeFile*|*appendFile*|*write_text*|*fs.write*) ;; *) exit 0 ;; esac
     targets="$(printf '%s' "$cmd" | grep -Eo '(>>?|tee([[:space:]]+-a)?)[[:space:]]*["'\'']?[^[:space:]"'\''<>|;&]+'"$src_ext" \
       | sed -E 's/^(>>?|tee([[:space:]]+-a)?)[[:space:]]*["'\'']?//' | sort -u || true)"
     if printf '%s' "$cmd" | grep -Eq '(^|[[:space:];&|])(sed|perl)[[:space:]]+(-[A-Za-z]*i|-i)|open\([^)]*["'\''][wa]\+?["'\'']|writeFile|appendFile|write_text|fs\.write'; then

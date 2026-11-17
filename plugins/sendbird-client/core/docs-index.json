@@ -1,8 +1,7 @@
 {
   "schemaVersion": 1,
   "sources": [
-    "https://sendbird.com/docs/llms.txt",
-    "https://sendbird.com/llms.txt (ai-agent pages only)"
+    "https://sendbird.com/docs/llms.txt"
   ],
   "count": 712,
   "entries": [

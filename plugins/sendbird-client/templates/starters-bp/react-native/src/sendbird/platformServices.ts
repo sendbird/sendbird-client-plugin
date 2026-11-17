@@ -1,5 +1,5 @@
 // source: https://github.com/sendbird/sendbird-uikit-react-native/blob/main/sample/src/factory/index.ts
-// source: knowledge/curated/js/products/uikit.md ("React Native": platformServices from the createNative*Service factories)
+// source: https://sendbird.com/docs/chat/uikit/v3/react-native/essentials/authentication
 // source: https://sendbird.com/docs/chat/uikit/v3/react-native/essentials/installation
 // source: https://github.com/sendbird/sendbird-uikit-react-native/blob/v3.12.10/packages/uikit-react-native/src/platform/types.ts (NotificationServiceInterface)
 // source: https://github.com/invertase/react-native-firebase/blob/v19.3.0/packages/app/lib/index.d.ts (firebase.apps)

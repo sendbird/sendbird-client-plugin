@@ -1,11 +1,10 @@
-// source: knowledge/curated/js/products/uikit.md ("Compose your own UI: channel list + conversation", "After a reconnect")
+// source: https://github.com/sendbird/sendbird-uikit-react/blob/v3.20.0/src/lib/MediaQueryContext.tsx#L4-L60
 // source: knowledge/curated/js/products/auth.md ("Token refresh — SessionHandler (set before connect)")
-// source: knowledge/curated/js/cross-cutting/push.md ("Logout: unregister this device before disconnecting")
+// source: https://sendbird.com/docs/chat/sdk/v4/javascript/application/authenticating-a-user/authentication
 // source: knowledge/curated/js/hosts/react.md ("Integration notes")
-// source: knowledge/curated/js/products/chat.md ("Connection state and reconnection")
+// source: https://sendbird.com/docs/chat/sdk/v4/javascript/event-handler/managing-connection-event-handlers/add-or-remove-a-connection-event-handler
 // source: https://github.com/sendbird/sendbird-uikit-react/blob/v3.19.1/src/hooks/useConnectionState.ts#L8-L31
 // source: https://github.com/sendbird/sendbird-uikit-react/blob/v3.19.1/src/modules/GroupChannelList/context/GroupChannelListProvider.tsx#L141-L146
-// source: knowledge/curated/js/cross-cutting/troubleshooting.md ("selecting a channel always opens the first one")
 //
 // Everything below SendbirdProvider: it initializes the Chat SDK once (it reuses the cached
 // instance), connects with the signed-in user, and hosts the UIKit channel list and conversation.

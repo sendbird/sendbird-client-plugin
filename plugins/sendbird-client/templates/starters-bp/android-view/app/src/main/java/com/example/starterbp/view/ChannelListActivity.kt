@@ -1,4 +1,4 @@
-// source: knowledge/curated/android/products/uikit.md ("Customization model (View host)", "Present prebuilt screens")
+// source: https://github.com/sendbird/sendbird-uikit-android/blob/07ffe8efc97e2d71dedc466ad868df817e5f433e/uikit/src/main/java/com/sendbird/uikit/providers/AdapterProviders.kt#L19
 // source: https://github.com/sendbird/sendbird-uikit-android/blob/main/uikit/src/main/java/com/sendbird/uikit/fragments/ChannelListFragment.java#L286
 package com.example.starterbp.view
 

@@ -253,7 +253,7 @@ check_ios() {
       if command -v xcodegen >/dev/null; then
         # XcodeGen writes the Xcode project under the plugin's state folder, never next to project.yml
         mkdir -p "$PROJECT/$STATE_DIR/typecheck"
-        [ -f "$PROJECT/$STATE_DIR/typecheck/.gitignore" ] || printf '*\n' > "$PROJECT/$STATE_DIR/typecheck/.gitignore"
+        [ -f "$PROJECT/$STATE_DIR/.gitignore" ] || printf '# The coding plugin keeps its state here; git ignores the whole folder.\n*\n' > "$PROJECT/$STATE_DIR/.gitignore"
         (cd "$PROJECT" && xcodegen generate --spec project.yml --project "$STATE_DIR/typecheck" --quiet) > "$TMP/xcodegen.log" 2>&1
         xp="$(find "$PROJECT/$STATE_DIR/typecheck" -maxdepth 1 -name '*.xcodeproj' -type d | head -1)"
       fi

@@ -1,6 +1,6 @@
 // source: https://sendbird.com/docs/chat/sdk/v4/ios/ref/Classes/GroupChannel.html (startTyping, endTyping, getTypingUsers, getUnreadMemberCount, markAsRead)
 // source: https://sendbird.com/docs/chat/sdk/v4/ios/ref/Classes/SendbirdChat.html (addChannelDelegate, removeChannelDelegate)
-// source: knowledge/curated/ios/products/chat.md ("Typing indicator (group channels)", "Read receipts for a message")
+// source: https://sendbird.com/docs/chat/sdk/v4/ios/message/managing-read-status-in-a-group-channel/get-read-status
 // The SDK calls are the ones in the UIKit-host template templates/ios/uikit/chat/TypingAndReadReceipts.swift,
 // verified against the 4.39.10 and 4.39.11 release .swiftinterface. This file only wraps them in an
 // ObservableObject; the wrapper is standard SwiftUI/Combine, not an SDK API. Compiled by

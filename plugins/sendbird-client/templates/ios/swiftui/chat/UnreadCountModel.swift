@@ -1,6 +1,6 @@
 // source: https://sendbird.com/docs/chat/sdk/v4/ios/ref/Classes/SendbirdChat.html (getTotalUnreadMessageCount, addUserEventDelegate, removeUserEventDelegate)
 // source: https://sendbird.com/docs/chat/sdk/v4/ios/ref/Classes/GroupChannel.html (unreadMessageCount, markAsRead)
-// source: knowledge/curated/ios/products/chat.md ("Unread counts")
+// source: https://sendbird.com/docs/chat/sdk/v4/ios/event-delegate/managing-user-event-delegates/add-or-remove-a-user-event-delegate
 // The SDK calls are the ones in the UIKit-host template templates/ios/uikit/chat/UnreadCount.swift, verified against
 // the 4.39.10 and 4.39.11 release .swiftinterface. This file only wraps them in an ObservableObject; the wrapper is
 // standard SwiftUI/Combine, not an SDK API. Compiled by tools/templates/compile-check-ios.sh against the pinned and

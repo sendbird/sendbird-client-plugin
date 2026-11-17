@@ -1,4 +1,4 @@
-// source: knowledge/curated/android/products/auth.md ("Connect (session token)", "Session token expiry")
+// source: https://sendbird.com/docs/chat/sdk/v4/android/application/authenticating-a-user/authentication
 package com.example.starterbp.compose.sendbird
 
 /**

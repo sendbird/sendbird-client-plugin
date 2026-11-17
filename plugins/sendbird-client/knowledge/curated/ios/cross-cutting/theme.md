@@ -1,10 +1,10 @@
 <!-- last-verified-against: sendbird-uikit-ios 3.36.1 -->
-<!-- verified-at: 2026-10-12 -->
+<!-- verified-at: 2026-11-16 -->
 <!-- verification-method: compile-check-ios -->
 <!-- status: populated -->
 # ios — theme (UIKit)
 
-> Verified against the public UIKit README, the public SendbirdUIKit `.swiftinterface`, and pinned/latest iOS template xcodebuild on 2026-09-22. The runtime switch, fonts and colors, and strings sections were read from the public source at tag `3.36.1` and build with `tools/curated/compile-snippets-ios.sh` (verified 2026-10-11). The message input colors and date format sections were read from the same tag and build the same way (verified 2026-10-12). Used by `/sendbird-client:ui-customize`. Do not invent API.
+> Verified against the public UIKit README, the public SendbirdUIKit `.swiftinterface`, and pinned/latest iOS template xcodebuild on 2026-09-22. The runtime switch, fonts and colors, and strings sections were read from the public source at tag `3.36.1` and build with `tools/curated/compile-snippets-ios.sh` (verified 2026-10-11). The message input colors and date format sections were read from the same tag and build the same way (verified 2026-10-12). GitHub source citations re-checked 2026-11-16 against tag `3.36.4`: the cited lines in `SBUGroupChannelListViewController.swift` (135–137) and `SBUAlertView.swift` (28, 289–307) are unchanged; 3.36.4 changes those files only at other lines. Used by `/sendbird-client:ui-customize`. Do not invent API.
 
 ## Overview
 Sendbird UIKit for iOS themes through three singletons: `SBUTheme` (themes), `SBUColorSet` (colors), `SBUFontSet` (fonts). Switch light/dark globally, or override per-component theme objects.
@@ -120,4 +120,3 @@ SBUDateFormatSet.Message.sentTimeFormatInOpenChannel = "HH:mm"
 
 ## Related
 - UIKit: knowledge/curated/ios/products/uikit.md
-- AI Agent theme: knowledge/curated/ios/cross-cutting/ai-agent-theme.md

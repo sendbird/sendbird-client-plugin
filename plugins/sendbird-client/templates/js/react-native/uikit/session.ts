@@ -2,7 +2,6 @@
 // source: https://github.com/sendbird/sendbird-uikit-react-native/blob/v3.12.10/packages/uikit-react-native/src/hooks/useConnection.ts#L10-L36 (ConnectOptions.accessToken passed to sdk.connect)
 // source: https://github.com/sendbird/sendbird-uikit-react-native/blob/v3.12.10/packages/uikit-react-native/src/containers/SendbirdUIKitContainer.tsx#L87-L91 (chatOptions.onInitialized, called right after SendbirdChat.init at lines 296-314)
 // source: https://sendbird.com/docs/chat/sdk/v4/javascript/application/authenticating-a-user/authentication (SessionHandler, setSessionHandler before connect)
-// source: knowledge/curated/js/products/uikit.md ("Session tokens: `connect(userId, { accessToken })` and `onInitialized`")
 // Type-checked by tools/templates/compile-check-js.sh against the pinned and latest packages.
 //
 // Session tokens for UIKit React Native. SendbirdUIKitContainer initializes the Chat SDK but does

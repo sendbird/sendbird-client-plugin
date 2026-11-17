@@ -1,5 +1,5 @@
 // source: knowledge/curated/android/setup.md ("Getting a newer Chat SDK under UIKit", "App ID in Gradle")
-// source: knowledge/curated/android/hosts/compose.md ("UIKit for Jetpack Compose — init, then push")
+// source: https://sendbird.com/docs/chat/uikit/v3/jetpack-compose/essentials/push-notifications
 import java.util.Properties
 
 plugins {

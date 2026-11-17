@@ -1,7 +1,6 @@
-// source: knowledge/curated/android/hosts/compose.md ("UIKit for Jetpack Compose — init, then push")
+// source: https://sendbird.com/docs/chat/uikit/v3/jetpack-compose/essentials/push-notifications
 // source: https://sendbird.com/docs/chat/uikit/v3/jetpack-compose/essentials/authentication
-// source: knowledge/curated/android/products/auth.md ("Session token expiry")
-// source: knowledge/curated/android/products/chat.md ("Call APIs only after connect completes", "Connection state and reconnection")
+// source: https://sendbird.com/docs/chat/sdk/v4/android/application/authenticating-a-user/authentication
 // source: https://sendbird.com/docs/chat/sdk/v4/android/ref/-sendbird-chat/com.sendbird.android/-sendbird-chat/index.html
 package com.example.starterbp.compose.sendbird
 

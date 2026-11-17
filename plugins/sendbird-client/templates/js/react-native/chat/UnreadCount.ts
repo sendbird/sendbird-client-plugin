@@ -1,7 +1,7 @@
 // source: https://sendbird.com/docs/chat/sdk/v4/javascript/ref/classes/_sendbird_chat_groupChannel.GroupChannelModule.html (getTotalUnreadMessageCount)
 // source: https://sendbird.com/docs/chat/sdk/v4/javascript/ref/classes/_sendbird_chat.default.html (addUserEventHandler, removeUserEventHandler)
 // source: https://sendbird.com/docs/chat/sdk/v4/javascript/event-handler/managing-user-event-handlers/add-or-remove-a-user-event-handler
-// source: knowledge/curated/js/products/chat.md ("Unread counts")
+// source: https://sendbird.com/docs/chat/sdk/v4/javascript/ref/classes/_sendbird_chat.UserEventHandler.html
 // Verified against the @sendbird/chat 4.22.11 and 4.22.14 type declarations: GroupChannelModule
 // getTotalUnreadMessageCount(params?): Promise<number>; SendbirdChat addUserEventHandler(key, UserEventHandler) /
 // removeUserEventHandler(key); UserEventHandler onTotalUnreadMessageCountChanged(UnreadMessageCount) with groupChannelCount;

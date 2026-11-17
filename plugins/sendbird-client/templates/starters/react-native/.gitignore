@@ -31,5 +31,5 @@ local.properties
 .env.local
 .env.*.local
 
-# The Sendbird client plugin's state folder (profile, logs, check results): never commit it
+# The Sendbird Client Plugin's state folder (profile, logs, check results): never commit it
 .sendbird-client/

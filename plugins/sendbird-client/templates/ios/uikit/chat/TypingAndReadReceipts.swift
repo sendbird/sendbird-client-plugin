@@ -1,7 +1,6 @@
 // source: https://sendbird.com/docs/chat/sdk/v4/ios/ref/Classes/GroupChannel.html (startTyping, endTyping, getTypingUsers, getUnreadMemberCount, getReadMembers, markAsRead)
 // source: https://sendbird.com/docs/chat/sdk/v4/ios/ref/Classes/SendbirdChat.html (addChannelDelegate, removeChannelDelegate)
 // source: https://sendbird.com/docs/chat/sdk/v4/ios/message/managing-read-status-in-a-group-channel/get-read-status
-// source: knowledge/curated/ios/products/chat.md ("Typing indicator (group channels)", "Read receipts for a message")
 // Verified against the 4.39.10 and 4.39.11 release .swiftinterface (GroupChannel startTyping(), endTyping(),
 // getTypingUsers(), getUnreadMemberCount(_:), getReadMembers(message:includeAllMembers:), markAsRead(completionHandler:);
 // GroupChannelDelegate optional channelDidUpdateTypingStatus(_:) and channel(_:userDidMarkAsRead:)).

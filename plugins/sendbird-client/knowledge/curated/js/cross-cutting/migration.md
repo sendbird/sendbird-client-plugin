@@ -16,7 +16,7 @@
 | React Native UIKit v2 | React Native UIKit v3 (`@sendbird/uikit-react-native`) | https://sendbird.com/docs/chat/uikit/v3/react-native/miscellaneous/migration-guide |
 | v3 code built on low-level channel and message calls | group channel and message collections (optional, recommended by the guide) | https://sendbird.com/docs/chat/sdk/v4/javascript/migration-guide/collection-migration-guide |
 
-React Native apps use the same Chat SDK package, `@sendbird/chat` (knowledge/curated/js/setup.md). The docs index (`core/docs-index.json`) has no separate React Native Chat SDK migration guide, so use the JavaScript one. It has no major-version migration guide for Calls, Desk, Live, or AI Agent on JavaScript (checked 2026-10-16); for those, say that no public migration guide exists and work from the product's current docs.
+React Native apps use the same Chat SDK package, `@sendbird/chat` (knowledge/curated/js/setup.md). The docs index (`core/docs-index.json`) has no separate React Native Chat SDK migration guide, so use the JavaScript one. It has no major-version migration guide for Calls, Desk, or Live on JavaScript (checked 2026-10-16); for those, say that no public migration guide exists and work from the product's current docs.
 
 ## Order of work
 

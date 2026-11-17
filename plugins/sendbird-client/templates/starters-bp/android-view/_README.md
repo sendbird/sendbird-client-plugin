@@ -19,20 +19,20 @@ your own sign-in. The practices it follows are listed in `../BEST_PRACTICES.md`.
 
 | ID | File:line | What the code does |
 |---|---|---|
-| BP01 | `app/src/main/java/com/example/starterbp/view/StarterApplication.kt:9` | `SendbirdUIKit.init` once, in `Application.onCreate` (`app/src/main/java/com/example/starterbp/view/sendbird/SendbirdSession.kt:64`). |
+| BP01 | `app/src/main/java/com/example/starterbp/view/StarterApplication.kt:9` | `SendbirdUIKit.init` once, in `Application.onCreate` (`app/src/main/java/com/example/starterbp/view/sendbird/SendbirdSession.kt:63`). |
 | BP02 | `app/build.gradle.kts:9` | First non-blank of the Gradle property, the environment variable, and `local.properties`, passed on as `BuildConfig.SENDBIRD_APP_ID`; never fails the build (`gradle.properties:3`). Empty is reported on the sign-in screen (`app/src/main/java/com/example/starterbp/view/MainActivity.kt:28`). |
-| BP03 | `app/src/main/java/com/example/starterbp/view/sendbird/SendbirdSession.kt:104` | Connects only after `onLoginSucceeded(userId)`; a sign-in that arrives before init finishes waits for it. |
-| BP04 | `app/src/main/java/com/example/starterbp/view/sendbird/SendbirdSession.kt:95` | `SendbirdChat.setSessionHandler` once after init, before any connect; it asks `TokenProvider` (`app/src/main/java/com/example/starterbp/view/sendbird/TokenProvider.kt:5`) for a new token. |
-| BP05 | `app/src/main/java/com/example/starterbp/view/sendbird/SendbirdSession.kt:125` | Connects with `SendbirdUIKit.connect`; the adapter hands UIKit the signed-in user (`app/src/main/java/com/example/starterbp/view/sendbird/SendbirdSession.kt:68`). |
+| BP03 | `app/src/main/java/com/example/starterbp/view/sendbird/SendbirdSession.kt:103` | Connects only after `onLoginSucceeded(userId)`; a sign-in that arrives before init finishes waits for it. |
+| BP04 | `app/src/main/java/com/example/starterbp/view/sendbird/SendbirdSession.kt:94` | `SendbirdChat.setSessionHandler` once after init, before any connect; it asks `TokenProvider` (`app/src/main/java/com/example/starterbp/view/sendbird/TokenProvider.kt:5`) for a new token. |
+| BP05 | `app/src/main/java/com/example/starterbp/view/sendbird/SendbirdSession.kt:124` | Connects with `SendbirdUIKit.connect`; the adapter hands UIKit the signed-in user (`app/src/main/java/com/example/starterbp/view/sendbird/SendbirdSession.kt:67`). |
 | BP06 | `app/src/main/java/com/example/starterbp/view/MainActivity.kt:68` | The Channels button appears only after connect returns. |
-| BP07 | `app/src/main/java/com/example/starterbp/view/sendbird/SendbirdSession.kt:198` | A `ConnectionHandler` drives the status line (Connected, Reconnecting…, Offline). |
-| BP08 | `app/src/main/java/com/example/starterbp/view/sendbird/SendbirdSession.kt:119` | Added before connect under one identifier, removed on sign-out (`app/src/main/java/com/example/starterbp/view/sendbird/SendbirdSession.kt:160`). |
-| BP09 | `app/src/main/java/com/example/starterbp/view/sendbird/SendbirdSession.kt:149` | Unregisters the push token (`app/src/main/java/com/example/starterbp/view/sendbird/PushTokens.kt:28`), then `SendbirdUIKit.disconnect` in its completion. |
-| BP10 | `app/src/main/java/com/example/starterbp/view/sendbird/PushTokens.kt:7` | One registration point for the FCM token, registered for the signed-in user after connect (`app/src/main/java/com/example/starterbp/view/sendbird/SendbirdSession.kt:145`). |
-| BP11 | `app/src/main/java/com/example/starterbp/view/sendbird/SendbirdSession.kt:69` | UIKit initializes the Chat SDK with local caching on. |
-| BP12 | `app/src/main/java/com/example/starterbp/view/sendbird/SendbirdSession.kt:64` | `SendbirdUIKit.setDefaultThemeMode` before init and before the first UIKit screen. |
-| BP13 | `app/src/main/java/com/example/starterbp/view/sendbird/SendbirdErrors.kt:9` | Maps the verified error codes to a message; a failed connect shows it on the sign-in screen (`app/src/main/java/com/example/starterbp/view/sendbird/SendbirdSession.kt:135`). |
-| BP16 | `app/src/main/java/com/example/starterbp/view/sendbird/SendbirdSession.kt:36` | One `object`; `LoginService` (`app/src/main/java/com/example/starterbp/view/auth/LoginService.kt:7`) forwards to it and `MainActivity` collects its state (`app/src/main/java/com/example/starterbp/view/MainActivity.kt:19`). |
+| BP07 | `app/src/main/java/com/example/starterbp/view/sendbird/SendbirdSession.kt:197` | A `ConnectionHandler` drives the status line (Connected, Reconnecting…, Offline). |
+| BP08 | `app/src/main/java/com/example/starterbp/view/sendbird/SendbirdSession.kt:118` | Added before connect under one identifier, removed on sign-out (`app/src/main/java/com/example/starterbp/view/sendbird/SendbirdSession.kt:159`). |
+| BP09 | `app/src/main/java/com/example/starterbp/view/sendbird/SendbirdSession.kt:148` | Unregisters the push token (`app/src/main/java/com/example/starterbp/view/sendbird/PushTokens.kt:28`), then `SendbirdUIKit.disconnect` in its completion. |
+| BP10 | `app/src/main/java/com/example/starterbp/view/sendbird/PushTokens.kt:7` | One registration point for the FCM token, registered for the signed-in user after connect (`app/src/main/java/com/example/starterbp/view/sendbird/SendbirdSession.kt:144`). |
+| BP11 | `app/src/main/java/com/example/starterbp/view/sendbird/SendbirdSession.kt:68` | UIKit initializes the Chat SDK with local caching on. |
+| BP12 | `app/src/main/java/com/example/starterbp/view/sendbird/SendbirdSession.kt:63` | `SendbirdUIKit.setDefaultThemeMode` before init and before the first UIKit screen. |
+| BP13 | `app/src/main/java/com/example/starterbp/view/sendbird/SendbirdErrors.kt:9` | Maps the verified error codes to a message; a failed connect shows it on the sign-in screen (`app/src/main/java/com/example/starterbp/view/sendbird/SendbirdSession.kt:134`). |
+| BP16 | `app/src/main/java/com/example/starterbp/view/sendbird/SendbirdSession.kt:35` | One `object`; `LoginService` (`app/src/main/java/com/example/starterbp/view/auth/LoginService.kt:7`) forwards to it and `MainActivity` collects its state (`app/src/main/java/com/example/starterbp/view/MainActivity.kt:19`). |
 | BP17 | `app/src/main/res/layout/activity_main.xml:2` | Resource ids (see below). |
 
 Not applicable here: BP14 (SwiftUI), BP15 (React Native).

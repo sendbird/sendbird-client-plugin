@@ -1,5 +1,5 @@
-// source: knowledge/curated/android/cross-cutting/errors.md ("All codes", "Handling tips")
-// source: knowledge/curated/android/products/chat.md ("Call APIs only after connect completes")
+// source: https://sendbird.com/docs/chat/sdk/v4/android/error-codes
+// source: https://sendbird.com/docs/chat/sdk/v4/android/application/authenticating-a-user/authentication
 package com.example.starterbp.view.sendbird
 
 import com.sendbird.android.exception.SendbirdError

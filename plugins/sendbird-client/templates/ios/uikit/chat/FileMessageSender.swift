@@ -1,6 +1,5 @@
 // source: https://sendbird.com/docs/chat/sdk/v4/ios/ref/Classes/BaseChannel.html (sendFileMessage, resendFileMessage, cancelUploadingFileMessage)
 // source: https://sendbird.com/docs/chat/sdk/v4/ios/message/sending-a-message/track-file-upload-progress-using-a-handler
-// source: knowledge/curated/ios/products/chat.md ("Upload progress and resending a failed file message")
 // Verified against the 4.39.10 and 4.39.11 release .swiftinterface (extension BaseChannel:
 // sendFileMessage(params:progressHandler:completionHandler:), resendFileMessage(_:binaryData:progressHandler:completionHandler:),
 // class func cancelUploadingFileMessage(requestId:completionHandler:); FileMessageCreateParams init(file:), fileName, mimeType;

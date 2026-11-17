@@ -166,4 +166,3 @@ Custom colors go through `sendbirdLightColorScheme(...)` / `sendbirdDarkColorSch
 ## Related
 - UIKit: knowledge/curated/android/products/uikit.md
 - Compose host: knowledge/curated/android/hosts/compose.md
-- AI Agent theme: knowledge/curated/android/cross-cutting/ai-agent-theme.md

@@ -3,7 +3,7 @@
 
 # JQ_MISSING_REASON : what a guard tells the user when jq is missing (welcome.sh says it too). It goes
 # into JSON through printf '%s', so each \n stays a JSON line-break escape.
-JQ_MISSING_REASON='The Sendbird Client plugin couldn'"'"'t check this call because jq isn'"'"'t installed.\nThe checks cover credentials, source citations, and destructive commands.\nApprove it only if you trust it. To turn the checks back on, install jq.'
+JQ_MISSING_REASON='The Sendbird Client Plugin couldn'"'"'t check this call because jq isn'"'"'t installed.\nThe checks cover credentials, source citations, and destructive commands.\nApprove it only if you trust it. To turn the checks back on, install jq.'
 
 # ask_without_jq : the PreToolUse "ask" decision, built with printf because jq is absent
 ask_without_jq() {
@@ -21,22 +21,80 @@ read_stdin_json() {
     exit 0
   fi
   HOOK_JSON="$(cat 2>/dev/null || true)"
-  if ! printf '%s' "$HOOK_JSON" | jq -e . >/dev/null 2>&1; then HOOK_JSON='{}'; fi
+  # One jq call checks the payload and reads the fields most hooks ask for (each jq call is a process, and
+  # a tool call runs about seven hooks at once: in a 2026-11 audit on a loaded machine each took 1.2 to 1.8
+  # seconds). jget answers these from HOOK_FIELDS; any other path, or a field that is not a string, is read
+  # with jq as before.
+  local f
+  if f="$(printf '%s' "$HOOK_JSON" | jq -r "$HOOK_FIELDS_JQ" 2>/dev/null)" && [ -n "$f" ]; then
+    eval "$f"
+  else
+    HOOK_JSON='{}'; HOOK_FIELDS_READ=1
+  fi
+}
+# The fields jget answers without jq, as <path>=<variable suffix>. For each, read_stdin_json sets
+# HF_<suffix> to s<value> when the field is a string, to e when it is absent, null, or false (jget prints
+# nothing, as `// empty` does), and leaves it unset otherwise, so jget asks jq.
+HOOK_FIELDS='.session_id=session_id .tool_name=tool_name .cwd=cwd .transcript_path=transcript_path .hook_event_name=hook_event_name .turn_id=turn_id .agent_id=agent_id .agent_type=agent_type .prompt=prompt .last_assistant_message=last_assistant_message .tool_input.command=ti_command .tool_input.file_path=ti_file_path .tool_input.path=ti_path .tool_input.pattern=ti_pattern .tool_input.skill=ti_skill .tool_input.subagent_type=ti_subagent_type .tool_input.content=ti_content .tool_input.new_string=ti_new_string'
+HOOK_FIELDS_JQ='def f($n; v): v as $v | if ($v | type) == "string" then "HF_\($n)=s\($v | @sh)" elif $v == null or $v == false then "HF_\($n)=e" else empty end;
+  "HOOK_FIELDS_READ=1",
+  f("session_id"; .session_id), f("tool_name"; .tool_name), f("cwd"; .cwd), f("transcript_path"; .transcript_path),
+  f("hook_event_name"; .hook_event_name), f("turn_id"; .turn_id), f("agent_id"; .agent_id), f("agent_type"; .agent_type),
+  f("prompt"; .prompt), f("last_assistant_message"; .last_assistant_message),
+  f("ti_command"; .tool_input.command?), f("ti_file_path"; .tool_input.file_path?), f("ti_path"; .tool_input.path?),
+  f("ti_pattern"; .tool_input.pattern?), f("ti_skill"; .tool_input.skill?), f("ti_subagent_type"; .tool_input.subagent_type?),
+  f("ti_content"; .tool_input.content?), f("ti_new_string"; .tool_input.new_string?)'
+
+# command_text : the shell command of a Bash call, as one string. Codex may send it as an argument list
+# (["/bin/zsh", "-lc", "cat > f <<'EOF' ..."]), which is joined with spaces; a string needs no jq call.
+command_text() {
+  if [ -n "${HOOK_FIELDS_READ:-}" ] && [ -n "${HF_ti_command+x}" ]; then jget .tool_input.command; return 0; fi
+  printf '%s' "$HOOK_JSON" | jq -r '.tool_input.command | if type == "array" then join(" ") else (. // "") end' 2>/dev/null
+}
+
+# may_hold_credential <text> : 1 when core/commands/check-credential.sh cannot find anything in the text, so a
+# hook can skip it (it starts six processes). Each of its patterns needs one of these words: PRIVATE KEY,
+# eyJ (a JWT), password or passwd, secret, or token (api, access, session, auth). Matched in any case, which
+# is wider than the check, never narrower.
+may_hold_credential() {
+  local rc=1 had=0
+  shopt -q nocasematch && had=1
+  shopt -s nocasematch
+  case "$1" in
+    *"private key"*|*eyj*|*passw*|*secret*|*token*) rc=0 ;;
+  esac
+  [ "$had" = 1 ] || shopt -u nocasematch
+  return "$rc"
 }
 
 # is_noninteractive : 0 when SENDBIRD_NONINTERACTIVE turns on a non-interactive run (1, true, or
 # yes in any case). Empty, 0, false, no, and any other value keep the run interactive. welcome.sh
 # and run-summary-gate.sh both use this, so the model is told about the run summary exactly when
-# the gate checks it. (tr, not ${v,,}: stock macOS bash 3.2.)
+# the gate checks it. (Bracket patterns, not ${v,,}: stock macOS bash 3.2; and no tr, which is one more process.)
 is_noninteractive() {
-  case "$(printf '%s' "${SENDBIRD_NONINTERACTIVE:-}" | tr '[:upper:]' '[:lower:]')" in
-    1|true|yes) return 0 ;;
+  case "${SENDBIRD_NONINTERACTIVE:-}" in
+    1|[Tt][Rr][Uu][Ee]|[Yy][Ee][Ss]) return 0 ;;
     *) return 1 ;;
   esac
 }
 
 # jget <jq-path> : echo a string field from $HOOK_JSON ('' if absent)
-jget() { printf '%s' "$HOOK_JSON" | jq -r "$1 // empty" 2>/dev/null; }
+jget() {
+  if [ -n "${HOOK_FIELDS_READ:-}" ]; then
+    local pair n v
+    for pair in $HOOK_FIELDS; do
+      [ "${pair%%=*}" = "$1" ] || continue
+      n="HF_${pair#*=}"
+      if [ -n "${!n+x}" ]; then
+        v="${!n}"
+        [ "$v" = e ] || printf '%s' "${v#s}"
+        return 0
+      fi
+      break
+    done
+  fi
+  printf '%s' "$HOOK_JSON" | jq -r "$1 // empty" 2>/dev/null
+}
 
 # final_answer_text : the text of the answer this Stop event ends. The runtime passes it as
 # last_assistant_message; older runtimes do not, so fall back to the transcript and read only
@@ -206,7 +264,7 @@ sdk_source_path() {
 # the sentence or list after a path (chat.md, chat.md:42.) is not part of it. A cited source that names
 # no file or page this accepts is added to UNRESOLVED_SOURCES, for the deny message.
 resolve_cited_sources() {
-  local cwd="$1" source tmp_source local_path root="${CLAUDE_PLUGIN_ROOT:-.}" real_root
+  local cwd="$1" source tmp_source local_path cited_by root="${CLAUDE_PLUGIN_ROOT:-.}" real_root
   real_root="$(plugin_root_real)"
   RESOLVED_SOURCES=(); TMP_SOURCES=(); UNRESOLVED_SOURCES=()
   while IFS= read -r source; do
@@ -232,6 +290,15 @@ resolve_cited_sources() {
         if [ -n "$local_path" ]; then RESOLVED_SOURCES+=("$local_path"); else UNRESOLVED_SOURCES+=("$source"); fi ;;
       https://*)
         public_source_url "$source" || { UNRESOLVED_SOURCES+=("$source"); continue; }
+        # A public page that a curated entry cites stands for that entry (docs/AGENT_CONTRACT.md "Cite the
+        # curated entry"), so the customer's code and the answer carry a page they can open instead of a
+        # plugin path. The entries that cite it are searched instead of the page: this works offline, adds
+        # no wait, and accepts nothing that citing those entries' paths would not.
+        cited_by="$(curated_files_citing "$root" "$source")"
+        if [ -n "$cited_by" ]; then
+          while IFS= read -r local_path; do RESOLVED_SOURCES+=("$local_path"); done <<< "$cited_by"
+          continue
+        fi
         tmp_source="$(mktemp)"
         if curl -fsSL --max-time 8 "$source" -o "$tmp_source" 2>/dev/null; then
           RESOLVED_SOURCES+=("$tmp_source"); TMP_SOURCES+=("$tmp_source")
@@ -241,6 +308,15 @@ resolve_cited_sources() {
       *) UNRESOLVED_SOURCES+=("$source") ;;
     esac
   done
+}
+
+# curated_files_citing <plugin root> <url> : the curated files that cite the page, one per line. The URL must
+# end where the citation ends (a longer URL that starts with it does not count; a period that ends the
+# sentence does not change it).
+curated_files_citing() {
+  local esc
+  esc="$(printf '%s' "$2" | sed 's/[][\.*^$+?(){}|]/\\&/g')"
+  grep -rlE -- "${esc}([^A-Za-z0-9_/#?=&%.-]|\.([^A-Za-z0-9]|\$)|\$)" "$1/knowledge/curated" 2>/dev/null || true
 }
 
 # source_supports_symbol <file> <symbol> : 0 when the file names the symbol, or for Type.member
@@ -267,6 +343,63 @@ all_symbols_sourced() {   # sets UNSOURCED_SYMBOL to the first symbol no source 
   done <<< "$1"
   for source_file in ${TMP_SOURCES[@]+"${TMP_SOURCES[@]}"}; do rm -f "$source_file"; done
   [ "$valid" -eq 1 ]
+}
+
+# answer_on_screen : 0 when the customer reads the conversation as it goes, in the terminal or the VS Code
+# extension (CLAUDE_CODE_ENTRYPOINT cli or claude-vscode, as hooks/first-run-notice.sh reads it), and the run
+# is not a non-interactive one. `claude -p` (sdk-cli) and Agent SDK programs return only the last reply, and
+# a missing value says nothing, so both count as not on screen.
+answer_on_screen() {
+  is_noninteractive && return 1
+  case "${CLAUDE_CODE_ENTRYPOINT:-}" in cli|claude-vscode) return 0 ;; *) return 1 ;; esac
+}
+
+# gate_emit : prints the Stop decision JSON on stdin, made to ask for an addition when the answer is on
+# screen. A send-back asks for the whole answer again because a non-interactive caller sees only the last
+# reply; in the terminal that showed the customer the same answer twice with a red "Stop hook error" line
+# between them, in 11 of 13 work turns of a 2026-11 audit. There the reply that follows carries only what
+# the answer left out.
+# customer_lines : prints the deny or block JSON on stdin with the first line of its reason (the line written
+# for the customer: hooks show the reason in full) in Korean when the latest request is in Korean. The
+# lines after it are for the agent and stay in English. A 2026-11 audit found every first line in English,
+# also for customers who wrote in Korean. A line without a Korean version stays as it is.
+customer_lines() {
+  jq --arg req "$(turn_user_prompt)" '
+    def ko_first: (split("\n")) as $l | ($l[0] | split(": ")) as $h
+      | if ($h | length) < 2 then . else
+        ([$h[0], ($h[1:] | join(": "))]) as [$who, $what]
+        | ([["This request didn'"'"'t ask for a build or a test run, so this command didn'"'"'t run. To run it, ask for it, for example \"build it\" or \"run the tests\".",
+             "이번 요청에는 빌드나 테스트 실행이 없어서 이 명령을 실행하지 않았습니다. 실행하시려면 「빌드해 줘」나 「테스트 돌려 줘」처럼 말씀해 주세요."],
+            ["This change uses Sendbird APIs that weren'"'"'t checked against the Sendbird docs or your installed SDK, so it wasn'"'"'t made. They are checked first and the change is made again; you don'"'"'t need to do anything.",
+             "Sendbird 문서나 설치된 SDK로 확인하지 않은 Sendbird API가 들어 있어서 이 변경을 적용하지 않았습니다. API를 먼저 확인하고 다시 적용하므로 따로 하실 일은 없습니다."],
+            ["The token you pasted isn'"'"'t copied into the next step, so this step didn'"'"'t start.",
+             "붙여 넣으신 토큰은 다음 단계로 넘기지 않으므로 이 단계를 시작하지 않았습니다."],
+            ["The upgrade is paused until the upgrade rules for your target versions are read.",
+             "목표 버전의 업그레이드 규칙을 읽을 때까지 업그레이드를 멈췄습니다."],
+            ["The answer included the token you pasted.", "답에 붙여 넣으신 토큰이 그대로 들어 있었습니다."],
+            ["The answer left out sources or check results from the work done for your request.", "답에서 이번 작업의 출처나 검사 결과가 빠졌습니다."],
+            ["The upgrade answer left out version details or where they came from.", "업그레이드 답에서 버전 정보나 그 출처가 빠졌습니다."],
+            ["The answer asked for your App ID, but this task doesn'"'"'t need it.", "이 작업에는 App ID가 필요 없는데 답에서 App ID를 물었습니다."],
+            ["The answer linked to web pages instead of the Sendbird docs it used.", "답에 참고한 Sendbird 문서 대신 웹 페이지 링크만 달렸습니다."],
+            ["The answer mentioned Sendbird APIs without saying where the information came from.", "답에 나온 Sendbird API의 출처가 빠졌습니다."],
+            ["A new answer follows.", "고쳐 쓴 답이 이어집니다."],
+            ["What it left out follows.", "빠진 내용이 이어집니다."]]
+           | reduce .[] as $p ($what; split($p[0]) | join($p[1]))) as $ko
+        | ([$who + ": " + $ko] + $l[1:]) | join("\n") end;
+    if ($req | test("[가-힣]")) then
+      (if .reason then .reason |= ko_first else . end)
+      | (if .hookSpecificOutput.permissionDecisionReason then .hookSpecificOutput.permissionDecisionReason |= ko_first else . end)
+    else . end'
+}
+
+gate_emit() {
+  if answer_on_screen; then
+    jq '.reason |= (sub("A new answer follows\\."; "What it left out follows.")
+      | sub("Write the whole answer again as the reply itself \\(the user may see only this reply, so do not say it is repeated or mention this check\\)";
+            "The customer has already read this answer on screen, so do not write it again or say that it was incomplete: reply with only what it left out, as a short addition that follows on from it (do not mention this check)"))' | customer_lines
+  else
+    customer_lines
+  fi
 }
 
 # emit_warning <text> : warn-only output (exit 0 in caller). Never blocks.
@@ -325,9 +458,53 @@ patch_added() {
 
 # prompt_asks_build <text> : 0 when a request asks to build, compile, or type-check the project, or
 # brings a build error ("fix this build error", "빌드해 줘", "run the typecheck"). "Build a chat screen"
-# (build = make) is not a build request.
+# (build = make) is not a build request. A request to run the tests ("run the unit tests", "테스트 돌려 줘",
+# "fix the failing CI") counts too: ./gradlew test, swift test, xcodebuild test, and npm test build or run the project, and in
+# a 2026-11 audit "테스트 돌려 줘" on an iOS app was denied its xcodegen and the tests never ran.
 prompt_asks_build() {
-  printf '%s' "$1" | grep -Eiq '\b(type-?check(s|ed|ing)?|tsc|xcodebuild|gradlew|assemble(debug|release)|compil(e|es|ed|ing|er))\b|\b(run|do|try|start|kick off)[[:space:]]+(a[[:space:]]+|the[[:space:]]+|an?[[:space:]]+)?(build|typecheck)\b|\bbuild[[:space:]]+(it|and[[:space:]]+(run|launch|test)|(the|my|this|your|our)[[:space:]]+(app|project|code|ios app|android app|web app))\b|\b(build|bundler|gradle|xcode|metro|webpack|vite)[[:space:]]+(error|errors|fails?|failed|failure|failing|log|output)\b|빌드|컴파일|타입[[:space:]]*체크|타입[[:space:]]*검사'
+  printf '%s' "$1" | grep -Eiq '\b(type-?check(s|ed|ing)?|tsc|xcodebuild|gradlew|assemble(debug|release)|compil(e|es|ed|ing|er))\b|\b(run|do|try|start|kick off)[[:space:]]+(a[[:space:]]+|the[[:space:]]+|an?[[:space:]]+)?(build|typecheck)\b|\bbuild[[:space:]]+(it|and[[:space:]]+(run|launch|test)|(the|my|this|your|our)[[:space:]]+(app|project|code|ios app|android app|web app))\b|\b(build|bundler|gradle|xcode|metro|webpack|vite)[[:space:]]+(error|errors|fails?|failed|failure|failing|log|output)\b|빌드|컴파일|타입[[:space:]]*체크|타입[[:space:]]*검사' && return 0
+  printf '%s' "$1" | grep -Eiq '\b(run|rerun|re-run|execute|kick off|start)[[:space:]]+((the|my|our|all|unit|ui|integration|e2e|instrumented|failing|existing|test)[[:space:]]+)*(tests?|test suites?|specs?)\b|\b(npm|yarn|pnpm|bun|swift|xcodebuild|gradlew)[[:space:]]+test\b|\bfailing[[:space:]]+(ci|tests?|checks?)\b|\b(ci|tests?)[[:space:]]+((is|are)[[:space:]]+)?(failing|fails|failed|broken|red)\b|테스트[[:space:]]*(를|을|가|도|만)?[[:space:]]*(돌려|돌리|실행|통과|깨|실패)'
+}
+
+# uses_sendbird <dir> : 0 when the project in <dir> uses a Sendbird SDK. The guards that read code or answers
+# for Sendbird API (source-claim-guard.sh, final-answer-gate.sh) ask this before they take a common name such
+# as BaseMessage or "error code 235050" for Sendbird's: in a 2026-11 audit a LangChain.js project with no
+# Sendbird in it was denied a file that used BaseMessage, and a Postgres error code answer was sent back.
+# It counts: the plugin's project profile (<stateDir>/profile.json, written by tools/detection/detect.sh) in
+# <dir> or a folder above it, or a package manifest, lockfile, or Xcode or Gradle project file that names
+# Sendbird in <dir>, in one of the four folders above it, or up to four folders below it (dependency and build
+# folders are skipped). The look below is skipped for the home folder and /, which can take seconds, and its
+# answer is kept per session and folder (sendbird-scan-<session_id>): a yes for the session, a no for ten
+# minutes, so an app that setup creates in a folder below is found again soon after.
+uses_sendbird() {
+  local dir="$1" d i f sd scan cached found
+  [ -n "$dir" ] && [ -d "$dir" ] || return 1
+  sd="$(jq -r '.stateDir // empty' "${CLAUDE_PLUGIN_ROOT:-$(dirname "${BASH_SOURCE[0]}")/../..}/config/plugin-config.json" 2>/dev/null)"
+  d="$dir"
+  for i in 0 1 2 3 4; do
+    [ -n "$sd" ] && [ -f "$d/$sd/profile.json" ] && return 0
+    for f in package.json Package.swift Package.resolved project.yml Podfile Podfile.lock build.gradle build.gradle.kts settings.gradle settings.gradle.kts pubspec.yaml; do
+      [ -f "$d/$f" ] && grep -qi sendbird "$d/$f" 2>/dev/null && return 0
+    done
+    [ -e "$d/.git" ] && break
+    [ "$d" = / ] && break
+    d="$(dirname "$d")"
+  done
+  case "$dir" in /|"${HOME:-/}"|"${HOME:-/}/") return 1 ;; esac
+  scan="$(session_state_file sendbird-scan)"
+  if [ -n "$scan" ] && [ -f "$scan" ]; then
+    cached="$(awk -F'\t' -v d="$dir" -v now="$(date +%s)" '$3 == d && ($1 == "yes" || now - $2 < 600) { r = $1 } END { print r }' "$scan")"
+    case "$cached" in yes) return 0 ;; no) return 1 ;; esac
+  fi
+  found="$(find "$dir" -maxdepth 4 \( -name node_modules -o -name Pods -o -name .git -o -name build -o -name .build \
+      -o -name DerivedData -o -name .gradle -o -name dist -o -name .next \) -prune -o -type f \( -name package.json \
+      -o -name Package.swift -o -name Package.resolved -o -name project.yml -o -name project.pbxproj -o -name Podfile \
+      -o -name Podfile.lock -o -name 'build.gradle*' -o -name 'settings.gradle*' -o -name libs.versions.toml \
+      -o -name pubspec.yaml \) -exec grep -li sendbird {} + 2>/dev/null | head -1)"
+  if [ -n "$scan" ]; then
+    mkdir -p "$(dirname "$scan")" 2>/dev/null && (umask 077; printf '%s\t%s\t%s\n' "$([ -n "$found" ] && echo yes || echo no)" "$(date +%s)" "$dir" >> "$scan")
+  fi
+  [ -n "$found" ]
 }
 
 # session_state_file <kind> : this session's file of that kind; prints nothing without a session_id
@@ -356,11 +533,16 @@ agents_running() {
 #   extension (".log"), such as the "-Users-<name>-...-sendbird-plugin" folder of a Claude Code session;
 # - a run that holds a UUID, such as a session ID folder ("<uuid>_old") or an artifact ID;
 # - 키 inside a longer Korean word: "패키지" (package) is not "키" (key), so 키 counts only when no Hangul
-#   syllable comes right before it.
+#   syllable comes right before it;
+# - a git commit or other hash named as one: a run of hex digits right after commit, sha, revision, hash,
+#   커밋, or 해시 ("Session token refresh broke after commit 9914c0ce..." in a 2026-11 audit, whose answer
+#   was sent back for repeating the commit). A hex run without such a word still counts.
 # request_tokens <text> : the tokens in that text, one per line
 request_tokens() {
   jq -rn --arg req "$1" '
-    [ ($req | match("(?i)(token|secret|session|api[ _-]?key|password|bearer|credential|토큰|시크릿|비밀|세션|(?<![가-힣])키)[^\\n]{0,60}?(?<![A-Za-z0-9_/\\\\-])([A-Za-z0-9_-]{24,})(?![A-Za-z0-9_/\\\\-]|\\.[A-Za-z0-9])"; "g") | .captures[1].string),
+    [ ($req | match("(?i)(token|secret|session|api[ _-]?key|password|bearer|credential|토큰|시크릿|비밀|세션|(?<![가-힣])키)([^\\n]{0,60}?)(?<![A-Za-z0-9_/\\\\-])([A-Za-z0-9_-]{24,})(?![A-Za-z0-9_/\\\\-]|\\.[A-Za-z0-9])"; "g")
+        | select((.captures[2].string | test("^[0-9A-Fa-f]+$")) and (.captures[1].string | test("(?i)(commit|sha(1|256)?|revision|rev|hash|커밋|해시)[[:space:]:#=@]*(은|는|이|가|을|를)?[[:space:]]*$")) | not)
+        | .captures[2].string),
       ($req | match("eyJ[A-Za-z0-9_-]{10,}\\.[A-Za-z0-9_-]{5,}\\.[A-Za-z0-9_-]{5,}"; "g") | .string) ]
     | map(select(test("[A-Za-z]") and test("[0-9]")
         and (test("[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}") | not)))
@@ -430,7 +612,10 @@ report_check_names() {
     | .n | ascii_downcase' 2>/dev/null | awk '!seen[$0]++'
 }
 # report_source_files : the file (or page) name of each source cell of the report's symbol/source table
-# on stdin, one per line, without the folder and the line (types.d.ts for node_modules/.../types.d.ts:52)
+# on stdin, one per line, without the folder and the line (types.d.ts for node_modules/.../types.d.ts:52).
+# The name is the cell's first file name (with an extension) or URL, not its first word: in a 2026-11 audit
+# run a cell read "grep for "GroupChannel" found only ... (`.sendbird-client/cache/uikit/api-surface.md:18`)",
+# and an answer that kept api-surface.md was sent back for leaving out "grep". A cell with neither prints nothing.
 report_source_files() {
   awk -F'|' '
     /^[[:space:]]*\|/ {
@@ -441,7 +626,13 @@ report_source_files() {
         next
       }
       if ($0 ~ /^[[:space:]]*\|[-:|[:space:]]+$/) next
-      v = $col; gsub(/`/, "", v); sub(/^[[:space:]]+/, "", v); sub(/[[:space:]].*$/, "", v)
+      cell = $col; gsub(/[`()\[\]]/, " ", cell); v = ""
+      nt = split(cell, t, /[[:space:]]+/)
+      for (k = 1; k <= nt; k++) {
+        w = t[k]; sub(/[,;]+$/, "", w); sub(/\.$/, "", w)
+        if (w ~ /^https?:\/\// || w ~ /\.[A-Za-z][A-Za-z0-9]*(:[0-9][0-9,-]*)?$/) { v = w; break }
+      }
+      if (v == "") next
       sub(/:[0-9][0-9,-]*$/, "", v); sub(/\/+$/, "", v); n = split(v, p, "/"); v = p[n]
       if (v ~ /[A-Za-z]/) print v
       next
@@ -603,4 +794,17 @@ cited_sources() {
   printf '%s\n' "$1" | grep -Eio '(source:|출처:|근거:)[[:space:]]*[^[)[:space:]][^)[:space:]]*' \
     | sed -E 's/^([Ss][Oo][Uu][Rr][Cc][Ee]:|출처:|근거:)[[:space:]]*//' \
     | sed -E 's/(\.(md|swift|kt|java|ts|tsx|js|jsx|json|swiftinterface))[^:0-9A-Za-z_.,-].*$/\1/'
+}
+
+# curated_page_links <root> <text> : each https:// link in the text, with or without a source marker, that is
+# a public page a curated entry under <root> cites (curated_files_citing). The contract asks an answer to cite
+# that page, with no marker: in a 2026-11 audit run an answer that cited the error code page in parentheses
+# ("오류 코드 페이지(https://sendbird.com/docs/...)에서") was sent back as citing nothing. Only pages an entry
+# cites count, so reading them fetches nothing.
+curated_page_links() {
+  local link
+  while IFS= read -r link; do
+    public_source_url "$link" && [ -n "$(curated_files_citing "$1" "$link")" ] && printf '%s\n' "$link"
+  done < <(printf '%s\n' "$2" | LC_ALL=C grep -Eo 'https://[A-Za-z0-9._~:/?#@!$&*+,;=%-]+' | LC_ALL=C sed -E 's/[.,;:!?]+$//' | awk '!seen[$0]++')
+  return 0
 }

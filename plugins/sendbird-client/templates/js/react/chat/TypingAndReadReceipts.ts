@@ -1,7 +1,7 @@
 // source: https://sendbird.com/docs/chat/sdk/v4/javascript/ref/classes/_sendbird_chat_groupChannel.GroupChannel.html (startTyping, endTyping, getTypingUsers, getUnreadMemberCount, getReadMembers, markAsRead)
 // source: https://sendbird.com/docs/chat/sdk/v4/javascript/ref/classes/_sendbird_chat_groupChannel.GroupChannelHandler.html (onTypingStatusUpdated, onUserMarkedRead)
 // source: https://sendbird.com/docs/chat/sdk/v4/javascript/ref/classes/_sendbird_chat_groupChannel.GroupChannelModule.html (addGroupChannelHandler, removeGroupChannelHandler)
-// source: knowledge/curated/js/products/chat.md ("Typing indicator (group channels)", "Read receipts for a message")
+// source: https://sendbird.com/docs/chat/sdk/v4/javascript/message/managing-read-status-in-a-group-channel/mark-messages-as-read
 // Verified against the @sendbird/chat 4.22.11 and 4.22.14 type declarations: GroupChannel startTyping(), endTyping(),
 // getTypingUsers(): Member[], getUnreadMemberCount(message), getReadMembers(message, includeAllMembers?), markAsRead(), url;
 // GroupChannelHandler onTypingStatusUpdated(channel) and onUserMarkedRead(channel, userIds). Not used on purpose:

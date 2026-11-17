@@ -3,6 +3,8 @@
 <!-- status: populated -->
 # android — troubleshooting
 
+> Source re-check verified 2026-11-09: the Chat SDK CHANGELOG gained only a v4.36.6 entry (internal handling of CSAT submission and retrieval), which leaves the v4.25.0 entry cited below unchanged, and the 4.36.6 POM declares the same dependencies as the 4.36.5 POM cited below (`sendbird-common` 1.0.7, `sendbird-auth` 1.0.27, `kotlin-stdlib`, `androidx.annotation`); every other GitHub source cited below has had no commit since 2026-10-08 (`tools/curated/source-freshness.sh`).
+
 > Symptom → cause → fix entries built from solved public cases (Sendbird community forum and GitHub discussions). Each fix was re-checked against the pinned SDK surface (`javap` of sendbird-chat 4.36.5, uikit 3.26.3, sendbird-calls 1.12.5 and sendbird-common 1.0.7) or against the published POM and CHANGELOG. Behavior that only a case states is attributed to that case. Answers written for Chat v3 or UIKit v2 were rewritten for the current API or dropped. Case links marked **community** were resolved by the poster or another user, not by Sendbird staff. Verified 2026-10-08. On 2026-10-12 the citations were moved to public sources: the Chat v4 Android API reference and docs on sendbird.com, the public UIKit Android source at commit `07ffe8e` (3.26.3), or the AAR class or manifest by name.
 
 ## Build and install

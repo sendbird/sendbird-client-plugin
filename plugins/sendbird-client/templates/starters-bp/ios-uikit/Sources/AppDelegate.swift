@@ -1,4 +1,4 @@
-// source: knowledge/curated/ios/cross-cutting/push.md ("Register / unregister the APNs token", "Token registered before connect (pending)")
+// source: https://sendbird.com/docs/chat/sdk/v4/ios/push-notifications/configuring-preferences/register-push-notification-credentials
 import UIKit
 
 @main

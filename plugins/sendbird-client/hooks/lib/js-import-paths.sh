@@ -7,7 +7,7 @@
 # tools/local-sdk/read-surface.sh caches the installed package's surface at
 # <project>/.sendbird-client/cache/<product>/api-surface.md, and under every `## <kind> <Name>`
 # heading it writes the paths that export that name:
-#   Exported from: `@sendbird/chat/groupChannel`, `@sendbird/chat/aiAgent`
+#   Exported from: `@sendbird/chat/groupChannel`, `@sendbird/chat/poll`
 # A default export carries " (default export)" after its path (`@sendbird/chat (default export)`).
 
 # surface_project_dir <file path> <cwd> : prints the nearest folder, from the file's folder up, that

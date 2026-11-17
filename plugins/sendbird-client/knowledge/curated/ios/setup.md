@@ -1,10 +1,10 @@
 <!-- last-verified-against: sendbird-chat-sdk-ios 4.39.11 / sendbird-uikit-ios 3.36.1 -->
-<!-- verified-at: 2026-11-02 -->
+<!-- verified-at: 2026-11-16 -->
 <!-- verification-method: compile-check-ios -->
 <!-- status: populated -->
 # ios — setup
 
-> Verified against the public mirrors and rebuilt against the latest SPM releases on 2026-09-08. Shared-dependency minimums read from the public `Package.swift` manifests on 2026-09-30. Prefer SPM; cite each coordinate. Do not invent versions.
+> Verified against the public mirrors and rebuilt against the latest SPM releases on 2026-09-08. Shared-dependency minimums read from the public `Package.swift` manifests on 2026-09-30. GitHub source citations re-checked 2026-11-16: Chat SDK 4.39.14 `Package.swift` line 8 still declares iOS 13, the cited 4.39.11 CHANGELOG lines are unchanged (lines 574-579 at 4.39.14), and the UIKit 3.36.4 and SwiftUI 1.2.3 minimums below were read from their tags. Prefer SPM; cite each coordinate. Do not invent versions.
 
 > A plugin run does not build, compile, or type-check the project: do not run `xcodebuild build`, `xcodegen generate`, or `swift build` unless the customer asks for a build (`docs/AGENT_CONTRACT.md` section 3). The rebuilds above are the plugin's own tests.
 
@@ -26,7 +26,7 @@ Add the SDK(s) you need via Swift Package Manager, initialize once at launch, th
 | UIKit (`sendbird-uikit-ios-spm`) | iOS 13 |
 | Calls (`sendbird-calls-ios`) | iOS 14 |
 
-An app whose deployment target is iOS 12 cannot take Chat SDK 4.25.0 or later. Raise the deployment target to iOS 13 (iOS 14 when the app also uses Calls) rather than pinning an old Chat SDK, because UIKit 3.36.x already needs Chat SDK 4.39.6 or later (table below). (source: https://github.com/sendbird/sendbird-chat-sdk-ios/blob/4.39.11/CHANGELOG.md#L531-L536 — 4.25.0: "The minimum supported iOS version has been raised from iOS 12 to iOS 13" ; https://github.com/sendbird/sendbird-chat-sdk-ios/blob/4.39.11/Package.swift#L8 ; https://github.com/sendbird/sendbird-uikit-ios-spm/blob/3.36.2/Package.swift#L8 ; https://github.com/sendbird/sendbird-calls-ios/blob/1.12.3/Package.swift#L7)
+An app whose deployment target is iOS 12 cannot take Chat SDK 4.25.0 or later. Raise the deployment target to iOS 13 (iOS 14 when the app also uses Calls) rather than pinning an old Chat SDK, because UIKit 3.36.0–3.36.2 already needs Chat SDK 4.39.6 or later, UIKit 3.36.3 needs 4.39.12 or later, and UIKit 3.36.4 needs 4.39.13 or later (table below). (source: https://github.com/sendbird/sendbird-chat-sdk-ios/blob/4.39.11/CHANGELOG.md#L531-L536 — 4.25.0: "The minimum supported iOS version has been raised from iOS 12 to iOS 13" ; https://github.com/sendbird/sendbird-chat-sdk-ios/blob/4.39.11/Package.swift#L8 ; https://github.com/sendbird/sendbird-uikit-ios-spm/blob/3.36.3/Package.swift#L8 ; https://github.com/sendbird/sendbird-chat-sdk-ios/blob/4.39.12/Package.swift#L8 ; https://github.com/sendbird/sendbird-calls-ios/blob/1.12.3/Package.swift#L7 ; https://github.com/sendbird/sendbird-uikit-ios-spm/blob/3.36.4/Package.swift#L8 ; https://github.com/sendbird/sendbird-chat-sdk-ios/blob/4.39.14/Package.swift#L8)
 
 ## Keep shared dependencies compatible
 
@@ -34,19 +34,22 @@ Swift Package Manager resolves a single version of `sendbird-chat-sdk-ios` (and 
 
 | Package (version) | Requires |
 |---|---|
-| `sendbird-uikit-ios-spm` 3.36.0 | Chat SDK 4.39.6+ |
+| `sendbird-uikit-ios-spm` 3.36.0–3.36.2 | Chat SDK 4.39.6+ |
+| `sendbird-uikit-ios-spm` 3.36.3 | Chat SDK 4.39.12+ |
+| `sendbird-uikit-ios-spm` 3.36.4 | Chat SDK 4.39.13+ |
 | `sendbird-swiftui-ios` 1.2.2 | Chat SDK 4.39.6+, `sendbird-uikit-ios-spm` 3.35.5+ |
+| `sendbird-swiftui-ios` 1.2.3 | Chat SDK 4.39.13+, `sendbird-uikit-ios-spm` 3.36.4+ |
 | `SendBird-Desk-iOS-Framework` v1.2.2 | Chat SDK 4.39.5+ |
 
 When you upgrade one Sendbird package, check its `Package.swift` and raise the shared pins if needed instead of pinning them exactly to an older release.
 
 ### Keep UIKit and raise only the Chat SDK
 
-UIKit does not pin the Chat SDK to one release. At tag 3.36.1, `sendbird-uikit-ios-spm` declares `.package(name: "SendbirdChatSDK", url: "https://github.com/sendbird/sendbird-chat-sdk-ios", from: "4.39.6")`. In SwiftPM, `from:` means "this version or newer, up to the next major version", so any 4.x release from 4.39.6 satisfies UIKit. To run a newer Chat SDK under the same UIKit version, add `sendbird-chat-sdk-ios` to the app yourself with a higher minimum, for example `from: "4.39.11"`. SwiftPM then resolves the one shared version to 4.39.11 or later. The version it picked is recorded in `Package.resolved`. A 5.x Chat SDK would fall outside UIKit's range and fail to resolve.
+UIKit does not pin the Chat SDK to one release. At tag 3.36.1, `sendbird-uikit-ios-spm` declares `.package(name: "SendbirdChatSDK", url: "https://github.com/sendbird/sendbird-chat-sdk-ios", from: "4.39.6")`. In SwiftPM, `from:` means "this version or newer, up to the next major version", so any 4.x release from 4.39.6 satisfies UIKit. To run a newer Chat SDK under the same UIKit version, add `sendbird-chat-sdk-ios` to the app yourself with a higher minimum, for example `from: "4.39.11"`. SwiftPM then resolves the one shared version to 4.39.11 or later. The version it picked is recorded in `Package.resolved`. A 5.x Chat SDK would fall outside UIKit's range and fail to resolve. At tag 3.36.3 the declared minimum is `from: "4.39.12"`, so with UIKit 3.36.3 the app's own Chat SDK minimum must be 4.39.12 or higher. At tag 3.36.4 it is `from: "4.39.13"`, so with UIKit 3.36.4 the minimum is 4.39.13.
 
-(source: https://github.com/sendbird/sendbird-uikit-ios-spm/blob/3.36.1/Package.swift#L19-L25; https://github.com/swiftlang/swift-package-manager/blob/swift-6.0-RELEASE/Sources/PackageDescription/PackageDependency.swift#L196-L223 — `from:` is `.upToNextMajor(from:)`)
+(source: https://github.com/sendbird/sendbird-uikit-ios-spm/blob/3.36.1/Package.swift#L19-L25; https://github.com/sendbird/sendbird-uikit-ios-spm/blob/3.36.3/Package.swift#L19-L23; https://github.com/sendbird/sendbird-uikit-ios-spm/blob/3.36.4/Package.swift#L19-L23; https://github.com/swiftlang/swift-package-manager/blob/swift-6.0-RELEASE/Sources/PackageDescription/PackageDependency.swift#L196-L223 — `from:` is `.upToNextMajor(from:)`)
 
-(source: Package.swift of sendbird/sendbird-uikit-ios-spm@3.36.0 line 23, sendbird/sendbird-swiftui-ios@1.2.2 lines 19 and 23, sendbird/SendBird-Desk-iOS-Framework@v1.2.2 line 17; README Requirements of sendbird-uikit-ios-spm@3.36.0 and SendBird-Desk-iOS-Framework@v1.2.2)
+(source: Package.swift of sendbird/sendbird-uikit-ios-spm@3.36.0 line 23, sendbird/sendbird-swiftui-ios@1.2.2 lines 19 and 23, sendbird/SendBird-Desk-iOS-Framework@v1.2.2 line 17, sendbird/sendbird-uikit-ios-spm@3.36.3 line 22 (read 2026-11-09); sendbird/sendbird-uikit-ios-spm@3.36.4 line 22, sendbird/sendbird-swiftui-ios@1.2.3 lines 19 and 23 (read 2026-11-16); README Requirements of sendbird-uikit-ios-spm@3.36.0 and SendBird-Desk-iOS-Framework@v1.2.2)
 
 ## App ID
 
@@ -78,7 +81,7 @@ If the project already supplies the App ID another way, such as an existing conf
 - Auth/session: knowledge/curated/ios/products/auth.md.
 
 ## Pitfalls
-- Binary frameworks (Calls/Live/AI Agent Core) may need a device build (simulator slice arch limits).
+- Binary frameworks (Calls/Live) may need a device build (simulator slice arch limits).
 - App ID from the Info.plist build setting (see "App ID" above); tokens are secrets — never hard-code.
 - One App ID per app run. The authentication docs say the initialize method "must be called once across your client app", and they describe no way to switch to another App ID at runtime; keep development and production App IDs in separate build configurations. (source: https://sendbird.com/docs/chat/sdk/v4/ios/application/authenticating-a-user/authentication)
   - When the customer asks to switch App IDs inside the app (a settings switch, a debug menu), do not build a runtime switch. Say why (the rule above), give the `SENDBIRD_APP_ID` build setting one value per build configuration (Debug and Release, in the `project.yml` configuration settings or the xcconfig file each configuration uses), and finish the run with that change instead of asking or declining. A value the customer did not give keeps the placeholder and goes under the run's manual steps.

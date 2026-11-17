@@ -1,6 +1,5 @@
 // source: https://sendbird.com/docs/chat/sdk/v4/ios/ref/Classes/BaseChannel.html (sendFileMessage, resendFileMessage, cancelUploadingFileMessage)
 // source: https://sendbird.com/docs/chat/sdk/v4/ios/message/sending-a-message/track-file-upload-progress-using-a-handler
-// source: knowledge/curated/ios/products/chat.md ("Upload progress and resending a failed file message")
 // The SDK calls are the ones in the UIKit-host template templates/ios/uikit/chat/FileMessageSender.swift, verified
 // against the 4.39.10 and 4.39.11 release .swiftinterface. This file only wraps them in an ObservableObject so a
 // SwiftUI view can show progress and a retry button; the wrapper is standard SwiftUI/Combine, not an SDK API.

@@ -2,16 +2,17 @@
 <!-- status: populated -->
 # ios host — SwiftUI
 
+> GitHub source citations re-checked 2026-11-16 against tag `1.2.3`: `GlobalOptions.swift` lines 13–17 (`enableViewAdaptorAutoReset`) are unchanged; 1.2.3 changes only a doc comment elsewhere in that file. The other cited source and sample files have no commits since they were verified.
+
 > Host guidance. The SendbirdSwiftUI sections are read from the public `sendbird-swiftui-ios` 1.2.2 package (swiftinterface and source) and their snippet is build-verified (xcodebuild). Verified 2026-09-30. The customization sections (message views, input, channel list, header, theme) were read from the 1.2.2 `.swiftinterface`, the public sample app at tag `1.2.2`, and the SwiftUI docs, and every example builds with `tools/curated/compile-snippets-ios.sh` (verified 2026-10-11).
 
 ## Detection signals
 - `import SwiftUI`, `App` protocol with `@main`, `WindowGroup`, `some View`, `@UIApplicationDelegateAdaptor` for an AppDelegate bridge.
 
 ## Integration notes
-- Sendbird UIKit (`SendbirdUIKit`) and AI Agent screens are UIViewController-based. Wrap them in `UIViewControllerRepresentable` (standard interop, not an SDK API).
+- Sendbird UIKit (`SendbirdUIKit`) screens are UIViewController-based. Wrap them in `UIViewControllerRepresentable` (standard interop, not an SDK API).
 - Calls and Live ship no prebuilt screens; their video views (`SendBirdVideoView` in SendBirdCalls, `SendbirdVideoView` in SendbirdLiveSDK) are UIViews, so wrap them in `UIViewRepresentable`. Desk is headless and needs no wrapper. (source: SendBirdCalls.swiftinterface (1.12.3) line 450; SendbirdLiveSDK.swiftinterface (1.6.0) line 606; build-verified SwiftUI templates in templates/ios/swiftui/calls, templates/ios/swiftui/live, templates/ios/swiftui/desk)
 - Chat also ships SwiftUI-native views in the separate `SendbirdSwiftUI` package; see SwiftUI-native chat views (SendbirdSwiftUI) below. A build-verified template is in templates/ios/swiftui/uikit.
-- The AI Agent floating launcher attaches to the window, so it works from a SwiftUI app run from an `@UIApplicationDelegateAdaptor` AppDelegate (see products/ai-agent.md + templates/ios/swiftui/ai-agent/_README.md).
 - Init/connect/auth APIs are identical to the UIKit host.
 
 ## SwiftUI-native chat views (SendbirdSwiftUI)
@@ -356,4 +357,3 @@ Put the button inside a `NavigationStack`. (source: https://github.com/sendbird/
 
 ## Related
 - UIKit host: knowledge/curated/ios/hosts/uikit.md
-- AI Agent: knowledge/curated/ios/products/ai-agent.md

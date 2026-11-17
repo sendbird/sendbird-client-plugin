@@ -1,4 +1,4 @@
-// source: knowledge/curated/ios/hosts/swiftui.md ("Theme, dark mode, strings")
+// source: https://sendbird.com/docs/chat/uikit/v3/swiftui/theme-and-style-resources/color-resources
 import SendbirdSwiftUI
 
 enum StarterTheme {

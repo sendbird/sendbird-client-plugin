@@ -1,5 +1,5 @@
-// source: knowledge/curated/android/hosts/compose.md ("UIKit for Jetpack Compose — init, then push")
-// source: knowledge/curated/android/cross-cutting/theme.md ("Jetpack Compose host")
+// source: https://sendbird.com/docs/chat/uikit/v3/jetpack-compose/essentials/push-notifications
+// source: https://sendbird.com/docs/chat/uikit/v3/jetpack-compose/themes
 package com.example.starterbp.compose
 
 import android.os.Bundle

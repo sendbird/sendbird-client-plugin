@@ -1,4 +1,4 @@
-// source: knowledge/curated/android/hosts/compose.md ("UIKit for Jetpack Compose — init, then push": same repository)
+// source: https://sendbird.com/docs/chat/uikit/v3/jetpack-compose/essentials/push-notifications
 pluginManagement { repositories { google(); mavenCentral(); gradlePluginPortal() } }
 dependencyResolutionManagement {
     repositories {

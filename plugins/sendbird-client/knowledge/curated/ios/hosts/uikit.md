@@ -9,7 +9,7 @@
 
 ## Integration notes
 - Sendbird UIKit + Calls/Desk/Live UIs are UIViewController-based — present/push them directly (see products/uikit.md).
-- Initialize the SDK in `application(_:didFinishLaunchingWithOptions:)`; attach AI Agent launcher on the main thread.
+- Initialize the SDK in `application(_:didFinishLaunchingWithOptions:)`.
 - Lifecycle: add channel delegates in `viewWillAppear`, remove in `viewWillDisappear` (see cross-cutting/performance.md).
 
 ## Where common customizations live

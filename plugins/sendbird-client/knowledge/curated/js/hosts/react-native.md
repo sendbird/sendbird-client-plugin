@@ -10,7 +10,7 @@
 
 ## Integration notes
 
-- Core chat via `@sendbird/chat` (same as web); prebuilt UI via `@sendbird/uikit-react-native` (needs `platformServices` + native modules); AI Agent via `@sendbird/ai-agent-messenger-react-native` (needs `nativeModules` incl. `react-native-mmkv`).
+- Core chat via `@sendbird/chat` (same as web); prebuilt UI via `@sendbird/uikit-react-native` (needs `platformServices` + native modules).
 - Native peers (mmkv, safe-area-context, clipboard, image/document pickers) must be installed + linked per the quickstart.
 - Push: register the FCM/APNs token from the native layer via the chat SDK (see cross-cutting/push.md).
 
@@ -96,5 +96,4 @@ function sendRecording(uri: string) {
 ## Related
 
 - UIKit: knowledge/curated/js/products/uikit.md
-- AI Agent: knowledge/curated/js/products/ai-agent.md
 - React host: knowledge/curated/js/hosts/react.md

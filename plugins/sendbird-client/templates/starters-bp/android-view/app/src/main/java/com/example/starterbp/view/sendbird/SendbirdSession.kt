@@ -1,7 +1,6 @@
 // source: knowledge/curated/android/products/uikit.md ("Initialize (Application class)", "Pitfalls")
-// source: knowledge/curated/android/products/auth.md ("Session token expiry")
-// source: knowledge/curated/android/products/chat.md ("Call APIs only after connect completes", "Connection state and reconnection")
-// source: knowledge/curated/android/cross-cutting/theme.md ("Light / dark (View host)")
+// source: https://sendbird.com/docs/chat/sdk/v4/android/application/authenticating-a-user/authentication
+// source: https://sendbird.com/docs/chat/uikit/v3/android-view/customizations/resource-customization/theme-resources
 // source: https://github.com/sendbird/sendbird-uikit-android/blob/main/uikit/src/main/java/com/sendbird/uikit/SendbirdUIKit.java#L557
 // source: https://sendbird.com/docs/chat/sdk/v4/android/ref/-sendbird-chat/com.sendbird.android/-sendbird-chat/index.html
 package com.example.starterbp.view.sendbird

@@ -7,8 +7,8 @@
 
 ## Setup
 - Initialize Chat once in `Application.onCreate`; register `Application` in the manifest.
-- UIKit/AI Agent are View-based (ViewBinding/Fragments) — the `MessengerLauncher` context must be a `FragmentActivity` (see ai-agent.md).
-- Enable `buildFeatures { viewBinding = true }` for UIKit/AI Agent.
+- UIKit is View-based (ViewBinding/Fragments).
+- Enable `buildFeatures { viewBinding = true }` for UIKit.
 
 ## Auth
 - Call `SendbirdChat.setSessionHandler(...)` before `connect` (see auth.md).
@@ -16,7 +16,7 @@
 
 ## Lifecycle
 - Remove channel handlers you add, bound to the Activity/Fragment lifecycle (see performance.md).
-- Desk/AI Agent init only after Chat `onInitSucceed()`.
+- Desk init only after Chat `onInitSucceed()`.
 
 ## Messages (file send / resend)
 

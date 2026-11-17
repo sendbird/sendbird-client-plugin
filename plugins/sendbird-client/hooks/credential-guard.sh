@@ -22,6 +22,7 @@ case "$tool" in
   *) exit 0;;
 esac
 [ -n "$body" ] || exit 0
+may_hold_credential "$body" || exit 0
 
 CORE="$(cd "$HERE/../core/commands" && pwd)"
 hit="$(printf '%s' "$body" | bash "$CORE/check-credential.sh" | jq -r '.hit // empty')"
@@ -29,15 +30,15 @@ hit="$(printf '%s' "$body" | bash "$CORE/check-credential.sh" | jq -r '.hit // e
 
 # The first line is for the person, who sees the whole reason; the rest tells the agent what to do.
 if [ "$tool" = Bash ]; then
-  reason="Sendbird Client plugin: This command would pass a secret, such as a key or token, so it didn't run. Keep secrets in an environment variable or a secret manager instead."
+  reason="Sendbird Client Plugin: This command would pass a secret, such as a key or token, so it didn't run. Keep secrets in an environment variable or a secret manager instead."
 else
-  reason="Sendbird Client plugin: This change would save a secret, such as a key or token, in ${path:-the edited file}, so it wasn't made. Keep secrets in an environment variable or a secret manager instead."
+  reason="Sendbird Client Plugin: This change would save a secret, such as a key or token, in ${path:-the edited file}, so it wasn't made. Keep secrets in an environment variable or a secret manager instead."
 fi
 reason="$reason
 Possible secret ($hit) in ${path:-the edited file}. Use an environment variable or secret manager; do not write or pass credential literals."
 # a session, access, or auth token given a string literal, a placeholder included (core/commands/check-credential.sh)
 case "$hit" in *"token literal"*)
-  reason="$reason A session or access token is never a string literal in app code, a placeholder such as \"TODO_SESSION_TOKEN\" included: read it from the app's token source. When the app has none, follow docs/AGENT_CONTRACT.md: for an authenticated session, one app function fetches the token from the customer's server (no URL or token in it) and the token server goes under manualSteps; for AI Agent user details, keep the anonymous session and pass the details in the context object (section 7)." ;;
+  reason="$reason A session or access token is never a string literal in app code, a placeholder such as \"TODO_SESSION_TOKEN\" included: read it from the app's token source. When the app has none, follow docs/AGENT_CONTRACT.md: for an authenticated session, one app function fetches the token from the customer's server (no URL or token in it) and the token server goes under manualSteps." ;;
 esac
 jq -n --arg reason "$reason" '{
   hookSpecificOutput: {

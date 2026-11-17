@@ -23,6 +23,7 @@
 import '@sendbird/chat/node';
 import SendbirdChat from '@sendbird/chat';
 import { GroupChannelModule } from '@sendbird/chat/groupChannel';
+import { promises as dnsPromises } from 'node:dns';
 
 // Node 22 and later have a built-in WebSocket, and the SDK uses it instead of its bundled `ws`. That
 // WebSocket hands a binary (compressed) frame over as a Blob, and the SDK reads a Blob with
@@ -39,17 +40,48 @@ if (NativeWebSocket) {
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const out = (o) => process.stdout.write(JSON.stringify(o) + '\n');
 
+// A connect that fails on the network (a code in the 800000s, or none) is tried up to three times, two
+// seconds apart: in a 2026-11 audit one 800120 ended the whole check, and the same command passed when run
+// again. A refusal from the server (an application that requires an access token) is not retried.
 export async function connectAs(userId) {
   const appId = process.env.RT_APP_ID;
   if (!appId) throw new Error('RT_APP_ID is not set');
-  const chat = SendbirdChat.init({ appId, modules: [new GroupChannelModule()], localCacheEnabled: false, newInstance: true });
-  try {
-    await chat.connect(userId);
-  } catch (e) {
-    // The code tells the caller why, for example an application that requires an access token.
-    throw new Error(`connect as ${userId} with a user ID only failed (code ${e && e.code ? e.code : 'none'}: ${e && e.message ? e.message : e})`);
+  let last;
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    const chat = SendbirdChat.init({ appId, modules: [new GroupChannelModule()], localCacheEnabled: false, newInstance: true });
+    try {
+      await chat.connect(userId);
+      return chat;
+    } catch (e) {
+      last = e;
+      const code = e && e.code ? Number(e.code) : 0;
+      if (code && (code < 800000 || code >= 900000)) break;
+      if (attempt < 3) await sleep(2000);
+    }
   }
-  return chat;
+  // The code tells the caller why, for example an application that requires an access token.
+  const code = last && last.code ? Number(last.code) : 0;
+  const note = !code || (code >= 800000 && code < 900000) ? await appHostNote(appId) : '';
+  throw new Error(`connect as ${userId} with a user ID only failed (code ${last && last.code ? last.code : 'none'}: ${last && last.message ? last.message : last})${note}`);
+}
+
+// appHostNote <appId> [lookup] : why a network-coded connect failure (800120) happened, when DNS can tell.
+// The SDK connects to https://api-<App ID>.sendbird.com (the apiHost it builds in SendbirdChat.init when
+// none is given). In a 2026-11 audit run with a wrong App ID that name did not exist, the SDK said only
+// 800120 "There was a network error", and the answer blamed the network. A name that does not exist while
+// sendbird.com resolves means no Sendbird application has this App ID; when sendbird.com does not resolve
+// either, this computer has no network or DNS. The App ID is never printed. '' when neither applies.
+export async function appHostNote(appId, lookup = dnsPromises.lookup) {
+  const missing = async (host) => {
+    try { await Promise.race([lookup(host), sleep(5000).then(() => { throw Object.assign(new Error('timeout'), { code: 'ETIMEOUT' }); })]); return false; }
+    catch (e) { return e && (e.code === 'ENOTFOUND' || e.code === 'EAI_NONAME') ? true : null; }
+  };
+  const app = await missing(`api-${String(appId).toLowerCase()}.sendbird.com`);
+  if (app !== true) return '';
+  const base = await missing('sendbird.com');
+  if (base === false) return '; Sendbird has no server for this App ID (api-<app-id>.sendbird.com does not exist while sendbird.com does): check that it is the App ID of the application in the Sendbird Dashboard';
+  if (base === true) return '; this computer could not look up sendbird.com either: it has no network or DNS';
+  return '';
 }
 
 export async function presence(chat, userId, want, timeoutSec = 90) {
