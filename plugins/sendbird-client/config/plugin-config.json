@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "1.0.3",
+  "schemaVersion": "1.0.4",
   "knowledge": {
     "mode": "runtime-fetch",
     "_modes": [

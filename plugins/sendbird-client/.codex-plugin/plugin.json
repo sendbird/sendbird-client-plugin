@@ -1,12 +1,12 @@
 {
   "name": "sendbird-client",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Help adding Sendbird Chat, UIKit, and Calls to iOS, Android, and JS apps, including authentication and sessions. It runs local shell scripts as hooks. See \"What runs on your machine\" in the README.",
   "author": {
     "name": "Sendbird",
     "url": "https://sendbird.com"
   },
-  "homepage": "https://sendbird.com/docs",
+  "homepage": "https://tools.docs.sendbird.com/",
   "repository": "https://github.com/sendbird/sendbird-client-plugin",
   "license": "Apache-2.0",
   "keywords": [
@@ -34,13 +34,15 @@
       "Read",
       "Write"
     ],
-    "websiteURL": "https://sendbird.com/docs",
+    "websiteURL": "https://tools.docs.sendbird.com/",
     "defaultPrompt": [
       "Set up Sendbird in this project.",
       "Add a Sendbird channel list screen to this app.",
       "Verify this Sendbird integration."
     ],
     "displayName": "Sendbird Client Plugin",
-    "longDescription": "Help adding Sendbird Chat, UIKit, and Calls to iOS, Android, and JS apps, including authentication and sessions. It runs local shell scripts as hooks. See \"What runs on your machine\" in the README."
+    "longDescription": "Help adding Sendbird Chat, UIKit, and Calls to iOS, Android, and JS apps, including authentication and sessions. It runs local shell scripts as hooks. See \"What runs on your machine\" in the README.",
+    "logo": "./.claude-plugin/icon.png",
+    "composerIcon": "./.claude-plugin/icon.png"
   }
 }
