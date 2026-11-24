@@ -1,6 +1,8 @@
-<!-- last-verified-against: @sendbird/chat 4.22.16 -->
+<!-- last-verified-against: @sendbird/chat 4.22.17 -->
 <!-- status: populated -->
 # js chat
+
+> Re-verified 2026-11-23 against `@sendbird/chat@4.22.17` and its public CHANGELOG at tag `4.22.17` (https://github.com/sendbird/sendbird-chat-sdk-javascript/blob/4.22.17/CHANGELOG.md — the v4.22.17 entry only fixes the typing indicator being removed right after it arrived when the device clock was ahead of the server; it does not change the `onTypingStatusUpdated` / `getTypingUsers()` usage cited below). The published 4.22.17 `index.d.ts`, `groupChannel.d.ts`, `openChannel.d.ts`, `message.d.ts`, and `lib/__definition.d.ts` are byte-identical to 4.22.16, so every 4.22.16 line cited below holds unchanged; the JS templates and curated examples type-check against 4.22.17 (`compile-check-js.sh --latest` and `--latest --snippets`).
 
 > Re-verified 2026-11-16 against `@sendbird/chat@4.22.16` and its public CHANGELOG at tag `4.22.16` (https://github.com/sendbird/sendbird-chat-sdk-javascript/blob/4.22.16/CHANGELOG.md — the v4.22.16 entry only adds `logger.warn` logs when a realtime group channel message is dropped without notifying handlers or collections; the v4.22.15 entry cited below is unchanged; the other GitHub source cited below has no newer commit).
 

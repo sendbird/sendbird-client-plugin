@@ -2,6 +2,8 @@
 <!-- status: populated -->
 # js calls
 
+> Re-verified 2026-11-23: the only newer commits to the two cited READMEs (sendbird-calls-javascript 6e138fd and sendbird-calls-sdk-react-native 160630e, both 2026-11-19) add a "Build with Claude Code or Codex" section and its table-of-contents entry; no SDK setup, API, or event text cited below changed, and the citations below stay pinned to `1.10.21` / `v1.2.0` (`gh api repos/sendbird/sendbird-calls-javascript/commits/6e138fd`, `gh api repos/sendbird/sendbird-calls-sdk-react-native/commits/160630e`).
+
 > Verified against the public mirrors `sendbird/sendbird-calls-javascript` + `sendbird/sendbird-calls-sdk-react-native` (README implementation guides, verified 2026-06-09). Web init + authenticate type-checked against `sendbird-calls`. React Native quoted from the RN README. Cite each symbol; do not add API from memory.
 > Sources: https://github.com/sendbird/sendbird-calls-javascript , https://github.com/sendbird/sendbird-calls-sdk-react-native
 

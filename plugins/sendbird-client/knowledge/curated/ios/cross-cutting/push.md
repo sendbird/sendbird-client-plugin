@@ -1,10 +1,10 @@
 <!-- last-verified-against: sendbird-chat-sdk-ios 4.39.11 -->
-<!-- verified-at: 2026-11-16 -->
+<!-- verified-at: 2026-11-23 -->
 <!-- verification-method: compile-check-ios -->
 <!-- status: populated -->
 # ios — push
 
-> Push APIs read from the SDK's own `SendbirdChatSDK.swiftinterface`, verified 2026-09-30. register/unregister, logout order, and the Notification Service Extension snippet build-verified (xcodebuild). The pending-token and payload sections were added on 2026-10-11 from the 4.39.11 interface and the iOS push registration page. On 2026-11-09 the Chat SDK CHANGELOG cited below was re-read at tag 4.39.12: the only new entry is 4.39.12 (CSAT follow-up interfaces, a channel-update crash fix, and a fix for a duplicate wrapper-class warning), nothing about push, and the cited 4.39.11 lines 1262-1379 are unchanged (lines 1273-1390 at 4.39.12). On 2026-11-16 it was re-read at tag 4.39.14: 4.39.13 and 4.39.14 add only bug fixes and improvements, the only push-related entry is 4.39.13 "Stopped the WebSocket receive log and the push notification log from printing the session key and the device push token" (no API or registration change), and the cited lines are unchanged (lines 1305-1422 at 4.39.14). Used by `/sendbird-client:push-setup`. Do not invent API.
+> Push APIs read from the SDK's own `SendbirdChatSDK.swiftinterface`, verified 2026-09-30. register/unregister, logout order, and the Notification Service Extension snippet build-verified (xcodebuild). The pending-token and payload sections were added on 2026-10-11 from the 4.39.11 interface and the iOS push registration page. On 2026-11-09 the Chat SDK CHANGELOG cited below was re-read at tag 4.39.12: the only new entry is 4.39.12 (CSAT follow-up interfaces, a channel-update crash fix, and a fix for a duplicate wrapper-class warning), nothing about push, and the cited 4.39.11 lines 1262-1379 are unchanged (lines 1273-1390 at 4.39.12). On 2026-11-16 it was re-read at tag 4.39.14: 4.39.13 and 4.39.14 add only bug fixes and improvements, the only push-related entry is 4.39.13 "Stopped the WebSocket receive log and the push notification log from printing the session key and the device push token" (no API or registration change), and the cited lines are unchanged (lines 1305-1422 at 4.39.14). On 2026-11-23 it was re-read at tag 4.39.15: the new 4.39.15 entry changes what happens when a token is registered before connect and fixes stale push token data after logout (both noted in "Token registered before connect (pending)"), and the cited lines are unchanged (lines 1347-1464 at 4.39.15). The `last-verified-against` stamp is not bumped because that needs an iOS build, which this check did not run. Used by `/sendbird-client:push-setup`. Do not invent API.
 
 ## Overview
 iOS push uses APNs. Register the device's APNs token with Sendbird after the user connects; register a PushKit (VoIP) token for Calls. Upload your APNs auth key / certificate on the Sendbird dashboard.
@@ -66,6 +66,8 @@ func connectAndRegisterPendingToken() {
 ```
 
 (source: SendbirdChatSDK.swiftinterface (4.39.11) lines 6393 `getPendingPushToken()`, 6396 `registerDevicePushTokenForMultiDevicePush(_:completionHandler:)`, 5744 `PushTokenRegistrationStatus.pending`, 6318 `connect(userId:completionHandler:)`; source: https://sendbird.com/docs/chat/sdk/v4/ios/push-notifications/configuring-preferences/register-push-notification-credentials — reviewed 2026-10-11)
+
+Since 4.39.15, a token registered before connect calls the completion handler only once, with `.pending`, and the SDK registers the token after login without calling that handler again. Before 4.39.15 the handler was called twice, which could crash the app. 4.39.15 also fixes stale push token data left in the local cache when a register, list, or unregister response arrived after logout or a reconnect, which made the next registration get skipped. (source: https://github.com/sendbird/sendbird-chat-sdk-ios/blob/4.39.15/CHANGELOG.md#L8 and https://github.com/sendbird/sendbird-chat-sdk-ios/blob/4.39.15/CHANGELOG.md#L25 — 4.39.15 "Bug Fixes")
 
 ### Chat SDK 4.3.1 to 4.5.2: the pending token can be lost
 
