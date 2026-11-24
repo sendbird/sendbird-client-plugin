@@ -10,7 +10,8 @@
 - `import SwiftUI`, `App` protocol with `@main`, `WindowGroup`, `some View`, `@UIApplicationDelegateAdaptor` for an AppDelegate bridge.
 
 ## Integration notes
-- Sendbird UIKit (`SendbirdUIKit`) screens are UIViewController-based. Wrap them in `UIViewControllerRepresentable` (standard interop, not an SDK API).
+- Prebuilt chat screens on a SwiftUI host come from `SendbirdSwiftUI`, whose views are SwiftUI `View`s (SwiftUI-native chat views (SendbirdSwiftUI) below; build-verified template in templates/ios/swiftui/uikit). This holds when the request says "Sendbird UIKit": on this host that is the SwiftUI package. Customize those views as "Customizing SendbirdSwiftUI views" below says (channel list query and loading indicator, message views, input, header, theme); do not replace them with a wrapped `SBUGroupChannelListViewController` or another `SBU...ViewController` to reach a customization point.
+- Wrap UIViewController-based screens in `UIViewControllerRepresentable` (standard interop, not an SDK API) only when the project already uses Sendbird UIKit (`SendbirdUIKit`) for its chat screens.
 - Calls and Live ship no prebuilt screens; their video views (`SendBirdVideoView` in SendBirdCalls, `SendbirdVideoView` in SendbirdLiveSDK) are UIViews, so wrap them in `UIViewRepresentable`. Desk is headless and needs no wrapper. (source: SendBirdCalls.swiftinterface (1.12.3) line 450; SendbirdLiveSDK.swiftinterface (1.6.0) line 606; build-verified SwiftUI templates in templates/ios/swiftui/calls, templates/ios/swiftui/live, templates/ios/swiftui/desk)
 - Chat also ships SwiftUI-native views in the separate `SendbirdSwiftUI` package; see SwiftUI-native chat views (SendbirdSwiftUI) below. A build-verified template is in templates/ios/swiftui/uikit.
 - Init/connect/auth APIs are identical to the UIKit host.
@@ -318,6 +319,37 @@ func applyBrandTheme(isDark: Bool) {
 }
 ```
 Call `applyBrandTheme(isDark:)` at launch, before SendbirdSwiftUI is initialized. For strings, the rules in knowledge/curated/ios/cross-cutting/theme.md apply unchanged. (source: SendbirdSwiftUI.swiftinterface (1.2.2) lines 18900–18903 (`SBUTheme.set(theme:)`, `set(colorScheme:)`), 102 (`asUIColor()`), 21462 (`asUIFont()`), 107 (`ColorSet`), 595 (`FontSet`), 7889–7890 and 10122–10123 (`SBUColorSet` and `SBUFontSet` deprecated, renamed to `ColorSet` and `FontSet`), 18454 (`SBUStringSet`); source: https://sendbird.com/docs/chat/uikit/v3/swiftui/theme-and-style-resources/color-resources; source: https://sendbird.com/docs/chat/uikit/v3/swiftui/theme-and-style-resources/font-resources; source: https://github.com/sendbird/sendbird-uikit-ios/blob/3.36.1/Sources/Constant/SBUStringSet.swift#L17; source: https://github.com/sendbird/sendbird-swiftui-ios/blob/1.2.2/Sample/QuickStartSwiftUI/CustomSample/CustomViews/Theme/Theme/Custom/CustomTheme.Theme.Custom.Main.swift#L25-L29; source: https://sendbird.com/docs/chat/uikit/v3/swiftui/theme-and-style-resources/theme-resources)
+
+The rest of the theme rules in knowledge/curated/ios/cross-cutting/theme.md apply here too, because the theme objects are the same. What differs in SwiftUI:
+
+- **Brand colors**: the dark themes take their accent from `ColorSet.primaryLight`, the light themes from `ColorSet.primaryMain`, so set the whole primary ramp. `ColorSet.restoreDefaultColors()` puts the defaults back.
+- **Fonts**: `FontSet` converts each SwiftUI `Font` with `asUIFont()`. A text style such as body or headline becomes the UIKit font for that text style, a custom font with a name and size becomes `UIFont(name:size:)`, and a system font with a size and weight becomes a system font. Anything else, and a custom font that is not bundled, falls back to the body text style with a logged warning. So give `FontSet` custom fonts by the exact font name bundled in your app, as in the example below. UIKit does not support Dynamic Type, so the size does not follow a change while the app runs.
+- **Message bubble colors**: set them on `SBUTheme.messageCellTheme` as in theme.md "Message bubble colors", converting with `asUIColor()`. They do not apply to a message row you replaced with your own view through `listItem`.
+- **Icons and the default profile image**: there is no SwiftUI icon set; use `SBUIconSet` with `UIImage` values, set before SendbirdSwiftUI is initialized. The placeholder for a user without a picture is `SBUIconSet.iconUser`.
+- **Date formats**: `SBUDateFormatSet` works as in theme.md "Date and time formats".
+- **Dark mode while a view is showing**: the SwiftUI views do not watch `colorScheme`, and there is no public call that restyles a Sendbird view that is already on screen. Set the scheme before the Sendbird view is created; a view created after `SBUTheme.set(colorScheme:)` reads the new theme.
+
+```swift
+import SwiftUI
+import UIKit
+import SendbirdSwiftUI
+
+@MainActor
+func applySwiftUIBrandTheme(isDark: Bool) {
+    FontSet.body3 = Font.custom("AvenirNext-Regular", size: 14)   // message text
+    ColorSet.primaryLight = Color(red: 0.45, green: 0.65, blue: 1.0)  // dark mode accent
+    ColorSet.primaryMain = Color(red: 0.0, green: 0.40, blue: 0.95)   // light mode accent
+    SBUTheme.set(colorScheme: isDark ? .dark : .light)
+
+    let cellTheme = SBUTheme.messageCellTheme
+    cellTheme.rightBackgroundColor = ColorSet.primaryMain.asUIColor()
+    cellTheme.userMessageRightTextColor = Color.white.asUIColor()
+    if let send = UIImage(systemName: "paperplane.fill") {
+        SBUIconSet.iconSend = send
+    }
+}
+```
+(source: https://github.com/sendbird/sendbird-swiftui-ios/blob/1.2.2/Sources/SwiftUI/Theme/ColorSet.swift#L11-L35 ; source: https://github.com/sendbird/sendbird-swiftui-ios/blob/1.2.2/Sources/SwiftUI/Theme/FontSet.swift#L13-L21 ; source: https://github.com/sendbird/sendbird-swiftui-ios/blob/1.2.2/Sources/SwiftUI/Extension/UIFont%2BSendbird.swift#L47-L99 (`asUIFont()` rules) ; source: https://github.com/sendbird/sendbird-swiftui-ios/blob/1.2.2/Sources/SwiftUI/Util/SwiftUIViewController.swift#L68-L89 (the screen is configured inside the package; the hook is internal) ; source: https://github.com/sendbird/sendbird-swiftui-ios/blob/1.2.2/Sample/QuickStartSwiftUI/CustomSample/CustomViews/Theme/IconSet/Custom/CustomTheme.IconSet.Custom.Main.swift#L25-L34 ; SendbirdSwiftUI.swiftinterface (1.2.2) lines 116 (`primaryMain`), 267 (`restoreDefaultColors`), 12387 and 12584 (`SBUIconSet`, `iconUser`), 18941 (`messageCellTheme`), 19228–19254 (bubble colors), 9198–9240 (`SBUDateFormatSet`); source: https://sendbird.com/docs/chat/uikit/v3/swiftui/theme-and-style-resources/icon-resources ; source: https://sendbird.com/docs/chat/uikit/v3/swiftui/theme-and-style-resources/font-resources)
 
 ## Start a 1:1 chat from a button (SendbirdSwiftUI)
 Create the channel with `isDistinct = true` (knowledge/curated/ios/products/chat.md, "Create and list group channels"), keep its URL in state, and push `GroupChannelView(provider: GroupChannelViewProvider(channelURL:))`. The public sample pushes `GroupChannelView` from its own navigation link the same way. `navigationDestination(isPresented:)` is SwiftUI's iOS 16 API; on iOS 15, use the `NavigationLink` the sample uses.

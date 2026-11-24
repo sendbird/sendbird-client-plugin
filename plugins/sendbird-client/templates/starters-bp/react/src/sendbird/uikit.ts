@@ -8,8 +8,8 @@ import type { SendbirdProviderProps } from '@sendbird/uikit-react/SendbirdProvid
 // BP12: the one place for the UIKit theme.
 export const UIKIT_THEME: SendbirdProviderProps['theme'] = 'light';
 
-// Brand colors: map UIKit CSS variable names to values, for example
-//   { '--sendbird-light-primary-500': '#00487c', '--sendbird-light-primary-300': '#3e6680' }
+// Brand colors: map UIKit CSS variable names to values; the brand color goes on 300 (main), 500 is
+// darkest and 100 lightest, e.g. { '--sendbird-light-primary-300': '#00487c' }
 // Leave undefined to keep the default palette.
 export const UIKIT_COLOR_SET: SendbirdProviderProps['colorSet'] = undefined;
 

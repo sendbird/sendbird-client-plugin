@@ -10,6 +10,7 @@ authentication), verified 2026-09-30. Compiled by `tools/templates/compile-check
 ## Files
 - `UikitComposeApplication.kt` — `SendbirdUikitCompose.init(UikitInitParams(...))` in `Application.onCreate()`; init returns a `Flow<UikitInitResult>` that must be collected.
 - `UikitComposeApp.kt` — `UikitComposeActivity` + `SendbirdChatApp(userId)`: `prepare(UikitCurrentUserInfo(...))`, `connect()`, and a `NavHost` hosting `sendbirdGroupChannelNavGraph(navController)` inside `SendbirdTheme`.
+- `BrandSendbirdTheme.kt` — theme: `SendbirdTheme` with brand light and dark color schemes (outgoing bubble `primary`, incoming `surfaceBright` and `surfaceContainerHighest`), a font in all 15 text styles (message text is `bodySmall`), dark mode from the system, and an optional outgoing text bubble through the channel screen's `messageItem` slot.
 
 ## How to splice
 1. Gradle: maven `https://repo.sendbird.com/public/maven` in `settings.gradle.kts`;
@@ -34,3 +35,6 @@ authentication), verified 2026-09-30. Compiled by `tools/templates/compile-check
 - Already on the View-based UIKit (`com.sendbird.sdk:uikit`)? It keeps its own init
   (`templates/android/view/uikit/UIKitApplication.kt`); from Compose, start its activities or host its
   fragments via interop.
+
+## Theme (dark mode, brand colors, font, bubble colors)
+Use `BrandSendbirdTheme.kt` when the request is to restyle the Compose UIKit screens. Keep only the parts the request asks for and take the values from the app. Wrap the UIKit screens in `SendbirdTheme`, not your own `MaterialTheme`, or parts of UIKit keep light colors in dark mode. Details and sources: knowledge/curated/android/cross-cutting/theme.md, "Jetpack Compose host".

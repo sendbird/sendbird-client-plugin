@@ -19,3 +19,5 @@ export function ChatApp({ accessToken }: { accessToken?: string } = {}) {
 // Granular UI instead of the full App: wrap your tree in <SendbirdProvider appId userId> from
 // '@sendbird/uikit-react/SendbirdProvider' and compose <GroupChannelList /> + <GroupChannel />
 // (subpath imports; see knowledge/curated/js/products/uikit.md "Compose your own UI").
+// GroupChannelList requires both onChannelSelect and onChannelCreated (GroupChannelListProps,
+// verified against @sendbird/uikit-react 3.19.1 types/modules/GroupChannelList/context/GroupChannelListProvider.d.ts).

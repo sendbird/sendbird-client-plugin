@@ -26,7 +26,9 @@
 # A manualSteps entry that asks the customer to call a helper this run added, or the sign-in function it
 # wired, from the app's sign-in or sign-out is sent back as well (docs/AGENT_CONTRACT.md section 3).
 # A needs_input summary that asks the apply-fix question when the request itself asked for the fix
-# ("fix it", "apply", "고쳐 줘", "적용해 줘"; docs/AGENT_CONTRACT.md section 7) is sent back once too.
+# ("fix it", "apply", "고쳐 줘", "적용해 줘"; docs/AGENT_CONTRACT.md section 7) is sent back once too, and so
+# is one that asks it when the request said not to change anything ("don't change any files", "고치지 말고"):
+# that request already answered no, so the run ends completed with the fix under nextSteps.
 set -uo pipefail
 HERE="$(cd "$(dirname "$0")" && pwd)"
 # shellcheck source=lib/hook-helpers.sh
@@ -77,13 +79,22 @@ esac
 # The request asks for the fix itself (docs/AGENT_CONTRACT.md section 7: "fix it", "apply", "go ahead",
 # "고쳐 줘", "적용해 줘", or --apply), unless it says not to. consent holds the words that asked for it.
 consent_re='(\bfix (it|this|that|them|these|those)\b|\bgo ahead\b|\bapply\b|--apply\b|고쳐 ?(줘|줄래|주세요|주실래요|줘요|봐|놔)|수정해 ?(줘|줄래|주세요|줘요)|적용해 ?(줘|줄래|주세요|줘요|봐)|적용 ?부탁)'
-no_consent_re="(\b(don'?t|do not|never|without) (fix|apply|chang)|고치지 ?(마|말|않)|적용하지 ?(마|말|않)|수정하지 ?(마|말|않))"
+# A refusal is a request to change nothing ("don't change any files", "고치지 말고 원인만"). A limit on the
+# fix ("fix it without changing the public API", "공개 API는 수정하지 말고 고쳐 줘") is not one: the
+# verb must have no object, or an object that means everything (it, anything, any files, the code).
+ref_verb="(fix|apply|change|modify|touch|edit)"
+ref_ing="(fixing|applying|changing|modifying|touching|editing)"
+ref_all="(it|this|that|them|anything|any ?thing|any (files?|code)|the (files?|code)|my (files?|code)|files|code)"
+no_consent_re="(\b(don'?t|do not|never) $ref_verb $ref_all\b|\b(don'?t|do not|never) $ref_verb( $ref_all)? yet\b|\b(don'?t|do not|never) $ref_verb *([.,;!]|$)|\b(don'?t|do not|never) make (any )?changes\b|\bmake no changes\b|\bwithout $ref_ing $ref_all\b|\bwithout $ref_ing *([.,;!]|$)|\bwithout making (any )?changes\b|(^|[.,;!?] *|아무것도 |아직 |파일(은|을|도|들은)? |코드(는|를|도)? )(고치지|적용하지|수정하지|바꾸지|건드리지) ?(마|말|않))"
 # a question that asks whether to apply the fix (the apply-fix question by its wording, when its id differs)
 fix_question='(적용할까요|적용해도 될까요|고칠까요|수정할까요|바꿀까요|\bapply (this|the|that|it|these)\b|\b(shall|should|may) i (apply|fix|make)\b|\bwant me to (apply|fix)\b)'
 request="$(turn_user_prompt)"
 consent=""
+refusal=""
 if [ -n "$request" ] && ! printf '%s' "$request" | grep -Eiq "$no_consent_re"; then
   consent="$(printf '%s' "$request" | grep -Eio "$consent_re" | head -1)"
+elif [ -n "$request" ]; then
+  refusal="$(printf '%s' "$request" | grep -Eio "$no_consent_re" | head -1)"
 fi
 
 # the last ```json fenced block of the answer
@@ -96,7 +107,7 @@ elif ! printf '%s' "$block" | jq -e 'type == "object"' >/dev/null 2>&1; then
   problems="the last json block is not a JSON object"
 else
   problems="$(printf '%s' "$block" | jq -r --slurpfile s "$SCHEMA" --arg build "$build_step" --arg sd "$state_dir" \
-    --arg loader "$appid_loader_step" --argjson js "$is_js" --arg consent "$consent" --arg fixq "$fix_question" '
+    --arg loader "$appid_loader_step" --argjson js "$is_js" --arg consent "$consent" --arg refusal "$refusal" --arg fixq "$fix_question" '
     ($s[0]) as $S | . as $d
     | ($S.properties.status.enum) as $st
     | ($S.properties.checks.items.properties.result.enum) as $cr
@@ -128,6 +139,13 @@ else
         (if $consent != "" and $d.status == "needs_input"
             and any(($d.questions // [])[]; (if type == "object" then ((.id // "") == "apply-fix" or ((.question // "") | tostring | test($fixq; "i"))) else (tostring | test($fixq; "i")) end))
          then "the request already asks to apply the fix (it says \($consent | tojson)), so the apply-fix question is answered: apply the fix now the way the skill says (through the platform agent), then end with status completed, the changed files under changes, and the checks (docs/AGENT_CONTRACT.md section 7). Ask only about a value the fix still needs" else empty end),
+        # the request said not to change anything: that is the no the apply-fix question asks for
+        # another question still open keeps needs_input; only the apply-fix question goes
+        (if $refusal != "" and $d.status == "needs_input"
+            and any(($d.questions // [])[]; (if type == "object" then ((.id // "") == "apply-fix" or ((.question // "") | tostring | test($fixq; "i"))) else (tostring | test($fixq; "i")) end))
+         then (if all(($d.questions // [])[]; (if type == "object" then ((.id // "") == "apply-fix" or ((.question // "") | tostring | test($fixq; "i"))) else (tostring | test($fixq; "i")) end))
+           then "the request says not to change anything yet (it says \($refusal | tojson)), so the apply-fix question is already answered with no: keep the files as they are and end with status completed, the findings in the answer, the planned fix under nextSteps, and no questions (docs/AGENT_CONTRACT.md section 7)"
+           else "the request says not to change anything yet (it says \($refusal | tojson)), so the apply-fix question is already answered with no: drop that question, keep the files as they are, put the planned fix under nextSteps, and keep needs_input only for the other questions (docs/AGENT_CONTRACT.md section 7)" end) else empty end),
         (if $d.status == "needs_input" and (($d.changes // []) | length) > 0 then "needs_input must not list changes" else empty end),
         (if ($d.status | IN("failed","declined")) and ((($d.reason // "") | type) != "string" or ($d.reason // "") == "") then "\($d.status) needs a reason" else empty end),
         (if ($d | has("checks")) and ($d.checks | type) != "array" then "checks must be an array"

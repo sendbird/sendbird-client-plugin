@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-11-16T02:43:15Z",
+  "generatedAt": "2026-11-24T06:28:01Z",
   "count": 51,
   "entries": [
     {
@@ -68,7 +68,7 @@
       "lastVerifiedAgainst": "sendbird-uikit-android 3.26.3; uikit-compose 1.3.6",
       "verifiedDates": [
         "2026-10-11",
-        "2026-10-12"
+        "2026-11-23"
       ]
     },
     {
@@ -285,7 +285,7 @@
       "verifiedDates": [
         "2026-10-11",
         "2026-10-12",
-        "2026-11-16"
+        "2026-11-23"
       ]
     },
     {
@@ -437,9 +437,9 @@
       "platform": "js",
       "category": "cross-cutting",
       "status": "populated",
-      "lastVerifiedAgainst": "@sendbird/uikit-react 3.19.1 / @sendbird/uikit-react-native 3.12.10",
+      "lastVerifiedAgainst": "@sendbird/uikit-react 3.20.1 / @sendbird/uikit-react-native 3.12.11",
       "verifiedDates": [
-        "2026-10-12"
+        "2026-11-23"
       ]
     },
     {

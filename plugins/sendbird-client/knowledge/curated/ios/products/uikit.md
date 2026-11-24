@@ -630,6 +630,8 @@ SBUModuleSet.GroupChannelModule.InputComponent = TextOnlyMentionInput.self
 (source: https://github.com/sendbird/sendbird-uikit-ios/blob/3.36.1/Sources/Module/Channel/GroupChannel/SBUGroupChannelModule.Input.swift#L841-L865 (`suggestedMentionList` at line 123); source: https://github.com/sendbird/sendbird-uikit-ios/blob/3.36.1/Sources/View/Channel/MessageInput/SBUSuggestedMentionList.swift#L150-L158; community context: https://github.com/sendbird/sendbird-uikit-ios/discussions/105)
 
 ## Channel list
+This section is for `SendbirdUIKit` view controllers. On a SwiftUI host the channel list is `SendbirdSwiftUI`'s `GroupChannelListView`: its custom query, loading indicator, and list item are in knowledge/curated/ios/hosts/swiftui.md "Channel list: custom query, loading indicator, list item".
+
 **Customize the list item.** Subclass `SBUGroupChannelCell`, change its public subviews after `super.configure(channel:)`, and assign the type. Subviews include `titleLabel`, `messageLabel`, `coverImage`, `unreadCount`, and `lastUpdatedTimeLabel`.
 
 ```swift

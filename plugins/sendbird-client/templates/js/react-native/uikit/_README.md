@@ -9,6 +9,7 @@ public sample + docs-validation (verified 2026-06-09). `SendbirdUIKitContainer`,
 - `App.tsx` — `<SendbirdUIKitContainer appId platformServices>`.
 - `factory.ts` — native clipboard, notification, file, media, player, and recorder services from the public sample.
 - `session.ts` — session tokens: `withSessionHandler(...)` for `chatOptions.onInitialized` (token refresh) and `useSendbirdSession()` to connect with `connect(userId, { accessToken })`.
+- `BrandTheme.tsx` — theme: dark mode from `useColorScheme()` or the app's setting, brand palette (`createTheme`), the font (`typography.shared`), and bubble colors (`colors.ui.groupChannelMessage`).
 
 ## How to splice
 1. Install the package + its peers/native modules per the quickstart (foundation, chat, RN modules).
@@ -25,3 +26,6 @@ The container initializes the Chat SDK but does not connect; the app connects fr
 
 ## Variations (see knowledge/curated/js/products/uikit.md, all cited)
 - Add UIKit fragments (e.g. group channel list) inside the container with navigation.
+
+## Theme (dark mode, brand colors, font, bubble colors)
+Use `BrandTheme.tsx` when the request is to restyle the UIKit screens. Keep only the parts the request asks for, and take every value (colors, the font name) from the app's own theme module, not from the template. Each part is explained, with sources, in knowledge/curated/js/cross-cutting/theme.md.
