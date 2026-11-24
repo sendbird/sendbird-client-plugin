@@ -1,10 +1,10 @@
 <!-- last-verified-against: sendbird-chat-sdk-ios 4.39.11 / sendbird-uikit-ios 3.36.2 (new names); public migration guides fetched 2026-10-16 -->
-<!-- verified-at: 2026-11-09 -->
+<!-- verified-at: 2026-11-23 -->
 <!-- verification-method: docs-page + sdk-surface -->
 <!-- status: populated -->
 # ios — major version migration
 
-> Moving an app from Chat SDK v3 to v4 and from UIKit v2 to v3. Every old and new name below is taken from Sendbird's public migration guides (cited per section), verified 2026-10-16. Each new name was also found in the SendbirdChatSDK 4.39.11 or SendbirdUIKit 3.36.2 interface; rows of the guides whose new name is not in those interfaces are left out. The guides hold the full lists; this page keeps the parts an agent needs first. On 2026-11-09 the cited UIKit `README.md` was re-read: its only change since 2026-10-16 is line 63 (UIKit 3.36.3 raised the minimum Chat SDK to 4.39.12), and the CocoaPods lines 113-129 cited below are unchanged.
+> Moving an app from Chat SDK v3 to v4 and from UIKit v2 to v3. Every old and new name below is taken from Sendbird's public migration guides (cited per section), verified 2026-10-16. Each new name was also found in the SendbirdChatSDK 4.39.11 or SendbirdUIKit 3.36.2 interface; rows of the guides whose new name is not in those interfaces are left out. The guides hold the full lists; this page keeps the parts an agent needs first. On 2026-11-09 the cited UIKit `README.md` was re-read: its only change since 2026-10-16 is line 63 (UIKit 3.36.3 raised the minimum Chat SDK to 4.39.12), and the CocoaPods lines 113-129 cited below are unchanged. Re-verified 2026-11-23: UIKit 3.36.5 (commit 95d02e8) added a section to its `README.md` and raised the minimum Chat SDK to 4.39.15 (line 64), which moved the CocoaPods lines to 147-163, and the Chat SDK `README.md` (commit d1703a8) moved the `pod SendbirdChatSDK` line from 113 to 147. Both citations are now pinned to tags whose lines were checked (`sendbird-uikit-ios` 3.36.5, `sendbird-chat-sdk-ios` 4.39.15); the pod names they back are unchanged. The cited `SBUGlobals.swift` lines 70-79 at 3.36.2 are the same text at lines 71-80 in 3.36.5 (only `currentUser` changed, earlier in the file). The stamp is not bumped because that needs an iOS build.
 
 ## Which guide applies
 
@@ -27,7 +27,7 @@ The docs index (`core/docs-index.json`) has no major-version migration guide for
 ## Package change
 
 - Swift Package Manager (default): remove the v3 package and add `https://github.com/sendbird/sendbird-chat-sdk-ios`, product `SendbirdChatSDK`, from 4.0.0. The `sendbird-chat-ios-spm` mirror is legacy v3 (`SendBirdSDK`); a project that keeps it never gets v4. UIKit v3 comes from `https://github.com/sendbird/sendbird-uikit-ios-spm` (product `SendbirdUIKit`). (source: knowledge/curated/ios/setup.md)
-- A project that already has a `Podfile` keeps CocoaPods: the Chat v4 pod is `SendbirdChatSDK` (source: https://github.com/sendbird/sendbird-chat-sdk-ios/blob/master/README.md#L113). The UIKit pod keeps the name `SendBirdUIKit` with a capital B even though the Swift module is now `SendbirdUIKit` (source: https://github.com/sendbird/sendbird-uikit-ios/blob/main/README.md#L113-L129). Never add a `Podfile` to an SPM project.
+- A project that already has a `Podfile` keeps CocoaPods: the Chat v4 pod is `SendbirdChatSDK` (source: https://github.com/sendbird/sendbird-chat-sdk-ios/blob/4.39.15/README.md#L147). The UIKit pod keeps the name `SendBirdUIKit` with a capital B even though the Swift module is now `SendbirdUIKit` (source: https://github.com/sendbird/sendbird-uikit-ios/blob/3.36.5/README.md#L147-L163). Never add a `Podfile` to an SPM project.
 - Requirements stated by the guide: Xcode 15 or later, iOS 12.0 or later, Swift 5.0 or later, or Objective-C. Raise any Sendbird package that has a minimum Chat SDK version together with it (see "Keep shared dependencies compatible" in knowledge/curated/ios/setup.md).
 
 ## Chat SDK v3 to v4
