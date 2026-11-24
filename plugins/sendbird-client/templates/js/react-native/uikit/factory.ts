@@ -4,7 +4,12 @@ import * as ImageResizer from '@bam.tech/react-native-image-resizer';
 import { CameraRoll } from '@react-native-camera-roll/camera-roll';
 import Clipboard from '@react-native-clipboard/clipboard';
 import * as DocumentPicker from '@react-native-documents/picker';
-import RNFBMessaging from '@react-native-firebase/messaging';
+// @react-native-firebase/messaging 26.0.0 removed the default export the sample imports (it pins 19.3.0).
+// The module namespace carries the modular API (getMessaging, getToken, AuthorizationStatus, ...)
+// from 22.0.0 on, and createNativeNotificationService accepts it (isModularAPI):
+// https://github.com/sendbird/sendbird-uikit-react-native/blob/main/packages/uikit-react-native/src/platform/createNotificationService.native.ts
+// A project pinned below 22.0.0 has no modular API: import the default export there instead.
+import * as RNFBMessaging from '@react-native-firebase/messaging';
 import * as FileAccess from 'react-native-file-access';
 import * as ImagePicker from 'react-native-image-picker';
 import * as AudioRecorderPlayer from 'react-native-nitro-sound';

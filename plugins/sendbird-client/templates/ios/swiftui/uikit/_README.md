@@ -14,6 +14,7 @@ at the pinned and latest versions (`tools/templates/compile-check-ios.sh`, xcode
     `SBUGlobals.currentUser`, then `SendbirdUI.connect`; `signOut()` calls `SendbirdUI.disconnect`.
   - `SendbirdChatRootView` — spinner while initializing, then `GroupChannelListView()`.
   - `SendbirdChannelScreen(channelURL:)` — opens one channel with `GroupChannelView(provider:)`.
+- `BrandChatTheme.swift` — theme for SendbirdSwiftUI: `FontSet` and `ColorSet` (custom fonts with `Font.custom`), bubble colors on `SBUTheme.messageCellTheme`, and a channel list that is created again when the color scheme changes (compiled, not run on a device).
 
 ## How to splice
 1. Add the package via SPM: `https://github.com/sendbird/sendbird-swiftui-ios`, product `SendbirdSwiftUI`, from `1.2.2`
@@ -58,3 +59,6 @@ are UIViewControllers. Init and current user are the same as the UIKit host
 (`templates/ios/uikit/uikit/SetupUIKit.swift`); wrap `SBUGroupChannelListViewController` or
 `SBUGroupChannelViewController(channelURL:)` in a `UIViewControllerRepresentable`. That is standard
 SwiftUI↔UIKit interop, not an SDK API, and it is not build-verified as a separate template here.
+
+## Theme (dark mode, brand colors, font, bubble colors)
+Use `BrandChatTheme.swift` when the request is to restyle the SendbirdSwiftUI screens. Keep only the parts the request asks for and take the values from the app. Call `BrandChatTheme.configureAtLaunch(isDark:)` before SendbirdSwiftUI is initialized. Rebuilding the list on a scheme change compiles but was not run on a device: say so if you use it. Details and sources: knowledge/curated/ios/hosts/swiftui.md.

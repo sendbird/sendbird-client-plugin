@@ -11,7 +11,7 @@
 #
 # A session, access, or auth token variable (or a labeled argument, or an object key written without
 # quotes) given a string literal is a "token literal" at any length: a real token, or a placeholder
-# such as let sessionToken = "TODO_SESSION_TOKEN_FROM_AUTH_SERVER", which an app then sends as its
+# such as a sessionToken variable set to the TODO_SESSION_TOKEN_FROM_AUTH_SERVER placeholder, which an app then sends as its
 # token. The token comes from the app's token source (docs/AGENT_CONTRACT.md sections 3 and 7, and
 # hooks/credential-guard.sh, which says so when it denies one). An empty string, an interpolated string
 # ("\(token)", "${token}", "$token"), and a quoted key ("sessionToken": ...) do not count.

@@ -45,7 +45,7 @@ If the project still uses Chat SDK v3 (`import SendBirdSDK`, `SBD`-prefixed type
 - Do not proactively mention CocoaPods, `pod install`, or `.xcworkspace` unless the customer's project already has a Podfile, or the customer explicitly asks for CocoaPods.
 
 ## Templates
-Splice from `templates/ios/{uikit|swiftui}/{product}/` matching the detected host + product.
+Splice from `templates/ios/{uikit|swiftui}/{product}/` matching the detected host + product. On a SwiftUI host the prebuilt chat screens are `SendbirdSwiftUI` views, also when the request says "UIKit": customize them from `knowledge/curated/ios/hosts/swiftui.md` "Customizing SendbirdSwiftUI views" and its `###` parts, and do not wrap an `SBU...ViewController` in `UIViewControllerRepresentable` instead, unless the project already uses `SendbirdUIKit` for its chat screens.
 
 ## No-Fabrication Policy (non-negotiable)
 - Never invent an API name, signature, parameter, error code, enum case, or docs URL. Every emitted symbol must be verifiable in the sources listed under Source priority above.

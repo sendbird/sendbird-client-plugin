@@ -1,0 +1,5 @@
+# Files Codex should leave out of this plugin's bundle.
+# The plugin ships no build output or dependencies, so only editor and OS leftovers are listed.
+.DS_Store
+.git/
+*.swp

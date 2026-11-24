@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 # Type-check the source files this run wrote, without building the app (docs/AGENT_CONTRACT.md section 3,
-# "Type-check the Chat SDK screens you wrote"). Only the chat-ui=chat-sdk path calls it: screens written on
+# "Type-check the Chat SDK screens you wrote"). The chat-ui=chat-sdk path calls it, and on React and React
+# Native the UIKit path calls it for the .ts and .tsx files it wrote ("Type-check the TypeScript you wrote on
+# the UIKit path too": a hand-composed UIKit screen can miss a required prop). Screens written on
 # the Chat SDK alone have no plugin-built template behind every line, and each demo round produced compile
 # errors that nobody saw until the app was built (a Kotlin nullable return, a missing orEmpty(), a
 # non-optional Swift value in `if let`).

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- app/src/main/res/color/sb_message_me_tint_light.xml — outgoing bubble background, Light mode -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_pressed="true" android:color="@color/primary_dark"/>
+    <item android:color="#FF1A73E8"/>
+</selector>

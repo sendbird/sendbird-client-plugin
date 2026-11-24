@@ -8,6 +8,7 @@ Sendbird UIKit on React (`@sendbird/uikit-react`). From the public README (verif
 ## Files
 - `App.tsx` — full drop-in `<SendbirdApp appId userId />`, with an optional `accessToken`.
 - `SignedInChat.tsx` — `SendbirdProvider` with `accessToken` and `configureSession` (token refresh) for apps whose users connect with a token; put `GroupChannelList` / `GroupChannel` inside it.
+- `BrandTheme.tsx` — theme: dark mode from the device or the app's setting (`theme`), brand colors (`colorSet`, light and dark ramps), the font (`--sendbird-font-family-default`), and text bubble colors (CSS on UIKit's selectors).
 
 ## How to splice
 1. `npm i @sendbird/uikit-react @sendbird/chat`
@@ -24,3 +25,6 @@ Splice this when the app already has its own sign-in and the Sendbird applicatio
 
 ## Variations (see knowledge/curated/js/products/uikit.md, all cited)
 - Granular UI: `SendbirdProvider` + `GroupChannelList` + `GroupChannel` (subpath imports, "Compose your own UI").
+
+## Theme (dark mode, brand colors, font, bubble colors)
+Use `BrandTheme.tsx` when the request is to restyle the UIKit screens. Keep only the parts the request asks for, and take every value (colors, the font name) from the app's own theme module, not from the template. Each part is explained, with sources, in knowledge/curated/js/cross-cutting/theme.md.

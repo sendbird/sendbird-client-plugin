@@ -6,6 +6,7 @@ Sendbird UIKit on iOS. From the public `sendbird-uikit-ios` README quickstart
 
 ## Files
 - `SetupUIKit.swift` — `initialize()` / `setCurrentUser(...)` / `presentChannelList(from:)`.
+- `BrandChatTheme.swift` — theme: font and color sets (whole primary ramp; dark mode reads `primaryLight`), `SBUTheme.set(colorScheme:)`, bubble colors on `messageCellTheme`, and a navigation controller that follows the system appearance and restyles open screens, including the input bar.
 
 ## How to splice
 1. SPM package `https://github.com/sendbird/sendbird-uikit-ios-spm`, product `SendbirdUIKit` (prefer SPM, no CocoaPods).
@@ -16,3 +17,6 @@ Sendbird UIKit on iOS. From the public `sendbird-uikit-ios` README quickstart
 ## Variations (see knowledge/curated/ios/products/uikit.md, all cited)
 - Open a specific channel: `SBUGroupChannelViewController(channelURL:)`.
 - Feature toggles: `SendbirdUI.config.groupChannel.*` before presenting.
+
+## Theme (dark mode, brand colors, font, bubble colors)
+Use `BrandChatTheme.swift` when the request is to restyle the UIKit screens. Keep only the parts the request asks for and take the values from the app. Call `BrandChatTheme.configureAtLaunch(style:)` after `SendbirdUI.initialize` and before the first screen, and use `BrandChatNavigationController` as the container of the Sendbird screens. Details and sources: knowledge/curated/ios/cross-cutting/theme.md.

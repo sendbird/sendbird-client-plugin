@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- app/src/main/res/color/sb_message_other_tint_dark.xml — incoming bubble background, Dark mode -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_pressed="true" android:color="@color/primary_extra_dark"/>
+    <item android:color="#FF3C4043"/>
+</selector>
